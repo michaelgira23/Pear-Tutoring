@@ -43,19 +43,22 @@
     }
   ],
   "bugs": {
-	"url": "https://github.com/michaelgira23/WWT-Hackathon-2016-Frontend/issues"
+    "url": "https://github.com/michaelgira23/WWT-Hackathon-2016-Frontend/issues"
   },
   "homepage": "https://github.com/michaelgira23/WWT-Hackathon-2016-Frontend#readme",
   "dependencies": {
-    "@angular/common": "^2.1.0",
-    "@angular/compiler": "^2.1.0",
-    "@angular/core": "^2.1.0",
-    "@angular/forms": "^2.1.0",
-    "@angular/http": "^2.1.0",
-    "@angular/platform-browser": "^2.1.0",
-    "@angular/platform-browser-dynamic": "^2.1.0",
-    "@angular/router": "^3.1.0",
+    "@angular/common": "^2.2.3",
+    "@angular/compiler": "^2.2.3",
+    "@angular/compiler-cli": "2.2.3",
+    "@angular/core": "^2.2.3",
+    "@angular/forms": "^2.2.3",
+    "@angular/http": "^2.2.3",
+    "@angular/platform-browser": "^2.2.3",
+    "@angular/platform-browser-dynamic": "^2.2.3",
+    "@angular/router": "^3.2.3",
+    "angularfire2": "^2.0.0-beta.6",
     "core-js": "^2.4.1",
+    "firebase": "^3.6.1",
     "rxjs": "5.0.0-beta.12",
     "ts-helpers": "^1.1.1",
     "zone.js": "^0.6.23"
@@ -64,7 +67,7 @@
     "@angular/compiler-cli": "^2.1.0",
     "@types/jasmine": "^2.2.30",
     "@types/node": "^6.0.42",
-    "angular-cli": "1.0.0-beta.20-4",
+    "angular-cli": "1.0.0-beta.21",
     "codelyzer": "~1.0.0-beta.3",
     "jasmine-core": "2.4.1",
     "jasmine-spec-reporter": "2.5.0",
