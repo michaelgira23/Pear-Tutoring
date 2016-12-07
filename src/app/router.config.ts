@@ -1,0 +1,25 @@
+import { Route } from '@angular/router';
+
+import { HomeComponent } from './home/home.component';
+import { WhiteboardComponent } from './whiteboard/whiteboard.component';
+import { LoginComponent } from './login/login.component';
+
+export const routerConfig : Route[] = [
+	{
+		path: '',
+		redirectTo: 'home',
+		pathMatch: 'full'
+	},
+	{
+		path: 'home',
+		component: HomeComponent
+	},
+	{
+		path: 'whiteboard',
+		component: WhiteboardComponent
+	},
+	{
+		path: 'login',
+		component: LoginComponent
+	}
+];

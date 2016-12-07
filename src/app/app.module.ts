@@ -1,23 +1,40 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
-import { AngularFireModule } from 'angularfire2/index';
-import { firebaseConfig } from '../environments/environment';
+import { AngularFireModule } from 'angularfire2';
+
+import { routerConfig } from './router.config';
+import { firebaseConfig, authConfig } from '../environments/environment';
 
 import { AppComponent } from './app.component';
+import { NavbarComponent } from './navbar/navbar.component';
+import { HomeComponent } from './home/home.component';
+import { WhiteboardComponent } from './whiteboard/whiteboard.component';
+import { ChatComponent } from './chat/chat.component';
+import { LoginComponent } from './login/login.component';
+
+import { AuthService } from './shared/security/auth.service';
 
 @NgModule({
-  declarations: [
-    AppComponent
-  ],
-  imports: [
-    BrowserModule,
-    FormsModule,
-    HttpModule,
-    AngularFireModule.initializeApp(firebaseConfig)
-  ],
-  providers: [],
-  bootstrap: [AppComponent]
+	declarations: [
+		AppComponent,
+		NavbarComponent,
+		HomeComponent,
+		WhiteboardComponent,
+		ChatComponent,
+		LoginComponent
+	],
+	imports: [
+		BrowserModule,
+		FormsModule,
+		ReactiveFormsModule,
+		HttpModule,
+		RouterModule.forRoot(routerConfig),
+		AngularFireModule.initializeApp(firebaseConfig, authConfig)
+	],
+	providers: [AuthService],
+	bootstrap: [AppComponent]
 })
 export class AppModule { }

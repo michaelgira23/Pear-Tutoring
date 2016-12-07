@@ -7,14 +7,12 @@ import { AngularFire, FirebaseListObservable, FirebaseObjectObservable } from 'a
 	styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-	title = 'app works!';
 
 	constructor (private af: AngularFire) {
 		const rootList$: FirebaseListObservable<any> = af.database.list('/');
 		rootList$.subscribe(
 			data => {
-				console.log(data);
-				this.title = JSON.stringify(data);
+				console.log('Firebase db', data);
 			}
 		);
 	}

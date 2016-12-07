@@ -1,0 +1,5 @@
+<form [formGroup]="form" (submit)="login()" autocomplete="off" novalidate>
+	<input name="email" formControlName="email" placeholder="Email">
+	<input type="password" name="password" formControlName="password" placeholder="Password">
+	<button [disabled]="!form.valid">Login</button>
+</form>
