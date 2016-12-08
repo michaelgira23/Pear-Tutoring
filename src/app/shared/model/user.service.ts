@@ -1,13 +1,14 @@
 import { Injectable, Inject } from '@angular/core';
-import { FirebaseRef } from 'angularfire2';
+import { AngularFireDatabase, FirebaseRef } from 'angularfire2';
 import { Observable, Subject } from 'rxjs/Rx';
+import { User } from './user';
 
 @Injectable()
 export class UserService {
 
 	sdkDb: any;
 
-	constructor(@Inject(FirebaseRef) fb) {
+	constructor(@Inject(FirebaseRef) fb, private db: AngularFireDatabase) {
 		this.sdkDb = fb.database().ref();
 	}
 
@@ -17,6 +18,16 @@ export class UserService {
 		let dataToSave = {};
 		dataToSave[`users/${uid}`] = userToSave;
 		return this.firebaseUpdate(dataToSave);
+	}
+
+	findAllUsers(): Observable<User[]> {
+		return this.db.list('users').do(console.log)
+		.map(User.fromJsonList);
+	}
+
+	findUser(uid: string): Observable<User> {
+		return this.db.object(`users/${uid}`).do(console.log)
+		.map(User.fromJson);
 	}
 
 	private firebaseUpdate(dataToSave) {
