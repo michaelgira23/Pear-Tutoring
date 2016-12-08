@@ -23,6 +23,7 @@ export class RegisterComponent implements OnInit {
 	}
 
 	register() {
+		console.log("reister called")
 		const formValue = this.form.value;
 		this.authService.register(formValue.email, formValue.password).subscribe(
 			data => {
