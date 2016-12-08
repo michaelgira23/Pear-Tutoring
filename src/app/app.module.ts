@@ -16,6 +16,8 @@ import { ChatComponent } from './chat/chat.component';
 import { LoginComponent } from './login/login.component';
 
 import { AuthService } from './shared/security/auth.service';
+import { SchedulingComponent } from './scheduling/scheduling.component';
+import { SessionService } from './shared/model/session.service';
 
 @NgModule({
 	declarations: [
@@ -24,7 +26,8 @@ import { AuthService } from './shared/security/auth.service';
 		HomeComponent,
 		WhiteboardComponent,
 		ChatComponent,
-		LoginComponent
+		LoginComponent,
+		SchedulingComponent
 	],
 	imports: [
 		BrowserModule,
@@ -34,7 +37,7 @@ import { AuthService } from './shared/security/auth.service';
 		RouterModule.forRoot(routerConfig),
 		AngularFireModule.initializeApp(firebaseConfig, authConfig)
 	],
-	providers: [AuthService],
+	providers: [AuthService, SessionService],
 	bootstrap: [AppComponent]
 })
 export class AppModule { }
