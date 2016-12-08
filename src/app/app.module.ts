@@ -14,6 +14,7 @@ import { HomeComponent } from './home/home.component';
 import { WhiteboardComponent } from './whiteboard/whiteboard.component';
 import { ChatComponent } from './chat/chat.component';
 import { LoginComponent } from './login/login.component';
+import { RegisterComponent } from './register/register.component';
 
 import { AuthService } from './shared/security/auth.service';
 
@@ -24,7 +25,8 @@ import { AuthService } from './shared/security/auth.service';
 		HomeComponent,
 		WhiteboardComponent,
 		ChatComponent,
-		LoginComponent
+		LoginComponent,
+		RegisterComponent
 	],
 	imports: [
 		BrowserModule,
