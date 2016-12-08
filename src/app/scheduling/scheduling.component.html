@@ -1,3 +1,8 @@
-<p>
-  scheduling works!
-</p>
+<h2> All sessions </h2>
+<div *ngFor="let session of allSessions"> 
+  <div> {{session | json}} </div>
+</div>
+<h2> All Users </h2>
+<div *ngFor="let user of allUsers"> 
+  <div> {{user | json}} </div>
+</div>
