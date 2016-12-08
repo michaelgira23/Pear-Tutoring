@@ -14,10 +14,12 @@ import { HomeComponent } from './home/home.component';
 import { WhiteboardComponent } from './whiteboard/whiteboard.component';
 import { ChatComponent } from './chat/chat.component';
 import { LoginComponent } from './login/login.component';
+import { RegisterComponent } from './register/register.component';
 
 import { AuthService } from './shared/security/auth.service';
 import { SchedulingComponent } from './scheduling/scheduling.component';
 import { SessionService } from './shared/model/session.service';
+import { UserService } from './shared/model/user.service'
 
 @NgModule({
 	declarations: [
@@ -27,7 +29,8 @@ import { SessionService } from './shared/model/session.service';
 		WhiteboardComponent,
 		ChatComponent,
 		LoginComponent,
-		SchedulingComponent
+		SchedulingComponent,
+		RegisterComponent
 	],
 	imports: [
 		BrowserModule,
@@ -37,7 +40,7 @@ import { SessionService } from './shared/model/session.service';
 		RouterModule.forRoot(routerConfig),
 		AngularFireModule.initializeApp(firebaseConfig, authConfig)
 	],
-	providers: [AuthService, SessionService],
+	providers: [AuthService, SessionService, UserService],
 	bootstrap: [AppComponent]
 })
 export class AppModule { }

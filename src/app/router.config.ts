@@ -4,8 +4,9 @@ import { HomeComponent } from './home/home.component';
 import { WhiteboardComponent } from './whiteboard/whiteboard.component';
 import { LoginComponent } from './login/login.component';
 import { SchedulingComponent } from './scheduling/scheduling.component'
+import { RegisterComponent } from './register/register.component';
 
-export const routerConfig : Route[] = [
+export const routerConfig: Route[] = [
 	{
 		path: '',
 		redirectTo: 'home',
@@ -25,6 +26,10 @@ export const routerConfig : Route[] = [
 	},
 	{
 		path: 'scheduling',
-		component: SchedulingComponent
+		component: SchedulingComponent,
+	},
+	{
+		path: 'register',
+		component: RegisterComponent
 	}
 ];

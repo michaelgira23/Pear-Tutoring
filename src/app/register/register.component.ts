@@ -4,11 +4,11 @@ import { Router } from '@angular/router';
 import { AuthService } from '../shared/security/auth.service';
 
 @Component({
-	selector: 'app-login',
-	templateUrl: './login.component.html',
-	styleUrls: ['./login.component.scss']
+	selector: 'app-register',
+	templateUrl: './register.component.html',
+	styleUrls: ['./register.component.scss']
 })
-export class LoginComponent implements OnInit {
+export class RegisterComponent implements OnInit {
 
 	form: FormGroup;
 
@@ -22,14 +22,15 @@ export class LoginComponent implements OnInit {
 	ngOnInit() {
 	}
 
-	login() {
+	register() {
+		console.log("reister called")
 		const formValue = this.form.value;
-		this.authService.login(formValue.email, formValue.password).subscribe(
+		this.authService.register(formValue.email, formValue.password).subscribe(
 			data => {
 				this.router.navigate(['/home']);
 			},
 			err => {
-				console.log('Login error', err);
+				console.log('Register error', err);
 			}
 		);
 	}
