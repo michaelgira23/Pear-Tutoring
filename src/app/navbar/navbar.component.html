@@ -2,6 +2,7 @@
 	<a routerLink="home" routerLinkActive="active">Home</a>
 	<a routerLink="whiteboard" routerLinkActive="active">Whiteboard</a>
 	<a routerLink="login" routerLinkActive="active" *ngIf="!authInfo">Login</a>
+	<a routerLink="register" routerLinkActive="active" *ngIf="!authInfo">Register</a>
 	<p *ngIf="authInfo">Signed in as {{ authInfo.auth.email }}</p>
 	<button *ngIf="authInfo" (click)="authService.logout()">Logout</button>
 </div>

@@ -6,10 +6,14 @@ import { FirebaseAuth, FirebaseAuthState } from 'angularfire2';
 @Injectable()
 export class AuthService {
 
-	constructor(private auth: FirebaseAuth, private router:Router) { }
+	constructor (private auth: FirebaseAuth, private router: Router) { }
 
-	login(email, password): Observable<FirebaseAuthState> {
+	login(email: string, password: string): Observable<FirebaseAuthState> {
 		return this.fromFirebaseAuthPromise(this.auth.login({ email, password }));
+	}
+
+	register(email: string, password: string): Observable<FirebaseAuthState> {
+		return this.fromFirebaseAuthPromise(this.auth.createUser({ email, password }));
 	}
 
 	fromFirebaseAuthPromise(promise): Observable<any> {
@@ -27,12 +31,12 @@ export class AuthService {
 			});
 
 			return subject.asObservable();
-		}
+	}
 
 
-		logout() {
-			this.auth.logout();
-			this.router.navigate(['/home']);
-		}
+	logout() {
+		this.auth.logout();
+		this.router.navigate(['/home']);
+	}
 
 }
