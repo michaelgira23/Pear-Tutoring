@@ -1,4 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
+import { ChatService, Message } from '../shared/model/chat.service';
+import { User } from '../shared/model/user';
 
 @Component({
 	selector: 'app-chat',
@@ -7,9 +9,29 @@ import { Component, OnInit } from '@angular/core';
 })
 export class ChatComponent implements OnInit {
 
-	constructor() { }
+	@Input('chatKey') chatKey: string;
+
+	allMessages: Message[];
+
+	constructor(private chatService: ChatService) { }
 
 	ngOnInit() {
+		this.chatService.getAllMessages(this.chatKey).subscribe(
+			data => {
+				this.allMessages = data;
+			},
+			err => {
+				console.log(`Getting chat messages error: ${err}`);
+			}
+		);
 	}
 
+	sendMessage(message: string) {
+		this.chatService.sendMessage({
+			chat: this.chatKey || 'test',
+			text: message,
+			from: new User('test', 'hello world', 'test@example.com', false),
+			time: new Date().getTime()
+		});
+	}
 }

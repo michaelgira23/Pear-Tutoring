@@ -1,5 +1,6 @@
 import { Route } from '@angular/router';
 
+import { ChatComponent } from './chat/chat.component';
 import { HomeComponent } from './home/home.component';
 import { WhiteboardComponent } from './whiteboard/whiteboard.component';
 import { LoginComponent } from './login/login.component';
@@ -26,5 +27,9 @@ export const routerConfig: Route[] = [
 	{
 		path: 'register',
 		component: RegisterComponent
+	},
+	{
+		path: 'chat',
+		component: ChatComponent
 	}
 ];

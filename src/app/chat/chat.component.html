@@ -1,3 +1,7 @@
-<p>
-	chat works!
-</p>
+<h2>All messages in chat {{chatKey}}:</h2>
+<div *ngFor="let message of allMessages">
+	<p>{{message | json}}</p>
+</div>
+<h3>Send a message to {{chatKey}}:</h3>
+<input #messageInput placeholder="type your message here!" />
+<button (click)="sendMessage(messageInput.value)">Send Message</button>

@@ -31,7 +31,7 @@ export class ChatService {
 		return this.firebaseUpdate(dataToSave);
 	}
 
-	saveMessage(message: Message): Observable<any> {
+	sendMessage(message: Message): Observable<any> {
 		let msgToSave = Object.assign({}, message);
 		let newMsgKey = this.sdkDb.child('chatMessages').push().key;
 
@@ -63,5 +63,6 @@ export class ChatService {
 export interface Message {
 	chat: string,
 	text: string,
-	from: User
+	from: User,
+	time: number
 }

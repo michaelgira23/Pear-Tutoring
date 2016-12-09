@@ -17,7 +17,8 @@ import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
 
 import { AuthService } from './shared/security/auth.service';
-import { UserService } from './shared/model/user.service'
+import { UserService } from './shared/model/user.service';
+import { ChatService } from './shared/model/chat.service';
 
 @NgModule({
 	declarations: [
@@ -37,7 +38,7 @@ import { UserService } from './shared/model/user.service'
 		RouterModule.forRoot(routerConfig),
 		AngularFireModule.initializeApp(firebaseConfig, authConfig)
 	],
-	providers: [AuthService, UserService],
+	providers: [AuthService, UserService, ChatService],
 	bootstrap: [AppComponent]
 })
 export class AppModule { }
