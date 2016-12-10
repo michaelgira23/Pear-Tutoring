@@ -19,7 +19,8 @@ import { RegisterComponent } from './register/register.component';
 import { AuthService } from './shared/security/auth.service';
 import { SchedulingComponent } from './scheduling/scheduling.component';
 import { SessionService } from './shared/model/session.service';
-import { UserService } from './shared/model/user.service'
+import { UserService } from './shared/model/user.service';
+import { CreateSessionComponent } from './scheduling/create-session/create-session.component'
 
 @NgModule({
 	declarations: [
@@ -30,7 +31,8 @@ import { UserService } from './shared/model/user.service'
 		ChatComponent,
 		LoginComponent,
 		SchedulingComponent,
-		RegisterComponent
+		RegisterComponent,
+		CreateSessionComponent
 	],
 	imports: [
 		BrowserModule,

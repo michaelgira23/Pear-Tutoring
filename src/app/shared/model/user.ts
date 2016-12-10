@@ -1,6 +1,6 @@
 export class User {
-	static fromJson({uid, name, email, tutor}): User {
-		return new User(uid, name, email, tutor);
+	static fromJson({uid, name, email, tutor, inSession, lastOnline}): User {
+		return new User(uid, name, email, tutor, inSession, lastOnline);
 	}
 
 	static fromJsonList(list: any[]): User[] {
@@ -12,5 +12,8 @@ export class User {
 		public email: string,
 		public tutor: boolean,
 //		public publicSessions: string[],
+		public inSession: boolean,
+//		public institution: string,
+		public lastOnline: number
 	) {}
 }

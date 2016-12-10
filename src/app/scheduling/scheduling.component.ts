@@ -3,6 +3,7 @@ import { SessionService } from '../shared/model/session.service';
 import { Session } from '../shared/model/session';
 import { UserService } from '../shared/model/user.service';
 import { User } from '../shared/model/user';
+import { Validators, FormGroup, FormBuilder } from '@angular/forms';
 
 import * as moment from 'moment';
 
@@ -15,10 +16,18 @@ export class SchedulingComponent implements OnInit {
 
 	allSessions: Session[];
 	allUsers: User[];
+	joinSessionForm: FormGroup;
+	joinSessionModel: any;
 
-	constructor(private sessionService: SessionService, private userService: UserService) { }
+	constructor(private sessionService: SessionService, private userService: UserService, private fb: FormBuilder) { }
 
 	ngOnInit() {
+		this.joinSessionModel = {
+			'sessionId': ''
+		}
+		this.joinSessionForm = this.fb.group({
+			'sessionId': [this.joinSessionModel.sessionId, [Validators.required]]
+		})
 		// this.sessionService.createSession({
 		// 	start: moment.now(),
 		// 	end: moment().hours(2).format('x'),
@@ -47,5 +56,10 @@ export class SchedulingComponent implements OnInit {
 			val => console.log('deleted'),
 			err => console.log(err)
 		)
+	}
+
+	joinSession() {
+		const sessionId = this.joinSessionForm.value.sessionId;
+		this.sessionService.joinSession(sessionId).subscribe(console.info, console.error);
 	}
 }
