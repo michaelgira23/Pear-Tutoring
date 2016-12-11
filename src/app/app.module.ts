@@ -12,6 +12,7 @@ import { AppComponent } from './app.component';
 import { NavbarComponent } from './navbar/navbar.component';
 import { HomeComponent } from './home/home.component';
 import { WhiteboardComponent } from './whiteboard/whiteboard.component';
+import { CreateWhiteboardComponent } from './create-whiteboard/create-whiteboard.component';
 import { ChatComponent } from './chat/chat.component';
 import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
@@ -26,6 +27,7 @@ import { UserService } from './shared/model/user.service';
 		NavbarComponent,
 		HomeComponent,
 		WhiteboardComponent,
+		CreateWhiteboardComponent,
 		ChatComponent,
 		LoginComponent,
 		RegisterComponent
