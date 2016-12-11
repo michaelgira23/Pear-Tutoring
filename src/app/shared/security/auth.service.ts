@@ -27,10 +27,10 @@ export class AuthService {
 
 	register(email: string, password: string): Observable<FirebaseAuthState> {
 		return this.fromFirebaseAuthPromise(this.auth.createUser({ email, password }))
-		.flatMap(val => {
-			let userUid = this.auth.getAuth().uid;
-			return this.userService.saveUser({email}, userUid);
-		})
+			.flatMap(val => {
+				let userUid = this.auth.getAuth().uid;
+				return this.userService.saveUser({email}, userUid);
+			});
 	}
 
 	fromFirebaseAuthPromise(promise): Observable<any> {

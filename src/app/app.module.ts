@@ -17,7 +17,7 @@ import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
 
 import { AuthService } from './shared/security/auth.service';
-import { UserService } from './shared/model/user.service'
+import { UserService } from './shared/model/user.service';
 
 @NgModule({
 	declarations: [

@@ -13,6 +13,6 @@ export class User {
 		public tutor: boolean,
 		public tutorSessions: {[uid: string]: boolean},
 		public tuteeSessions: {[uid: string]: boolean}
-//		public publicSessions: string[],
+		// public publicSessions: string[],
 	) {}
 }

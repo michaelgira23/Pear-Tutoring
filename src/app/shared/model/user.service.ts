@@ -47,5 +47,5 @@ export class UserService {
 			);
 
 		return subject.asObservable();
-  }
+	}
 }
