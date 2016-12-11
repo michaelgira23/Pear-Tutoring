@@ -40,6 +40,7 @@ export class SessionService {
 	}
 
 	createSession(session: any): Observable<any> {
+		if (!this.uid) return Observable.throw('Rip no login info');
 		const sessionToSave = Object.assign({}, session);
 		const newSessionKey = this.sdkDb.child('sessions').push().key;
 		const uidsToSave = {};
@@ -64,7 +65,7 @@ export class SessionService {
 	joinSession(sessionId: String): Observable<any> {
 		if (!this.uid) return Observable.throw('Rip no login info');
 
-		this.sdkDb.child(`usersInSession/${sessionId}/${this.uid}`).onDisconnect().remove();
+		this.sdkDb.child(`usersInSession/${sessionId}/${this.uid}`).onDisconnect().set(false);
 
 		let dataToSave = {};
 		dataToSave[`usersInSession/${sessionId}/${this.uid}`] = true;

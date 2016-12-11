@@ -37,8 +37,11 @@ export class CreateSessionComponent implements OnInit {
 		let sessionToCreate = this.createSessionForm.value;
 		sessionToCreate.start = moment(sessionToCreate.start).format('X');
 		sessionToCreate.end = moment(sessionToCreate.end).format('X');
-		sessionToCreate.tutees = sessionToCreate.tutees.split(',').forEach(val => val.trim());
-		this.sessionService.createSession(sessionToCreate);
+		sessionToCreate.tutees = sessionToCreate.tutees.split(',').map(val => val.trim());
+		this.sessionService.createSession(sessionToCreate).subscribe(
+			val => console.info('session created'),
+			err => console.log(err)
+		);
 	}
 
 }
