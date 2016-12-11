@@ -1,5 +1,10 @@
-<h2> All sessions </h2>
-<div *ngFor="let session of allSessions"> 
+<h2> Sessions I'm tutoring </h2>
+<div *ngFor="let session of tutorSessions"> 
+	<div> {{session | json}} </div>
+</div>
+
+<h2> Sessions I'm in </h2>
+<div *ngFor="let session of tuteeSessions">
 	<div> {{session | json}} </div>
 </div>
 

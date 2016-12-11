@@ -11,7 +11,8 @@ import * as moment from 'moment';
 })
 export class SchedulingComponent implements OnInit {
 
-	allSessions: Session[];
+	tutorSessions: Session[];
+	tuteeSessions: Session[];
 	joinSessionForm: FormGroup;
 
 	constructor(private sessionService: SessionService, private fb: FormBuilder) { }
@@ -31,9 +32,14 @@ export class SchedulingComponent implements OnInit {
 		// 	val => console.log("Mock Session created"),
 		// 	err => console.log(err)
 		// );
-		this.sessionService.findAllSessions()
+		this.sessionService.findMySessions().tutorSessions
 		.subscribe(
-			val => this.allSessions = val,
+			val => this.tutorSessions = val,
+			err => console.log(err)
+		);
+		this.sessionService.findMySessions().tuteeSessions
+		.subscribe(
+			val => this.tuteeSessions = val,
 			err => console.log(err)
 		);
 	}

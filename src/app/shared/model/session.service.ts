@@ -39,17 +39,33 @@ export class SessionService {
 		return this.db.list('sessions').map(Session.fromJsonArray);
 	}
 
+	findMySessions(): {tutorSessions: Observable<Session[]>, tuteeSessions: Observable<Session[]>} {
+		if (!this.uid) return {tutorSessions: Observable.throw('Rip no login info'), tuteeSessions: Observable.throw('Rip no login info')};
+		return {
+			tutorSessions: this.db.list(`/users/${this.uid}/tutorSessions`)
+				.map(sessions => sessions.map(session => this.db.object(`/sessions/${session.$key}`)))
+				.flatMap(sessions$arr => Observable.combineLatest(sessions$arr)).do(console.log)
+				.map(Session.fromJsonArray),
+			tuteeSessions: this.db.list(`/users/${this.uid}/tuteeSessions`)
+				.map(sessions => sessions.map(session => this.db.object(`/sessions/${session.$key}`)))
+				.flatMap(sessions$arr => Observable.combineLatest(sessions$arr)).do(console.log)
+				.map(Session.fromJsonArray)
+		}
+	}
+
 	createSession(session: any): Observable<any> {
 		if (!this.uid) return Observable.throw('Rip no login info');
-		const sessionToSave = Object.assign({}, session);
+		let sessionToSave = Object.assign({}, session);
 		const newSessionKey = this.sdkDb.child('sessions').push().key;
 		const uidsToSave = {};
 		session.tutees.forEach(uid => uidsToSave[uid] = false);
+		sessionToSave.tutor = this.uid;
 
 		let dataToSave = {};
-
 		dataToSave['sessions/' + newSessionKey] = sessionToSave;
 		dataToSave['usersInSession/' + newSessionKey] = uidsToSave;
+		dataToSave[`users/${this.uid}/tutorSessions/${newSessionKey}`] = true;
+		session.tutees.forEach(uid => dataToSave[`users/${uid}/tuteeSessions/${newSessionKey}`] = true);
 
 		return this.firebaseUpdate(dataToSave);
 	}

@@ -23,6 +23,7 @@ export class CreateSessionComponent implements OnInit {
 			end: ['', Validators.required],
 			max: ['', Validators.required],
 			listed: [false, Validators.required],
+			title: ['', [Validators.required]],
 			desc: ['', Validators.required],
 			tutees: ['', Validators.required]
 		});
