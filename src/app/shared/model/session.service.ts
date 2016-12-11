@@ -1,16 +1,17 @@
 import { Injectable, Inject } from '@angular/core';
 import { Observable, Subject } from 'rxjs/Rx';
-import { AngularFireDatabase, FirebaseRef, AngularFireAuth } from 'angularfire2';
+import { AngularFireDatabase, FirebaseRef} from 'angularfire2';
 import { Session } from './session';
+import { AuthService } from '../security/auth.service';
 
 @Injectable()
 export class SessionService {
 	sdkDb: any;
 	uid: string;
 
-	constructor(private db: AngularFireDatabase, @Inject(FirebaseRef) fb, private auth: AngularFireAuth) {
+	constructor(private db: AngularFireDatabase, @Inject(FirebaseRef) fb, private authService: AuthService) {
 		this.sdkDb = fb.database().ref();
-		this.auth.subscribe(val => {
+		this.authService.auth$.subscribe(val => {
 			if (val) this.uid = val.uid;
 			console.log('get uid: ' +  this.uid);
 		});
@@ -38,11 +39,11 @@ export class SessionService {
 		return this.db.list('sessions').map(Session.fromJsonArray);
 	}
 
-	createSession(session: any, uids: string[]): Observable<any> {
+	createSession(session: any): Observable<any> {
 		const sessionToSave = Object.assign({}, session);
 		const newSessionKey = this.sdkDb.child('sessions').push().key;
 		const uidsToSave = {};
-		uids.forEach(uid => uidsToSave[uid] = true);
+		session.tutees.forEach(uid => uidsToSave[uid] = false);
 
 		let dataToSave = {};
 

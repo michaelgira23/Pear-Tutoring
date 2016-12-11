@@ -1,10 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { SessionService } from '../shared/model/session.service';
 import { Session } from '../shared/model/session';
-import { UserService } from '../shared/model/user.service';
-import { User } from '../shared/model/user';
 import { Validators, FormGroup, FormBuilder } from '@angular/forms';
-
 import * as moment from 'moment';
 
 @Component({
@@ -15,18 +12,13 @@ import * as moment from 'moment';
 export class SchedulingComponent implements OnInit {
 
 	allSessions: Session[];
-	allUsers: User[];
 	joinSessionForm: FormGroup;
-	joinSessionModel: any;
 
-	constructor(private sessionService: SessionService, private userService: UserService, private fb: FormBuilder) { }
+	constructor(private sessionService: SessionService, private fb: FormBuilder) { }
 
 	ngOnInit() {
-		this.joinSessionModel = {
-			'sessionId': ''
-		}
 		this.joinSessionForm = this.fb.group({
-			'sessionId': [this.joinSessionModel.sessionId, [Validators.required]]
+			'sessionId': ['', [Validators.required]]
 		})
 		// this.sessionService.createSession({
 		// 	start: moment.now(),
@@ -44,11 +36,6 @@ export class SchedulingComponent implements OnInit {
 			val => this.allSessions = val,
 			err => console.log(err)
 		);
-
-		this.userService.findAllUsers().subscribe(
-			val => this.allUsers = val,
-			err => console.log('Getting users error', err)
-		)
 	}
 
 	deleteSession(sessionId: string) {

@@ -3,8 +3,8 @@
 // In database, must be stored as int because of Firebase
 
 export class Session {
-	static fromJson({ $key, start, end, tutor, max, listed, whiteboard, chat}): Session {
-		return new Session($key, start, end, tutor, max, listed, whiteboard, chat);
+	static fromJson({ $key, start, end, tutor, max, listed, whiteboard, chat, desc}): Session {
+		return new Session($key, start, end, tutor, max, listed, whiteboard, chat, desc);
 	}
 
 	static fromJsonArray(json: any[]): Session[] {
@@ -19,6 +19,7 @@ export class Session {
 		public max: number,
 		public listed: boolean,
 		public whiteboard: string,
-		public chat: string
+		public chat: string,
+		public desc: string
 	) { }
 }

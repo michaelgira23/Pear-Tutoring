@@ -1,3 +1,19 @@
-<p>
-  create-session works!
-</p>
+<form [formGroup]="createSessionForm" (ngSubmit)="createSession()">
+  <fieldset>
+    start: <input formControlName="start" required><br/>
+    end: <input formControlName="end" required><br/>
+    max: <input formControlName="max" required><br/>
+    listed: <input type="checkbox" formControlName="listed" required><br/>
+    description: <textarea formControlName="desc" required></textarea>
+  </fieldset>
+  <fieldset>
+    add tutees: <br/>
+    <textarea formControlName="tutees" required row=1></textarea>
+  </fieldset>
+  <button>Create</button>
+</form>
+
+<h2> All Users </h2>
+<div *ngFor="let user of allUsers"> 
+	<div> {{user | json}} </div>
+</div>
