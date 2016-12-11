@@ -3,6 +3,7 @@ import { Observable, Subject } from 'rxjs/Rx';
 import { AngularFireDatabase, FirebaseRef} from 'angularfire2';
 import { Session } from './session';
 import { AuthService } from '../security/auth.service';
+import * as moment from 'moment';
 
 @Injectable()
 export class SessionService {
@@ -53,7 +54,7 @@ export class SessionService {
 		}
 	}
 
-	createSession(session: any): Observable<any> {
+	createSession(session: SessionOptions): Observable<any> {
 		if (!this.uid) return Observable.throw('Rip no login info');
 		let sessionToSave = Object.assign({}, session);
 		const newSessionKey = this.sdkDb.child('sessions').push().key;
@@ -66,6 +67,13 @@ export class SessionService {
 		dataToSave['usersInSession/' + newSessionKey] = uidsToSave;
 		dataToSave[`users/${this.uid}/tutorSessions/${newSessionKey}`] = true;
 		session.tutees.forEach(uid => dataToSave[`users/${uid}/tuteeSessions/${newSessionKey}`] = true);
+
+		// let whiteboardOptions = {
+		// 	created: moment().format('X'),
+		// 	createdBy: this.uid,
+		// }
+		// createWhiteboard$ = this.whiteboardService.createWhiteboard(whiteboardOptions);
+		// remember to merge this with the update observable
 
 		return this.firebaseUpdate(dataToSave);
 	}
@@ -87,4 +95,15 @@ export class SessionService {
 		dataToSave[`usersInSession/${sessionId}/${this.uid}`] = true;
 		return this.firebaseUpdate(dataToSave);
 	}
+}
+
+export interface SessionOptions {
+	start: number,
+	end: number,
+	tutor: string,
+	max: number,
+	listed: boolean,
+	title: string,
+	desc: string,
+	tutees: string[]
 }
