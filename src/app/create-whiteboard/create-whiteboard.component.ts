@@ -15,7 +15,7 @@ export class CreateWhiteboardComponent implements OnInit {
 
 	constructor(private router: Router, private fb: FormBuilder, private whiteboardService: WhiteboardService) {
 		this.form = this.fb.group({
-			anyoneWrite: [true],
+			// anyoneWrite: [true],
 			background: ['black', Validators.required]
 		});
 	}
@@ -30,7 +30,7 @@ export class CreateWhiteboardComponent implements OnInit {
 		const background = formValue.background;
 
 		console.log('create a form with anyone write: ' + anyoneWrite);
-		this.whiteboardService.createWhiteboard({ anyoneWrite, background })
+		this.whiteboardService.createWhiteboard({ background })
 			.subscribe(
 				data => {
 					console.log('create whiteboard successful', data);

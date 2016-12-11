@@ -1,6 +1,6 @@
 import { Component, Input, OnInit, OnDestroy, ViewChild, HostListener } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { WhiteboardService, Whiteboard, WhiteboardMarking, WhiteboardMarkingOptions, defaultMarkingOptions } from '../shared/model/whiteboard.service';
+import { WhiteboardService, Whiteboard, WhiteboardMarking, WhiteboardMarkingOptions, defaultMarkingOptions, Point } from '../shared/model/whiteboard.service';
 
 declare const paper;
 
@@ -22,11 +22,12 @@ export class WhiteboardComponent implements OnInit, OnDestroy {
 	canvasEl: any;
 
 	// paper.js paths on the whiteboard canvas
-	paths: any;
+	paths: any = {};
 	// Options for drawing the path that are currently selected
 	pathOptions: WhiteboardMarkingOptions = defaultMarkingOptions;
 	// Current path being drawn
 	currentPath: any;
+	currentPathFinished: boolean = true;
 	// Rectangle on canvas to set background
 	background: any;
 
@@ -39,7 +40,6 @@ export class WhiteboardComponent implements OnInit, OnDestroy {
 
 	// Data from database
 	whiteboard: Whiteboard;
-	markings: any;
 
 	constructor(private route: ActivatedRoute, private whiteboardService: WhiteboardService) { }
 
@@ -52,7 +52,7 @@ export class WhiteboardComponent implements OnInit, OnDestroy {
 		this.route.params.subscribe(
 			params => {
 				this.key = params['key'];
-				this.whiteboardService.getWhiteboard(this.key).subscribe(
+				this.whiteboardSubscription = this.whiteboardService.getWhiteboard(this.key).subscribe(
 					data => {
 						console.log('whiteboard data', data);
 						this.whiteboard = data;
@@ -63,11 +63,10 @@ export class WhiteboardComponent implements OnInit, OnDestroy {
 					}
 				);
 
-				this.whiteboardService.getMarkings(this.key).subscribe(
+				this.markingsSubscription = this.whiteboardService.getMarkings(this.key).subscribe(
 					data => {
 						console.log('new marking', data);
-						this.markings = data;
-						this.markingsToCanvas(this.markings);
+						this.markingsToCanvas(data);
 					},
 					err => {
 						console.log('whiteboard markings error!', err);
@@ -84,28 +83,35 @@ export class WhiteboardComponent implements OnInit, OnDestroy {
 
 	@HostListener('mousedown', ['$event'])
 	onMouseDown(event) {
-		console.log('mousedown', event);
+		// console.log('mousedown', event);
 		this.mouseDown = true;
 
-		// Create a new path
-		this.currentPath = new paper.Path({
-			segments: [this.cursorPoint(event)],
-			strokeColor  : this.pathOptions.strokeColor,
-			strokeWidth  : this.pathOptions.strokeWidth,
-			strokeCap    : this.pathOptions.strokeCap,
-			strokeJoin   : this.pathOptions.strokeJoin,
-			dashOffset   : this.pathOptions.dashOffset,
-			strokeScaling: this.pathOptions.strokeScaling,
-			dashArray    : this.pathOptions.dashArray,
-			miterLimit   : this.pathOptions.miterLimit
-		});
+		if(this.currentPathFinished) {
+			// Create a new path
+			this.currentPath = new paper.Path({
+				segments: [this.cursorPoint(event)],
+				strokeColor  : this.pathOptions.strokeColor,
+				strokeWidth  : this.pathOptions.strokeWidth,
+				strokeCap    : this.pathOptions.strokeCap,
+				strokeJoin   : this.pathOptions.strokeJoin,
+				dashOffset   : this.pathOptions.dashOffset,
+				strokeScaling: this.pathOptions.strokeScaling,
+				dashArray    : this.pathOptions.dashArray,
+				miterLimit   : this.pathOptions.miterLimit,
+				opacity      : this.pathOptions.opacity
+			});
+			this.currentPathFinished = false;
+		} else {
+			// User unclicked the mouse outside of the window, just continue with previous path
+			this.currentPath.add(this.cursorPoint(event));
+		}
 	}
 
 	@HostListener('mousemove', ['$event'])
 	onMouseMove(event) {
 		// Only care if mouse is being dragged
 		if(this.mouseDown) {
-			console.log('mousemove', event);
+			// console.log('mousemove', event);
 			// Add point to the current line
 			this.currentPath.add(this.cursorPoint(event));
 		}
@@ -113,13 +119,35 @@ export class WhiteboardComponent implements OnInit, OnDestroy {
 
 	@HostListener('mouseup', ['$event'])
 	onMouseUp(event) {
-		console.log('mouseup', event);
+		// console.log('mouseup', event);
 		this.mouseDown = false;
+		this.currentPathFinished = true;
 
 		// Add point to the current line
 		this.currentPath.add(this.cursorPoint(event));
 		// Simplify path to make it smoother and less data
 		this.currentPath.simplify();
+
+		// Convert path segments into an array
+		const path = [];
+		this.currentPath.segments.forEach(segment => {
+			const point: Point = {
+				x: segment.point.x,
+				y: segment.point.y
+			};
+			path.push(point);
+		});
+
+		// Insert path into database
+		this.whiteboardService.createMarking(this.key, path, this.pathOptions)
+			.subscribe(
+				data => {
+					console.log('successfully added marking', data);
+				},
+				err => {
+					console.log('add marking error', err);
+				}
+			);
 		console.log('add this point to db');
 	}
 
@@ -150,21 +178,48 @@ export class WhiteboardComponent implements OnInit, OnDestroy {
 		this.background.fillColor = color;
 	}
 
-	markingsToCanvas(markings: WhiteboardMarking[]) {
-		console.log(markings);
-		// this.paths = {};
-		//
-		// markings.forEach((value, index) => {
-		// 	const path = new paper.Path();
-		// 	path.strokeColor   = value.strokeColor;
-		// 	path.strokeWidth   = value.strokeWidth;
-		// 	path.strokeCap     = value.strokeCap;
-		// 	path.strokeJoin    = value.strokeJoin;
-		// 	path.dashOffset    = value.dashOffset;
-		// 	path.strokeScaling = value.strokeScaling;
-		// 	path.dashArray     = value.dashArray;
-		// 	path.miterLimit    = value.miterLimit;
-		// });
+	markingsToCanvas(paths: any[]) {
+		// Erase current canvas markings if they exist
+		if(this.paths) {
+			const markingKeys = Object.keys(this.paths);
+			markingKeys.forEach(key => {
+				console.log('remove marking', key);
+				this.paths[key].remove();
+				delete this.paths[key];
+			});
+		}
+
+		// Erase current path too, if it isn't in the process of being drawn
+		if(this.currentPathFinished && this.currentPath) {
+			this.currentPath.remove();
+		}
+
+		// Loop through markings and add to canvas
+		paths.forEach(marking => {
+
+			// Convert path points to paper.js Points objects
+			console.log('marking', marking.path);
+			let points = [];
+			marking.path.forEach(point => {
+				points.push(new paper.Point(point.x, point.y));
+			});
+
+			const path = new paper.Path({
+				segments: points,
+				strokeColor  : marking.options.strokeColor,
+				strokeWidth  : marking.options.strokeWidth,
+				strokeCap    : marking.options.strokeCap,
+				strokeJoin   : marking.options.strokeJoin,
+				dashOffset   : marking.options.dashOffset,
+				strokeScaling: marking.options.strokeScaling,
+				dashArray    : marking.options.dashArray,
+				miterLimit   : marking.options.miterLimit,
+				opacity      : marking.options.opacity
+			});
+
+			this.paths[marking.$key] = path;
+		});
+
 	}
 
 }

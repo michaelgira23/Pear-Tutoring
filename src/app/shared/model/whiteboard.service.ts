@@ -39,13 +39,18 @@ export class WhiteboardService {
 		return Observable.from([this.whiteboards.push(whiteboard)]);
 	}
 
-	getMarkings(key: string): FirebaseObjectObservable<any> {
-		return this.af.database.object('whiteboardMarkings/' + key);
+	getMarkings(key: string): FirebaseListObservable<any> {
+		return this.af.database.list('whiteboardMarkings/' + key);
 	}
 
-	createMarking(key: string, marking: WhiteboardMarking): Observable<any> {
+	createMarking(key: string, path: Point[], options: WhiteboardMarkingOptions): Observable<any> {
 		// By default, use default options
-		marking.options = Object.assign(defaultMarkingOptions, marking.options);
+		let marking: WhiteboardMarking = {
+			created: Date.now(),
+			createdBy: this.authInfo ? this.authInfo.uid : null,
+			options: Object.assign(defaultMarkingOptions, options),
+			path
+		};
 
 		const whiteboardMarkings = this.af.database.list('whiteboardMarkings/' + key);
 		return Observable.from([whiteboardMarkings.push(marking)]);
@@ -54,7 +59,6 @@ export class WhiteboardService {
 }
 
 export const defaultWhiteboardOptions: WhiteboardOptions = {
-	anyoneWrite: true,
 	background: 'white'
 };
 
@@ -66,24 +70,25 @@ export const defaultMarkingOptions: WhiteboardMarkingOptions = {
 	dashOffset: 0,
 	strokeScaling: true,
 	dashArray: [],
-	miterLimit: 10
+	miterLimit: 10,
+	opacity: 1
 };
 
 export interface Whiteboard {
 	created: number;
 	createdBy: string;
-	anyoneWrite: boolean;
 	background: string;
 }
 
 export interface WhiteboardOptions {
-	anyoneWrite?: boolean;
 	background?: string;
 }
 
 export interface WhiteboardMarking {
+	created: number;
+	createdBy: string;
 	options?: WhiteboardMarkingOptions;
-	segments: number[][];
+	path: Point[];
 }
 
 export interface WhiteboardMarkingOptions {
@@ -95,4 +100,10 @@ export interface WhiteboardMarkingOptions {
 	strokeScaling?: boolean;
 	dashArray?: number[];
 	miterLimit?: number;
+	opacity?: number;
+}
+
+export interface Point {
+	x: number;
+	y: number;
 }

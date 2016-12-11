@@ -1,9 +1,9 @@
 <h1>Create a Whiteboard</h1>
 <form [formGroup]="form" (submit)="create()" autocomplete="off" novalidate>
-	<label>
+	<!-- <label>
 		<input type="checkbox" name="anyoneWrite" formControlName="anyoneWrite" value="true">
 		Allow anyone to write
-	</label>
+	</label> -->
 	<input name="background" formControlName="background" placeholder="Background Color (Any CSS value)">
 	<button [disabled]="!form.valid">Create</button>
 </form>
