@@ -1,3 +1,51 @@
+$sophisticated-white: #eee;
+
+.toolbar {
+	position: relative;
+	top: 2.5rem;
+	left: 2.5rem;
+
+	width: 5rem;
+
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	align-items: center;
+
+	color: $sophisticated-white;
+	background-color: rgba(0, 0, 0, 0.8);
+	border-radius: 0.25rem;
+
+	label {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+
+		padding: 0.5rem 0;
+
+		border-bottom: 1px solid rgba($sophisticated-white, 0.5);
+
+		&:last-child {
+			border-bottom: none;
+		}
+
+		.color {
+			height: 2rem;
+			width: 2rem;
+
+			border: none;
+			border-radius: 0.5rem;
+		}
+
+		.range {
+			width: 100%;
+			margin: 0;
+			padding: 0;
+		}
+	}
+}
+
 canvas {
 	height: 100%;
 	width: 100%;

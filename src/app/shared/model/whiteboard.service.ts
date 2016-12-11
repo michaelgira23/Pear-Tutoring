@@ -4,6 +4,21 @@ import { Observable } from 'rxjs/Rx';
 
 import { AuthService } from '../security/auth.service';
 
+export const defaultWhiteboardOptions: WhiteboardOptions = {
+	background: 'white'
+};
+
+export const defaultMarkingOptions: WhiteboardMarkingOptions = {
+	strokeColor: '#111',
+	strokeWidth: 2,
+	strokeCap: 'round',
+	strokeJoin: 'miter',
+	dashOffset: 0,
+	strokeScaling: true,
+	dashArray: [],
+	miterLimit: 10
+};
+
 @Injectable()
 export class WhiteboardService {
 
@@ -58,22 +73,6 @@ export class WhiteboardService {
 
 }
 
-export const defaultWhiteboardOptions: WhiteboardOptions = {
-	background: 'white'
-};
-
-export const defaultMarkingOptions: WhiteboardMarkingOptions = {
-	strokeColor: 'black',
-	strokeWidth: 2,
-	strokeCap: 'round',
-	strokeJoin: 'miter',
-	dashOffset: 0,
-	strokeScaling: true,
-	dashArray: [],
-	miterLimit: 10,
-	opacity: 1
-};
-
 export interface Whiteboard {
 	created: number;
 	createdBy: string;
@@ -100,7 +99,6 @@ export interface WhiteboardMarkingOptions {
 	strokeScaling?: boolean;
 	dashArray?: number[];
 	miterLimit?: number;
-	opacity?: number;
 }
 
 export interface Point {

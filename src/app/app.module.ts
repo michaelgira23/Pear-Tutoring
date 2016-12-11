@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 import { AngularFireModule } from 'angularfire2';
+import { ColorPickerModule } from 'angular2-color-picker';
 
 import { routerConfig } from './router.config';
 import { firebaseConfig, authConfig } from '../environments/environment';
@@ -38,7 +39,8 @@ import { UserService } from './shared/model/user.service';
 		ReactiveFormsModule,
 		HttpModule,
 		RouterModule.forRoot(routerConfig),
-		AngularFireModule.initializeApp(firebaseConfig, authConfig)
+		AngularFireModule.initializeApp(firebaseConfig, authConfig),
+		ColorPickerModule
 	],
 	providers: [AuthService, WhiteboardService, UserService],
 	bootstrap: [AppComponent]

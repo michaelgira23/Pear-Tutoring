@@ -1,15 +1,17 @@
 <div class="toolbar">
 	<label>
 		Color
-		<input [(ngModel)]="pathOptions.strokeColor">
+		<button class="color"
+			[(colorPicker)]="pathOptions.strokeColor"
+			[cpFallbackColor]="pathOptions.strokeColor"
+			[style.background]="pathOptions.strokeColor"></button>
 	</label>
 	<label>
-		Stroke Width
-		<input [(ngModel)]="pathOptions.strokeWidth">
-	</label>
-	<label>
-		Opacity
-		<input [(ngModel)]="pathOptions.opacity">
+		Width
+		<input class="range" type="range" min="1" [(ngModel)]="pathOptions.strokeWidth">
 	</label>
 </div>
-<canvas #whiteboard resize></canvas>
+<canvas #whiteboard resize
+	(mousedown)="onMouseDown($event)"
+	(mousemove)="onMouseMove($event)"
+	(mouseup)="onMouseUp($event)"></canvas>

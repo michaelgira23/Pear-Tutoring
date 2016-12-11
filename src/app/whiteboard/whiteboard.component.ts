@@ -1,6 +1,6 @@
 import { Component, Input, OnInit, OnDestroy, ViewChild, HostListener } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { WhiteboardService, Whiteboard, WhiteboardMarking, WhiteboardMarkingOptions, defaultMarkingOptions, Point } from '../shared/model/whiteboard.service';
+import { WhiteboardService, Whiteboard, defaultMarkingOptions, Point } from '../shared/model/whiteboard.service';
 
 declare const paper;
 
@@ -24,7 +24,8 @@ export class WhiteboardComponent implements OnInit, OnDestroy {
 	// paper.js paths on the whiteboard canvas
 	paths: any = {};
 	// Options for drawing the path that are currently selected
-	pathOptions: WhiteboardMarkingOptions = defaultMarkingOptions;
+	@Input()
+	pathOptions = defaultMarkingOptions;
 	// Current path being drawn
 	currentPath: any;
 	currentPathFinished: boolean = true;
@@ -83,11 +84,10 @@ export class WhiteboardComponent implements OnInit, OnDestroy {
 		this.markingsSubscription.unsubscribe();
 	}
 
-	@HostListener('mousedown', ['$event'])
 	onMouseDown(event) {
 		this.mouseDown = true;
 
-		if(this.currentPathFinished) {
+		if (this.currentPathFinished) {
 			// Create a new path
 			this.currentPath = new paper.Path({
 				segments: [this.cursorPoint(event)],
@@ -98,8 +98,7 @@ export class WhiteboardComponent implements OnInit, OnDestroy {
 				dashOffset   : this.pathOptions.dashOffset,
 				strokeScaling: this.pathOptions.strokeScaling,
 				dashArray    : this.pathOptions.dashArray,
-				miterLimit   : this.pathOptions.miterLimit,
-				opacity      : this.pathOptions.opacity
+				miterLimit   : this.pathOptions.miterLimit
 			});
 			this.currentPathFinished = false;
 		} else {
@@ -108,16 +107,14 @@ export class WhiteboardComponent implements OnInit, OnDestroy {
 		}
 	}
 
-	@HostListener('mousemove', ['$event'])
 	onMouseMove(event) {
 		// Only care if mouse is being dragged
-		if(this.mouseDown) {
+		if (this.mouseDown) {
 			// Add point to the current line
 			this.currentPath.add(this.cursorPoint(event));
 		}
 	}
 
-	@HostListener('mouseup', ['$event'])
 	onMouseUp(event) {
 		this.mouseDown = false;
 		this.currentPathFinished = true;
@@ -151,11 +148,11 @@ export class WhiteboardComponent implements OnInit, OnDestroy {
 
 	@HostListener('window:resize', ['$event'])
 	onResize(event) {
-		if(!this.resizingBackground) {
+		if (!this.resizingBackground) {
 			this.resizingBackground = true;
 
 			setTimeout(() => {
-				if(this.resizingBackground) {
+				if (this.resizingBackground) {
 					this.resizeBackground();
 					this.resizingBackground = false;
 				}
@@ -174,7 +171,7 @@ export class WhiteboardComponent implements OnInit, OnDestroy {
 
 	setBackgroundColor(color: string) {
 		// If there is currently a background, remove it
-		if(this.background) {
+		if (this.background) {
 			this.background.remove();
 		}
 
@@ -191,7 +188,7 @@ export class WhiteboardComponent implements OnInit, OnDestroy {
 	}
 
 	resizeBackground() {
-		if(this.background) {
+		if (this.background) {
 			const bottomLeft = new paper.Point(0, this.canvasEl.height);
 			const topLeft = new paper.Point(0, 0);
 			const topRight = new paper.Point(this.canvasEl.width, 0);
@@ -206,7 +203,7 @@ export class WhiteboardComponent implements OnInit, OnDestroy {
 
 	markingsToCanvas(paths: any[]) {
 		// Erase current canvas markings if they exist
-		if(this.paths) {
+		if (this.paths) {
 			const markingKeys = Object.keys(this.paths);
 			markingKeys.forEach(key => {
 				this.paths[key].remove();
@@ -215,7 +212,7 @@ export class WhiteboardComponent implements OnInit, OnDestroy {
 		}
 
 		// Erase current path too, if it isn't in the process of being drawn
-		if(this.currentPathFinished && this.currentPath) {
+		if (this.currentPathFinished && this.currentPath) {
 			this.currentPath.remove();
 		}
 
