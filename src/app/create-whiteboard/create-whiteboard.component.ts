@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { FormGroup, FormBuilder } from '@angular/forms';
+import { Validators, FormGroup, FormBuilder } from '@angular/forms';
 
 import { WhiteboardService } from '../shared/model/whiteboard.service';
 
@@ -13,9 +13,10 @@ export class CreateWhiteboardComponent implements OnInit {
 
 	form: FormGroup;
 
-	constructor(private fb: FormBuilder, private whiteboardService: WhiteboardService) {
+	constructor(private router: Router, private fb: FormBuilder, private whiteboardService: WhiteboardService) {
 		this.form = this.fb.group({
-			anyoneWrite: [true]
+			anyoneWrite: [true],
+			background: ['black', Validators.required]
 		});
 	}
 
@@ -24,12 +25,17 @@ export class CreateWhiteboardComponent implements OnInit {
 
 	create() {
 		const formValue = this.form.value;
+
 		const anyoneWrite = formValue.anyoneWrite;
+		const background = formValue.background;
+
 		console.log('create a form with anyone write: ' + anyoneWrite);
-		this.whiteboardService.createWhiteboard({ anyoneWrite })
+		this.whiteboardService.createWhiteboard({ anyoneWrite, background })
 			.subscribe(
 				data => {
-					console.log('create whiteboard', data);
+					console.log('create whiteboard successful', data);
+					console.log('new whiteboard key', data.getKey());
+					this.router.navigate(['whiteboard', data.getKey()]);
 				},
 				err => {
 					console.log('there was an error creating the whiteboard!');
