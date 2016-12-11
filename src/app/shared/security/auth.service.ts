@@ -1,13 +1,25 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable, Subject } from 'rxjs/Rx';
+import { Observable, Subject, BehaviorSubject } from 'rxjs/Rx';
 import { FirebaseAuth, FirebaseAuthState } from 'angularfire2';
 import { UserService } from '../model/user.service';
 
 @Injectable()
 export class AuthService {
 
-	constructor (private auth: FirebaseAuth, private router: Router, private userService: UserService) { }
+	auth$: BehaviorSubject<FirebaseAuthState> = new BehaviorSubject(null);
+
+	constructor (private auth: FirebaseAuth, private router: Router, private userService: UserService) {
+		this.auth.subscribe(
+			data => {
+				console.log('new auth state from servcie', data);
+				this.auth$.next(data);
+			},
+			err => {
+				this.auth$.error(err);
+			}
+		);
+	}
 
 	login(email: string, password: string): Observable<FirebaseAuthState> {
 		return this.fromFirebaseAuthPromise(this.auth.login({ email, password }));
