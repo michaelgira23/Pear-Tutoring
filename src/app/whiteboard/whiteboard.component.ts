@@ -30,6 +30,8 @@ export class WhiteboardComponent implements OnInit, OnDestroy {
 	currentPathFinished: boolean = true;
 	// Rectangle on canvas to set background
 	background: any;
+	// If resizing background when triggered by window resize
+	resizingBackground: boolean = false;
 
 	// Whether or not mouse is clicked; used for drawing
 	mouseDown: boolean = false;
@@ -83,7 +85,6 @@ export class WhiteboardComponent implements OnInit, OnDestroy {
 
 	@HostListener('mousedown', ['$event'])
 	onMouseDown(event) {
-		// console.log('mousedown', event);
 		this.mouseDown = true;
 
 		if(this.currentPathFinished) {
@@ -111,7 +112,6 @@ export class WhiteboardComponent implements OnInit, OnDestroy {
 	onMouseMove(event) {
 		// Only care if mouse is being dragged
 		if(this.mouseDown) {
-			// console.log('mousemove', event);
 			// Add point to the current line
 			this.currentPath.add(this.cursorPoint(event));
 		}
@@ -119,7 +119,6 @@ export class WhiteboardComponent implements OnInit, OnDestroy {
 
 	@HostListener('mouseup', ['$event'])
 	onMouseUp(event) {
-		// console.log('mouseup', event);
 		this.mouseDown = false;
 		this.currentPathFinished = true;
 
@@ -148,7 +147,20 @@ export class WhiteboardComponent implements OnInit, OnDestroy {
 					console.log('add marking error', err);
 				}
 			);
-		console.log('add this point to db');
+	}
+
+	@HostListener('window:resize', ['$event'])
+	onResize(event) {
+		if(!this.resizingBackground) {
+			this.resizingBackground = true;
+
+			setTimeout(() => {
+				if(this.resizingBackground) {
+					this.resizeBackground();
+					this.resizingBackground = false;
+				}
+			}, 100);
+		}
 	}
 
 	cursorPoint(event) {
@@ -178,12 +190,25 @@ export class WhiteboardComponent implements OnInit, OnDestroy {
 		this.background.fillColor = color;
 	}
 
+	resizeBackground() {
+		if(this.background) {
+			const bottomLeft = new paper.Point(0, this.canvasEl.height);
+			const topLeft = new paper.Point(0, 0);
+			const topRight = new paper.Point(this.canvasEl.width, 0);
+			const bottomRight = new paper.Point(this.canvasEl.width, this.canvasEl.height);
+
+			console.log(this.background.segments);
+
+			this.background.insertSegments(0, [bottomLeft, topLeft, topRight, bottomRight]);
+			this.background.removeSegments(4);
+		}
+	}
+
 	markingsToCanvas(paths: any[]) {
 		// Erase current canvas markings if they exist
 		if(this.paths) {
 			const markingKeys = Object.keys(this.paths);
 			markingKeys.forEach(key => {
-				console.log('remove marking', key);
 				this.paths[key].remove();
 				delete this.paths[key];
 			});
@@ -198,7 +223,6 @@ export class WhiteboardComponent implements OnInit, OnDestroy {
 		paths.forEach(marking => {
 
 			// Convert path points to paper.js Points objects
-			console.log('marking', marking.path);
 			let points = [];
 			marking.path.forEach(point => {
 				points.push(new paper.Point(point.x, point.y));
