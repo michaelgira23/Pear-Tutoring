@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FirebaseAuth, FirebaseAuthState } from 'angularfire2';
+import { FirebaseAuthState } from 'angularfire2';
 import { AuthService } from '../shared/security/auth.service';
 
 @Component({
@@ -11,16 +11,16 @@ export class NavbarComponent implements OnInit {
 
 	authInfo: FirebaseAuthState;
 
-	constructor(private auth: FirebaseAuth, private authService: AuthService) { }
+	constructor(private authService: AuthService) { }
 
 	ngOnInit() {
-		this.auth.subscribe(
+		this.authService.auth$.subscribe(
 			data => {
-				console.log(data);
+				console.log('auth state', data);
 				this.authInfo = data;
 			},
 			err => {
-				console.log(err);
+				console.log('auth error', err);
 			}
 		);
 	}
