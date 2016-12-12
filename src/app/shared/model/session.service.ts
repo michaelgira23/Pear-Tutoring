@@ -89,6 +89,10 @@ export class SessionService {
 		return this.firebaseUpdate(dataToSave);
 	}
 
+	createAnonSession(): Observable<any> {
+		return Observable.from(undefined);
+	}
+
 	deleteSession(sessionId: string): Observable<any> {
 		// calling update null on a location in the database will cause it to be deleted. 
 		let dataToDelete = {};
