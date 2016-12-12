@@ -6,5 +6,3 @@
 	<p *ngIf="authInfo">Signed in as {{ authInfo.auth.email }}</p>
 	<button *ngIf="authInfo" (click)="authService.logout()">Logout</button>
 </div>
-
-{{ authInfo | json }}
