@@ -1,6 +1,5 @@
-import { Component, Input, OnInit, OnDestroy, ViewChild, HostListener } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { WhiteboardService, Whiteboard, defaultMarkingOptions, Point } from '../shared/model/whiteboard.service';
+import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy, ViewChild, HostListener } from '@angular/core';
+import { WhiteboardService, Whiteboard, WhiteboardMarking, defaultMarkingOptions, Point } from '../shared/model/whiteboard.service';
 
 declare const paper;
 
@@ -9,7 +8,7 @@ declare const paper;
 	templateUrl: './whiteboard.component.html',
 	styleUrls: ['./whiteboard.component.scss']
 })
-export class WhiteboardComponent implements OnInit, OnDestroy {
+export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 
 	// Key of whiteboard
 	@Input()
@@ -21,67 +20,105 @@ export class WhiteboardComponent implements OnInit, OnDestroy {
 	// Actual canvas DOM reference
 	canvasEl: any;
 
-	// paper.js paths on the whiteboard canvas
-	paths: any = {};
-	// Options for drawing the path that are currently selected
-	@Input()
-	pathOptions = defaultMarkingOptions;
-	// Current path being drawn
-	currentPath: any;
-	currentPathFinished: boolean = true;
-	// Rectangle on canvas to set background
-	background: any;
-	// If resizing background when triggered by window resize
-	resizingBackground: boolean = false;
-
 	// Whether or not mouse is clicked; used for drawing
 	mouseDown: boolean = false;
 
 	// Observable subscriptions
 	whiteboardSubscription: any;
 	markingsSubscription: any;
-
-	// Data from database
+	// Whiteboard and marking objects from database
 	whiteboard: Whiteboard;
+	markings: WhiteboardMarking[];
 
-	constructor(private route: ActivatedRoute, private whiteboardService: WhiteboardService) { }
+	// paper.js paths on the whiteboard canvas
+	paths: any = {};
+	// Current path being drawn
+	currentPath: any;
+	// Whether moues is still held down and segments are being added to current path
+	currentPathFinished: boolean = true;
+
+	// Options for drawing the path that are currently selected
+	@Input()
+	markingOptions = defaultMarkingOptions;
+	// Whether or not to show toolbar for editting marking options
+	@Input()
+	showToolbar: boolean = true;
+
+	// Rectangle on canvas to set background
+	background: any;
+	// If resizing background when triggered by window resize
+	resizingBackground: boolean = false;
+
+	constructor(private whiteboardService: WhiteboardService) { }
 
 	ngOnInit() {
+		// Get canvas DOM reference
 		this.canvasEl = this.canvas.nativeElement;
 		// Setup Canvas with paper.js
 		paper.setup(this.canvasEl);
 
-		// Listen to route parameters until we get session component up
-		this.route.params.subscribe(
-			params => {
-				this.key = params['key'];
-				this.whiteboardSubscription = this.whiteboardService.getWhiteboard(this.key).subscribe(
-					data => {
-						console.log('whiteboard data', data);
-						this.whiteboard = data;
-						this.setBackgroundColor(this.whiteboard.background);
-					},
-					err => {
-						console.log('create whiteboard error!', err);
-					}
-				);
+		// Put content on whiteboard if it exists
+		if(this.whiteboard && this.whiteboard.background) {
+			this.setBackgroundColor(this.whiteboard.background);
+		}
+		if(this.markings) {
+			this.markingsToCanvas(this.markings);
+		}
+	}
 
-				this.markingsSubscription = this.whiteboardService.getMarkings(this.key).subscribe(
-					data => {
-						console.log('new marking', data);
-						this.markingsToCanvas(data);
-					},
-					err => {
-						console.log('whiteboard markings error!', err);
+	ngOnChanges(changes: SimpleChanges) {
+		// Check if the key has changed
+		if(changes['key'] && changes['key'].currentValue !== changes['key'].previousValue) {
+
+			// If we are changing the key, clean up any previous observables
+			this.cleanUp();
+
+			// Subscribe to whiteboard metadata
+			this.whiteboardSubscription = this.whiteboardService.getWhiteboard(this.key).subscribe(
+				data => {
+					this.whiteboard = data;
+
+					// Only update background if whiteboard canvas is initialized
+					if(this.canvasEl) {
+						this.setBackgroundColor(this.whiteboard.background);
 					}
-				);
-			}
-		);
+				},
+				err => {
+					console.log('create whiteboard error!', err);
+				}
+			);
+
+			// Subscribe to markings on whiteboard
+			this.markingsSubscription = this.whiteboardService.getMarkings(this.key).subscribe(
+				data => {
+					this.markings = data;
+
+					// Only update markings if whiteboard canvas is initialized
+					if(this.canvasEl) {
+						this.markingsToCanvas(this.markings);
+					}
+				},
+				err => {
+					console.log('whiteboard markings error!', err);
+				}
+			);
+		}
 	}
 
 	ngOnDestroy() {
-		this.whiteboardSubscription.unsubscribe();
-		this.markingsSubscription.unsubscribe();
+		this.cleanUp();
+	}
+
+	cleanUp() {
+		// Clean up observables and stuff
+		if(this.whiteboardSubscription) {
+			this.whiteboardSubscription.unsubscribe();
+			this.whiteboardSubscription = null;
+		}
+		if(this.markingsSubscription) {
+			this.markingsSubscription.unsubscribe();
+			this.markingsSubscription = null;
+		}
 	}
 
 	onMouseDown(event) {
@@ -91,14 +128,14 @@ export class WhiteboardComponent implements OnInit, OnDestroy {
 			// Create a new path
 			this.currentPath = new paper.Path({
 				segments: [this.cursorPoint(event)],
-				strokeColor  : this.pathOptions.strokeColor,
-				strokeWidth  : this.pathOptions.strokeWidth,
-				strokeCap    : this.pathOptions.strokeCap,
-				strokeJoin   : this.pathOptions.strokeJoin,
-				dashOffset   : this.pathOptions.dashOffset,
-				strokeScaling: this.pathOptions.strokeScaling,
-				dashArray    : this.pathOptions.dashArray,
-				miterLimit   : this.pathOptions.miterLimit
+				strokeColor  : this.markingOptions.strokeColor,
+				strokeWidth  : this.markingOptions.strokeWidth,
+				strokeCap    : this.markingOptions.strokeCap,
+				strokeJoin   : this.markingOptions.strokeJoin,
+				dashOffset   : this.markingOptions.dashOffset,
+				strokeScaling: this.markingOptions.strokeScaling,
+				dashArray    : this.markingOptions.dashArray,
+				miterLimit   : this.markingOptions.miterLimit
 			});
 			this.currentPathFinished = false;
 		} else {
@@ -135,7 +172,7 @@ export class WhiteboardComponent implements OnInit, OnDestroy {
 		});
 
 		// Insert path into database
-		this.whiteboardService.createMarking(this.key, path, this.pathOptions)
+		this.whiteboardService.createMarking(this.key, path, this.markingOptions)
 			.subscribe(
 				data => {
 					console.log('successfully added marking', data);
@@ -153,7 +190,9 @@ export class WhiteboardComponent implements OnInit, OnDestroy {
 
 			setTimeout(() => {
 				if (this.resizingBackground) {
-					this.resizeBackground();
+					if (this.whiteboard.background) {
+						this.setBackgroundColor(this.whiteboard.background)
+					}
 					this.resizingBackground = false;
 				}
 			}, 100);
@@ -185,20 +224,6 @@ export class WhiteboardComponent implements OnInit, OnDestroy {
 		// Send the canvas to the back
 		this.background.sendToBack();
 		this.background.fillColor = color;
-	}
-
-	resizeBackground() {
-		if (this.background) {
-			const bottomLeft = new paper.Point(0, this.canvasEl.height);
-			const topLeft = new paper.Point(0, 0);
-			const topRight = new paper.Point(this.canvasEl.width, 0);
-			const bottomRight = new paper.Point(this.canvasEl.width, this.canvasEl.height);
-
-			console.log(this.background.segments);
-
-			this.background.insertSegments(0, [bottomLeft, topLeft, topRight, bottomRight]);
-			this.background.removeSegments(4);
-		}
 	}
 
 	markingsToCanvas(paths: any[]) {

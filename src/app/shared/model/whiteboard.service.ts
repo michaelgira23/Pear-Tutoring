@@ -5,7 +5,7 @@ import { Observable } from 'rxjs/Rx';
 import { AuthService } from '../security/auth.service';
 
 export const defaultWhiteboardOptions: WhiteboardOptions = {
-	background: 'white'
+	background: '#FFF'
 };
 
 export const defaultMarkingOptions: WhiteboardMarkingOptions = {

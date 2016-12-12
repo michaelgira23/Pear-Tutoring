@@ -1,7 +1,12 @@
 $sophisticated-white: #eee;
 
-.toolbar {
+:host {
 	position: relative;
+	display: inline-block;
+}
+
+.toolbar {
+	position: absolute;;
 	top: 2.5rem;
 	left: 2.5rem;
 
@@ -34,7 +39,7 @@ $sophisticated-white: #eee;
 			height: 2rem;
 			width: 2rem;
 
-			border: none;
+			border: 1px solid rgba(0, 0, 0, 0.5);
 			border-radius: 0.5rem;
 		}
 
@@ -47,6 +52,11 @@ $sophisticated-white: #eee;
 }
 
 canvas {
+	position: relative;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
 	height: 100%;
 	width: 100%;
 }
