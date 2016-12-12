@@ -178,8 +178,6 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 
 			// Add point to the current line
 			this.currentPath.add(this.cursorPoint(event));
-			// Simplify path to make it smoother and less data
-			this.currentPath.simplify();
 
 			// Convert path segments into an array
 			const path = [];

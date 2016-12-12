@@ -49,7 +49,7 @@ export class WhiteboardService {
 		// Object to insert in the database
 		let whiteboard: any = options;
 		whiteboard.created = Date.now();
-		whiteboard.createdBy = this.authInfo.uid;
+		whiteboard.createdBy = this.authInfo ? this.authInfo.uid : null;
 
 		return Observable.from([this.whiteboards.push(whiteboard)]);
 	}
