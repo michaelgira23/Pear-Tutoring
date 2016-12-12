@@ -191,8 +191,8 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 				path.push(point);
 			});
 
-			// Check if we're still allowed to draw
-			if (this.allowDraw) {
+			// Check if we're still allowed to draw and it's more than just one point
+			if (this.allowDraw && this.currentPath.segments.length > 1) {
 				// Insert path into database
 				this.whiteboardService.createMarking(this.key, path, this.markingOptions)
 					.subscribe(
