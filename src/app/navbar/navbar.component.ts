@@ -16,7 +16,6 @@ export class NavbarComponent implements OnInit {
 	ngOnInit() {
 		this.authService.auth$.subscribe(
 			data => {
-				console.log('auth state', data);
 				this.authInfo = data;
 			},
 			err => {
