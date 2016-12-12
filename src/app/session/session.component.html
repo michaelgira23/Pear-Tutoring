@@ -7,8 +7,8 @@
 <h2>
   online users
 </h2>
-<div *ngFor user of onlineUsers>
-  {{ user.name }}
+<div *ngFor="let user of onlineUsers">
+  {{ user | json }}<br/>
 </div>
   
 <!--<app-whiteboard [key]="sessionInfo.whiteboard"></app-whiteboard>

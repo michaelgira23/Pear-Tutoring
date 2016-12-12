@@ -109,15 +109,15 @@ export class SessionService {
 
 	getOnlineUsers(sessionId): Observable<User[]> {
 		return this.db.list('usersInSession/' + sessionId)
-		.map(uids => uids.map(uid => this.db.object('users/' + uid)))
+		.map(uids => uids.map(uid => this.db.object('users/' + uid.$key)))
 		.flatMap(uid$arr => Observable.combineLatest(uid$arr))
 		.map(User.fromJsonList);
 	}
 }
 
 export interface SessionOptions {
-	start: number,
-	end: number,
+	start: string,
+	end: string,
 	tutor: string,
 	max: number,
 	listed: boolean,
