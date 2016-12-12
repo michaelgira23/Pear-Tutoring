@@ -6,6 +6,7 @@ import { LoginComponent } from './login/login.component';
 import { SchedulingComponent } from './scheduling/scheduling.component';
 import { CreateSessionComponent } from './scheduling/create-session/create-session.component';
 import { RegisterComponent } from './register/register.component';
+import { SessionComponent } from './session/session.component';
 
 export const routerConfig: Route[] = [
 	{
@@ -41,5 +42,9 @@ export const routerConfig: Route[] = [
 	{
 		path: 'register',
 		component: RegisterComponent
+	},
+	{
+		path: 'session/:id',
+		component: SessionComponent
 	}
 ];

@@ -8,6 +8,11 @@
 	<div> {{session | json}} </div>
 </div>
 
+<h2> Public Sessions </h2>
+<div *ngFor="let session of publicSessions">
+	<div> {{session | json}} </div>
+</div>
+
 <form [formGroup]="joinSessionForm" (ngSubmit)="joinSession()">
 	<input formControlName="sessionId" required>
 	<button>Join Session</button>

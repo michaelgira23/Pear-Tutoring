@@ -2,6 +2,7 @@ import { Injectable, Inject } from '@angular/core';
 import { Observable, Subject } from 'rxjs/Rx';
 import { AngularFireDatabase, FirebaseRef} from 'angularfire2';
 import { Session } from './session';
+import { User } from './user';
 import { AuthService } from '../security/auth.service';
 import * as moment from 'moment';
 
@@ -36,8 +37,8 @@ export class SessionService {
 		return subject.asObservable();
 	}
 
-	findAllSessions(): Observable<Session[]> {
-		return this.db.list('sessions').map(Session.fromJsonArray);
+	findSession(id: string): Observable<Session> {
+		return this.db.object('/sessions/' + id).map(Session.fromJson);
 	}
 
 	findMySessions(): {tutorSessions: Observable<Session[]>, tuteeSessions: Observable<Session[]>} {
@@ -54,7 +55,16 @@ export class SessionService {
 		}
 	}
 
-	createSession(session: SessionOptions): Observable<any> {
+	findPublicSessions(): Observable<Session[]> {
+		return this.db.list('sessions', {
+			query: {
+				orderByChild: 'listed',
+				equalTo: true
+			}
+		});
+	}
+
+	createSession(session: SessionOptions, whiteboardOptions?: WhiteboardOptions): Observable<any> {
 		if (!this.uid) return Observable.throw('Rip no login info');
 		let sessionToSave = Object.assign({}, session);
 		const newSessionKey = this.sdkDb.child('sessions').push().key;
@@ -68,11 +78,12 @@ export class SessionService {
 		dataToSave[`users/${this.uid}/tutorSessions/${newSessionKey}`] = true;
 		session.tutees.forEach(uid => dataToSave[`users/${uid}/tuteeSessions/${newSessionKey}`] = true);
 
-		// let whiteboardOptions = {
+		// let wbOptDefault = {
 		// 	created: moment().format('X'),
 		// 	createdBy: this.uid,
+		//  background: '#FFF'
 		// }
-		// createWhiteboard$ = this.whiteboardService.createWhiteboard(whiteboardOptions);
+		// createWhiteboard$ = this.whiteboardService.createWhiteboard(whiteboardOptions ? whiteboardOptions : wbOptDefault);
 		// remember to merge this with the update observable
 
 		return this.firebaseUpdate(dataToSave);
@@ -89,11 +100,18 @@ export class SessionService {
 	joinSession(sessionId: String): Observable<any> {
 		if (!this.uid) return Observable.throw('Rip no login info');
 
-		this.sdkDb.child(`usersInSession/${sessionId}/${this.uid}`).onDisconnect().set(false);
+		this.sdkDb.child(`/usersInSession/${sessionId}/${this.uid}`).onDisconnect().set(false);
 
 		let dataToSave = {};
-		dataToSave[`usersInSession/${sessionId}/${this.uid}`] = true;
+		dataToSave[`/usersInSession/${sessionId}/${this.uid}`] = true;
 		return this.firebaseUpdate(dataToSave);
+	}
+
+	getOnlineUsers(sessionId): Observable<User[]> {
+		return this.db.list('usersInSession/' + sessionId)
+		.map(uids => uids.map(uid => this.db.object('users/' + uid)))
+		.flatMap(uid$arr => Observable.combineLatest(uid$arr))
+		.map(User.fromJsonList);
 	}
 }
 
@@ -105,5 +123,10 @@ export interface SessionOptions {
 	listed: boolean,
 	title: string,
 	desc: string,
-	tutees: string[]
+	tutees: string[],
+	tags: string[]
+}
+
+export interface WhiteboardOptions {
+	background?: string;
 }

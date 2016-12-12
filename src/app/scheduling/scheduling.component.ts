@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { SessionService } from '../shared/model/session.service';
 import { Session } from '../shared/model/session';
 import { Validators, FormGroup, FormBuilder } from '@angular/forms';
+import { Router } from '@angular/router'
 import * as moment from 'moment';
 
 @Component({
@@ -13,9 +14,10 @@ export class SchedulingComponent implements OnInit {
 
 	tutorSessions: Session[];
 	tuteeSessions: Session[];
+	publicSessions: Session[];
 	joinSessionForm: FormGroup;
 
-	constructor(private sessionService: SessionService, private fb: FormBuilder) { }
+	constructor(private sessionService: SessionService, private fb: FormBuilder, private router: Router) { }
 
 	ngOnInit() {
 		this.joinSessionForm = this.fb.group({
@@ -42,6 +44,12 @@ export class SchedulingComponent implements OnInit {
 			val => this.tuteeSessions = val,
 			err => console.log(err)
 		);
+
+		this.sessionService.findPublicSessions()
+		.subscribe(
+			val => this.publicSessions = val,
+			err => console.log(err)
+		)
 	}
 
 	deleteSession(sessionId: string) {
@@ -53,6 +61,6 @@ export class SchedulingComponent implements OnInit {
 
 	joinSession() {
 		const sessionId = this.joinSessionForm.value.sessionId;
-		this.sessionService.joinSession(sessionId).subscribe(console.info, console.error);
+		this.router.navigate(['session/' + sessionId]);
 	}
 }

@@ -20,7 +20,8 @@ import { AuthService } from './shared/security/auth.service';
 import { SchedulingComponent } from './scheduling/scheduling.component';
 import { SessionService } from './shared/model/session.service';
 import { UserService } from './shared/model/user.service';
-import { CreateSessionComponent } from './scheduling/create-session/create-session.component'
+import { CreateSessionComponent } from './scheduling/create-session/create-session.component';
+import { SessionComponent } from './session/session.component'
 
 @NgModule({
 	declarations: [
@@ -32,7 +33,8 @@ import { CreateSessionComponent } from './scheduling/create-session/create-sessi
 		LoginComponent,
 		SchedulingComponent,
 		RegisterComponent,
-		CreateSessionComponent
+		CreateSessionComponent,
+		SessionComponent
 	],
 	imports: [
 		BrowserModule,

@@ -1,0 +1,15 @@
+<h2>
+  Session Info
+</h2>
+<div>
+  {{ sessionInfo | json }}
+</div>
+<h2>
+  online users
+</h2>
+<div *ngFor user of onlineUsers>
+  {{ user.name }}
+</div>
+  
+<!--<app-whiteboard [key]="sessionInfo.whiteboard"></app-whiteboard>
+<app-chat [key]="sessionInfo.chat"></app-chat>-->

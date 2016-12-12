@@ -25,7 +25,9 @@ export class CreateSessionComponent implements OnInit {
 			listed: [false, Validators.required],
 			title: ['', [Validators.required]],
 			desc: ['', Validators.required],
-			tutees: ['', Validators.required]
+			tutees: ['', Validators.required],
+			wbBackground: [''],
+			tags: ['']
 		});
 
 		this.userService.findAllUsers().subscribe(
@@ -38,9 +40,11 @@ export class CreateSessionComponent implements OnInit {
 		let sessionToCreate = this.createSessionForm.value;
 		sessionToCreate.start = moment(sessionToCreate.start).format('X');
 		sessionToCreate.end = moment(sessionToCreate.end).format('X');
+		sessionToCreate.tags = sessionToCreate.tutees.split(',').map(val => val.trim());
 		sessionToCreate.tutees = sessionToCreate.tutees.split(',').map(val => val.trim());
+		delete sessionToCreate.wbBackground;
 		this.sessionService.createSession(sessionToCreate).subscribe(
-			val => console.info('session created'),
+			val => console.log('session created'),
 			err => console.log(err)
 		);
 	}
