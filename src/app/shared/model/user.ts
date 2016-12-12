@@ -1,6 +1,6 @@
 export class User {
-	static fromJson({$key, name, email, tutor}): User {
-		return new User($key, name, email, tutor, {}, {});
+	static fromJson({$key, name, email, tutor, tutorSessions, tuteeSessions}): User {
+		return new User($key, name, email, tutor, tutorSessions, tuteeSessions);
 	}
 
 	static fromJsonList(list: any[]): User[] {
