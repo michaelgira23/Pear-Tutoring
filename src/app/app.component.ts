@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { AngularFire, FirebaseListObservable } from 'angularfire2';
 
 @Component({
 	selector: 'app-root',
@@ -8,12 +7,6 @@ import { AngularFire, FirebaseListObservable } from 'angularfire2';
 })
 export class AppComponent {
 
-	constructor (private af: AngularFire) {
-		const rootList$: FirebaseListObservable<any> = af.database.list('/');
-		rootList$.subscribe(
-			data => {
-				console.log('Firebase db', data);
-			}
-		);
-	}
+	constructor () { }
+
 }

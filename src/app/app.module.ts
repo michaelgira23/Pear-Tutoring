@@ -21,7 +21,7 @@ import { SchedulingComponent } from './scheduling/scheduling.component';
 import { SessionService } from './shared/model/session.service';
 import { UserService } from './shared/model/user.service';
 import { CreateSessionComponent } from './scheduling/create-session/create-session.component';
-import { SessionComponent } from './session/session.component'
+import { SessionComponent } from './session/session.component';
 
 @NgModule({
 	declarations: [
