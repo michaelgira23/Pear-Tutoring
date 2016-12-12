@@ -1,0 +1,16 @@
+<h1>Create a Whiteboard</h1>
+<form (submit)="create()" autocomplete="off" novalidate>
+	<!-- <label>
+		<input type="checkbox" name="anyoneWrite" formControlName="anyoneWrite" value="true">
+		Allow anyone to write
+	</label> -->
+	<!-- <input name="background" formControlName="background" placeholder="Background Color (Any CSS value)"> -->
+	<label>
+		Background Color
+		<button type="button" class="color"
+			[(colorPicker)]="options.background"
+			[cpFallbackColor]="options.background"
+			[style.background]="options.background"></button>
+	</label>
+	<button>Create</button>
+</form>

@@ -13,7 +13,7 @@ export class UserService {
 	}
 
 	saveUser(user: any, uid: string): Observable<any> {
-		let userToSave = Object.assign({}, user);
+		let userToSave = Object.assign({}, user, {uid});
 		delete userToSave.uid;
 		let dataToSave = {};
 		dataToSave[`users/${uid}`] = userToSave;
@@ -47,5 +47,5 @@ export class UserService {
 			);
 
 		return subject.asObservable();
-  }
+	}
 }

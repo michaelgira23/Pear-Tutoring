@@ -12,7 +12,10 @@ export class AuthService {
 	constructor (private auth: FirebaseAuth, private router: Router, private userService: UserService) {
 		this.auth.subscribe(
 			data => {
+<<<<<<< HEAD
 				console.log('new auth state from servcie', data);
+=======
+>>>>>>> master
 				this.auth$.next(data);
 			},
 			err => {
@@ -27,10 +30,10 @@ export class AuthService {
 
 	register(email: string, password: string): Observable<FirebaseAuthState> {
 		return this.fromFirebaseAuthPromise(this.auth.createUser({ email, password }))
-		.flatMap(val => {
-			let userUid = this.auth.getAuth().uid;
-			return this.userService.saveUser({email}, userUid);
-		})
+			.flatMap(val => {
+				let userUid = this.auth.getAuth().uid;
+				return this.userService.saveUser({email}, userUid);
+			});
 	}
 
 	fromFirebaseAuthPromise(promise): Observable<any> {
