@@ -12,10 +12,7 @@ export class AuthService {
 	constructor (private auth: FirebaseAuth, private router: Router, private userService: UserService) {
 		this.auth.subscribe(
 			data => {
-<<<<<<< HEAD
 				console.log('new auth state from servcie', data);
-=======
->>>>>>> master
 				this.auth$.next(data);
 			},
 			err => {

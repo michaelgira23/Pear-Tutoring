@@ -30,7 +30,7 @@ export class ChatComponent implements OnInit {
 		this.chatService.sendMessage({
 			chat: this.chatKey || 'test',
 			text: message,
-			from: new User('test', 'hello world', 'test@example.com', false),
+			from: new User('test', 'hello world', 'test@example.com', false, {'test': true}, {'test': true}),
 			time: new Date().getTime()
 		});
 	}
