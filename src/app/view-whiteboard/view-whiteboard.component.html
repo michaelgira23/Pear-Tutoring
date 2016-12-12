@@ -1,0 +1,10 @@
+<div class="view-whiteboard-options">
+	<h3>View Whiteboard Options</h3>
+	<input [(ngModel)]="key" placeholder="Whiteboard Key">
+	<input [(ngModel)]="markingOptions.strokeColor">
+	<label>
+		<input type="checkbox" [(ngModel)]="showToolbar">
+		Show Toolbar
+	</label>
+</div>
+<app-whiteboard [key]="key" [markingOptions]="markingOptions" [showToolbar]="showToolbar"></app-whiteboard>

@@ -1,3 +1,22 @@
-<p>
-	whiteboard works!
-</p>
+<canvas #whiteboard resize
+	(mousedown)="onMouseDown($event)"
+	(mousemove)="onMouseMove($event)"
+	(mouseup)="onMouseUp($event)"></canvas>
+
+<div *ngIf="showToolbar" class="toolbar">
+	<label>
+		Color
+		<button class="color"
+			[(colorPicker)]="markingOptions.strokeColor"
+			[cpFallbackColor]="markingOptions.strokeColor"
+			[style.background]="markingOptions.strokeColor"></button>
+	</label>
+	<label>
+		Width
+		<input class="range" type="range" min="1" [(ngModel)]="markingOptions.strokeWidth">
+	</label>
+</div>
+
+<div class="invalid-key" [class.show]="!validKey">
+	<h1>Invalid whiteboard key!</h1>
+</div>
