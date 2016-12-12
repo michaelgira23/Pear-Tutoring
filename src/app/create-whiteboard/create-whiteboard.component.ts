@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Validators, FormGroup, FormBuilder } from '@angular/forms';
 
 import { WhiteboardService, WhiteboardOptions, defaultWhiteboardOptions } from '../shared/model/whiteboard.service';
 

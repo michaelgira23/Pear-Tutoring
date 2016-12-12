@@ -62,17 +62,17 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		paper.setup(this.canvasEl);
 
 		// Put content on whiteboard if it exists
-		if(this.whiteboard && this.whiteboard.background) {
+		if (this.whiteboard && this.whiteboard.background) {
 			this.setBackgroundColor(this.whiteboard.background);
 		}
-		if(this.markings) {
+		if (this.markings) {
 			this.markingsToCanvas(this.markings);
 		}
 	}
 
 	ngOnChanges(changes: SimpleChanges) {
 		// Check if the key has changed
-		if(changes['key'] && changes['key'].currentValue !== changes['key'].previousValue) {
+		if (changes['key'] && changes['key'].currentValue !== changes['key'].previousValue) {
 
 			// If we are changing the key, clean up any previous observables
 			this.cleanUp();
@@ -80,10 +80,8 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 			// Subscribe to whiteboard metadata
 			this.whiteboardSubscription = this.whiteboardService.getWhiteboard(this.key).subscribe(
 				data => {
-					console.log('Does the whiteboard exist', data.$exists());
-
 					// Check if whiteboard exists
-					if(data.$exists()) {
+					if (data.$exists()) {
 						this.validKey = true;
 						this.allowDraw = true;
 					} else {
@@ -97,7 +95,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 					this.whiteboard = data;
 
 					// Only update background if whiteboard canvas is initialized
-					if(this.canvasEl) {
+					if (this.canvasEl) {
 						this.setBackgroundColor(this.whiteboard.background);
 					}
 				},
@@ -112,7 +110,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 					this.markings = data;
 
 					// Only update markings if whiteboard canvas is initialized
-					if(this.canvasEl) {
+					if (this.canvasEl) {
 						this.markingsToCanvas(this.markings);
 					}
 				},
@@ -129,11 +127,11 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 
 	cleanUp() {
 		// Clean up observables and stuff
-		if(this.whiteboardSubscription) {
+		if (this.whiteboardSubscription) {
 			this.whiteboardSubscription.unsubscribe();
 			this.whiteboardSubscription = null;
 		}
-		if(this.markingsSubscription) {
+		if (this.markingsSubscription) {
 			this.markingsSubscription.unsubscribe();
 			this.markingsSubscription = null;
 		}
@@ -176,7 +174,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		this.mouseDown = false;
 		this.currentPathFinished = true;
 
-		if(this.currentPath) {
+		if (this.currentPath) {
 
 			// Add point to the current line
 			this.currentPath.add(this.cursorPoint(event));
@@ -194,7 +192,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 			});
 
 			// Check if we're still allowed to draw
-			if(this.allowDraw) {
+			if (this.allowDraw) {
 				// Insert path into database
 				this.whiteboardService.createMarking(this.key, path, this.markingOptions)
 					.subscribe(
@@ -220,7 +218,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 			setTimeout(() => {
 				if (this.resizingBackground) {
 					if (this.whiteboard.background) {
-						this.setBackgroundColor(this.whiteboard.background)
+						this.setBackgroundColor(this.whiteboard.background);
 					}
 					this.resizingBackground = false;
 				}
