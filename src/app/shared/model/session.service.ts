@@ -38,7 +38,8 @@ export class SessionService {
 	}
 
 	findSession(id: string): Observable<Session> {
-		return this.db.object('/sessions/' + id).map(Session.fromJson);
+		return this.db.object('/sessions/' + id)
+		.flatMap(val => val.$exists() ? Observable.from([val]) : Observable.throw('Session dont exist'));
 	}
 
 	findMySessions(): {tutorSessions: Observable<Session[]>, tuteeSessions: Observable<Session[]>} {
@@ -62,6 +63,10 @@ export class SessionService {
 				equalTo: true
 			}
 		});
+	}
+
+	findSessionsByTag(): Observable<Session[]> {
+		return Observable.from([]);
 	}
 
 	createSession(session: SessionOptions, whiteboardOptions?: WhiteboardOptions): Observable<any> {
