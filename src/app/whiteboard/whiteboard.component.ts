@@ -53,6 +53,79 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	// If resizing background when triggered by window resize
 	resizingBackground: boolean = false;
 
+	// What tool is selected in the whiteboard toolbar
+	@Input()
+	tool = 'draw';
+	// Mouse up/change/down event handlers for each tool
+	toolHandlers: any = {
+		draw: {
+			mousedown: event => {
+				if (this.allowDraw) {
+					if (this.currentPathFinished) {
+						// Create a new path
+						this.currentPath = new paper.Path({
+							segments: [this.cursorPoint(event)],
+							strokeColor  : this.markingOptions.strokeColor,
+							strokeWidth  : this.markingOptions.strokeWidth,
+							strokeCap    : this.markingOptions.strokeCap,
+							strokeJoin   : this.markingOptions.strokeJoin,
+							dashOffset   : this.markingOptions.dashOffset,
+							strokeScaling: this.markingOptions.strokeScaling,
+							dashArray    : this.markingOptions.dashArray,
+							miterLimit   : this.markingOptions.miterLimit
+						});
+						this.currentPathFinished = false;
+					} else {
+						// User unclicked the mouse outside of the window, just continue with previous path
+						this.currentPath.add(this.cursorPoint(event));
+					}
+				}
+			},
+			mousemove: event => {
+				// Only care if mouse is being dragged
+				if (this.mouseDown && this.currentPath && !this.currentPathFinished && this.allowDraw) {
+					// Add point to the current line
+					this.currentPath.add(this.cursorPoint(event));
+				}
+			},
+			mouseup: event => {
+				if (this.currentPath && !this.currentPathFinished) {
+					this.currentPathFinished = true;
+
+					// Add point to the current line
+					this.currentPath.add(this.cursorPoint(event));
+
+					// Convert path segments into an array
+					const path = [];
+					this.currentPath.segments.forEach(segment => {
+						const point: Point = {
+							x: segment.point.x,
+							y: segment.point.y
+						};
+						path.push(point);
+					});
+
+					// Check if we're still allowed to draw and it's more than just one point
+					if (this.allowDraw && this.currentPath.segments.length > 1) {
+						// Insert path into database
+						this.whiteboardService.createMarking(this.key, path, this.markingOptions)
+							.subscribe(
+								data => {
+									console.log('successfully added marking', data);
+								},
+								err => {
+									console.log('add marking error', err);
+								}
+							);
+					} else {
+						// Erase the path since we can't draw
+						this.currentPath.remove();
+					}
+				}
+			}
+		}
+	};
+
 	constructor(private whiteboardService: WhiteboardService) { }
 
 	ngOnInit() {
@@ -137,75 +210,24 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		}
 	}
 
-	onMouseDown(event) {
-		this.mouseDown = true;
-
-		if (this.allowDraw) {
-			if (this.currentPathFinished) {
-				// Create a new path
-				this.currentPath = new paper.Path({
-					segments: [this.cursorPoint(event)],
-					strokeColor  : this.markingOptions.strokeColor,
-					strokeWidth  : this.markingOptions.strokeWidth,
-					strokeCap    : this.markingOptions.strokeCap,
-					strokeJoin   : this.markingOptions.strokeJoin,
-					dashOffset   : this.markingOptions.dashOffset,
-					strokeScaling: this.markingOptions.strokeScaling,
-					dashArray    : this.markingOptions.dashArray,
-					miterLimit   : this.markingOptions.miterLimit
-				});
-				this.currentPathFinished = false;
-			} else {
-				// User unclicked the mouse outside of the window, just continue with previous path
-				this.currentPath.add(this.cursorPoint(event));
-			}
+	triggerToolEvent(tool: string, eventName: string, event: any) {
+		if (this.toolHandlers[tool] && typeof this.toolHandlers[tool][eventName] === 'function') {
+			this.toolHandlers[tool][eventName](event);
 		}
 	}
 
+	onMouseDown(event) {
+		this.mouseDown = true;
+		this.triggerToolEvent(this.tool, 'mousedown', event);
+	}
+
 	onMouseMove(event) {
-		// Only care if mouse is being dragged
-		if (this.mouseDown && this.currentPath && !this.currentPathFinished && this.allowDraw) {
-			// Add point to the current line
-			this.currentPath.add(this.cursorPoint(event));
-		}
+		this.triggerToolEvent(this.tool, 'mousemove', event);
 	}
 
 	onMouseUp(event) {
 		this.mouseDown = false;
-
-		if (this.currentPath && !this.currentPathFinished) {
-			this.currentPathFinished = true;
-
-			// Add point to the current line
-			this.currentPath.add(this.cursorPoint(event));
-
-			// Convert path segments into an array
-			const path = [];
-			this.currentPath.segments.forEach(segment => {
-				const point: Point = {
-					x: segment.point.x,
-					y: segment.point.y
-				};
-				path.push(point);
-			});
-
-			// Check if we're still allowed to draw and it's more than just one point
-			if (this.allowDraw && this.currentPath.segments.length > 1) {
-				// Insert path into database
-				this.whiteboardService.createMarking(this.key, path, this.markingOptions)
-					.subscribe(
-						data => {
-							console.log('successfully added marking', data);
-						},
-						err => {
-							console.log('add marking error', err);
-						}
-					);
-			} else {
-				// Erase the path since we can't draw
-				this.currentPath.remove();
-			}
-		}
+		this.triggerToolEvent(this.tool, 'mouseup', event);
 	}
 
 	@HostListener('window:resize', ['$event'])
