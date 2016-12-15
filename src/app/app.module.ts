@@ -24,7 +24,6 @@ import { ChatService } from './shared/model/chat.service';
 import { UserService } from './shared/model/user.service';
 import { WhiteboardService } from './shared/model/whiteboard.service';
 
-
 @NgModule({
 	declarations: [
 		AppComponent,
@@ -46,7 +45,11 @@ import { WhiteboardService } from './shared/model/whiteboard.service';
 		AngularFireModule.initializeApp(firebaseConfig, authConfig),
 		ColorPickerModule
 	],
+<<<<<<< HEAD
 	providers: [AuthService, ChatService, UserService, WhiteboardService],
+=======
+	providers: [AuthService, WhiteboardService, UserService],
+>>>>>>> origin/master
 	bootstrap: [AppComponent]
 })
 export class AppModule { }
