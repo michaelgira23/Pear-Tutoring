@@ -4,6 +4,7 @@ import { AngularFireDatabase, FirebaseRef} from 'angularfire2';
 import { Session } from './session';
 import { User } from './user';
 import { AuthService } from '../security/auth.service';
+import { WhiteboardService, WhiteboardOptions } from './whiteboard.service';
 import * as moment from 'moment';
 
 @Injectable()
@@ -11,7 +12,7 @@ export class SessionService {
 	sdkDb: any;
 	uid: string;
 
-	constructor(private db: AngularFireDatabase, @Inject(FirebaseRef) fb, private authService: AuthService) {
+	constructor(private db: AngularFireDatabase, @Inject(FirebaseRef) fb, private authService: AuthService, private whiteboardService: WhiteboardService) {
 		this.sdkDb = fb.database().ref();
 		this.authService.auth$.subscribe(val => {
 			if (val) this.uid = val.uid;
@@ -47,11 +48,11 @@ export class SessionService {
 		return {
 			tutorSessions: this.db.list(`/users/${this.uid}/tutorSessions`)
 				.map(sessions => sessions.map(session => this.db.object(`/sessions/${session.$key}`)))
-				.flatMap(sessions$arr => Observable.combineLatest(sessions$arr)).do(console.log)
+				.flatMap(sessions$arr => Observable.combineLatest(sessions$arr))
 				.map(Session.fromJsonArray),
 			tuteeSessions: this.db.list(`/users/${this.uid}/tuteeSessions`)
 				.map(sessions => sessions.map(session => this.db.object(`/sessions/${session.$key}`)))
-				.flatMap(sessions$arr => Observable.combineLatest(sessions$arr)).do(console.log)
+				.flatMap(sessions$arr => Observable.combineLatest(sessions$arr))
 				.map(Session.fromJsonArray)
 		}
 	}
@@ -65,33 +66,43 @@ export class SessionService {
 		});
 	}
 
-	findSessionsByTag(): Observable<Session[]> {
-		return Observable.from([]);
+	findSessionsByTags(tags: string[]): Observable<Session[]> {
+		return Observable.of(tags)
+			.map(tags => tags.map(tag => this.db.list('sessionsByTags/' + tag)))
+			.flatMap(tags$arr => Observable.combineLatest(tags$arr))
+			.map(tagsArr => tagsArr.map(tagStr => this.db.object('sessions/' + tagStr)))
+			.flatMap(session$arr => Observable.combineLatest(session$arr))
+			.map(Session.fromJsonArray);
 	}
 
-	createSession(session: SessionOptions, whiteboardOptions?: WhiteboardOptions): Observable<any> {
+	updateSession(sessionId: string, session: SessionOptions): Observable<any> {
 		if (!this.uid) return Observable.throw('Rip no login info');
 		let sessionToSave = Object.assign({}, session);
-		const newSessionKey = this.sdkDb.child('sessions').push().key;
 		const uidsToSave = {};
 		session.tutees.forEach(uid => uidsToSave[uid] = false);
 		sessionToSave.tutor = this.uid;
 
 		let dataToSave = {};
-		dataToSave['sessions/' + newSessionKey] = sessionToSave;
-		dataToSave['usersInSession/' + newSessionKey] = uidsToSave;
-		dataToSave[`users/${this.uid}/tutorSessions/${newSessionKey}`] = true;
-		session.tutees.forEach(uid => dataToSave[`users/${uid}/tuteeSessions/${newSessionKey}`] = true);
-
-		// let wbOptDefault = {
-		// 	created: moment().format('X'),
-		// 	createdBy: this.uid,
-		//  background: '#FFF'
-		// }
-		// createWhiteboard$ = this.whiteboardService.createWhiteboard(whiteboardOptions ? whiteboardOptions : wbOptDefault);
-		// remember to merge this with the update observable
+		dataToSave['sessions/' + sessionId] = sessionToSave;
+		dataToSave['usersInSession/' + sessionId] = uidsToSave;
+		dataToSave[`users/${this.uid}/tutorSessions/${sessionId}`] = true;
+		session.tutees.forEach(uid => dataToSave[`users/${uid}/tuteeSessions/${sessionId}`] = true);
+		session.tags.forEach(tag => dataToSave[`sessionsByTags/${tag}/${sessionId}`] = true);
 
 		return this.firebaseUpdate(dataToSave);
+	}
+
+	createSession(session: SessionOptions, wbOpt?: WhiteboardOptions): Observable<any> {
+		const wbOptDefault = {
+			background: '#FFF'
+		}
+		return this.whiteboardService.createWhiteboard(wbOpt.background.match('^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$') ? wbOpt : wbOptDefault)
+		.switchMap(wb => {
+			const newSessionKey = this.sdkDb.child('sessions').push().key;
+			session.whiteboard = wb.key;
+			session.canceled = false;
+			return this.updateSession(newSessionKey, session);
+		})
 	}
 
 	createAnonSession(): Observable<any> {
@@ -133,9 +144,7 @@ export interface SessionOptions {
 	title: string,
 	desc: string,
 	tutees: string[],
-	tags: string[]
-}
-
-export interface WhiteboardOptions {
-	background?: string;
+	tags: string[],
+	whiteboard: string,
+	canceled: boolean
 }

@@ -37,18 +37,21 @@ export class CreateSessionComponent implements OnInit {
 			err => console.log('Getting users error', err)
 		);
 
-		this.auth.auth$.subscribe(val => this.uid = val.uid);
+		this.auth.auth$.subscribe(val => this.uid = val ? val.uid : null);
 	}
 
 	createSession() {
-		let sessionToCreate = this.createSessionForm.value;
+		let sessionToCreate = Object.assign({}, this.createSessionForm.value);
 		sessionToCreate.start = moment(sessionToCreate.start).format('X');
 		sessionToCreate.end = moment(sessionToCreate.end).format('X');
-		sessionToCreate.tags = sessionToCreate.tutees.split(',').map(val => val.trim());
+		sessionToCreate.tags = sessionToCreate.tags.split(',').map(val => val.trim());
 		sessionToCreate.tutees = sessionToCreate.tutees.split(',').map(val => val.trim());
 		sessionToCreate.tutor = this.uid;
 		delete sessionToCreate.wbBackground;
-		this.sessionService.createSession(sessionToCreate).subscribe(
+		let wbOpt = {
+			background: this.createSessionForm.value.wbBackground
+		}
+		this.sessionService.createSession(sessionToCreate, wbOpt).subscribe(
 			val => console.log('session created'),
 			err => console.log(err)
 		);

@@ -13,6 +13,12 @@
 	<div> {{session | json}} </div>
 </div>
 
+<h2> Session By tag </h2>
+<div>
+	<input #findTagsInput ><button (click)="findSessionsByTags(findTagsInput.value)">Find</button>
+	{{ sessionsByTags }}
+</div>
+<br><br>
 <form [formGroup]="joinSessionForm" (ngSubmit)="joinSession()">
 	<input formControlName="sessionId" required>
 	<button>Join Session</button>
