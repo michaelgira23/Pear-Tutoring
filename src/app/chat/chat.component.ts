@@ -1,6 +1,8 @@
+import { AuthService } from '../shared/security/auth.service';
 import { Component, OnInit, Input } from '@angular/core';
 import { ChatService, Message } from '../shared/model/chat.service';
-import { User } from '../shared/model/user';
+import { FirebaseAuthState } from 'angularfire2';
+import { UserService } from '../shared/model/user.service';
 
 @Component({
 	selector: 'app-chat',
@@ -9,28 +11,52 @@ import { User } from '../shared/model/user';
 })
 export class ChatComponent implements OnInit {
 
-	@Input('chatKey') chatKey: string;
+	@Input('key') chatKey: string;
 
 	allMessages: Message[];
+	authInfo: FirebaseAuthState;
 
-	constructor(private chatService: ChatService) { }
+	constructor(private chatService: ChatService, private authService: AuthService, private userService: UserService) { }
 
 	ngOnInit() {
 		this.chatService.getAllMessages(this.chatKey).subscribe(
 			data => {
 				this.allMessages = data;
+				this.allMessages.sort((a, b) => {
+					return a.time - b.time;
+				});
 			},
 			err => {
 				console.log(`Getting chat messages error: ${err}`);
 			}
 		);
+
+		this.authService.auth$.subscribe(
+			data => {
+				this.authInfo = data;
+			},
+			err => {
+				console.log(`Getting auth data error: ${err}`);
+			}
+		);
 	}
+
+	// getName(uid: string) {
+	// 	this.userService.findUser(uid).subscribe(
+	// 		data => {
+	// 			return data.name ? data.name : 'an anonymous user';
+	// 		},
+	// 		err => {
+	// 			console.log(`Resolving user uid error: ${err}`)
+	// 		}
+	// 	);
+	// }
 
 	sendMessage(message: string) {
 		this.chatService.sendMessage({
-			chat: this.chatKey || 'test',
+			chat: this.chatKey ? this.chatKey : null,
 			text: message,
-			from: new User('test', 'hello world', 'test@example.com', false, {'test': true}, {'test': true}),
+			from: this.authInfo ? this.authInfo.uid : null,
 			time: new Date().getTime()
 		});
 	}

@@ -63,6 +63,6 @@ export class ChatService {
 export interface Message {
 	chat: string,
 	text: string,
-	from: User,
+	from: string,
 	time: number
 }

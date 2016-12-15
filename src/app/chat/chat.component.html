@@ -1,7 +1,8 @@
 <h2>All messages in chat {{chatKey}}:</h2>
 <div *ngFor="let message of allMessages">
-	<p>{{message | json}}</p>
+	<!-- FIXME: The `message.from` should go through the getName() function, but I can't get it to actually echo the result. -->
+	<p>From {{ message.from }}: {{ message.text }}</p>
 </div>
-<h3>Send a message to {{chatKey}}:</h3>
+<h3>Send a message to {{ chatKey }}:</h3>
 <input #messageInput placeholder="type your message here!" />
 <button (click)="sendMessage(messageInput.value)">Send Message</button>
