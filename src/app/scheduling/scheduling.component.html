@@ -16,7 +16,7 @@
 <h2> Session By tag </h2>
 <div>
 	<input #findTagsInput ><button (click)="findSessionsByTags(findTagsInput.value)">Find</button>
-	{{ sessionsByTags }}
+	{{ sessionsByTags | json }}
 </div>
 <br><br>
 <form [formGroup]="joinSessionForm" (ngSubmit)="joinSession()">

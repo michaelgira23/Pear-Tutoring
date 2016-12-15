@@ -70,7 +70,8 @@ export class SessionService {
 		return Observable.of(tags)
 			.map(tags => tags.map(tag => this.db.list('sessionsByTags/' + tag)))
 			.flatMap(tags$arr => Observable.combineLatest(tags$arr))
-			.map(tagsArr => tagsArr.map(tagStr => this.db.object('sessions/' + tagStr)))
+			.map(sessionsByTag => {sessionsByTag = sessionsByTag.reduce((a, b) => a.concat(b));
+				return sessionsByTag.map(session => this.db.object('sessions/' + session.$key).do(console.log))})
 			.flatMap(session$arr => Observable.combineLatest(session$arr))
 			.map(Session.fromJsonArray);
 	}
