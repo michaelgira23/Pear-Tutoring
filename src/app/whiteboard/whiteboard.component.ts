@@ -172,9 +172,9 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 
 	onMouseUp(event) {
 		this.mouseDown = false;
-		this.currentPathFinished = true;
 
-		if (this.currentPath) {
+		if (this.currentPath && !this.currentPathFinished) {
+			this.currentPathFinished = true;
 
 			// Add point to the current line
 			this.currentPath.add(this.cursorPoint(event));
