@@ -26,6 +26,7 @@ import { WhiteboardService } from './shared/model/whiteboard.service';
 import { UserService } from './shared/model/user.service';
 import { CreateSessionComponent } from './scheduling/create-session/create-session.component';
 import { SessionComponent } from './session/session.component';
+import { DisplaySessionComponent } from './scheduling/display-session/display-session.component';
 
 @NgModule({
 	declarations: [
@@ -40,7 +41,8 @@ import { SessionComponent } from './session/session.component';
 		SchedulingComponent,
 		RegisterComponent,
 		CreateSessionComponent,
-		SessionComponent
+		SessionComponent,
+		DisplaySessionComponent
 	],
 	imports: [
 		BrowserModule,
