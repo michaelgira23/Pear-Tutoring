@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@angular/core';
-import { Observable, Subject } from 'rxjs/Rx';
+import { Observable, Subject, Observer } from 'rxjs/Rx';
 import { AngularFireDatabase, FirebaseRef} from 'angularfire2';
 import { Session } from './session';
 import { User } from './user';
@@ -39,19 +39,22 @@ export class SessionService {
 	}
 
 	findSession(id: string): Observable<Session> {
+		let sessionWithUser;
 		return this.db.object('/sessions/' + id)
-		.flatMap(val => val.$exists() ? Observable.from([val]) : Observable.throw('Session dont exist'));
+		.flatMap(val => val.$exists() ? Observable.of(val) : Observable.throw(`Session ${val.$key} does not exist`))
+		.switchMap((val, index) => {sessionWithUser = val; return this.db.object('users/' + val.tutor)})
+		.map(val => {sessionWithUser.tutor = val; return sessionWithUser});
 	}
 
 	findMySessions(): {tutorSessions: Observable<Session[]>, tuteeSessions: Observable<Session[]>} {
 		if (!this.uid) return {tutorSessions: Observable.throw('Rip no login info'), tuteeSessions: Observable.throw('Rip no login info')};
 		return {
 			tutorSessions: this.db.list(`/users/${this.uid}/tutorSessions`)
-				.map(sessions => sessions.map(session => this.db.object(`/sessions/${session.$key}`)))
+				.map(sessions => sessions.map(session => this.findSession(session.$key)))
 				.flatMap(sessions$arr => Observable.combineLatest(sessions$arr))
 				.map(Session.fromJsonArray),
 			tuteeSessions: this.db.list(`/users/${this.uid}/tuteeSessions`)
-				.map(sessions => sessions.map(session => this.db.object(`/sessions/${session.$key}`)))
+				.map(sessions => sessions.map(session => this.findSession(session.$key)))
 				.flatMap(sessions$arr => Observable.combineLatest(sessions$arr))
 				.map(Session.fromJsonArray)
 		}
@@ -71,7 +74,7 @@ export class SessionService {
 			.map(tags => tags.map(tag => this.db.list('sessionsByTags/' + tag)))
 			.flatMap(tags$arr => Observable.combineLatest(tags$arr))
 			.map(sessionsByTag => {sessionsByTag = sessionsByTag.reduce((a, b) => a.concat(b));
-				return sessionsByTag.map(session => this.db.object('sessions/' + session.$key).do(console.log))})
+				return sessionsByTag.map(session => this.findSession(session.$key).do(console.log))})
 			.flatMap(session$arr => Observable.combineLatest(session$arr))
 			.map(Session.fromJsonArray);
 	}

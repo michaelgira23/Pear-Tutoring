@@ -1,15 +1,19 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
+import { Session } from '../../shared/model/session'
 
 @Component({
-  selector: 'app-display-session',
-  templateUrl: './display-session.component.html',
-  styleUrls: ['./display-session.component.scss']
+	selector: 'app-display-session',
+	templateUrl: './display-session.component.html',
+	styleUrls: ['./display-session.component.scss']
 })
 export class DisplaySessionComponent implements OnInit {
 
-  constructor() { }
+	@Input()
+	session: Session
 
-  ngOnInit() {
-  }
+	constructor() { }
+
+	ngOnInit() {
+	}
 
 }
