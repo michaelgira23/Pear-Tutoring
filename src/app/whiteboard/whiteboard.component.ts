@@ -123,6 +123,10 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 					}
 				}
 			}
+		},
+		eraser: {
+			mousedown: this.erasePoint.bind(this),
+			mousemove: this.erasePoint.bind(this)
 		}
 	};
 
@@ -279,26 +283,30 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		// Loop through markings and add to canvas
 		paths.forEach(marking => {
 
-			// Convert path points to paper.js Points objects
-			let points = [];
-			marking.path.forEach(point => {
-				points.push(new paper.Point(point.x, point.y));
-			});
+			// Make sure marking isn't erased
+			if(!marking.erased) {
 
-			const path = new paper.Path({
-				segments: points,
-				strokeColor  : marking.options.strokeColor,
-				strokeWidth  : marking.options.strokeWidth,
-				strokeCap    : marking.options.strokeCap,
-				strokeJoin   : marking.options.strokeJoin,
-				dashOffset   : marking.options.dashOffset,
-				strokeScaling: marking.options.strokeScaling,
-				dashArray    : marking.options.dashArray,
-				miterLimit   : marking.options.miterLimit,
-				opacity      : marking.options.opacity
-			});
+				// Convert path points to paper.js Points objects
+				let points = [];
+				marking.path.forEach(point => {
+					points.push(new paper.Point(point.x, point.y));
+				});
 
-			this.paths[marking.$key] = path;
+				const path = new paper.Path({
+					segments: points,
+					strokeColor  : marking.options.strokeColor,
+					strokeWidth  : marking.options.strokeWidth,
+					strokeCap    : marking.options.strokeCap,
+					strokeJoin   : marking.options.strokeJoin,
+					dashOffset   : marking.options.dashOffset,
+					strokeScaling: marking.options.strokeScaling,
+					dashArray    : marking.options.dashArray,
+					miterLimit   : marking.options.miterLimit,
+					opacity      : marking.options.opacity
+				});
+
+				this.paths[marking.$key] = path;
+			}
 		});
 
 	}
@@ -317,6 +325,40 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		if (this.currentPathFinished && this.currentPath) {
 			this.currentPath.remove();
 		}
+	}
+
+	erasePoint(event) {
+		if(this.mouseDown) {
+			const point = this.cursorPoint(event);
+			const path = paper.project.hitTest(point);
+
+			console.log(path);
+			if(!path) return;
+
+			const markingKey = this.paperIdToPushKey(path.item.id);
+
+			if(markingKey) {
+				this.whiteboardService.eraseMarking(this.key, markingKey)
+					.subscribe(
+						data => {
+							console.log('Erased marking', data);
+						},
+						err => {
+							console.log('Erase marking error', err);
+						}
+					);
+			}
+		}
+	}
+
+	paperIdToPushKey(id) {
+		const markingKeys = Object.keys(this.paths);
+		for(let i = 0; i < markingKeys.length; i++) {
+			const path = this.paths[markingKeys[i]];
+
+			if(path.id === id) return markingKeys[i];
+		}
+		return null;
 	}
 
 }

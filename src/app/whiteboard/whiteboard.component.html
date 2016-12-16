@@ -4,6 +4,14 @@
 	(mouseup)="onMouseUp($event)"></canvas>
 
 <div *ngIf="showToolbar" class="toolbar">
+	<div class="tool-selection">
+		<button class="btn btn-primary" [class.active]="tool === 'draw'" (click)="tool = 'draw'">
+			<span class="fa fa-pencil"></span>
+		</button>
+		<button class="btn btn-secondary" [class.active]="tool === 'eraser'" (click)="tool = 'eraser'">
+			<span class="fa fa-eraser"></span>
+		</button>
+	</div>
 	<label>
 		Color
 		<button class="color"

@@ -71,6 +71,10 @@ export class WhiteboardService {
 		return Observable.from([whiteboardMarkings.push(marking)]);
 	}
 
+	eraseMarking(whiteboardKey: string, markingKey: string): Observable<any> {
+		return Observable.from([this.af.database.object('whiteboardMarkings/' + whiteboardKey + '/' + markingKey).update({ erased: Date.now() })]);
+	}
+
 }
 
 export interface Whiteboard {
