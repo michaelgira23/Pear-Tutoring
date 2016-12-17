@@ -1,7 +1,7 @@
 <h2>All messages in chat {{chatKey}}:</h2>
 <div *ngFor="let message of allMessages">
-	<p>From {{ message.from }}: {{ message.text }}</p>
+	<p>From {{ getName(message.from) | async }}: {{ message.text }}</p>
 </div>
-<h3>Send a message to {{ chatKey }}:</h3>
-<input #messageInput placeholder="type your message here!" />
-<button (click)="sendMessage(messageInput.value)">Send Message</button>
+<h4>Send a message to {{ chatKey }}:</h4>
+<input #message placeholder="type your message here!" />
+<button type="button" class="btn btn-primary" (click)="sendMessage(message.value)">Send</button>

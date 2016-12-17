@@ -17,7 +17,7 @@ export class ChatComponent implements OnInit {
 	allMessages: Message[];
 	authInfo: FirebaseAuthState;
 
-	constructor(private chatService: ChatService, private authService: AuthService, private userService: UserService) { }
+	constructor(private authService: AuthService, private chatService: ChatService, private userService: UserService) { }
 
 	ngOnInit() {
 		this.chatService.getAllMessages(this.chatKey).subscribe(
@@ -44,7 +44,6 @@ export class ChatComponent implements OnInit {
 
 	getName(uid: string): Observable<any> {
 		return this.userService.findUser(uid).map(user => {
-			console.log(user);
 			return user.name ? user.name : 'an anonymous user';
 		});
 	}
