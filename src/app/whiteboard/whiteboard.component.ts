@@ -34,12 +34,8 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 
 	// paper.js paths on the whiteboard canvas
 	paths: any = {};
-	// Current path being drawn
-	currentPath: any;
-	// Whether moues is still held down and segments are being added to current path
-	currentPathFinished: boolean = true;
 	// Whether or not user can draw on the whiteboard
-	allowDraw: boolean = false;
+	allowWrite: boolean = false;
 
 	// Options for drawing the path that are currently selected
 	@Input()
@@ -53,14 +49,27 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	// If resizing background when triggered by window resize
 	resizingBackground: boolean = false;
 
+	/**
+	 * Tool Variables
+	 */
+
 	// What tool is selected in the whiteboard toolbar
 	@Input()
 	tool = 'draw';
+
+	// Draw tool
+	currentPath: any;
+	currentPathFinished: boolean = true;
+
+	// Eraser tool
+	eraserPath: any;
+	eraserPathFinished: boolean = true;
+
 	// Mouse up/change/down event handlers for each tool
 	toolHandlers: any = {
 		draw: {
 			mousedown: event => {
-				if (this.allowDraw) {
+				if (this.allowWrite) {
 					if (this.currentPathFinished) {
 						// Create a new path
 						this.currentPath = new paper.Path({
@@ -83,7 +92,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 			},
 			mousemove: event => {
 				// Only care if mouse is being dragged
-				if (this.mouseDown && this.currentPath && !this.currentPathFinished && this.allowDraw) {
+				if (this.mouseDown && this.currentPath && !this.currentPathFinished && this.allowWrite) {
 					// Add point to the current line
 					this.currentPath.add(this.cursorPoint(event));
 				}
@@ -106,7 +115,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 					});
 
 					// Check if we're still allowed to draw and it's more than just one point
-					if (this.allowDraw && this.currentPath.segments.length > 1) {
+					if (this.allowWrite && this.currentPath.segments.length > 1) {
 						// Insert path into database
 						this.whiteboardService.createMarking(this.key, path, this.markingOptions)
 							.subscribe(
@@ -125,8 +134,35 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 			}
 		},
 		eraser: {
-			mousedown: this.erasePoint.bind(this),
-			mousemove: this.erasePoint.bind(this)
+			mousedown: event => {
+				if (this.allowWrite) {
+					if (this.eraserPathFinished) {
+						// Create a new path
+						this.eraserPath = new paper.Path({
+							segments: [this.cursorPoint(event)]
+						});
+						this.eraserPathFinished = false;
+					} else {
+						// User unclicked the mouse outside of the window, just continue with previous path
+						this.eraserPath.add(this.cursorPoint(event));
+					}
+				}
+			},
+			mousemove: event => {
+				// Only care if mouse is being dragged
+				if (this.mouseDown && this.eraserPath && !this.eraserPathFinished && this.allowWrite) {
+					// Add point to the current line
+					this.eraserPath.add(this.cursorPoint(event));
+					this.erasePathsOnLine(this.eraserPath);
+				}
+			},
+			mouseup: event => {
+				if (this.eraserPath && !this.eraserPathFinished) {
+					this.eraserPathFinished = true;
+					this.erasePathsOnLine(this.eraserPath);
+					this.eraserPath.remove();
+				}
+			}
 		}
 	};
 
@@ -160,12 +196,12 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 					// Check if whiteboard exists
 					if (data.$exists()) {
 						this.validKey = true;
-						this.allowDraw = true;
+						this.allowWrite = true;
 					} else {
 						this.cleanUp();
 						this.clearCanvas();
 						this.validKey = false;
-						this.allowDraw = false;
+						this.allowWrite = false;
 						return;
 					}
 
@@ -327,28 +363,25 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		}
 	}
 
-	erasePoint(event) {
-		if(this.mouseDown) {
-			const point = this.cursorPoint(event);
-			const path = paper.project.hitTest(point);
+	erasePathsOnLine(path) {
+			const markingKeys = Object.keys(this.paths);
+			markingKeys.forEach(key => {
+				// Get intersections between path and erasing path
+				const intersections = this.paths[key].getIntersections(path);
 
-			console.log(path);
-			if(!path) return;
-
-			const markingKey = this.paperIdToPushKey(path.item.id);
-
-			if(markingKey) {
-				this.whiteboardService.eraseMarking(this.key, markingKey)
-					.subscribe(
-						data => {
-							console.log('Erased marking', data);
-						},
-						err => {
-							console.log('Erase marking error', err);
-						}
-					);
-			}
-		}
+				// If paths intersect, erase the line
+				if(intersections.length > 0) {
+					this.whiteboardService.eraseMarking(this.key, key)
+						.subscribe(
+							data => {
+								console.log('Erased marking', data);
+							},
+							err => {
+								console.log('Erase marking error', err);
+							}
+						);
+				}
+			});
 	}
 
 	paperIdToPushKey(id) {
