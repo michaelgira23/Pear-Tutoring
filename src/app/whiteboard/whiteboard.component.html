@@ -16,6 +16,9 @@
 		<button class="btn btn-secondary" [class.active]="tool === 'text'" (click)="tool = 'text'">
 			<span class="fa fa-i-cursor"></span>
 		</button>
+		<button class="btn btn-success" [class.active]="tool === 'shape'" (click)="tool = 'shape'">
+			<span class="fa fa-square"></span>
+		</button>
 	</div>
 </div>
 
@@ -41,13 +44,13 @@
 	<div class="option">
 		<label>Color</label>
 		<button class="color"
-			[(colorPicker)]="markingOptions.strokeColor"
-			[cpFallbackColor]="markingOptions.strokeColor"
-			[style.background]="markingOptions.strokeColor"></button>
+			[(colorPicker)]="textOptions.fillColor"
+			[cpFallbackColor]="textOptions.fillColor"
+			[style.background]="textOptions.fillColor"></button>
 	</div>
 	<div class="option">
-		<label>Width</label>
-		<input class="range" type="range" min="1" [(ngModel)]="markingOptions.strokeWidth">
+		<label>Size</label>
+		<input class="range" type="range" min="1" [(ngModel)]="textOptions.fontSize">
 	</div>
 </div>
 
