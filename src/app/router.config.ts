@@ -8,6 +8,7 @@ import { SchedulingComponent } from './scheduling/scheduling.component';
 import { CreateSessionComponent } from './scheduling/create-session/create-session.component';
 import { RegisterComponent } from './register/register.component';
 import { SessionComponent } from './session/session.component';
+import { SettingsComponent } from './settings/settings.component';
 
 export const routerConfig: Route[] = [
 	{
@@ -61,5 +62,9 @@ export const routerConfig: Route[] = [
 	{
 		path: 'session/:id',
 		component: SessionComponent
+	},
+	{
+		path: 'settings',
+		component: SettingsComponent
 	}
 ];

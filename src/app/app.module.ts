@@ -27,6 +27,7 @@ import { UserService } from './shared/model/user.service';
 import { CreateSessionComponent } from './scheduling/create-session/create-session.component';
 import { SessionComponent } from './session/session.component';
 import { DisplaySessionComponent } from './scheduling/display-session/display-session.component';
+import { SettingsComponent } from './settings/settings.component';
 
 @NgModule({
 	declarations: [
@@ -42,7 +43,9 @@ import { DisplaySessionComponent } from './scheduling/display-session/display-se
 		RegisterComponent,
 		CreateSessionComponent,
 		SessionComponent,
-		DisplaySessionComponent
+		DisplaySessionComponent,
+		RegisterComponent,
+		SettingsComponent
 	],
 	imports: [
 		BrowserModule,
