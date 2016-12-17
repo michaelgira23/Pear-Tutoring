@@ -1,22 +1,32 @@
 <h2> Sessions I'm tutoring </h2>
-<div *ngFor="let session of tutorSessions"> 
-	<div> {{session | json}} </div>
+<div class="session-display">
+	<div *ngFor="let session of tutorSessions" class="session-display"> 
+	<app-display-session [session]="session"></app-display-session>
+	</div>
 </div>
 
 <h2> Sessions I'm in </h2>
-<div *ngFor="let session of tuteeSessions">
-	<div> {{session | json}} </div>
+<div class="session-display">
+	<div *ngFor="let session of tuteeSessions" class="session-display">
+		<app-display-session [session]="session"></app-display-session>
+	</div>
 </div>
 
 <h2> Public Sessions </h2>
-<div *ngFor="let session of publicSessions">
-	<div> {{session | json}} </div>
+<div class="session-display">
+	<div *ngFor="let session of publicSessions">
+		<app-display-session [session]="session"></app-display-session>
+	</div>
 </div>
 
 <h2> Session By tag </h2>
 <div>
 	<input #findTagsInput ><button (click)="findSessionsByTags(findTagsInput.value)">Find</button>
-	{{ sessionsByTags | json }}
+	<div class="session-display">
+		<div *ngFor="let session of sessionsByTags">
+			<app-display-session [session]="session"></app-display-session>
+		</div>
+	</div>
 </div>
 <br><br>
 <form [formGroup]="joinSessionForm" (ngSubmit)="joinSession()">

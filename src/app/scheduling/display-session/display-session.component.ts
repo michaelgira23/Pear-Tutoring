@@ -1,4 +1,5 @@
 import { Component, OnInit, Input } from '@angular/core';
+import { Router } from '@angular/router';
 import { Session } from '../../shared/model/session'
 
 @Component({
@@ -11,9 +12,12 @@ export class DisplaySessionComponent implements OnInit {
 	@Input()
 	session: Session
 
-	constructor() { }
+	constructor(private router: Router) { }
 
 	ngOnInit() {
 	}
 
+	joinSession() {
+		this.router.navigate(['session', this.session.$key]);
+	}
 }

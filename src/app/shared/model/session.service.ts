@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '@angular/core';
-import { Observable, Subject, Observer } from 'rxjs/Rx';
-import { AngularFireDatabase, FirebaseRef} from 'angularfire2';
+import { Observable, Subject } from 'rxjs/Rx';
+import { AngularFireDatabase, FirebaseRef } from 'angularfire2';
 import { Session } from './session';
 import { User } from './user';
 import { AuthService } from '../security/auth.service';
@@ -38,12 +38,34 @@ export class SessionService {
 		return subject.asObservable();
 	}
 
-	findSession(id: string): Observable<Session> {
+	combineWithUser(sessionQuery: Observable<any>): Observable<Session> {
 		let sessionWithUser;
-		return this.db.object('/sessions/' + id)
-		.flatMap(val => val.$exists() ? Observable.of(val) : Observable.throw(`Session ${val.$key} does not exist`))
-		.switchMap((val, index) => {sessionWithUser = val; return this.db.object('users/' + val.tutor)})
-		.map(val => {sessionWithUser.tutor = val; return sessionWithUser});
+		return sessionQuery.switchMap(val => {
+			sessionWithUser = val;
+			return this.db.object('users/' + val.tutor)
+		}).map(val => {
+			sessionWithUser.tutor = val;
+			return sessionWithUser;
+		});
+	}
+
+	combineArrWithUser(sessionQuery: Observable<any[]>): Observable<Session[]> {
+		let sessionWithUser;
+		return sessionQuery.switchMap((val: any[]) => {
+			sessionWithUser = val;
+			return Observable.combineLatest(
+				val.map((session) => this.db.object('users/' + session.tutor))
+			);
+		}).map((val: any[]) => {
+			sessionWithUser.map((session, index) => session.tutor = val[index]);
+			return sessionWithUser;
+		});
+	}
+
+	findSession(id: string, query?: {}): Observable<Session> {
+		return this.combineWithUser(
+			this.db.object('/sessions/' + id)
+			.flatMap(val => val.$exists() ? Observable.of(val) : Observable.throw(`Session ${val.$key} does not exist`)));
 	}
 
 	findMySessions(): {tutorSessions: Observable<Session[]>, tuteeSessions: Observable<Session[]>} {
@@ -61,12 +83,14 @@ export class SessionService {
 	}
 
 	findPublicSessions(): Observable<Session[]> {
-		return this.db.list('sessions', {
-			query: {
-				orderByChild: 'listed',
-				equalTo: true
-			}
-		});
+		return this.combineArrWithUser(
+			this.db.list('sessions', {
+				query: {
+					orderByChild: 'listed',
+					equalTo: true
+				}
+			})
+		);
 	}
 
 	findSessionsByTags(tags: string[]): Observable<Session[]> {

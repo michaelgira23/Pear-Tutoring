@@ -1,3 +1,13 @@
-<p>
-  display-session works!
-</p>
+<div class="card">
+  <div class="view overlay hm-white-slight">
+    <img class="img-fluid" [src]="session.tutor.pfp">
+    <a (click)="joinSession()">
+      <div class="mask"></div>
+    </a>
+  </div>
+  <div class="card-block">
+    <h4 class="card-title">{{ session.title }}</h4>
+    <p class="card-text">{{ session.desc }}</p>
+    <button (click)="joinSession()" class="btn btn-primary">Join Session</button>
+  </div>
+</div>
