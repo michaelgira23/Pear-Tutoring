@@ -9,6 +9,7 @@ export const defaultWhiteboardOptions: WhiteboardOptions = {
 };
 
 export const defaultMarkingOptions: WhiteboardMarkingOptions = {
+	// Stroke Style
 	strokeColor: '#111',
 	strokeWidth: 2,
 	strokeCap: 'round',
@@ -16,7 +17,43 @@ export const defaultMarkingOptions: WhiteboardMarkingOptions = {
 	dashOffset: 0,
 	strokeScaling: true,
 	dashArray: [],
-	miterLimit: 10
+	miterLimit: 10,
+	// Fill Style
+	fillColor: 'rgba(0, 0, 0, 0)',
+	// Shadow Style
+	shadowColor: 'rgba(0, 0, 0, 0)',
+	shadowBlur: 0,
+	shadowOffset: { x: 0, y: 0 }
+};
+
+export const defaultTextOptions: WhiteboardTextOptions = {
+	// Stroke Style
+	strokeColor: 'rgba(0, 0, 0, 0)',
+	strokeWidth: 0,
+	strokeCap: 'round',
+	strokeJoin: 'miter',
+	dashOffset: 0,
+	strokeScaling: true,
+	dashArray: [],
+	miterLimit: 10,
+	// Fill Style
+	fillColor: '#111',
+	// Shadow Style
+	shadowColor: 'rgba(0, 0, 0, 0)',
+	shadowBlur: 0,
+	shadowOffset: { x: 0, y: 0 },
+	// Character Style
+	fontFamily: 'sans-serif',
+	fontWeight: 600,
+	fontSize: '2.5em'
+};
+
+export const defaultTextPosition: WhiteboardTextPosition = {
+	anchor  : { x: 0, y: 0 },
+	position: { x: 0, y: 0 },
+	pivot   : { x: 0, y: 0 },
+	rotation: 0,
+	scaling : { x: 1, y: 1 }
 };
 
 @Injectable()
@@ -72,12 +109,32 @@ export class WhiteboardService {
 	}
 
 	eraseMarking(whiteboardKey: string, markingKey: string): Observable<any> {
-		return Observable.from([this.af.database.object('whiteboardMarkings/' + whiteboardKey + '/' + markingKey).update({ erased: Date.now() })]);
+		return Observable.from([
+			this.af.database.object('whiteboardMarkings/' + whiteboardKey + '/' + markingKey)
+				.update({ erased: Date.now() })
+		]);
+	}
+
+	getTexts(key: string): FirebaseListObservable<any> {
+		return this.af.database.list('whiteboardText/' + key);
+	}
+
+	createText(key: string, content: string, options: WhiteboardTextOptions): Observable<any> {
+		let text: WhiteboardText = {
+			created: Date.now(),
+			createdBy: this.authInfo ? this.authInfo.uid : null,
+			options: Object.assign(defaultTextOptions, options),
+			content
+		};
+
+		const whiteboardText = this.af.database.list('whiteboardText/' + key);
+		return Observable.from([whiteboardText.push(text)]);
 	}
 
 }
 
 export interface Whiteboard {
+	$key: string;
 	created: number;
 	createdBy: string;
 	background: string;
@@ -88,13 +145,43 @@ export interface WhiteboardOptions {
 }
 
 export interface WhiteboardMarking {
+	$key?: string;
 	created: number;
 	createdBy: string;
 	options?: WhiteboardMarkingOptions;
 	path: Point[];
+	erased?: boolean;
 }
 
-export interface WhiteboardMarkingOptions {
+export interface WhiteboardMarkingOptions extends ItemOptions { }
+
+export interface WhiteboardText {
+	$key?: string;
+	created: number;
+	createdBy: string;
+	options?: WhiteboardTextOptions;
+	position?: WhiteboardTextPosition;
+	content: string;
+	erased?: boolean;
+}
+
+export interface WhiteboardTextOptions extends ItemOptions {
+	// Character Style
+	fontFamily?: string;
+	fontWeight?: string | number;
+	fontSize?: number | string;
+}
+
+export interface WhiteboardTextPosition {
+	anchor?: Point;
+	position?: Point;
+	pivot?: Point;
+	rotation?: number;
+	scaling?: Point;
+}
+
+interface ItemOptions {
+	// Stroke Style
 	strokeColor?: string;
 	strokeWidth?: number;
 	strokeCap?: string;
@@ -103,6 +190,12 @@ export interface WhiteboardMarkingOptions {
 	strokeScaling?: boolean;
 	dashArray?: number[];
 	miterLimit?: number;
+	// Fill Style
+	fillColor?: string;
+	// Shadow Style
+	shadowColor?: string;
+	shadowBlur?: number;
+	shadowOffset?: Point;
 }
 
 export interface Point {

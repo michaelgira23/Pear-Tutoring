@@ -1,5 +1,12 @@
 import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy, ViewChild, HostListener } from '@angular/core';
-import { WhiteboardService, Whiteboard, WhiteboardMarking, defaultMarkingOptions, Point } from '../shared/model/whiteboard.service';
+import {
+	WhiteboardService,
+	Whiteboard,
+	WhiteboardMarking,
+	WhiteboardText,
+	Point,
+	defaultMarkingOptions,
+	defaultTextOptions } from '../shared/model/whiteboard.service';
 
 declare const paper;
 
@@ -9,6 +16,10 @@ declare const paper;
 	styleUrls: ['./whiteboard.component.scss']
 })
 export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
+
+	/**
+	 * General variables for everything
+	 */
 
 	// Key of whiteboard
 	@Input()
@@ -22,58 +33,91 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	// Actual canvas DOM reference
 	canvasEl: any;
 
-	// Whether or not mouse is clicked; used for drawing
-	mouseDown: boolean = false;
-
-	// Observable subscriptions
+	// Subscription for changes to whiteboard metadata
 	whiteboardSubscription: any;
-	markingsSubscription: any;
-	// Whiteboard and marking objects from database
+	// Latest value of whiteboard object from database
 	whiteboard: Whiteboard;
-	markings: WhiteboardMarking[];
 
-	// paper.js paths on the whiteboard canvas
-	paths: any = {};
-	// Whether or not user can draw on the whiteboard
-	allowWrite: boolean = false;
-
-	// Options for drawing the path that are currently selected
-	@Input()
-	markingOptions = defaultMarkingOptions;
-	// Whether or not to show toolbar for editting marking options
+	// Whether or not mouse is being clicked; used for drawing and things
+	mouseDown: boolean = false;
+	// Whether or not to show toolbar
 	@Input()
 	showToolbar: boolean = true;
+	// Whether or not user can make changes to whiteboard
+	allowWrite: boolean = false;
 
-	// Rectangle on canvas to set background
+	/**
+	 * Background variables
+	 */
+
+	// Rectangle path on canvas to set background
 	background: any;
 	// If resizing background when triggered by window resize
 	resizingBackground: boolean = false;
 
 	/**
-	 * Tool Variables
+	 * Tool variables
 	 */
 
 	// What tool is selected in the whiteboard toolbar
 	@Input()
 	tool = 'draw';
 
-	// Draw tool
+	/**
+	 * Draw tool
+	 */
+
+	// Observable subscription for markings
+	markingsSubscription: any;
+	markings: WhiteboardMarking[];
+	// paper.js paths on the whiteboard canvas
+	paths: any = {};
+
+	@Input()
+	markingOptions = defaultMarkingOptions;
 	currentPath: any;
 	currentPathFinished: boolean = true;
 
-	// Eraser tool
+	/**
+	 * Eraser tool
+	 */
+
 	eraserPath: any;
 	eraserPathFinished: boolean = true;
 
-	// Mouse up/change/down event handlers for each tool
+	/**
+	 * Text tool
+	 */
+
+	// Observable subscription for texts
+	textsSubscription: any;
+	texts: WhiteboardText[];
+	// paper.js point text objects on the whiteboard
+	pointTexts: any = {};
+
+	@Input()
+	textOptions = defaultTextOptions;
+	selectedText: any;
+
+	/**
+	 * Event handlers for each tool
+	 */
+
 	toolHandlers: any = {
+
+		/**
+		 * Draw tool
+		 */
+
 		draw: {
 			mousedown: event => {
 				if (this.allowWrite) {
 					if (this.currentPathFinished) {
 						// Create a new path
+						const shadowOffsetPoint = new paper.Point(this.markingOptions.shadowOffset.x, this.markingOptions.shadowOffset.y);
 						this.currentPath = new paper.Path({
 							segments: [this.cursorPoint(event)],
+							// Stroke Style
 							strokeColor  : this.markingOptions.strokeColor,
 							strokeWidth  : this.markingOptions.strokeWidth,
 							strokeCap    : this.markingOptions.strokeCap,
@@ -81,7 +125,13 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 							dashOffset   : this.markingOptions.dashOffset,
 							strokeScaling: this.markingOptions.strokeScaling,
 							dashArray    : this.markingOptions.dashArray,
-							miterLimit   : this.markingOptions.miterLimit
+							miterLimit   : this.markingOptions.miterLimit,
+							// Fill Style
+							fillColor    : this.markingOptions.fillColor,
+							// Shadow Style
+							shadowColor  : this.markingOptions.shadowColor,
+							shadowBlur   : this.markingOptions.shadowBlur,
+							shadowOffset : shadowOffsetPoint
 						});
 						this.currentPathFinished = false;
 					} else {
@@ -133,6 +183,11 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 				}
 			}
 		},
+
+		/**
+		 * Eraser tool
+		 */
+
 		eraser: {
 			mousedown: event => {
 				if (this.allowWrite) {
@@ -163,10 +218,95 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 					this.eraserPath.remove();
 				}
 			}
+		},
+
+		/**
+		 * Text tool
+		 */
+
+		text: {
+			mousedown: event => {
+				const point = this.cursorPoint(event);
+				const hit = paper.project.hitTest(point, {
+					tolerance: 1000,
+					class: paper.PointText,
+					fill: true,
+					stroke: true,
+					segments: true,
+					bounds: true
+				});
+
+				console.log(hit);
+
+				let key = null;
+
+				if (hit) {
+					key = this.textIdToPushKey(hit.item.id);
+
+					if (key) {
+						this.selectedText = this.pointTexts[key];
+					}
+				}
+
+				if (!key) {
+					// Create new text
+					this.selectedText = new paper.PointText({
+						content: 'TEXT',
+						point: point,
+						fillColor: 'black',
+						fontSize: '2.5em',
+						fontWeight: 600
+					});
+				}
+
+				this.deselectAllText();
+				this.selectedText.selected = true;
+
+			},
+			mousemove: event => {
+				if (this.selectedText && this.mouseDown) {
+					// Check if mouse is over any of the manipulation points
+					const point = this.cursorPoint(event);
+					const hit = this.selectedText.hitTest(point, {
+						tolerance: 1000,
+						fill: true,
+						stroke: true,
+						segments: true,
+						bounds: true
+					});
+
+					console.log(Date.now(), hit);
+
+					if (hit) {
+						// If dragging one of the text corners, move selected text
+						this.selectedText.point = point;
+					}
+				}
+			},
+			mouseup: event => {
+				if (this.selectedText && this.allowWrite) {
+					this.whiteboardService.createText(this.key, this.selectedText.content, this.textOptions)
+						.subscribe(
+							data => {
+								console.log('successfully added text', data);
+							},
+							err => {
+								console.log('add text error', err);
+							}
+						);
+				}
+			},
+			toolchange: nextTool => {
+				this.deselectAllText();
+			}
 		}
 	};
 
 	constructor(private whiteboardService: WhiteboardService) { }
+
+	/**
+	 * Angular Lifecycle Hooks
+	 */
 
 	ngOnInit() {
 		// Get canvas DOM reference
@@ -180,6 +320,9 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		}
 		if (this.markings) {
 			this.markingsToCanvas(this.markings);
+		}
+		if (this.texts) {
+			this.textsToCanvas(this.texts);
 		}
 	}
 
@@ -231,6 +374,26 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 					console.log('whiteboard markings error!', err);
 				}
 			);
+
+			// Subscribe to text on whiteboard
+			this.textsSubscription = this.whiteboardService.getTexts(this.key).subscribe(
+				data => {
+					this.texts = data;
+
+					// Only update texts if whiteboard canvas is initialized
+					if (this.canvasEl) {
+						this.textsToCanvas(this.texts);
+					}
+				}
+			);
+		}
+
+		// Also check if the tool changed
+		if (changes['tool'] && changes['tool'].currentValue !== changes['tool'].previousValue) {
+			// Trigger change event for previous tool
+			this.triggerToolEvent(changes['tool'].previousValue, 'changetool', changes['tool'].currentValue);
+			// Trigger change event for the next tool
+			this.triggerToolEvent(changes['tool'].currentValue, 'selecttool', changes['tool'].previousValue);
 		}
 	}
 
@@ -239,7 +402,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	}
 
 	cleanUp() {
-		// Clean up observables and stuff
+		// Clean up observables and stuff when component should be reset/destroyed
 		if (this.whiteboardSubscription) {
 			this.whiteboardSubscription.unsubscribe();
 			this.whiteboardSubscription = null;
@@ -250,6 +413,11 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		}
 	}
 
+	/**
+	 * Trigger Event Handlers
+	 */
+
+	// For triggering the neat little event system for each tool
 	triggerToolEvent(tool: string, eventName: string, event: any) {
 		if (this.toolHandlers[tool] && typeof this.toolHandlers[tool][eventName] === 'function') {
 			this.toolHandlers[tool][eventName](event);
@@ -270,6 +438,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		this.triggerToolEvent(this.tool, 'mouseup', event);
 	}
 
+	// When the window resizes, reset the background
 	@HostListener('window:resize', ['$event'])
 	onResize(event) {
 		if (!this.resizingBackground) {
@@ -286,6 +455,14 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		}
 	}
 
+	/**
+	 * General functions
+	 */
+
+	clearCanvas() {
+		this.clearMarkings();
+	}
+
 	cursorPoint(event) {
 		// Return a paper.js point where the mouse is at relative to the canvas
 		const canvasPos = this.canvasEl.getBoundingClientRect();
@@ -294,6 +471,10 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 
 		return new paper.Point(cursorX, cursorY);
 	}
+
+	/**
+	 * Background functions
+	 */
 
 	setBackgroundColor(color: string) {
 		// If there is currently a background, remove it
@@ -313,14 +494,18 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		this.background.fillColor = color;
 	}
 
-	markingsToCanvas(paths: any[]) {
-		this.clearCanvas();
+	/**
+	 * Draw tool
+	 */
+
+	markingsToCanvas(paths: WhiteboardMarking[]) {
+		this.clearMarkings();
 
 		// Loop through markings and add to canvas
 		paths.forEach(marking => {
 
 			// Make sure marking isn't erased
-			if(!marking.erased) {
+			if (!marking.erased) {
 
 				// Convert path points to paper.js Points objects
 				let points = [];
@@ -337,17 +522,15 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 					dashOffset   : marking.options.dashOffset,
 					strokeScaling: marking.options.strokeScaling,
 					dashArray    : marking.options.dashArray,
-					miterLimit   : marking.options.miterLimit,
-					opacity      : marking.options.opacity
+					miterLimit   : marking.options.miterLimit
 				});
 
 				this.paths[marking.$key] = path;
 			}
 		});
-
 	}
 
-	clearCanvas() {
+	clearMarkings() {
 		// Erase current canvas markings if they exist
 		if (this.paths) {
 			const markingKeys = Object.keys(this.paths);
@@ -363,33 +546,95 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		}
 	}
 
-	erasePathsOnLine(path) {
-			const markingKeys = Object.keys(this.paths);
-			markingKeys.forEach(key => {
-				// Get intersections between path and erasing path
-				const intersections = this.paths[key].getIntersections(path);
+	/**
+	 * Eraser tool
+	 */
 
-				// If paths intersect, erase the line
-				if(intersections.length > 0) {
-					this.whiteboardService.eraseMarking(this.key, key)
-						.subscribe(
-							data => {
-								console.log('Erased marking', data);
-							},
-							err => {
-								console.log('Erase marking error', err);
-							}
-						);
-				}
-			});
+	erasePathsOnLine(path) {
+		const markingKeys = Object.keys(this.paths);
+		markingKeys.forEach(key => {
+			// Get intersections between path and erasing path
+			const intersections = this.paths[key].getIntersections(path);
+
+			// If paths intersect, erase the line
+			if (intersections.length > 0) {
+				this.whiteboardService.eraseMarking(this.key, key)
+					.subscribe(
+						data => {
+							console.log('Erased marking', data);
+						},
+						err => {
+							console.log('Erase marking error', err);
+						}
+					);
+			}
+		});
 	}
 
-	paperIdToPushKey(id) {
-		const markingKeys = Object.keys(this.paths);
-		for(let i = 0; i < markingKeys.length; i++) {
-			const path = this.paths[markingKeys[i]];
+	/**
+	 * Text tool
+	 */
 
-			if(path.id === id) return markingKeys[i];
+	textsToCanvas(texts: any[]) {
+		console.log('texts to cnvas', texts);
+		this.clearTexts();
+
+		// Loop through texts and add to canvas
+		texts.forEach(text => {
+
+			// Make sure text isn't erased
+			if (!text.erased) {
+
+				const shadowOffsetPoint = new paper.Point(text.options.shadowOffset.x, text.options.shadowOffset.y);
+				const path = new paper.PointText({
+					content: text.content,
+					// Stroke Style
+					strokeColor  : text.options.strokeColor,
+					strokeWidth  : text.options.strokeWidth,
+					strokeCap    : text.options.strokeCap,
+					strokeJoin   : text.options.strokeJoin,
+					dashOffset   : text.options.dashOffset,
+					strokeScaling: text.options.strokeScaling,
+					dashArray    : text.options.dashArray,
+					miterLimit   : text.options.miterLimit,
+					// Fill Style
+					fillColor    : text.options.fillColor,
+					// Shadow Style
+					shadowColor  : text.options.shadowColor,
+					shadowBlur   : text.options.shadowBlur,
+					shadowOffset : shadowOffsetPoint
+				});
+
+				this.paths[text.$key] = path;
+			}
+		});
+	}
+
+	clearTexts() {
+		// Erase current canvas markings if they exist
+		if (this.texts) {
+			const textKeys = Object.keys(this.pointTexts);
+			textKeys.forEach(key => {
+				this.pointTexts[key].remove();
+				delete this.pointTexts[key];
+			});
+		}
+	}
+
+	deselectAllText() {
+		const textKeys = Object.keys(this.pointTexts);
+		textKeys.forEach(key => {
+			this.pointTexts[key].selected = false;
+		});
+	}
+
+	textIdToPushKey(id) {
+		const textKeys = Object.keys(this.pointTexts);
+		for (let i = 0; i < textKeys.length; i++) {
+			const text = this.pointTexts[textKeys[i]];
+			if (text.id === id) {
+				return textKeys[i];
+			}
 		}
 		return null;
 	}

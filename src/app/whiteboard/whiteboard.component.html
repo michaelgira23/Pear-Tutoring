@@ -1,28 +1,54 @@
+<!-- Canvas for paper.js -->
 <canvas #whiteboard resize
 	(mousedown)="onMouseDown($event)"
 	(mousemove)="onMouseMove($event)"
 	(mouseup)="onMouseUp($event)"></canvas>
 
+<!-- Tool selection -->
 <div *ngIf="showToolbar" class="toolbar">
 	<div class="tool-selection">
 		<button class="btn btn-primary" [class.active]="tool === 'draw'" (click)="tool = 'draw'">
 			<span class="fa fa-pencil"></span>
 		</button>
-		<button class="btn btn-secondary" [class.active]="tool === 'eraser'" (click)="tool = 'eraser'">
+		<button class="btn btn-default" [class.active]="tool === 'eraser'" (click)="tool = 'eraser'">
 			<span class="fa fa-eraser"></span>
 		</button>
+		<button class="btn btn-secondary" [class.active]="tool === 'text'" (click)="tool = 'text'">
+			<span class="fa fa-i-cursor"></span>
+		</button>
 	</div>
-	<label>
-		Color
+</div>
+
+<!-- Tool-Specific Toolbars -->
+
+<!-- Draw Toolbar -->
+<div *ngIf="showToolbar && tool === 'draw'" class="tool-toolbar">
+	<div class="option">
+		<label>Color</label>
 		<button class="color"
 			[(colorPicker)]="markingOptions.strokeColor"
 			[cpFallbackColor]="markingOptions.strokeColor"
 			[style.background]="markingOptions.strokeColor"></button>
-	</label>
-	<label>
-		Width
+	</div>
+	<div class="option">
+		<label>Width</label>
 		<input class="range" type="range" min="1" [(ngModel)]="markingOptions.strokeWidth">
-	</label>
+	</div>
+</div>
+
+<!-- Text Toolbar -->
+<div *ngIf="showToolbar && tool === 'text'" class="tool-toolbar">
+	<div class="option">
+		<label>Color</label>
+		<button class="color"
+			[(colorPicker)]="markingOptions.strokeColor"
+			[cpFallbackColor]="markingOptions.strokeColor"
+			[style.background]="markingOptions.strokeColor"></button>
+	</div>
+	<div class="option">
+		<label>Width</label>
+		<input class="range" type="range" min="1" [(ngModel)]="markingOptions.strokeWidth">
+	</div>
 </div>
 
 <div class="invalid-key" [class.show]="!validKey">
