@@ -2,6 +2,7 @@ import { AuthService } from '../shared/security/auth.service';
 import { Component, OnInit, Input } from '@angular/core';
 import { ChatService, Message } from '../shared/model/chat.service';
 import { FirebaseAuthState } from 'angularfire2';
+import { Observable } from 'rxjs';
 import { UserService } from '../shared/model/user.service';
 
 @Component({
@@ -11,7 +12,7 @@ import { UserService } from '../shared/model/user.service';
 })
 export class ChatComponent implements OnInit {
 
-	@Input('key') chatKey: string;
+	@Input('key') chatKey: string = 'anonymous';
 
 	allMessages: Message[];
 	authInfo: FirebaseAuthState;
@@ -41,16 +42,12 @@ export class ChatComponent implements OnInit {
 		);
 	}
 
-	// getName(uid: string) {
-	// 	this.userService.findUser(uid).subscribe(
-	// 		data => {
-	// 			return data.name ? data.name : 'an anonymous user';
-	// 		},
-	// 		err => {
-	// 			console.log(`Resolving user uid error: ${err}`)
-	// 		}
-	// 	);
-	// }
+	getName(uid: string): Observable<any> {
+		return this.userService.findUser(uid).map(user => {
+			console.log(user);
+			return user.name ? user.name : 'an anonymous user';
+		});
+	}
 
 	sendMessage(message: string) {
 		this.chatService.sendMessage({

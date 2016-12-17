@@ -45,11 +45,7 @@ import { WhiteboardService } from './shared/model/whiteboard.service';
 		AngularFireModule.initializeApp(firebaseConfig, authConfig),
 		ColorPickerModule
 	],
-<<<<<<< HEAD
 	providers: [AuthService, ChatService, UserService, WhiteboardService],
-=======
-	providers: [AuthService, WhiteboardService, UserService],
->>>>>>> origin/master
 	bootstrap: [AppComponent]
 })
 export class AppModule { }
