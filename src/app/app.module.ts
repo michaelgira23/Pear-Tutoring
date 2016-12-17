@@ -22,6 +22,7 @@ import { RegisterComponent } from './register/register.component';
 import { AuthService } from './shared/security/auth.service';
 import { WhiteboardService } from './shared/model/whiteboard.service';
 import { UserService } from './shared/model/user.service';
+import { SettingsComponent } from './settings/settings.component';
 
 @NgModule({
 	declarations: [
@@ -33,7 +34,8 @@ import { UserService } from './shared/model/user.service';
 		ViewWhiteboardComponent,
 		ChatComponent,
 		LoginComponent,
-		RegisterComponent
+		RegisterComponent,
+		SettingsComponent
 	],
 	imports: [
 		BrowserModule,
