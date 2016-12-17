@@ -20,8 +20,13 @@ import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
 
 import { AuthService } from './shared/security/auth.service';
+import { SchedulingComponent } from './scheduling/scheduling.component';
+import { SessionService } from './shared/model/session.service';
 import { WhiteboardService } from './shared/model/whiteboard.service';
 import { UserService } from './shared/model/user.service';
+import { CreateSessionComponent } from './scheduling/create-session/create-session.component';
+import { SessionComponent } from './session/session.component';
+import { DisplaySessionComponent } from './scheduling/display-session/display-session.component';
 import { SettingsComponent } from './settings/settings.component';
 
 @NgModule({
@@ -34,6 +39,11 @@ import { SettingsComponent } from './settings/settings.component';
 		ViewWhiteboardComponent,
 		ChatComponent,
 		LoginComponent,
+		SchedulingComponent,
+		RegisterComponent,
+		CreateSessionComponent,
+		SessionComponent,
+		DisplaySessionComponent,
 		RegisterComponent,
 		SettingsComponent
 	],
@@ -46,7 +56,7 @@ import { SettingsComponent } from './settings/settings.component';
 		AngularFireModule.initializeApp(firebaseConfig, authConfig),
 		ColorPickerModule
 	],
-	providers: [AuthService, WhiteboardService, UserService],
+	providers: [AuthService, SessionService, UserService, WhiteboardService, UserService],
 	bootstrap: [AppComponent]
 })
 export class AppModule { }

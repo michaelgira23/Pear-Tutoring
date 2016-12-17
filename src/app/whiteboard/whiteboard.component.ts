@@ -455,6 +455,18 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		}
 	}
 
+	@HostListener('window:keydown', ['$event'])
+	onKeydown(event: KeyboardEvent) {
+		if (event.keyCode === 90 && event.ctrlKey) {
+			window.alert('Undo');
+			let newMarks = [];
+			for (let i = 0; i < (this.markings.length - 1); ++i) {
+				newMarks[i] = this.markings[i];
+			}
+			this.markingsToCanvas(newMarks);
+		}
+	}
+
 	/**
 	 * General functions
 	 */

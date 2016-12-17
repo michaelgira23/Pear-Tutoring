@@ -1,0 +1,9 @@
+.session-display {
+	display: flex;
+	justify-content: flex-start;
+	flex-wrap: wrap;
+	padding: 15px;
+	div {
+		margin: 15px; 
+	}
+}

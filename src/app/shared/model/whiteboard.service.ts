@@ -104,7 +104,7 @@ export class WhiteboardService {
 			path
 		};
 
-		const whiteboardMarkings = this.af.database.list('whiteboardMarkings/' + key);
+		const whiteboardMarkings = this.getMarkings(key);
 		return Observable.from([whiteboardMarkings.push(marking)]);
 	}
 
