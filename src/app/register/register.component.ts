@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Validators, FormGroup, FormBuilder } from '@angular/forms';
-import { AuthService } from '../shared/security/auth.service';
+import { UserService } from '../shared/model/user.service';
 
 @Component({
 	selector: 'app-register',
@@ -12,7 +12,7 @@ export class RegisterComponent implements OnInit {
 
 	form: FormGroup;
 
-	constructor(private fb: FormBuilder, private router: Router, private authService: AuthService) {
+	constructor(private fb: FormBuilder, private router: Router, private userService: UserService) {
 		this.form = this.fb.group({
 			email: ['', Validators.required],
 			password: ['', Validators.required]
@@ -24,7 +24,7 @@ export class RegisterComponent implements OnInit {
 
 	register() {
 		const formValue = this.form.value;
-		this.authService.register(formValue.email, formValue.password).subscribe(
+		this.userService.register(formValue.email, formValue.password).subscribe(
 			data => {
 				this.router.navigate(['/home']);
 			},

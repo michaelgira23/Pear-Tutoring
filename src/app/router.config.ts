@@ -5,6 +5,7 @@ import { CreateWhiteboardComponent } from './create-whiteboard/create-whiteboard
 import { ViewWhiteboardComponent } from './view-whiteboard/view-whiteboard.component';
 import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
+import { SettingsComponent } from './settings/settings.component';
 
 export const routerConfig: Route[] = [
 	{
@@ -41,5 +42,9 @@ export const routerConfig: Route[] = [
 	{
 		path: 'register',
 		component: RegisterComponent
+	},
+	{
+		path: 'settings',
+		component: SettingsComponent
 	}
 ];
