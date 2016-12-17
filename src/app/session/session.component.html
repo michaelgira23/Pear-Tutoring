@@ -1,0 +1,20 @@
+<h2>
+  Session Info
+</h2>
+<div>
+  {{ sessionInfo | json }}
+</div>
+<div *ngIf="!sessionExist">
+  Session does not exist
+</div>
+<h2>
+  online users
+</h2>
+<div *ngFor="let user of onlineUsers">
+  {{ user | json }}<br/>
+</div>
+
+<div class="whiteboard-container" *ngIf="sessionExist">
+  <app-whiteboard [key]="sessionInfo.whiteboard"></app-whiteboard>
+</div>
+<!--<app-chat [chatKey]="sessionInfo.chat"></app-chat>-->

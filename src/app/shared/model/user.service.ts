@@ -65,13 +65,13 @@ export class UserService {
 			.then(
 				val => {
 					subject.next(val);
-					subject.complete();
+					subject.complete();							
 
 				},
 				err => {
 					subject.error(err);
 					subject.complete();
-				}
+				}								
 			);
 
 		return subject.asObservable();
