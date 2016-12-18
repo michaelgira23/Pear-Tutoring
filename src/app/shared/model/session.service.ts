@@ -46,19 +46,35 @@ export class SessionService {
 		}).map(val => {
 			sessionWithUser.tutor = val;
 			return sessionWithUser;
+		}).switchMap(val => {
+			sessionWithUser = val;
+			return Observable.combineLatest(val.tutees.map(tutee => this.db.object('users/' + tutee)));
+		}).map(val => {
+			sessionWithUser.tutees = val;
+			return sessionWithUser;
 		});
 	}
 
 	combineArrWithUser(sessionQuery: Observable<any[]>): Observable<Session[]> {
-		let sessionWithUser;
+		let sessionsWithUser: any[];
 		return sessionQuery.switchMap((val: any[]) => {
-			sessionWithUser = val;
+			sessionsWithUser = val;
 			return Observable.combineLatest(
 				val.map((session) => this.db.object('users/' + session.tutor))
 			);
 		}).map((val: any[]) => {
-			sessionWithUser.map((session, index) => session.tutor = val[index]);
-			return sessionWithUser;
+			sessionsWithUser.map((session, index) => val[index]);
+			return sessionsWithUser;
+		}).switchMap((val: any[]) => {
+			sessionsWithUser = val;
+			return Observable.combineLatest(
+				val.map((session) => Observable.combineLatest(
+					session.tutees.map(tutee => this.db.object('users/' + tutee))
+				))
+			);
+		}).map((val: any[]) => {
+			sessionsWithUser.map((session, sessionIndex) => session.tutee.map((tutee, tuteeIndex) => val[sessionIndex][tuteeIndex]));
+			return sessionsWithUser;
 		});
 	}
 
@@ -108,7 +124,11 @@ export class SessionService {
 		if (!this.uid) return Observable.throw('Rip no login info');
 		let sessionToSave = Object.assign({}, session);
 		const uidsToSave = {};
-		session.tutees.forEach(uid => uidsToSave[uid] = false);
+		session.tutees.forEach(uid => {
+			if (uid !== this.uid) {
+				uidsToSave[uid] = false;
+			}
+		});
 		sessionToSave.tutor = this.uid;
 
 		let dataToSave = {};
@@ -130,10 +150,10 @@ export class SessionService {
 		return this.whiteboardService.createWhiteboard(wbOpt.background.match('^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$') ? wbOpt : wbOptDefault)
 		.switchMap(wb => {
 			const newSessionKey = this.sdkDb.child('sessions').push().key;
-			session.whiteboard = wb.key;
+			session.whiteboard = [wb.key];
 			session.canceled = false;
 			return this.updateSession(newSessionKey, session);
-		})
+		});
 	}
 
 	createAnonSession(): Observable<any> {
@@ -160,10 +180,18 @@ export class SessionService {
 
 	getOnlineUsers(sessionId): Observable<User[]> {
 		return this.db.list('usersInSession/' + sessionId)
-		.map(uids => uids.map(uid => this.db.object('users/' + uid.$key)))
-		.flatMap(uid$arr => Observable.combineLatest(uid$arr))
-		.map(User.fromJsonList);
+		// .map(uids => uids.map(uid => this.db.object('users/' + uid.$key)))
+		// .flatMap(uid$arr => Observable.combineLatest(uid$arr))
+		// .map(User.fromJsonList);
+		// Probably dont need to query the users because we can just compare the uids in the component
 	}
+
+	// addWb(sessionId: string) {}
+
+	// deleteWb(sessionId: string) {}
+
+	// addTutee(sessionId: string, tuteeId: string) {}
+	// Might as well just use updateSession
 }
 
 export interface SessionOptions {
@@ -177,7 +205,7 @@ export interface SessionOptions {
 	desc: string;
 	tutees: string[];
 	tags: string[];
-	whiteboard: string;
+	whiteboard: string[];
 	canceled: boolean;
 }
 
