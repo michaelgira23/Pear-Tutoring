@@ -65,7 +65,8 @@ export class SessionService {
 	findSession(id: string, query?: {}): Observable<any> {
 		return this.combineWithUser(
 			this.db.object('/sessions/' + id)
-			.flatMap(val => val.$exists() ? Observable.of(val) : Observable.throw(`Session ${val.$key} does not exist`)));
+			.flatMap(val => val.$exists() ? Observable.of(val) : Observable.throw(`Session ${val.$key} does not exist`))
+		);
 	}
 
 	findMySessions(): {tutorSessions: Observable<Session[]>, tuteeSessions: Observable<Session[]>} {
@@ -90,7 +91,7 @@ export class SessionService {
 					equalTo: true
 				}
 			})
-		);
+		).map(Session.fromJsonArray);
 	}
 
 	findSessionsByTags(tags: string[]): Observable<Session[]> {

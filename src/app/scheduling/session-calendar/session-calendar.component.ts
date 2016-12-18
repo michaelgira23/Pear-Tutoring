@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, OnInit, Input, OnChanges, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { CalendarEvent, EventColor, EventAction } from 'calendar-utils';
 import { Session } from '../../shared/model/session';
 import { Subject } from 'rxjs/Rx';
@@ -7,7 +7,8 @@ import * as moment from 'moment';
 @Component({
 	selector: 'app-session-calendar',
 	templateUrl: './session-calendar.component.html',
-	styleUrls: ['./session-calendar.component.scss']
+	styleUrls: ['./session-calendar.component.scss'],
+	changeDetection: ChangeDetectionStrategy.OnPush
 })
 
 export class SessionCalendarComponent implements OnInit, OnChanges {
@@ -49,8 +50,8 @@ export class SessionCalendarComponent implements OnInit, OnChanges {
 	}
 
 	ngOnChanges(changes: SimpleChanges) {
-		console.log('wada');
-		//this.events = this.toCalendarEvents(this.sessions);
+		console.log(changes);
+		this.events = this.toCalendarEvents(this.sessions);
 	}
 
 	shadeColor(color, percent) {
@@ -65,8 +66,8 @@ export class SessionCalendarComponent implements OnInit, OnChanges {
 				end: moment(session.end, 'X').toDate(),
 				title: session.title,
 				color: {
-					primary: session.color ? '#000' : session.color,
-					secondary: this.shadeColor(session.color ? '#000' : session.color, 0.5)
+					primary: session.color,
+					secondary: this.shadeColor(session.color, 0.5)
 				},
 				actions: this.actions
 			};
@@ -78,9 +79,5 @@ export class SessionCalendarComponent implements OnInit, OnChanges {
 	}
 	nextMonth() {
 		this.momentViewDate.add(1, 'M');
-	}
-
-	onDayClick(day) {
-		console.log(day);
 	}
 }

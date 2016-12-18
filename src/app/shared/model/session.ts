@@ -6,7 +6,7 @@ import prisma from 'prisma';
 
 export class Session {
 	static fromJson({ $key, start, end, subject, tutor, max, listed, whiteboard, chat, title, desc, canceled}): Session {
-		let color = prisma(subject).hex
+		let color = subject ? prisma(subject).hex : '#000' ;
 		return new Session($key, start, end, subject, color, tutor, max, listed, whiteboard, chat, title, desc, canceled);
 	}
 
