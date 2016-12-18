@@ -1,5 +1,7 @@
 import {Point} from '../../shared/model/whiteboard.service';
 
+declare const paper;
+
 export class Pen {
 
 	currentPath: any;
@@ -17,8 +19,8 @@ export class Pen {
 	mousedown(event, point) {
 		if (this.currentPathFinished) {
 			// Create a new path
-			const shadowOffsetPoint = new this.whiteboard.paper.Point(this.whiteboard.markingOptions.shadowOffset.x, this.whiteboard.markingOptions.shadowOffset.y);
-			this.currentPath = new this.whiteboard.paper.Path({
+			const shadowOffsetPoint = new paper.Point(this.whiteboard.markingOptions.shadowOffset.x, this.whiteboard.markingOptions.shadowOffset.y);
+			this.currentPath = new paper.Path({
 				segments: [point],
 				// Stroke Style
 				strokeColor  : this.whiteboard.markingOptions.strokeColor,

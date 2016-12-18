@@ -1,5 +1,7 @@
 import {Point} from '../../shared/model/whiteboard.service';
 
+declare const paper;
+
 export class Shape {
 
 	whiteboard: any;
@@ -13,9 +15,9 @@ export class Shape {
 	*/
 
 	mousedown(event, point) {
-		const hit = this.whiteboard.paper.project.hitTest(point, {
+		const hit = paper.project.hitTest(point, {
 			tolerance: 1000,
-			class: this.whiteboard.paper.Shape,
+			class: paper.Shape,
 			fill: true,
 			stroke: true,
 			segments: true,
@@ -36,7 +38,7 @@ export class Shape {
 
 		if (!key) {
 			// Create new text
-			this.whiteboard.selectedText = new this.whiteboard.paper.PointText({
+			this.whiteboard.selectedText = new paper.PointText({
 				content: 'TEXT',
 				point: point,
 				fillColor: 'black',

@@ -1,5 +1,7 @@
 import {Point} from '../../shared/model/whiteboard.service';
 
+declare const paper;
+
 export class Eraser {
 
 	eraserPath: any;
@@ -20,7 +22,7 @@ export class Eraser {
 	mousedown(event, point) {
 		if (this.eraserPathFinished) {
 			// Create a new path
-			this.eraserPath = new this.whiteboard.paper.Path({
+			this.eraserPath = new paper.Path({
 				segments: [point]
 			});
 			this.eraserPathFinished = false;

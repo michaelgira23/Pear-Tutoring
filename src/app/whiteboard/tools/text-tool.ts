@@ -1,3 +1,6 @@
+import {Point} from '../../shared/model/whiteboard.service';
+
+declare const paper;
 
 export class TextTool {
 
@@ -8,8 +11,8 @@ export class TextTool {
 	}
 
 	mousedown(event, point) {
-		const hit = this.whiteboard.paper.project.hitTest(point, {
-			class: this.whiteboard.paper.PointText,
+		const hit = paper.project.hitTest(point, {
+			class: paper.PointText,
 			fill: true,
 			stroke: true,
 			segments: true,
@@ -34,7 +37,7 @@ export class TextTool {
 			// Create new text
 			console.log('create new text');
 			this.whiteboard.editExisting = false;
-			this.whiteboard.selectedText = new this.whiteboard.paper.PointText({
+			this.whiteboard.selectedText = new paper.PointText({
 				content: 'TEXT',
 				point: point,
 				fillColor: 'black',
