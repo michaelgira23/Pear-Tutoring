@@ -7,7 +7,7 @@
 <!-- Tool selection -->
 <div *ngIf="showToolbar" class="toolbar">
 	<div class="tool-selection">
-		<button class="btn btn-primary" [class.active]="tool === 'draw'" (click)="tool = 'draw'">
+		<button class="btn btn-primary" [class.active]="tool === 'pen'" (click)="tool = 'pen'">
 			<span class="fa fa-pencil"></span>
 		</button>
 		<button class="btn btn-default" [class.active]="tool === 'eraser'" (click)="tool = 'eraser'">
@@ -25,7 +25,7 @@
 <!-- Tool-Specific Toolbars -->
 
 <!-- Draw Toolbar -->
-<div *ngIf="showToolbar && tool === 'draw'" class="tool-toolbar">
+<div *ngIf="showToolbar && tool === 'pen'" class="tool-toolbar">
 	<div class="option">
 		<label>Color</label>
 		<button class="color"

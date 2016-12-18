@@ -9,6 +9,10 @@ import {
 	defaultMarkingOptions,
 	defaultTextOptions,
 	defaultShapeOptions } from '../shared/model/whiteboard.service';
+import {Pen} from './tools/pen';
+import {Shape} from './tools/shape';
+import {Eraser} from './tools/eraser';
+import {TextTool} from './tools/text-tool';
 
 declare const paper;
 
@@ -65,7 +69,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	tool = 'draw';
 
 	/**
-	 * Draw tool
+	 * Markings
 	 */
 
 	markingsSubscription: any;
@@ -75,16 +79,6 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 
 	@Input()
 	markingOptions = defaultMarkingOptions;
-	currentPath: any;
-	currentcanvasMarkingstarted: number;
-	currentPathFinished: boolean = true;
-
-	/**
-	 * Eraser tool
-	 */
-
-	eraserPath: any;
-	eraserPathFinished: boolean = true;
 
 	/**
 	 * Text tool
@@ -92,15 +86,14 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 
 	textsSubscription: any;
 	texts: WhiteboardText[];
+
 	// paper.js point text objects on the whiteboard
 	canvasText: any = {};
 
 	@Input()
 	textOptions = defaultTextOptions;
 	selectedText: any;
-	// Whether or not to create or edit text on mouseup
-	editExisting: boolean = false;
-
+	
 	/**
 	 * Shape tool
 	 */
@@ -116,332 +109,18 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	shapeType: string = 'rectangle';
 	selectedShape: any;
 
-	/**
-	 * Event handlers for each tool
-	 */
+	// Tool handlers
 
-	toolHandlers: any = {
+	pen = new Pen(this);
+	shape = new Shape(this);
+	eraser = new Eraser(this);
+	text = new TextTool(this);
 
-		/**
-		 * Draw tool
-		 */
-
-		draw: {
-			mousedown: event => {
-				if (this.allowWrite) {
-					if (this.currentPathFinished) {
-						// Create a new path
-						const shadowOffsetPoint = new paper.Point(this.markingOptions.shadowOffset.x, this.markingOptions.shadowOffset.y);
-						this.currentPath = new paper.Path({
-							segments: [this.cursorPoint(event)],
-							// Stroke Style
-							strokeColor  : this.markingOptions.strokeColor,
-							strokeWidth  : this.markingOptions.strokeWidth,
-							strokeCap    : this.markingOptions.strokeCap,
-							strokeJoin   : this.markingOptions.strokeJoin,
-							dashOffset   : this.markingOptions.dashOffset,
-							strokeScaling: this.markingOptions.strokeScaling,
-							dashArray    : this.markingOptions.dashArray,
-							miterLimit   : this.markingOptions.miterLimit,
-							// Fill Style
-							fillColor    : this.markingOptions.fillColor,
-							// Shadow Style
-							shadowColor  : this.markingOptions.shadowColor,
-							shadowBlur   : this.markingOptions.shadowBlur,
-							shadowOffset : shadowOffsetPoint
-						});
-						this.currentcanvasMarkingstarted = Date.now();
-						this.currentPathFinished = false;
-					} else {
-						// User unclicked the mouse outside of the window, just continue with previous path
-						this.currentPath.add(this.cursorPoint(event));
-					}
-				}
-			},
-			mousemove: event => {
-				// Only care if mouse is being dragged
-				if (this.mouseDown && this.currentPath && !this.currentPathFinished && this.allowWrite) {
-					// Add point to the current line
-					this.currentPath.add(this.cursorPoint(event));
-				}
-			},
-			mouseup: event => {
-				if (this.currentPath && !this.currentPathFinished) {
-					this.currentPathFinished = true;
-
-					// Add point to the current line
-					this.currentPath.add(this.cursorPoint(event));
-
-					// Convert path segments into an array
-					const path = [];
-					this.currentPath.segments.forEach(segment => {
-						const point: Point = {
-							x: segment.point.x,
-							y: segment.point.y
-						};
-						path.push(point);
-					});
-
-					// Check if we're still allowed to draw and it's more than just one point
-					if (this.allowWrite && this.currentPath.segments.length > 1) {
-						// Insert path into database
-						this.whiteboardService.createMarking(this.key, path, this.markingOptions, this.currentcanvasMarkingstarted)
-							.subscribe(
-								data => {
-									console.log('successfully added marking', data);
-								},
-								err => {
-									console.log('add marking error', err);
-								}
-							);
-					} else {
-						// Erase the path since we can't draw
-						this.currentPath.remove();
-					}
-				}
-			}
-		},
-
-		/**
-		 * Eraser tool
-		 */
-
-		eraser: {
-			mousedown: event => {
-				if (this.allowWrite) {
-					if (this.eraserPathFinished) {
-						// Create a new path
-						this.eraserPath = new paper.Path({
-							segments: [this.cursorPoint(event)]
-						});
-						this.eraserPathFinished = false;
-					} else {
-						// User unclicked the mouse outside of the window, just continue with previous path
-						this.eraserPath.add(this.cursorPoint(event));
-					}
-				}
-			},
-			mousemove: event => {
-				// Only care if mouse is being dragged
-				if (this.mouseDown && this.eraserPath && !this.eraserPathFinished && this.allowWrite) {
-					// Add point to the current line
-					this.eraserPath.add(this.cursorPoint(event));
-					this.eraseMarkingsOnLine(this.eraserPath);
-				}
-			},
-			mouseup: event => {
-				if (this.eraserPath && !this.eraserPathFinished) {
-					this.eraserPathFinished = true;
-					this.eraseMarkingsOnLine(this.eraserPath);
-					this.eraserPath.remove();
-				}
-			}
-		},
-
-		/**
-		 * Text tool
-		 */
-
-		text: {
-			mousedown: event => {
-				const point = this.cursorPoint(event);
-				const hit = paper.project.hitTest(point, {
-					class: paper.PointText,
-					fill: true,
-					stroke: true,
-					segments: true,
-					bounds: true
-				});
-
-				console.log(hit);
-
-				let key = null;
-
-				if (hit) {
-					key = this.textIdToPushKey(hit.item.id);
-
-					if (key) {
-						console.log('select existing text');
-						this.editExisting = true;
-						this.selectedText = this.canvasText[key];
-					}
-				}
-
-				if (!key) {
-					// Create new text
-					console.log('create new text');
-					this.editExisting = false;
-					this.selectedText = new paper.PointText({
-						content: 'TEXT',
-						point: point,
-						fillColor: 'black',
-						fontSize: '2.5em',
-						fontWeight: 600
-					});
-				}
-
-				console.log(this.selectedText);
-
-				this.deselectAllText();
-				this.selectedText.selected = true;
-
-			},
-			mousemove: event => {
-				if (this.selectedText && this.mouseDown) {
-					// Check if mouse is over any of the manipulation points
-					const point = this.cursorPoint(event);
-					const hit = this.selectedText.hitTest(point, {
-						tolerance: 1000,
-						fill: true,
-						stroke: true,
-						segments: true,
-						bounds: true
-					});
-
-					console.log(Date.now(), hit);
-
-					if (hit) {
-						// If dragging one of the text corners, move selected text
-						this.selectedText.point = point;
-					}
-				}
-			},
-			mouseup: event => {
-				if (this.selectedText && this.allowWrite) {
-					console.log('mouseup', this.selectedText);
-
-					// Convert points into objects for database
-					const anchor = {
-						x: this.selectedText.point.x,
-						y: this.selectedText.point.y
-					};
-					const positionPosition = {
-						x: this.selectedText.position.x,
-						y: this.selectedText.position.y
-					};
-					const scaling = {
-						x: this.selectedText.scaling.x,
-						y: this.selectedText.scaling.y
-					};
-
-					const position = {
-						anchor,
-						position: positionPosition,
-						rotation: this.selectedText.rotation,
-						scaling
-					};
-
-					if (this.editExisting) {
-						// Modify existing text in database
-						const pushKey = this.textIdToPushKey(this.selectedText.id);
-						this.whiteboardService.editText(this.key, pushKey, this.selectedText.content, this.textOptions, position)
-							.subscribe(
-								data => {
-									console.log('successfully editted text', data);
-								},
-								err => {
-									console.log('edit text error', err);
-								}
-							);
-					} else {
-						// Create new text in database
-						this.whiteboardService.createText(this.key, this.selectedText.content, this.textOptions, position)
-							.subscribe(
-								data => {
-									console.log('successfully added text', data);
-								},
-								err => {
-									console.log('add text error', err);
-								}
-							);
-					}
-				}
-			},
-			toolchange: nextTool => {
-				this.deselectAllText();
-			}
-		},
-
-		/**
-		 * Shapes tool
-		 */
-
-		shape: {
-			mousedown: event => {
-				const point = this.cursorPoint(event);
-				const hit = paper.project.hitTest(point, {
-					tolerance: 1000,
-					class: paper.Shape,
-					fill: true,
-					stroke: true,
-					segments: true,
-					bounds: true
-				});
-
-				console.log(hit);
-
-				let key = null;
-
-				if (hit) {
-					key = this.shapeIdToPushKey(hit.item.id);
-
-					if (key) {
-						this.selectedShape = this.canvasShapes[key];
-					}
-				}
-
-				if (!key) {
-					// Create new text
-					this.selectedText = new paper.PointText({
-						content: 'TEXT',
-						point: point,
-						fillColor: 'black',
-						fontSize: '2.5em',
-						fontWeight: 600
-					});
-				}
-
-				this.deselectAllShapes();
-				this.selectedText.selected = true;
-
-			},
-			mousemove: event => {
-				if (this.selectedText && this.mouseDown) {
-					// Check if mouse is over any of the manipulation points
-					const point = this.cursorPoint(event);
-					const hit = this.selectedText.hitTest(point, {
-						tolerance: 1000,
-						fill: true,
-						stroke: true,
-						segments: true,
-						bounds: true
-					});
-
-					console.log(Date.now(), hit);
-
-					if (hit) {
-						// If dragging one of the text corners, move selected text
-						this.selectedText.point = point;
-					}
-				}
-			},
-			mouseup: event => {
-				if (this.selectedText && this.allowWrite) {
-					this.whiteboardService.createShape(this.key, this.selectedText.content, this.textOptions)
-						.subscribe(
-							data => {
-								console.log('successfully added text', data);
-							},
-							err => {
-								console.log('add text error', err);
-							}
-						);
-				}
-			},
-			toolchange: nextTool => {
-				this.deselectAllShapes();
-			}
-		}
+	toolHandlers = {
+		"pen": this.pen,
+		"shape": this.shape,
+		"eraser": this.eraser,
+		"text": this.text
 	};
 
 	constructor(private whiteboardService: WhiteboardService) { }
@@ -577,7 +256,15 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	// For triggering the neat little event system for each tool
 	triggerToolEvent(tool: string, eventName: string, event: any) {
 		if (this.toolHandlers[tool] && typeof this.toolHandlers[tool][eventName] === 'function') {
-			this.toolHandlers[tool][eventName](event);
+			// finds the paper.js point of the mouse relative to the canvas
+			const canvasPos = this.canvasEl.getBoundingClientRect();
+			const cursorX = event.clientX - canvasPos.left;
+			const cursorY = event.clientY - canvasPos.top;
+			const point = new paper.Point(cursorX, cursorY);
+
+			this.toolHandlers[tool][eventName](event, point);
+			// everything's normal for this . . . it should be firing:
+			// console.log("Tool: " + tool + " eventname: " + eventName + " function: " + this.toolHandlers[tool][eventName]);
 		}
 	}
 
@@ -612,6 +299,8 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		}
 	}
 
+
+
 	@HostListener('window:keydown', ['$event'])
 	onKeydown(event: KeyboardEvent) {
 		if (event.keyCode === 90 && event.ctrlKey) {
@@ -632,15 +321,6 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		this.clearMarkings();
 		this.clearText();
 		this.clearShapes();
-	}
-
-	cursorPoint(event) {
-		// Return a paper.js point where the mouse is at relative to the canvas
-		const canvasPos = this.canvasEl.getBoundingClientRect();
-		const cursorX = event.clientX - canvasPos.left;
-		const cursorY = event.clientY - canvasPos.top;
-
-		return new paper.Point(cursorX, cursorY);
 	}
 
 	/**
@@ -712,39 +392,74 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		}
 
 		// Erase current path too, if it isn't in the process of being drawn
-		if (this.currentPathFinished && this.currentPath) {
-			this.currentPath.remove();
-		}
+
+		// TODO: these values are stored in pen.ts
+
+		// if (this.currentPathFinished && this.currentPath) {
+		// 	this.currentPath.remove();
+		// }
 	}
 
-	/**
-	 * Eraser tool
-	 */
+	// Shape tool
 
-	eraseMarkingsOnLine(path) {
-		const markingKeys = Object.keys(this.canvasMarkings);
-		markingKeys.forEach(key => {
-			// Get intersections between path and erasing path
-			const intersections = this.canvasMarkings[key].getIntersections(path);
+	shapesToCanvas(shapes) {
+		console.log('shapes to canvas', shapes);
+		this.clearShapes();
 
-			// If canvasMarkings intersect, erase the line
-			if (intersections.length > 0) {
-				this.whiteboardService.eraseMarking(this.key, key)
-					.subscribe(
-						data => {
-							console.log('Erased marking', data);
-						},
-						err => {
-							console.log('Erase marking error', err);
-						}
-					);
+		// Loop through shapes and add to canvas
+		shapes.forEach(shape => {
+
+			// Make sure shape isn't erased
+			if (!shape.erased) {
+
+				const shadowOffsetPoint = new paper.Point(shape.options.shadowOffset.x, shape.options.shadowOffset.y);
+				const shapeOptions = {
+					// Stroke Style
+					strokeColor  : shape.options.strokeColor,
+					strokeWidth  : shape.options.strokeWidth,
+					strokeCap    : shape.options.strokeCap,
+					strokeJoin   : shape.options.strokeJoin,
+					dashOffset   : shape.options.dashOffset,
+					strokeScaling: shape.options.strokeScaling,
+					dashArray    : shape.options.dashArray,
+					miterLimit   : shape.options.miterLimit,
+					// Fill Style
+					fillColor    : shape.options.fillColor,
+					// Shadow Style
+					shadowColor  : shape.options.shadowColor,
+					shadowBlur   : shape.options.shadowBlur,
+					shadowOffset : shadowOffsetPoint
+				};
+
+				switch (shape.type) {
+					case 'circle':
+						this.canvasShapes[shape.$key] = new paper.Shape.Circle(shapeOptions);
+						break;
+					case 'rectangle':
+						this.canvasShapes[shape.$key] = new paper.Shape.Rectangle(shapeOptions);
+						break;
+					case 'ellipse':
+						this.canvasShapes[shape.$key] = new paper.Shape.Ellipse(shapeOptions);
+						break;
+					default:
+						console.log('Unrecognized shape!', shape.type);
+				}
 			}
 		});
 	}
 
-	/**
-	 * Text tool
-	 */
+	clearShapes() {
+		// Erase current canvas markings if they exist
+		if (this.shapes) {
+			const shapeKeys = Object.keys(this.canvasShapes);
+			shapeKeys.forEach(key => {
+				this.canvasShapes[key].remove();
+				delete this.canvasShapes[key];
+			});
+		}
+	}
+
+	// Text tool
 
 	textsToCanvas(texts: WhiteboardText[]) {
 		console.log('texts to canvas', texts);
@@ -818,84 +533,4 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		}
 		return null;
 	}
-
-	/**
-	 * Shapes tool
-	 */
-
-	shapesToCanvas(shapes: WhiteboardShape[]) {
-		console.log('shapes to canvas', shapes);
-		this.clearShapes();
-
-		// Loop through shapes and add to canvas
-		shapes.forEach(shape => {
-
-			// Make sure shape isn't erased
-			if (!shape.erased) {
-
-				const shadowOffsetPoint = new paper.Point(shape.options.shadowOffset.x, shape.options.shadowOffset.y);
-				const shapeOptions = {
-					// Stroke Style
-					strokeColor  : shape.options.strokeColor,
-					strokeWidth  : shape.options.strokeWidth,
-					strokeCap    : shape.options.strokeCap,
-					strokeJoin   : shape.options.strokeJoin,
-					dashOffset   : shape.options.dashOffset,
-					strokeScaling: shape.options.strokeScaling,
-					dashArray    : shape.options.dashArray,
-					miterLimit   : shape.options.miterLimit,
-					// Fill Style
-					fillColor    : shape.options.fillColor,
-					// Shadow Style
-					shadowColor  : shape.options.shadowColor,
-					shadowBlur   : shape.options.shadowBlur,
-					shadowOffset : shadowOffsetPoint
-				};
-
-				switch (shape.type) {
-					case 'circle':
-						this.canvasShapes[shape.$key] = new paper.Shape.Circle(shapeOptions);
-						break;
-					case 'rectangle':
-						this.canvasShapes[shape.$key] = new paper.Shape.Rectangle(shapeOptions);
-						break;
-					case 'ellipse':
-						this.canvasShapes[shape.$key] = new paper.Shape.Ellipse(shapeOptions);
-						break;
-					default:
-						console.log('Unrecognized shape!', shape.type);
-				}
-			}
-		});
-	}
-
-	clearShapes() {
-		// Erase current canvas markings if they exist
-		if (this.shapes) {
-			const shapeKeys = Object.keys(this.canvasShapes);
-			shapeKeys.forEach(key => {
-				this.canvasShapes[key].remove();
-				delete this.canvasShapes[key];
-			});
-		}
-	}
-
-	deselectAllShapes() {
-		const shapeKeys = Object.keys(this.canvasShapes);
-		shapeKeys.forEach(key => {
-			this.canvasShapes[key].selected = false;
-		});
-	}
-
-	shapeIdToPushKey(id) {
-		const shapeKeys = Object.keys(this.canvasShapes);
-		for (let i = 0; i < shapeKeys.length; i++) {
-			const shape = this.canvasShapes[shapeKeys[i]];
-			if (shape.id === id) {
-				return shapeKeys[i];
-			}
-		}
-		return null;
-	}
-
 }
