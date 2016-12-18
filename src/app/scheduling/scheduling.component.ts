@@ -4,7 +4,6 @@ import { AuthService } from '../shared/security/auth.service';
 import { Session } from '../shared/model/session';
 import { Validators, FormGroup, FormBuilder } from '@angular/forms';
 import { Router } from '@angular/router';
-import * as moment from 'moment';
 
 @Component({
 	selector: 'app-scheduling',
@@ -13,11 +12,14 @@ import * as moment from 'moment';
 })
 export class SchedulingComponent implements OnInit {
 
-	tutorSessions: Session[];
-	tuteeSessions: Session[];
-	publicSessions: Session[];
+	tutorSessions: Session[] = [];
+	tuteeSessions: Session[] = [];
+	publicSessions: Session[] = [];
 	joinSessionForm: FormGroup;
-	sessionsByTags: Session[]
+	sessionsByTags: Session[] = [];
+	get mySessions(): Session[] {
+		return this.tutorSessions.concat(this.tuteeSessions);
+	};
 
 	constructor(private sessionService: SessionService, private fb: FormBuilder, private router: Router, private auth: AuthService) { }
 
@@ -42,7 +44,7 @@ export class SchedulingComponent implements OnInit {
 				val => this.publicSessions = val,
 				err => console.log(err)
 			);
-		})
+		});
 	}
 
 	deleteSession(sessionId: string) {

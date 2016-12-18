@@ -6,6 +6,7 @@ import { ViewWhiteboardComponent } from './view-whiteboard/view-whiteboard.compo
 import { LoginComponent } from './login/login.component';
 import { SchedulingComponent } from './scheduling/scheduling.component';
 import { CreateSessionComponent } from './scheduling/create-session/create-session.component';
+import { SessionCalendarComponent } from './scheduling/session-calendar/session-calendar.component';
 import { RegisterComponent } from './register/register.component';
 import { SessionComponent } from './session/session.component';
 import { SettingsComponent } from './settings/settings.component';

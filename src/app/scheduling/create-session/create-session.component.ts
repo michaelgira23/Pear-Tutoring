@@ -23,6 +23,7 @@ export class CreateSessionComponent implements OnInit {
 		this.createSessionForm = this.fb.group({
 			start: ['', Validators.required],
 			end: ['', Validators.required],
+			subject: ['', Validators.required],
 			max: ['', Validators.required],
 			listed: [false, Validators.required],
 			title: ['', [Validators.required]],

@@ -5,6 +5,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 import { AngularFireModule } from 'angularfire2';
 import { ColorPickerModule } from 'angular2-color-picker';
+import { CalendarModule } from 'angular-calendar';
 
 import { routerConfig } from './router.config';
 import { firebaseConfig, authConfig } from '../environments/environment';
@@ -28,6 +29,7 @@ import { CreateSessionComponent } from './scheduling/create-session/create-sessi
 import { SessionComponent } from './session/session.component';
 import { DisplaySessionComponent } from './scheduling/display-session/display-session.component';
 import { SettingsComponent } from './settings/settings.component';
+import { SessionCalendarComponent } from './scheduling/session-calendar/session-calendar.component';
 
 @NgModule({
 	declarations: [
@@ -45,7 +47,8 @@ import { SettingsComponent } from './settings/settings.component';
 		SessionComponent,
 		DisplaySessionComponent,
 		RegisterComponent,
-		SettingsComponent
+		SettingsComponent,
+		SessionCalendarComponent
 	],
 	imports: [
 		BrowserModule,
@@ -54,7 +57,8 @@ import { SettingsComponent } from './settings/settings.component';
 		HttpModule,
 		RouterModule.forRoot(routerConfig),
 		AngularFireModule.initializeApp(firebaseConfig, authConfig),
-		ColorPickerModule
+		ColorPickerModule,
+		CalendarModule.forRoot()
 	],
 	providers: [AuthService, SessionService, UserService, WhiteboardService, UserService],
 	bootstrap: [AppComponent]

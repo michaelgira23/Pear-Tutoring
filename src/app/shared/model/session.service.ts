@@ -62,7 +62,7 @@ export class SessionService {
 		});
 	}
 
-	findSession(id: string, query?: {}): Observable<Session> {
+	findSession(id: string, query?: {}): Observable<any> {
 		return this.combineWithUser(
 			this.db.object('/sessions/' + id)
 			.flatMap(val => val.$exists() ? Observable.of(val) : Observable.throw(`Session ${val.$key} does not exist`)));
@@ -116,7 +116,9 @@ export class SessionService {
 		dataToSave[`users/${this.uid}/tutorSessions/${sessionId}`] = true;
 		session.tutees.forEach(uid => dataToSave[`users/${uid}/tuteeSessions/${sessionId}`] = true);
 		session.tags.forEach(tag => dataToSave[`sessionsByTags/${tag}/${sessionId}`] = true);
-
+		if (allowedSubjects.find((val) => session.subject === val)) {
+			dataToSave[`sessionsBySubject/${session.subject}/${sessionId}`] = true;
+		}
 		return this.firebaseUpdate(dataToSave);
 	}
 
@@ -164,15 +166,18 @@ export class SessionService {
 }
 
 export interface SessionOptions {
-	start: string,
-	end: string,
-	tutor: string,
-	max: number,
-	listed: boolean,
-	title: string,
-	desc: string,
-	tutees: string[],
-	tags: string[],
-	whiteboard: string,
-	canceled: boolean
+	start: string;
+	end: string;
+	tutor: string;
+	subject: string;
+	max: number;
+	listed: boolean;
+	title: string;
+	desc: string;
+	tutees: string[];
+	tags: string[];
+	whiteboard: string;
+	canceled: boolean;
 }
+
+export const allowedSubjects = ['Math', 'English', 'Art']

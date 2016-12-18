@@ -1,6 +1,7 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { Router } from '@angular/router';
-import { Session } from '../../shared/model/session'
+import { Session } from '../../shared/model/session';
+import * as moment from 'moment';
 
 @Component({
 	selector: 'app-display-session',
@@ -10,7 +11,13 @@ import { Session } from '../../shared/model/session'
 export class DisplaySessionComponent implements OnInit {
 
 	@Input()
-	session: Session
+	session: Session;
+	get startTime(): string {
+		return moment(this.session.start, 'X').format('M/D/Y');
+	};
+	get endTime(): string {
+		return moment(this.session.end, 'X').format('M/D/Y');
+	}
 
 	constructor(private router: Router) { }
 
