@@ -11,6 +11,9 @@ export class Cursor {
 	resizingX: boolean;
 	resizingY: boolean;
 
+	// original bounds at moment resizing started
+	originalBounds: any;	
+
 	hitOptions: any;
 
 	constructor(private whiteboard: WhiteboardComponent) {
@@ -54,7 +57,9 @@ export class Cursor {
 				let hitY = hit.point.y;
 				this.resizingX = (hitX === item.bounds.left || hitX === item.bounds.right);
 				this.resizingY = (hitY === item.bounds.top || hitY === item.bounds.bottom);
-				
+
+				this.originalBounds = item.bounds;
+
 			} else if (hit.type === 'fill') {
 				// TODO: move item
 			}
@@ -68,23 +73,23 @@ export class Cursor {
 		if (this.whiteboard.mouseDown) {
 			if (this.resizingX || this.resizingY) {
 				// if we aren't resizing x, set that delta to 0. same with y.
-				let deltaX = this.resizingX ? Math.abs(point.x - this.mouseAnchorX) : 0;
-				let deltaY = this.resizingY ? Math.abs(point.y - this.mouseAnchorY) : 0;
+				let deltaX = this.resizingX ? point.x - this.mouseAnchorX : 0;
+				let deltaY = this.resizingY ? point.y - this.mouseAnchorY : 0;
 
-				console.log("deltaX: " + deltaX + " deltaY: " + deltaY);
+				let originalBounds = this.originalBounds;
 
 				// it loops thru all objects just cuz, but there should only be one object in this array
 				// because other objects are deselected when mousedown() detects a resize
 				this.whiteboard.selectedItems.forEach(function(item) {
 
 					// see Appendix A for proof that this works
-					let xScale = 2 * (1 + deltaX / item.bounds.width);
-					let yScale = 2 * (1 + deltaY / item.bounds.height);
+					let xScale = Math.abs(1 + 2 * deltaX / originalBounds.width);
+					let yScale = Math.abs(1 + 2 * deltaY / originalBounds.height);
 
-					console.log("item width: " + item.width + " item height: " + item.height);
+					console.log("item width: " + item.bounds.width + " item height: " + item.bounds.height);
 					console.log("X scale: " + xScale + " yScale: " + yScale);
 
-					item.scale(xScale, yScale);
+					item.scaling = new paper.Point(xScale, yScale);
 
 				});
 			}
@@ -129,17 +134,19 @@ export class Cursor {
 
 A:
 
-width - width of item
+currentWidth - width of item
 deltaX - amount mouse has dragged from initial mousedown
 newWidth - width that we want to resize the item to (should line up with mouse's current x position)
 
 scale (unknown) - constant we need to find
 
-newWidth = width + deltaX
-width * scale = newWidth
-scale = newWidth / width = (width + deltaX) / width = 1 + (deltaX / width)
-because we scale from the center (both sides increasing), we multiply scale by 2
-thus scale = 2 * (1 + deltaX / width)
+newWidth = currentWidth + deltaX
+currentWidth * scale = newWidth
+scale = newWidth / currentWidth = (currentWidth + deltaX) / currentWidth = 1 + (deltaX / currentWidth)
+because we scale from the center (both sides increasing), we're going to multiply deltaX by 2
+we're going to take the absolute value of the whole thing, so that if it's negative (you start scaling from right,
+and shrink it past its center line) it will grow bigger again
+so our final value is scale = abs(1 + 2 * deltaX / currentWidth)
 QED motherfucker
 
 this extends to the y dimension
