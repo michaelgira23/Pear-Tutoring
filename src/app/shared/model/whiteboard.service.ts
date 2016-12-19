@@ -190,16 +190,24 @@ export class WhiteboardService {
 		return this.af.database.list('whiteboardShapes/' + key);
 	}
 
-	createShape(key: string, content: string, options: WhiteboardShapeOptions): Observable<any> {
-		let text: WhiteboardText = {
+	createShape(
+		key: string,
+		type: string,
+		options: WhiteboardShapeOptions,
+		position: Position,
+		size: Size,
+		radius: number | Size): Observable<any> {
+
+		let shape: WhiteboardShape = {
 			created: Date.now(),
 			createdBy: this.authInfo ? this.authInfo.uid : null,
+			type,
 			options: Object.assign(defaultShapeOptions, options),
-			content
+
 		};
 
-		const whiteboardText = this.af.database.list('whiteboardText/' + key);
-		return Observable.from([whiteboardText.push(text)]);
+		const whiteboardShape = this.af.database.list('whiteboardShape/' + key);
+		return Observable.from([whiteboardShape.push(shape)]);
 	}
 
 }

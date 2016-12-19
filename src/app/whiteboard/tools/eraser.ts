@@ -1,42 +1,35 @@
-import {Point} from '../../shared/model/whiteboard.service';
-
+import { WhiteboardComponent } from './../whiteboard.component';
 declare const paper;
 
 export class Eraser {
 
 	eraserPath: any;
-	eraserPathFinished: boolean;
+	eraserPathFinished: boolean = true;
 
-	// whiteboard that this tool serves
-	whiteboard: any;
-
-	constructor(parentWhiteboard: any) {
-		this.eraserPathFinished = true;
-		this.whiteboard = parentWhiteboard;
-	}
+	constructor(private whiteboard: WhiteboardComponent) { }
 
 	/**
-	* Events
-	*/
+	 * Event handlers
+	 */
 
-	mousedown(event, point) {
+	mousedown(event) {
 		if (this.eraserPathFinished) {
 			// Create a new path
 			this.eraserPath = new paper.Path({
-				segments: [point]
+				segments: [this.whiteboard.cursorPoint(event)]
 			});
 			this.eraserPathFinished = false;
 		} else {
 			// User unclicked the mouse outside of the window, just continue with previous path
-			this.eraserPath.add(point);
+			this.eraserPath.add(this.whiteboard.cursorPoint(event));
 		}
 	}
 
-	mousemove(event, point) {
+	mousemove(event) {
 		// Only care if mouse is being dragged
 		if (this.whiteboard.mouseDown && this.eraserPath && !this.eraserPathFinished) {
 			// Add point to the current line
-			this.eraserPath.add(point);
+			this.eraserPath.add(this.whiteboard.cursorPoint(event));
 			this.eraseMarkingsOnLine(this.eraserPath);
 		}
 	}
@@ -50,14 +43,14 @@ export class Eraser {
 	}
 
 	/**
-	* Helper functions
-	*/
+	 * Helper functions
+	 */
 
 	eraseMarkingsOnLine(path) {
-		const markingKeys = Object.keys(this.whiteboard.canvasMarkings);
+		const markingKeys = Object.keys(this.whiteboard.tools.pen.canvasMarkings);
 		markingKeys.forEach(markingKey => {
 			// Get intersections between path and erasing path
-			const intersections = this.whiteboard.canvasMarkings[markingKey].getIntersections(path);
+			const intersections = this.whiteboard.tools.pen.canvasMarkings[markingKey].getIntersections(path);
 
 			// If canvasMarkings intersect, erase the line
 			if (intersections.length > 0) {
@@ -74,5 +67,3 @@ export class Eraser {
 		});
 	}
 }
-
-
