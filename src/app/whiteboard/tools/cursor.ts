@@ -3,16 +3,18 @@ declare const paper;
 
 export class Cursor {
 
-	// for resizing: these are mouse coords at original click
+	// mouse coords at original click
 	mouseAnchorX: number;
 	mouseAnchorY: number;
+	// original bounds at moment transform started
+	originalBounds: any;	
+
 	// are we resizing an item horizontally, vertically, or both?
 	// depends on what part of its bounding box we drag
 	resizingX: boolean;
 	resizingY: boolean;
-
-	// original bounds at moment resizing started
-	originalBounds: any;	
+	// or are we moving an item?
+	moving: boolean;
 
 	hitOptions: any;
 
@@ -41,27 +43,31 @@ export class Cursor {
 		if (!hit) {
 			return;
 		} else {
+
 			let item = hit.item;
-			console.log(hit);
+
 			// not working for some weird reason:
 			// item.brintToFront();
+
 			// deselects all other items
+			// TEMPORARY: later, may implement selecting (to move) multiple items
 			this.whiteboard.selectOnly(item);
+			// set mouse anchor to current mouse position
+			this.mouseAnchorX = point.x;
+			this.mouseAnchorY = point.y;
+			// set original bounds
+			this.originalBounds = item.bounds;
 
 			if (hit.type === 'bounds') {
-				// set mouse anchor to current mouse position
-				this.mouseAnchorX = point.x;
-				this.mouseAnchorY = point.y;
 
-				let hitX = hit.point.x;
-				let hitY = hit.point.y;
-				this.resizingX = (hitX === item.bounds.left || hitX === item.bounds.right);
-				this.resizingY = (hitY === item.bounds.top || hitY === item.bounds.bottom);
-
-				this.originalBounds = item.bounds;
+				// determine if we're resizing in x-direction, y-direction, or both
+				this.resizingX = (hit.point.x === item.bounds.left || hit.point.x === item.bounds.right);
+				this.resizingY = (hit.point.y === item.bounds.top || hit.point.y === item.bounds.bottom);
 
 			} else if (hit.type === 'fill') {
-				// TODO: move item
+
+				this.moving = true;
+
 			}
 		}
 	}
@@ -75,22 +81,30 @@ export class Cursor {
 				// if we aren't resizing x, set that delta to 0. same with y.
 				let deltaX = this.resizingX ? point.x - this.mouseAnchorX : 0;
 				let deltaY = this.resizingY ? point.y - this.mouseAnchorY : 0;
-
 				let originalBounds = this.originalBounds;
 
 				// it loops thru all objects just cuz, but there should only be one object in this array
 				// because other objects are deselected when mousedown() detects a resize
+				// although this may actually work with multiple items? idk. we'll keep it for now
 				this.whiteboard.selectedItems.forEach(function(item) {
 
 					// see Appendix A for proof that this works
 					let xScale = Math.abs(1 + 2 * deltaX / originalBounds.width);
 					let yScale = Math.abs(1 + 2 * deltaY / originalBounds.height);
 
-					console.log("item width: " + item.bounds.width + " item height: " + item.bounds.height);
-					console.log("X scale: " + xScale + " yScale: " + yScale);
-
 					item.scaling = new paper.Point(xScale, yScale);
 
+				});
+
+			} else if (this.moving) {
+				let deltaX = point.x - this.mouseAnchorX;
+				let deltaY = point.y - this.mouseAnchorY;
+				// because Rectangle bounds' position is their top left corner:
+				let ob = this.originalBounds;
+				let originalCenter = new paper.Point(ob.x + ob.width / 2, ob.y + ob.height / 2);
+
+				this.whiteboard.selectedItems.forEach(function(item) {
+					item.position = new paper.Point(originalCenter.x + deltaX, originalCenter.y + deltaY);
 				});
 			}
 		}
@@ -103,8 +117,8 @@ export class Cursor {
 				this.resizingX = false;
 				this.resizingY = false;
 
-				// write to database . . . somehow . . .
-				// off-topic example, maybe? 
+				// write to database
+				// some reference code:
 
 				// this.whiteboard.whiteboardService.editText(
 				// 	this.whiteboard.key, pushKey, this.selectedText.content, this.whiteboard.textOptions, position)
@@ -116,6 +130,15 @@ export class Cursor {
 				// 			console.log('edit text error', err);
 				// 		}
 				// 	);
+
+				// editText(whiteboardKey: string, textKey: string, content: string, options: WhiteboardTextOptions, position: Position): Observable<any> {
+				// 	const textObject = this.af.database.object(`whiteboardText/${whiteboardKey}/${textKey}`);
+				// 	return Observable.from([textObject.update({
+				// 		content,
+				// 		options,
+				// 		position
+				// 	})]);
+				// }
 			}
 		}
 	}
@@ -128,6 +151,8 @@ export class Cursor {
 	distance(x1: number, y1: number, x2: number, y2: number): number {
 		return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
 	}
+
+
 }
 
 /* APPENDIX (maths :3)
