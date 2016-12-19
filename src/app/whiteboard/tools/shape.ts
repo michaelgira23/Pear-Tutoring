@@ -10,6 +10,12 @@ export class Shape {
 	canvasShapes: any = {};
 
 	selectedShape: any;
+	// Point upon mousedown
+	startPoint: any;
+	// Rectangle from mouse down to mouse move/up
+	creationRect: any;
+	// Ghost rectangle for visualizing shape creation
+	visualRect: any;
 
 	constructor(private whiteboard: WhiteboardComponent) { }
 
@@ -41,14 +47,34 @@ export class Shape {
 		}
 
 		if (!key) {
-			// Create new text
-			this.selectedShape = new paper.PointText({
-				content: 'TEXT',
-				point: point,
-				fillColor: 'black',
-				fontSize: '2.5em',
-				fontWeight: 600
+			// Create new shape
+			this.startPoint = point;
+			const shadowOffsetPoint = new paper.Point(this.whiteboard.shapeOptions.shadowOffset.x, this.whiteboard.shapeOptions.shadowOffset.y);
+			this.selectedShape = new paper.Path.RegularPolygon({
+				// Stroke Style
+				strokeColor  : this.whiteboard.shapeOptions.strokeColor,
+				strokeWidth  : this.whiteboard.shapeOptions.strokeWidth,
+				strokeCap    : this.whiteboard.shapeOptions.strokeCap,
+				strokeJoin   : this.whiteboard.shapeOptions.strokeJoin,
+				dashOffset   : this.whiteboard.shapeOptions.dashOffset,
+				strokeScaling: this.whiteboard.shapeOptions.strokeScaling,
+				dashArray    : this.whiteboard.shapeOptions.dashArray,
+				miterLimit   : this.whiteboard.shapeOptions.miterLimit,
+				// Fill Style
+				fillColor    : this.whiteboard.shapeOptions.fillColor,
+				// Shadow Style
+				shadowColor  : this.whiteboard.shapeOptions.shadowColor,
+				shadowBlur   : this.whiteboard.shapeOptions.shadowBlur,
+				shadowOffset : shadowOffsetPoint,
+				// Shape
+				sides: 3,
+				radius: 10
 			});
+
+			this.creationRect = new paper.Rectangle(this.startPoint, this.startPoint);
+			this.visualRect = new paper.Path.Rectangle(this.creationRect);
+			this.visualRect.strokeColor = '#08f';
+			this.visualRect.dashArray = [10, 4];
 		}
 
 		this.deselectAllShapes();
@@ -59,37 +85,63 @@ export class Shape {
 		if (this.selectedShape && this.whiteboard.mouseDown) {
 			// Check if mouse is over any of the manipulation points
 			const point = this.whiteboard.cursorPoint(event);
-			const hit = this.selectedShape.hitTest(point, {
-				tolerance: 1000,
-				fill: true,
-				stroke: true,
-				segments: true,
-				bounds: true
-			});
-
-			console.log(Date.now(), hit);
-
-			if (hit) {
-				// If dragging one of the text corners, move selected text
-				this.selectedShape.point = point;
+			this.creationRect = new paper.Rectangle(this.startPoint, point);
+			if (this.creationRect.width > 0 && this.creationRect.height > 0) {
+				this.selectedShape.bounds = this.creationRect;
 			}
+			this.visualRect.bounds = this.creationRect;
 		}
 	}
 
 	mouseup(event) {
-		if (this.selectedShape) {
-			// @TODO Insert properly formatted shape data into whiteboard service
+		/*
+		if (this.selectedShape && this.whiteboard.allowWrite) {
+			const positionPosition: Point = {
+				x: this.selectedShape.position.x,
+				y: this.selectedShape.position.y
+			};
+			const scaling: Point = {
+				x: this.selectedShape.scaling.x,
+				y: this.selectedShape.scaling.y
+			};
 
-			// this.whiteboard.whiteboardService.createShape(this.whiteboard.key, this.whiteboard.shapeOptions)
-			// 	.subscribe(
-			// 		data => {
-			// 			console.log('successfully added text', data);
-			// 		},
-			// 		err => {
-			// 			console.log('add text error', err);
-			// 		}
-			// 	);
-		}
+			const position: Position = {
+				position: positionPosition,
+				rotation: this.selectedShape.rotation,
+				scaling
+			};
+
+			const size: Size = {
+				width: this.selectedShape.size.width,
+				height: this.selectedShape.size.height
+			};
+
+			let radius: number | Size;
+			if (typeof this.selectedShape.radius === 'number') {
+				radius = this.selectedShape.radius;
+			} else {
+				radius = {
+					width: this.selectedShape.radius.width,
+					height: this.selectedShape.radius.height
+				};
+			}
+
+			this.whiteboard.whiteboardService.createShape(
+				this.whiteboard.key,
+				this.whiteboard.shapeType,
+				this.whiteboard.shapeOptions,
+				position,
+				size,
+				radius)
+				.subscribe(
+					data => {
+						console.log('successfully added text', data);
+					},
+					err => {
+						console.log('add text error', err);
+					}
+				);
+		}*/
 	}
 
 	toolchange(nextTool) {

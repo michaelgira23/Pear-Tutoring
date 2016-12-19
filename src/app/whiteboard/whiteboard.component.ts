@@ -64,7 +64,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 
 	// What tool is selected in the whiteboard toolbar
 	@Input()
-	tool = 'draw';
+	tool = 'pen';
 
 	// Pen tool
 	@Input()

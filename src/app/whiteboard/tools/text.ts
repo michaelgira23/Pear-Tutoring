@@ -1,5 +1,5 @@
 import { WhiteboardComponent } from './../whiteboard.component';
-import { WhiteboardText } from './../../shared/model/whiteboard.service';
+import { WhiteboardText, Position, Point } from './../../shared/model/whiteboard.service';
 
 declare const paper;
 
@@ -89,20 +89,20 @@ export class Text {
 			console.log('mouseup', this.selectedText);
 
 			// Convert points into objects for database
-			const anchor = {
+			const anchor: Point = {
 				x: this.selectedText.point.x,
 				y: this.selectedText.point.y
 			};
-			const positionPosition = {
+			const positionPosition: Point = {
 				x: this.selectedText.position.x,
 				y: this.selectedText.position.y
 			};
-			const scaling = {
+			const scaling: Point = {
 				x: this.selectedText.scaling.x,
 				y: this.selectedText.scaling.y
 			};
 
-			const position = {
+			const position: Position = {
 				anchor,
 				position: positionPosition,
 				rotation: this.selectedText.rotation,
