@@ -11,18 +11,21 @@ export class Cursor {
 	resizingX: boolean;
 	resizingY: boolean;
 
-	hitTestOptions = {
-		fill: true,
-		stroke: true,
-		bounds: true,
-		tolerance: 5,
-		// ensures that hit test doesn't pick up the background rectangle
-		match: function(result) {
-			return result.item.id !== this.whiteboard.background.id;
-		}
-	};
+	hitOptions: any;
 
-	constructor(private whiteboard: WhiteboardComponent) { }
+	constructor(private whiteboard: WhiteboardComponent) {
+		var self = this;
+		this.hitOptions = {
+			fill: true,
+			stroke: true,
+			bounds: true,
+			tolerance: 5,
+			// ensures that hit test doesn't pick up the background rectangle
+			match: function(result) {
+				return result.item.id !== self.whiteboard.background.id;
+			}
+		}
+	}
 
 	/**
 	 * Event handlers
@@ -30,14 +33,15 @@ export class Cursor {
 
 	mousedown(event) {
 		const point = this.whiteboard.cursorPoint(event);
-		const hit = paper.project.hitTest(point, this.hitTestOptions);
+		const hit = paper.project.hitTest(point, this.hitOptions);
 
 		if (!hit) {
 			return;
 		} else {
 			let item = hit.item;
 			console.log(hit);
-			item.brintToFront();
+			// not working for some weird reason:
+			// item.brintToFront();
 			// deselects all other items
 			this.whiteboard.selectOnly(item);
 
@@ -67,13 +71,18 @@ export class Cursor {
 				let deltaX = this.resizingX ? Math.abs(point.x - this.mouseAnchorX) : 0;
 				let deltaY = this.resizingY ? Math.abs(point.y - this.mouseAnchorY) : 0;
 
+				console.log("deltaX: " + deltaX + " deltaY: " + deltaY);
+
 				// it loops thru all objects just cuz, but there should only be one object in this array
 				// because other objects are deselected when mousedown() detects a resize
 				this.whiteboard.selectedItems.forEach(function(item) {
 
 					// see Appendix A for proof that this works
-					let xScale = 2 * (1 + deltaX / item.width);
-					let yScale = 2 * (1 + deltaY / item.height);
+					let xScale = 2 * (1 + deltaX / item.bounds.width);
+					let yScale = 2 * (1 + deltaY / item.bounds.height);
+
+					console.log("item width: " + item.width + " item height: " + item.height);
+					console.log("X scale: " + xScale + " yScale: " + yScale);
 
 					item.scale(xScale, yScale);
 

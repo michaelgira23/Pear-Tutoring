@@ -62,8 +62,8 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	/**
 	* Selected entities
 	*/
-	selectedItems: any[];
-	selectedPoints: any[];
+	selectedItems = [];
+	selectedPoints = [];
 
 	/**
 	 * Tool variables
