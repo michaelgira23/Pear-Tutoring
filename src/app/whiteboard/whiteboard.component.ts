@@ -11,6 +11,7 @@ import { Pen } from './tools/pen';
 import { Eraser } from './tools/eraser';
 import { Text } from './tools/text';
 import { Shape } from './tools/shape';
+import {Cursor} from './tools/cursor';
 
 declare const paper;
 
@@ -59,6 +60,12 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	resizingBackground: boolean = false;
 
 	/**
+	* Selected entities
+	*/
+	selectedItems: any[];
+	selectedPoints: any[];
+
+	/**
 	 * Tool variables
 	 */
 
@@ -85,7 +92,8 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		pen   : new Pen(this),
 		eraser: new Eraser(this),
 		text  : new Text(this),
-		shape : new Shape(this)
+		shape : new Shape(this),
+		cursor: new Cursor(this)
 	};
 
 	constructor(public whiteboardService: WhiteboardService) { }
@@ -303,4 +311,24 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		this.background.fillColor = color;
 	}
 
+	/**
+	* Selection functions
+	*/
+
+	deselectAllItems(): void {
+		this.selectedItems.forEach(function(item) {
+			item.selected = false;
+		});
+		this.selectedItems = [];
+	}
+
+	selectItem(item: any): void {
+		item.selected = true;
+		this.selectedItems.push(item);
+	}
+
+	selectOnly(item: any): void {
+		this.deselectAllItems();
+		this.selectItem(item);
+	}
 }
