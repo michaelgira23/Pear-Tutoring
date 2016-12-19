@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { SessionService } from '../shared/model/session.service';
-import { AuthService } from '../shared/security/auth.service';
+import { UserService } from '../shared/model/user.service';
 import { Session } from '../shared/model/session';
 import { Validators, FormGroup, FormBuilder } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -21,13 +21,13 @@ export class SchedulingComponent implements OnInit {
 		return this.tutorSessions.concat(this.tuteeSessions);
 	};
 
-	constructor(private sessionService: SessionService, private fb: FormBuilder, private router: Router, private auth: AuthService) { }
+	constructor(private sessionService: SessionService, private fb: FormBuilder, private router: Router, private userService: UserService) { }
 
 	ngOnInit() {
 		this.joinSessionForm = this.fb.group({
 			'sessionId': ['', [Validators.required]]
 		});
-		this.auth.auth$.subscribe(val => {
+		this.userService.auth$.subscribe(val => {
 			this.sessionService.findMySessions().tutorSessions
 			.subscribe(
 				val => this.tutorSessions = val,

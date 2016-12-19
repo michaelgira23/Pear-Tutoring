@@ -30,6 +30,7 @@ import { SessionComponent } from './session/session.component';
 import { DisplaySessionComponent } from './scheduling/display-session/display-session.component';
 import { SettingsComponent } from './settings/settings.component';
 import { SessionCalendarComponent } from './scheduling/session-calendar/session-calendar.component';
+import { DisplayUserComponent } from './scheduling/display-user/display-user.component';
 
 @NgModule({
 	declarations: [
@@ -48,7 +49,8 @@ import { SessionCalendarComponent } from './scheduling/session-calendar/session-
 		DisplaySessionComponent,
 		RegisterComponent,
 		SettingsComponent,
-		SessionCalendarComponent
+		SessionCalendarComponent,
+		DisplayUserComponent
 	],
 	imports: [
 		BrowserModule,

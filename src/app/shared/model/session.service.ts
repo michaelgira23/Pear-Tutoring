@@ -3,7 +3,7 @@ import { Observable, Subject } from 'rxjs/Rx';
 import { AngularFireDatabase, FirebaseRef } from 'angularfire2';
 import { Session } from './session';
 import { User } from './user';
-import { AuthService } from '../security/auth.service';
+import { UserService, userStatus } from './user.service';
 import { WhiteboardService, WhiteboardOptions } from './whiteboard.service';
 import * as moment from 'moment';
 
@@ -12,11 +12,10 @@ export class SessionService {
 	sdkDb: any;
 	uid: string;
 
-	constructor(private db: AngularFireDatabase, @Inject(FirebaseRef) fb, private authService: AuthService, private whiteboardService: WhiteboardService) {
+	constructor(private db: AngularFireDatabase, @Inject(FirebaseRef) fb, private userService: UserService, private whiteboardService: WhiteboardService) {
 		this.sdkDb = fb.database().ref();
-		this.authService.auth$.subscribe(val => {
+		this.userService.auth$.subscribe(val => {
 			if (val) this.uid = val.uid;
-			console.log('get uid: ' +  this.uid);
 		});
 	}
 
@@ -42,13 +41,18 @@ export class SessionService {
 		let sessionWithUser;
 		return sessionQuery.switchMap(val => {
 			sessionWithUser = val;
-			return this.db.object('users/' + val.tutor)
+			return this.db.object('users/' + val.tutor);
 		}).map(val => {
 			sessionWithUser.tutor = val;
 			return sessionWithUser;
 		}).switchMap(val => {
 			sessionWithUser = val;
-			return Observable.combineLatest(val.tutees.map(tutee => this.db.object('users/' + tutee)));
+			return Observable.combineLatest(val.tutees.map(tutee => {
+				if (typeof tutee !== 'string') {
+					return this.db.object('users/' + tutee.$key);
+				}
+				return this.db.object('users/' + tutee);
+			}));
 		}).map(val => {
 			sessionWithUser.tutees = val;
 			return sessionWithUser;
@@ -63,17 +67,25 @@ export class SessionService {
 				val.map((session) => this.db.object('users/' + session.tutor))
 			);
 		}).map((val: any[]) => {
-			sessionsWithUser.map((session, index) => val[index]);
+			sessionsWithUser.map((session, index) => session.tutor = val[index]);
 			return sessionsWithUser;
 		}).switchMap((val: any[]) => {
 			sessionsWithUser = val;
 			return Observable.combineLatest(
 				val.map((session) => Observable.combineLatest(
-					session.tutees.map(tutee => this.db.object('users/' + tutee))
+					session.tutees.map(tutee => {
+						if (typeof tutee !== 'string') {
+							return this.db.object('users/' + tutee.$key);
+						}
+						return this.db.object('users/' + tutee);
+					})
 				))
 			);
-		}).map((val: any[]) => {
-			sessionsWithUser.map((session, sessionIndex) => session.tutee.map((tutee, tuteeIndex) => val[sessionIndex][tuteeIndex]));
+		}).map((val: any[][]) => {
+			sessionsWithUser.map((session, sessionIndex) => {
+				session.tutees = session.tutees.map((tutee, tuteeIndex) => val[sessionIndex][tuteeIndex]);
+				return session;
+			});
 			return sessionsWithUser;
 		});
 	}
@@ -171,15 +183,23 @@ export class SessionService {
 	joinSession(sessionId: String): Observable<any> {
 		if (!this.uid) return Observable.throw('Rip no login info');
 
-		this.sdkDb.child(`/usersInSession/${sessionId}/${this.uid}`).onDisconnect().set(false);
+		// this.sdkDb.child(`/usersInSession/${sessionId}/${this.uid}`).onDisconnect().set(false);
 
 		let dataToSave = {};
 		dataToSave[`/usersInSession/${sessionId}/${this.uid}`] = true;
+		this.userService.changeStatus(userStatus.IN_SESSION);
 		return this.firebaseUpdate(dataToSave);
 	}
 
-	getOnlineUsers(sessionId): Observable<User[]> {
-		return this.db.list('usersInSession/' + sessionId)
+	leaveSession(sessionId: string): Observable<any> {
+		let dataToSave = {};
+		dataToSave[`/usersInSession/${sessionId}/${this.uid}`] = false;
+		this.userService.changeStatus(userStatus.ONLINE);
+		return this.firebaseUpdate(dataToSave);
+	}
+
+	getOnlineUsers(sessionId): Observable<any[]> {
+		return this.db.list('usersInSession/' + sessionId);
 		// .map(uids => uids.map(uid => this.db.object('users/' + uid.$key)))
 		// .flatMap(uid$arr => Observable.combineLatest(uid$arr))
 		// .map(User.fromJsonList);

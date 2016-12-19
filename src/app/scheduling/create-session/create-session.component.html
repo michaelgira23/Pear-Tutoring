@@ -3,7 +3,7 @@
     start: <input formControlName="start" required><br/>
     end: <input formControlName="end" required><br/>
     Subject: 
-    <select>
+    <select formControlName="subject">
       <option *ngFor="let option of allowedSubjects" [value]="option">{{ option }}</option>
     </select><br/>
     max: <input formControlName="max" required><br/>

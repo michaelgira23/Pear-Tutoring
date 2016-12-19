@@ -1,8 +1,14 @@
 import { Injectable, Inject } from '@angular/core';
 import { AngularFireDatabase, FirebaseRef, FirebaseAuthState } from 'angularfire2';
 import { AuthService } from '../security/auth.service';
-import { Observable, Subject } from 'rxjs/Rx';
+import { Observable, Subject, BehaviorSubject } from 'rxjs/Rx';
 import { User } from './user';
+
+export const userStatus = {
+	IN_SESSION: 2,
+	ONLINE: 1,
+	OFFLINE: 0
+};
 
 @Injectable()
 export class UserService {
@@ -10,15 +16,30 @@ export class UserService {
 	sdkDb: any;
 	sdkStorage: any;
 	uid: string;
+	auth$: BehaviorSubject<FirebaseAuthState>;
 
 	constructor(@Inject(FirebaseRef) fb, private db: AngularFireDatabase, private auth: AuthService) {
 		this.sdkDb = fb.database().ref();
 		this.sdkStorage = fb.storage().ref();
-		auth.auth$.subscribe(val => this.uid = val ? val.uid : undefined);
+		this.auth$ = auth.auth$
+		this.auth$.subscribe(val => {
+			if (val) {
+				this.uid = val.uid;
+				console.log('get uid: ' +  this.uid);
+				this.changeStatus(userStatus.ONLINE);
+				this.sdkDb.child(`users/${this.uid}/status`).onDisconnect().set(userStatus.OFFLINE);
+			} else {
+				this.changeStatus(userStatus.OFFLINE);
+			}
+		});
 	}
 
 	login(email: string, password: string): Observable<FirebaseAuthState> {
 		return this.auth.login(email, password);
+	}
+
+	logout() {
+		return this.auth.logout();
 	}
 
 	register(email: string, password: string): Observable<any> {
@@ -56,6 +77,14 @@ export class UserService {
 				dataToSave[`users/${this.uid}`] = userToSave;
 				return this.firebaseUpdate(dataToSave);
 			});
+	}
+
+	changeStatus(status: number): void {
+		if (status === userStatus.ONLINE || status === userStatus.OFFLINE || status === userStatus.IN_SESSION) {
+			status = this.uid ? status : userStatus.OFFLINE;
+			console.log(status);
+			this.db.object(`users/${this.uid}`).update({status});
+		}
 	}
 
 	private firebaseUpdate(dataToSave) {

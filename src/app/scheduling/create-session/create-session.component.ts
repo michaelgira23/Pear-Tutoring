@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { Validators, FormGroup, FormBuilder } from '@angular/forms';
 import { Router } from '@angular/router';
 import { SessionService, SessionOptions, allowedSubjects } from '../../shared/model/session.service';
-import { AuthService } from '../../shared/security/auth.service';
 import * as moment from 'moment';
 import { UserService } from '../../shared/model/user.service';
 import { User } from '../../shared/model/user';
@@ -19,7 +18,7 @@ export class CreateSessionComponent implements OnInit {
 	uid: string;
 	allowedSubjects: string[] = allowedSubjects;
 
-	constructor(private fb: FormBuilder, private sessionService: SessionService, private userService: UserService, private auth: AuthService, private router: Router) { }
+	constructor(private fb: FormBuilder, private sessionService: SessionService, private userService: UserService, private router: Router) { }
 
 	ngOnInit() {
 		this.createSessionForm = this.fb.group({
@@ -40,7 +39,7 @@ export class CreateSessionComponent implements OnInit {
 			err => console.log('Getting users error', err)
 		);
 
-		this.auth.auth$.subscribe(val => this.uid = val ? val.uid : null);
+		this.userService.auth$.subscribe(val => this.uid = val ? val.uid : null);
 	}
 
 	createSession() {

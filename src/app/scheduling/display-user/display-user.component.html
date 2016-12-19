@@ -1,0 +1,12 @@
+<div *ngIf="user" class="card">
+
+  <img class="img-fluid" [src]="user.pfp">
+
+  <div class="card-block">
+    <h4 class="card-title">{{ user.name }}</h4>
+  </div>
+  
+  <div class="card-block">
+    <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="10" [attr.fill]="statusColor"/></svg>
+  <div>
+</div>
