@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { AngularFire, FirebaseAuthState, FirebaseListObservable, FirebaseObjectObservable } from 'angularfire2';
 import { Observable } from 'rxjs/Rx';
 
-import { UserService } from '../model/user.service';
+import { AuthService } from '../security/auth.service';
 
 export const defaultWhiteboardOptions: WhiteboardOptions = {
 	background: '#FFF'
@@ -25,10 +25,10 @@ export class WhiteboardService {
 	authInfo: FirebaseAuthState;
 	whiteboards: FirebaseListObservable<any>;
 
-	constructor(private af: AngularFire, private userService: UserService) {
+	constructor(private af: AngularFire, private authService: AuthService) {
 		this.whiteboards = this.af.database.list('whiteboards');
 
-		this.userService.auth$.subscribe(
+		this.authService.auth$.subscribe(
 			data => {
 				this.authInfo = data;
 			},

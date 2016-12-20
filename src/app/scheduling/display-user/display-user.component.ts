@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, OnChanges, SimpleChange } from '@angular/core';
 import { User } from '../../shared/model/user';
 import { userStatus } from '../../shared/model/user.service';
 
@@ -7,17 +7,17 @@ import { userStatus } from '../../shared/model/user.service';
 	templateUrl: './display-user.component.html',
 	styleUrls: ['./display-user.component.scss']
 })
-export class DisplayUserComponent implements OnInit {
+export class DisplayUserComponent implements OnInit, OnChanges {
 
 	@Input()
 	user: User;
 	get statusColor(): string {
 		switch (this.user.status) {
 			case userStatus.ONLINE: return '#00C851';
-			case userStatus.OFFLINE: return '2E2E2E';
-			case userStatus.IN_SESSION: return 'FFBB33';
+			case userStatus.OFFLINE: return '#4B515D';
+			case userStatus.IN_SESSION: return '#FFBB33';
 		}
-		return '#2E2E2E';
+		return '#4B515D';
 	};
 
 	constructor() { }
@@ -25,4 +25,7 @@ export class DisplayUserComponent implements OnInit {
 	ngOnInit() {
 	}
 
+	ngOnChanges(changes: {[key: string]: SimpleChange}) {
+		this.user = changes['user'].currentValue;
+	}
 }

@@ -4,6 +4,7 @@ import { AngularFireDatabase, FirebaseRef } from 'angularfire2';
 import { Session } from './session';
 import { User } from './user';
 import { UserService, userStatus } from './user.service';
+import { AuthService } from '../security/auth.service';
 import { WhiteboardService, WhiteboardOptions } from './whiteboard.service';
 import * as moment from 'moment';
 
@@ -12,9 +13,9 @@ export class SessionService {
 	sdkDb: any;
 	uid: string;
 
-	constructor(private db: AngularFireDatabase, @Inject(FirebaseRef) fb, private userService: UserService, private whiteboardService: WhiteboardService) {
+	constructor(private db: AngularFireDatabase, @Inject(FirebaseRef) fb, private userService: UserService, private whiteboardService: WhiteboardService, private auth: AuthService) {
 		this.sdkDb = fb.database().ref();
-		this.userService.auth$.subscribe(val => {
+		this.auth.auth$.subscribe(val => {
 			if (val) this.uid = val.uid;
 		});
 	}

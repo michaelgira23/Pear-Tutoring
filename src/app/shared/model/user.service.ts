@@ -16,13 +16,11 @@ export class UserService {
 	sdkDb: any;
 	sdkStorage: any;
 	uid: string;
-	auth$: BehaviorSubject<FirebaseAuthState>;
 
 	constructor(@Inject(FirebaseRef) fb, private db: AngularFireDatabase, private auth: AuthService) {
 		this.sdkDb = fb.database().ref();
 		this.sdkStorage = fb.storage().ref();
-		this.auth$ = auth.auth$
-		this.auth$.subscribe(val => {
+		auth.auth$.subscribe(val => {
 			if (val) {
 				this.uid = val.uid;
 				console.log('get uid: ' +  this.uid);
@@ -32,14 +30,6 @@ export class UserService {
 				this.changeStatus(userStatus.OFFLINE);
 			}
 		});
-	}
-
-	login(email: string, password: string): Observable<FirebaseAuthState> {
-		return this.auth.login(email, password);
-	}
-
-	logout() {
-		return this.auth.logout();
 	}
 
 	register(email: string, password: string): Observable<any> {

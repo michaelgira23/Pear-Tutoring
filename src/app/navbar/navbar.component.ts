@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FirebaseAuthState } from 'angularfire2';
-import { UserService } from '../shared/model/user.service';
+import { AuthService } from '../shared/security/auth.service';
 
 @Component({
 	selector: 'app-navbar',
@@ -11,10 +11,10 @@ export class NavbarComponent implements OnInit {
 
 	authInfo: FirebaseAuthState;
 
-	constructor(private userService: UserService) { }
+	constructor(private authService: AuthService) { }
 
 	ngOnInit() {
-		this.userService.auth$.subscribe(
+		this.authService.auth$.subscribe(
 			data => {
 				this.authInfo = data;
 			},
