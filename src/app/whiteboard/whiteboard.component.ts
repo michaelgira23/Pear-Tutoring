@@ -87,7 +87,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	@Input()
 	shapeType: string = 'polygon';
 	@Input()
-	polygonSides: number = 4;
+	polygonSides: any = 4;
 
 	// Tools
 	tools = {

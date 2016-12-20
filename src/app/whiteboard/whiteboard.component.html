@@ -78,7 +78,7 @@
 		<input class="range" type="range" min="1" [(ngModel)]="shapeOptions.strokeWidth">
 	</div>
 	<div class="option">
-		<label>Shape {{ polygonSides }}</label>
+		<label>Shape {{ polygonSides | json }}</label>
 		<div class="form-inline">
 			<fieldset class="form-group">
 				<input id="shape-line" type="radio" value="line" [(ngModel)]="shapeType">
@@ -95,7 +95,7 @@
 			<fieldset class="form-group">
 				<input id="shape-polygon" type="radio" value="polygon" [(ngModel)]="shapeType">
 				<label for="shape-polygon">Polygon</label>
-				<input [(ngModel)]="polygonSides">
+				<input class="number" type="number" [(ngModel)]="polygonSides">
 			</fieldset>
 			<fieldset class="form-group">
 				<input id="shape-star" type="radio" value="star" [(ngModel)]="shapeType">

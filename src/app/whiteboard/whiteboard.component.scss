@@ -76,6 +76,12 @@ $sophisticated-white: #eee;
 			margin: 0;
 			padding: 0;
 		}
+
+		.number {
+			max-width: 2.5rem;
+			margin-left: 0.5rem;
+			color: $sophisticated-white;
+		}
 	}
 }
 

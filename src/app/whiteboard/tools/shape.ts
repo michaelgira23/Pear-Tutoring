@@ -50,6 +50,7 @@ export class Shape {
 			// Create new shape
 			this.startPoint = point;
 			const shadowOffsetPoint = new paper.Point(this.whiteboard.shapeOptions.shadowOffset.x, this.whiteboard.shapeOptions.shadowOffset.y);
+			const sides = parseInt(this.whiteboard.polygonSides, 10);
 			this.selectedShape = new paper.Path.RegularPolygon({
 				// Stroke Style
 				strokeColor  : this.whiteboard.shapeOptions.strokeColor,
@@ -67,7 +68,7 @@ export class Shape {
 				shadowBlur   : this.whiteboard.shapeOptions.shadowBlur,
 				shadowOffset : shadowOffsetPoint,
 				// Shape
-				sides: this.whiteboard.polygonSides,
+				sides: sides ? sides : 4,
 				radius: 1
 			});
 
