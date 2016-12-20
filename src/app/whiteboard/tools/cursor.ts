@@ -15,6 +15,8 @@ export class Cursor {
 	resizingY: boolean;
 	// or are we moving an item?
 	moving: boolean;
+	// or are we drawing a selection box?
+	selecting: boolean;
 
 	hitOptions: any;
 
@@ -41,6 +43,7 @@ export class Cursor {
 		const hit = paper.project.hitTest(point, this.hitOptions);
 
 		if (!hit) {
+			this.whiteboard.deselectAllItems();
 			return;
 		} else {
 
@@ -67,16 +70,19 @@ export class Cursor {
 			} else if (hit.type === 'fill') {
 
 				this.moving = true;
+				console.log("here");
 
+			} else {
+				this.selecting = true;
 			}
 		}
 	}
 
 	mousemove(event) {
-		const point = this.whiteboard.cursorPoint(event);
-
 		// if mouse is dragged
 		if (this.whiteboard.mouseDown) {
+			const point = this.whiteboard.cursorPoint(event);
+	
 			if (this.resizingX || this.resizingY) {
 				// if we aren't resizing x, set that delta to 0. same with y.
 				let deltaX = this.resizingX ? point.x - this.mouseAnchorX : 0;
@@ -105,6 +111,24 @@ export class Cursor {
 
 				this.whiteboard.selectedItems.forEach(function(item) {
 					item.position = new paper.Point(originalCenter.x + deltaX, originalCenter.y + deltaY);
+				});
+			} else if (this.selecting) {
+
+				let selectionBox = new paper.Rectangle(new paper.Point(this.mouseAnchorX, this.mouseAnchorY), point);
+				let self = this;
+
+				let items = paper.project.getItems({
+					recursive: true,
+					overlapping: selectionBox,
+					// don't highlight the background
+					match: function(result) {
+						return result.item.id !== self.whiteboard.background.id;
+					}
+				});
+				console.log(selectionBox);
+				console.log(items);
+				items.forEach(function(item) {
+					self.whiteboard.selectItem(item);
 				});
 			}
 		}
@@ -139,6 +163,10 @@ export class Cursor {
 				// 		position
 				// 	})]);
 				// }
+			} else if (this.moving) {
+				this.moving = false;
+			} else if (this.selecting) {
+				this.selecting = false;
 			}
 		}
 	}
@@ -172,7 +200,6 @@ because we scale from the center (both sides increasing), we're going to multipl
 we're going to take the absolute value of the whole thing, so that if it's negative (you start scaling from right,
 and shrink it past its center line) it will grow bigger again
 so our final value is scale = abs(1 + 2 * deltaX / currentWidth)
-QED motherfucker
 
 this extends to the y dimension
 

@@ -22,66 +22,17 @@ export class Text {
 
 	mousedown(event) {
 		const point = this.whiteboard.cursorPoint(event);
-		const hit = paper.project.hitTest(point, {
-			class: paper.PointText,
-			fill: true,
-			stroke: true,
-			segments: true,
-			bounds: true
+		this.editExisting = false;
+
+		let text = prompt("enter text here: ", "TEXT");
+
+		this.selectedText = new paper.PointText({
+			content: text,
+			point: point,
+			fillColor: 'black',
+			fontSize: '2.5em',
+			fontWeight: 600
 		});
-
-		console.log(hit);
-
-		let key = null;
-
-		if (hit) {
-			key = this.textIdToPushKey(hit.item.id);
-
-			if (key) {
-				console.log('select existing text');
-				this.editExisting = true;
-				this.selectedText = this.canvasText[key];
-			}
-		}
-
-		if (!key) {
-			// Create new text
-			console.log('create new text');
-			this.editExisting = false;
-			this.selectedText = new paper.PointText({
-				content: 'TEXT',
-				point: point,
-				fillColor: 'black',
-				fontSize: '2.5em',
-				fontWeight: 600
-			});
-		}
-
-		console.log(this.selectedText);
-
-		this.deselectAllText();
-		this.selectedText.selected = true;
-	}
-
-	mousemove(event) {
-		if (this.selectedText && this.whiteboard.mouseDown) {
-			// Check if mouse is over any of the manipulation points
-			const point = this.whiteboard.cursorPoint(event);
-			const hit = this.selectedText.hitTest(point, {
-				tolerance: 1000,
-				fill: true,
-				stroke: true,
-				segments: true,
-				bounds: true
-			});
-
-			console.log(Date.now(), hit);
-
-			if (hit) {
-				// If dragging one of the text corners, move selected text
-				this.selectedText.point = point;
-			}
-		}
 	}
 
 	mouseup(event) {
