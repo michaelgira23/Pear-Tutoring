@@ -9,10 +9,14 @@ export class Cursor {
 	// original bounds at moment transform started
 	originalBounds: any;	
 
-	// are we resizing an item horizontally, vertically, or both?
-	// depends on what part of its bounding box we drag
-	resizingX: boolean;
-	resizingY: boolean;
+	resizing: boolean;
+	// are we resizing an item horizontally, vertically, or both? depends on what part of its bounding box we drag
+	// implicit in hitTop is hitBottom, since you can only get the top or bottom of a bounding rectangle
+	// so if hitTop is true, hitBottom is false, and vice versa. same with hitLeft and hitRight
+	hitTop: boolean;
+	hitBottom: boolean;
+	hitLeft: boolean;
+	hitRight: boolean;
 	// or are we moving an item?
 	moving: boolean;
 	// or are we drawing a selection box?
@@ -63,9 +67,12 @@ export class Cursor {
 
 			if (hit.type === 'bounds') {
 
-				// determine if we're resizing in x-direction, y-direction, or both
-				this.resizingX = (hit.point.x === item.bounds.left || hit.point.x === item.bounds.right);
-				this.resizingY = (hit.point.y === item.bounds.top || hit.point.y === item.bounds.bottom);
+				// which anchor point is being dragged?
+				this.hitTop = hit.point.y === item.bounds.top;
+				this.hitBottom = hit.point.y === item.bounds.bottom;
+				this.hitLeft = hit.point.x === item.bounds.left;
+				this.hitRight = hit.point.x === item.bounds.right;
+				this.resizing = true;
 
 			} else if (hit.type === 'fill') {
 
@@ -82,24 +89,36 @@ export class Cursor {
 		// if mouse is dragged
 		if (this.whiteboard.mouseDown) {
 			const point = this.whiteboard.cursorPoint(event);
-	
-			if (this.resizingX || this.resizingY) {
-				// if we aren't resizing x, set that delta to 0. same with y.
-				let deltaX = this.resizingX ? point.x - this.mouseAnchorX : 0;
-				let deltaY = this.resizingY ? point.y - this.mouseAnchorY : 0;
-				let originalBounds = this.originalBounds;
+		
+			if (this.resizing) {
 
-				// it loops thru all objects just cuz, but there should only be one object in this array
-				// because other objects are deselected when mousedown() detects a resize
-				// although this may actually work with multiple items? idk. we'll keep it for now
+				// In order to edit the item's bounds, we must pick a point that is diagonal
+				// from where the mouse started dragging. However, if the mouse dragged the side
+				// of the bounding box, we have to change the mouse's "position" so that only
+				// the right dimension is scaled.
+				// addX and addY = 0, width, or height of originalBounds
+				// if addX = width, the point we pick is on the right side of originalBounds,
+				// because originalBounds.x + originalBounds.width = x coordinate of its right side
+				// and vice versa. also applies to y.
+
+				// if mouse drags on right, we want the left side point, which means addX = 0
+				let addX = 0;
+				if (this.hitRight) {}
+				// if mouse drags on left, we want the right side point, which means addX = width
+				else if (this.hitLeft) addX = this.originalBounds.width;
+				// if mouse drags neither, we use the left side point, and set the mouse x coordinate
+				// to a constant: the originalBound's right side (so the x-scale doesn't change)
+				else point.x = this.originalBounds.x + this.originalBounds.width;
+				// same with Y
+				let addY = 0;
+				if (this.hitBottom) {}
+				else if (this.hitTop) addY = this.originalBounds.height;
+				else point.y = this.originalBounds.y + this.originalBounds.height;
+
+				let scalePoint = new paper.Point(this.originalBounds.x + addX, this.originalBounds.y + addY);
+
 				this.whiteboard.selectedItems.forEach(function(item) {
-
-					// see Appendix A for proof that this works
-					let xScale = Math.abs(1 + 2 * deltaX / originalBounds.width);
-					let yScale = Math.abs(1 + 2 * deltaY / originalBounds.height);
-
-					item.scaling = new paper.Point(xScale, yScale);
-
+					item.bounds = new paper.Rectangle(scalePoint, point);
 				});
 
 			} else if (this.moving) {
@@ -137,9 +156,8 @@ export class Cursor {
 	mouseup(event) {
 		if (this.whiteboard.allowWrite) {
 	
-			if (this.resizingX || this.resizingY) {
-				this.resizingX = false;
-				this.resizingY = false;
+			if (this.resizing) {
+				this.resizing = false;
 
 				// write to database
 				// some reference code:
@@ -182,25 +200,3 @@ export class Cursor {
 
 
 }
-
-/* APPENDIX (maths :3)
-
-A:
-
-currentWidth - width of item
-deltaX - amount mouse has dragged from initial mousedown
-newWidth - width that we want to resize the item to (should line up with mouse's current x position)
-
-scale (unknown) - constant we need to find
-
-newWidth = currentWidth + deltaX
-currentWidth * scale = newWidth
-scale = newWidth / currentWidth = (currentWidth + deltaX) / currentWidth = 1 + (deltaX / currentWidth)
-because we scale from the center (both sides increasing), we're going to multiply deltaX by 2
-we're going to take the absolute value of the whole thing, so that if it's negative (you start scaling from right,
-and shrink it past its center line) it will grow bigger again
-so our final value is scale = abs(1 + 2 * deltaX / currentWidth)
-
-this extends to the y dimension
-
-*/
