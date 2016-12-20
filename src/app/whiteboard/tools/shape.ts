@@ -67,14 +67,11 @@ export class Shape {
 				shadowBlur   : this.whiteboard.shapeOptions.shadowBlur,
 				shadowOffset : shadowOffsetPoint,
 				// Shape
-				sides: 3,
-				radius: 10
+				sides: this.whiteboard.polygonSides,
+				radius: 1
 			});
 
 			this.creationRect = new paper.Rectangle(this.startPoint, this.startPoint);
-			this.visualRect = new paper.Path.Rectangle(this.creationRect);
-			this.visualRect.strokeColor = '#08f';
-			this.visualRect.dashArray = [10, 4];
 		}
 
 		this.deselectAllShapes();
@@ -88,8 +85,14 @@ export class Shape {
 			this.creationRect = new paper.Rectangle(this.startPoint, point);
 			if (this.creationRect.width > 0 && this.creationRect.height > 0) {
 				this.selectedShape.bounds = this.creationRect;
+
+				if (!this.visualRect) {
+					this.visualRect = new paper.Path.Rectangle(this.creationRect);
+					this.visualRect.strokeColor = '#08f';
+					this.visualRect.dashArray = [10, 5];
+				}
+				this.visualRect.bounds = this.creationRect;
 			}
-			this.visualRect.bounds = this.creationRect;
 		}
 	}
 

@@ -71,7 +71,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 
 	// What tool is selected in the whiteboard toolbar
 	@Input()
-	tool = 'pen';
+	tool: string = 'cursor';
 
 	// Pen tool
 	@Input()
@@ -85,15 +85,17 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	@Input()
 	shapeOptions = defaultShapeOptions;
 	@Input()
-	shapeType: string = 'rectangle';
+	shapeType: string = 'polygon';
+	@Input()
+	polygonSides: number = 4;
 
 	// Tools
 	tools = {
+		cursor: new Cursor(this),
 		pen   : new Pen(this),
 		eraser: new Eraser(this),
 		text  : new Text(this),
-		shape : new Shape(this),
-		cursor: new Cursor(this)
+		shape : new Shape(this)
 	};
 
 	constructor(public whiteboardService: WhiteboardService) { }
@@ -107,6 +109,11 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		this.canvasEl = this.canvas.nativeElement;
 		// Setup Canvas with paper.js
 		paper.setup(this.canvasEl);
+
+		// Set background if it exists
+		if (this.whiteboard) {
+			this.setBackgroundColor(this.whiteboard.background);
+		}
 	}
 
 	ngOnChanges(changes: SimpleChanges) {

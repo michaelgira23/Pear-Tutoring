@@ -7,19 +7,19 @@
 <!-- Tool selection -->
 <div *ngIf="showToolbar" class="toolbar">
 	<div class="tool-selection">
-		<button class="btn btn-primary" [class.active]="tool === 'pen'" (click)="tool = 'pen'">
+		<button class="btn btn-primary" [class.active]="tool === 'cursor'" (click)="tool = 'cursor'">
+			<span class="fa fa-mouse-pointer"></span>
+		</button>
+		<button class="btn btn-default" [class.active]="tool === 'pen'" (click)="tool = 'pen'">
 			<span class="fa fa-pencil"></span>
 		</button>
-		<button class="btn btn-default" [class.active]="tool === 'eraser'" (click)="tool = 'eraser'">
+		<button class="btn btn-secondary" [class.active]="tool === 'eraser'" (click)="tool = 'eraser'">
 			<span class="fa fa-eraser"></span>
 		</button>
-		<button class="btn btn-secondary" [class.active]="tool === 'text'" (click)="tool = 'text'">
+		<button class="btn btn-success" [class.active]="tool === 'text'" (click)="tool = 'text'">
 			<span class="fa fa-i-cursor"></span>
 		</button>
-		<button class="btn btn-success" [class.active]="tool === 'shape'" (click)="tool = 'shape'">
-			<span class="fa fa-square"></span>
-		</button>
-		<button class="btn btn-danger" [class.active]="tool === 'cursor'" (click)="tool = 'cursor'">
+		<button class="btn btn-info" [class.active]="tool === 'shape'" (click)="tool = 'shape'">
 			<span class="fa fa-square"></span>
 		</button>
 	</div>
@@ -54,6 +54,54 @@
 	<div class="option">
 		<label>Size</label>
 		<input class="range" type="range" min="1" [(ngModel)]="textOptions.fontSize">
+	</div>
+</div>
+
+<!-- Shape Toolbar -->
+<div *ngIf="showToolbar && tool === 'shape'" class="tool-toolbar">
+	<div class="option">
+		<label>Fill Color</label>
+		<button class="color"
+			[(colorPicker)]="shapeOptions.fillColor"
+			[cpFallbackColor]="shapeOptions.fillColor"
+			[style.background]="shapeOptions.fillColor"></button>
+	</div>
+	<div class="option">
+		<label>Stroke Color</label>
+		<button class="color"
+			[(colorPicker)]="shapeOptions.strokeColor"
+			[cpFallbackColor]="shapeOptions.strokeColor"
+			[style.background]="shapeOptions.strokeColor"></button>
+	</div>
+	<div class="option">
+		<label>Stroke Size</label>
+		<input class="range" type="range" min="1" [(ngModel)]="shapeOptions.strokeWidth">
+	</div>
+	<div class="option">
+		<label>Shape {{ polygonSides }}</label>
+		<div class="form-inline">
+			<fieldset class="form-group">
+				<input id="shape-line" type="radio" value="line" [(ngModel)]="shapeType">
+				<label for="shape-line">Line</label>
+			</fieldset>
+			<fieldset class="form-group">
+				<input id="shape-arc" type="radio" value="arc" [(ngModel)]="shapeType">
+				<label for="shape-arc">Arc</label>
+			</fieldset>
+			<fieldset class="form-group">
+				<input id="shape-ellipse" type="radio" value="ellipse" [(ngModel)]="shapeType">
+				<label for="shape-ellipse">Circle/Ellipse</label>
+			</fieldset>
+			<fieldset class="form-group">
+				<input id="shape-polygon" type="radio" value="polygon" [(ngModel)]="shapeType">
+				<label for="shape-polygon">Polygon</label>
+				<input [(ngModel)]="polygonSides">
+			</fieldset>
+			<fieldset class="form-group">
+				<input id="shape-star" type="radio" value="star" [(ngModel)]="shapeType">
+				<label for="shape-star">Star</label>
+			</fieldset>
+		</div>
 	</div>
 </div>
 
