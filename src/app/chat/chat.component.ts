@@ -1,5 +1,4 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { Observable } from 'rxjs';
 
 import { ChatService, Message } from '../shared/model/chat.service';
 import { UserService } from '../shared/model/user.service';

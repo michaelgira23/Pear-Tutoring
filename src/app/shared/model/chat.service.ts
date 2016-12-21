@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { AngularFire, FirebaseAuthState } from 'angularfire2';
-import { Observable } from 'rxjs/Rx';
+import { Observable, Subject } from 'rxjs/Rx';
 
 import { AuthService } from '../security/auth.service';
 import { UserService } from '../model/user.service';
@@ -46,7 +46,7 @@ export class ChatService {
 			createdBy: this.authInfo ? this.authInfo.uid : null
 		};
 
-		return Observable.from([chats.push(chatObj)]);
+		return this.observableToPromise(chats.push(chatObj));
 	}
 
 	sendMessage(options: MessageOptions): Observable<any> {
@@ -55,7 +55,24 @@ export class ChatService {
 			from: this.authInfo ? this.authInfo.uid : null,
 			time: Date.now()
 		}, options);
-		return Observable.from([chatMessages.push(message)]);
+		return this.observableToPromise(chatMessages.push(message));
+	}
+
+	private observableToPromise(promise): Observable<any> {
+
+		const subject = new Subject<any>();
+
+		promise
+			.then(res => {
+					subject.next(res);
+					subject.complete();
+				},
+				err => {
+					subject.error(err);
+					subject.complete();
+				});
+
+		return subject.asObservable();
 	}
 
 }
@@ -68,7 +85,7 @@ export interface Chat {
 export interface Message {
 	chat: string;
 	text: string;
-	from: string;
+	from: string | any;
 	time: number;
 }
 
