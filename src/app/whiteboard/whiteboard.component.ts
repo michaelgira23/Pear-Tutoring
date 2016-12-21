@@ -201,6 +201,9 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 
 	ngOnDestroy() {
 		this.cleanUp();
+		// Save a snapshot of the current whiteboard to its metadata in db
+		document.getElementById('whiteboard');
+
 	}
 
 	cleanUp() {
