@@ -1,20 +1,27 @@
-import { Injectable, Inject } from '@angular/core';
-import { Observable, Subject } from 'rxjs/Rx';
-import { AngularFireDatabase, FirebaseRef } from 'angularfire2';
-import { User } from './user';
+import { Injectable } from '@angular/core';
+import { AngularFire, FirebaseAuthState, FirebaseListObservable } from 'angularfire2';
+import { Observable } from 'rxjs/Rx';
 
+import { AuthService } from '../security/auth.service';
 
 @Injectable()
 export class ChatService {
 
-	sdkDb: any;
+	authInfo: FirebaseAuthState;
 
-	constructor(@Inject(FirebaseRef) fb, private db: AngularFireDatabase) {
-		this.sdkDb = fb.database().ref();
+	constructor(private af: AngularFire, private authService: AuthService) {
+		this.authService.auth$.subscribe(
+			data => {
+				this.authInfo = data;
+			},
+			err => {
+				console.log('auth error chat service', err);
+			}
+		);
 	}
 
-	getAllMessages(chatKey: string): Observable<any[]> {
-		return this.db.list('chatMessages', {
+	getAllMessages(chatKey: string): FirebaseListObservable<any> {
+		return this.af.database.list('chatMessages', {
 			query: {
 				orderByChild: 'chat',
 				equalTo: chatKey
@@ -23,46 +30,30 @@ export class ChatService {
 	}
 
 	createChat(chat: any): Observable<any> {
-		let chatToSave = Object.assign({}, chat);
-		let newChatKey = this.sdkDb.child('chats').push().key;
+		const chats = this.af.database.list('chat');
+		const chatObj: Chat = {
+			created: Date.now(),
+			createdBy: this.authInfo ? this.authInfo.uid : null
+		};
 
-		let dataToSave = {};
-		dataToSave[`chats/${newChatKey}`] = chatToSave;
-		return this.firebaseUpdate(dataToSave);
+		return Observable.from([chats.push(chatObj)]);
 	}
 
 	sendMessage(message: Message): Observable<any> {
-		let msgToSave = Object.assign({}, message);
-		let newMsgKey = this.sdkDb.child('chatMessages').push().key;
-
-		let dataToSave = {};
-		dataToSave[`chatMessages/${newMsgKey}`] = msgToSave;
-		return this.firebaseUpdate(dataToSave);
+		const chatMessages = this.af.database.list('chatMessages');
+		return Observable.from([chatMessages.push(message)]);
 	}
 
-	private firebaseUpdate(dataToSave) {
-		const subject = new Subject();
+}
 
-		this.sdkDb.update(dataToSave)
-			.then(
-				val => {
-					subject.next(val);
-					subject.complete();
-
-				},
-				err => {
-					subject.error(err);
-					subject.complete();
-				}
-			);
-
-		return subject.asObservable();
-	}
+export interface Chat {
+	created: number;
+	createdBy: string;
 }
 
 export interface Message {
-	chat: string,
-	text: string,
-	from: string,
-	time: number
+	chat: string;
+	text: string;
+	from: string;
+	time: number;
 }

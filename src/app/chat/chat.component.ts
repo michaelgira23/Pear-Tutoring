@@ -12,7 +12,7 @@ import { UserService } from '../shared/model/user.service';
 })
 export class ChatComponent implements OnInit {
 
-	@Input('key') chatKey: string = 'anonymous';
+	@Input() key: string = 'anonymous';
 
 	allMessages: Message[];
 	authInfo: FirebaseAuthState;
@@ -20,7 +20,7 @@ export class ChatComponent implements OnInit {
 	constructor(private authService: AuthService, private chatService: ChatService, private userService: UserService) { }
 
 	ngOnInit() {
-		this.chatService.getAllMessages(this.chatKey).subscribe(
+		this.chatService.getAllMessages(this.key).subscribe(
 			data => {
 				this.allMessages = data;
 				this.allMessages.sort((a, b) => {
@@ -50,7 +50,7 @@ export class ChatComponent implements OnInit {
 
 	sendMessage(message: string) {
 		this.chatService.sendMessage({
-			chat: this.chatKey ? this.chatKey : null,
+			chat: this.key ? this.key : null,
 			text: message,
 			from: this.authInfo ? this.authInfo.uid : null,
 			time: new Date().getTime()
