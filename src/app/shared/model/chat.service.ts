@@ -1,15 +1,16 @@
 import { Injectable } from '@angular/core';
-import { AngularFire, FirebaseAuthState, FirebaseListObservable } from 'angularfire2';
+import { AngularFire, FirebaseAuthState } from 'angularfire2';
 import { Observable } from 'rxjs/Rx';
 
 import { AuthService } from '../security/auth.service';
+import { UserService } from '../model/user.service';
 
 @Injectable()
 export class ChatService {
 
 	authInfo: FirebaseAuthState;
 
-	constructor(private af: AngularFire, private authService: AuthService) {
+	constructor(private af: AngularFire, private authService: AuthService, private userService: UserService) {
 		this.authService.auth$.subscribe(
 			data => {
 				this.authInfo = data;
@@ -20,12 +21,21 @@ export class ChatService {
 		);
 	}
 
-	getAllMessages(chatKey: string): FirebaseListObservable<any> {
+	getAllMessages(chatKey: string): Observable<Message[]> {
+		let msgArrTemp: Message[];
 		return this.af.database.list('chatMessages', {
 			query: {
 				orderByChild: 'chat',
 				equalTo: chatKey
 			}
+		}).flatMap(msgArr => {
+			msgArrTemp = msgArr;
+			return Observable.combineLatest(msgArr.map(msg => (this.userService.findUser(msg.from))));
+		}).map(userArr => {
+			return msgArrTemp.map((msg, msgIndex) => {
+				msg.from = userArr[msgIndex];
+				return msg;
+			});
 		});
 	}
 
