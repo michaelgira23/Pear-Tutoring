@@ -23,12 +23,7 @@ export class ChatService {
 
 	getAllMessages(chatKey: string): Observable<Message[]> {
 		let msgArrTemp: Message[];
-		return this.af.database.list('chatMessages', {
-			query: {
-				orderByChild: 'chat',
-				equalTo: chatKey
-			}
-		}).flatMap(msgArr => {
+		return this.af.database.list(`chatMessages/${chatKey}`).flatMap(msgArr => {
 			msgArrTemp = msgArr;
 			return Observable.combineLatest(msgArr.map(msg => (this.userService.findUser(msg.from))));
 		}).map(userArr => {
@@ -39,8 +34,8 @@ export class ChatService {
 		});
 	}
 
-	createChat(chat: any): Observable<any> {
-		const chats = this.af.database.list('chat');
+	createChat(): Observable<any> {
+		const chats = this.af.database.list('chats');
 		const chatObj: Chat = {
 			created: Date.now(),
 			createdBy: this.authInfo ? this.authInfo.uid : null
@@ -49,12 +44,13 @@ export class ChatService {
 		return this.observableToPromise(chats.push(chatObj));
 	}
 
-	sendMessage(options: MessageOptions): Observable<any> {
-		const chatMessages = this.af.database.list('chatMessages');
-		const message: Message = Object.assign({
+	sendMessage(msgText: string, chatKey: string): Observable<any> {
+		const chatMessages = this.af.database.list(`chatMessages/${chatKey}`);
+		const message: Message = {
+			text: msgText,
 			from: this.authInfo ? this.authInfo.uid : null,
-			time: Date.now()
-		}, options);
+			time: Date.now(),
+		};
 		return this.observableToPromise(chatMessages.push(message));
 	}
 
@@ -83,13 +79,7 @@ export interface Chat {
 }
 
 export interface Message {
-	chat: string;
 	text: string;
 	from: string | any;
 	time: number;
-}
-
-export interface MessageOptions {
-	chat: string;
-	text: string;
 }

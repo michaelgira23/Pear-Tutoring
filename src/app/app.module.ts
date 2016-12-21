@@ -28,6 +28,8 @@ import { ViewWhiteboardComponent } from './view-whiteboard/view-whiteboard.compo
 import { WhiteboardService } from './shared/model/whiteboard.service';
 
 // Chat components and services
+import { CreateChatComponent } from './create-chat/create-chat.component';
+import { ViewChatComponent } from './view-chat/view-chat.component';
 import { ChatComponent } from './chat/chat.component';
 
 import { ChatService } from './shared/model/chat.service';
@@ -56,7 +58,9 @@ import { SessionService } from './shared/model/session.service';
 		SessionComponent,
 		DisplaySessionComponent,
 		RegisterComponent,
-		SettingsComponent
+		SettingsComponent,
+		CreateChatComponent,
+		ViewChatComponent
 	],
 	imports: [
 		BrowserModule,

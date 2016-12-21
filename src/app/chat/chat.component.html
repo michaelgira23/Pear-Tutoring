@@ -1,4 +1,3 @@
-<h2>All messages in chat {{key}}:</h2>
 <ol class="message-block">
 	<div class="message-list" *ngFor="let message of allMessages">
 		<li><p>From {{ message.from.name ? message.from.name : 'an anonymous user' }}: {{ message.text }}</p></li>
@@ -6,4 +5,4 @@
 	<!-- TODO: Maybe put a Bootstrap divider here or something? -->
 </ol>
 <input #message placeholder="type your message here!" />
-<button type="button" class="btn btn-primary" (click)="sendMessage(message.value)">Send</button>
+<button type="button" class="btn btn-primary" (click)="chatService.sendMessage(message.value, key)">Send</button>
