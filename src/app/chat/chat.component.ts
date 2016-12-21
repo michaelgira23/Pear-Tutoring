@@ -1,4 +1,4 @@
-import { Component, OnInit, OnChanges, SimpleChanges, Input } from '@angular/core';
+import { Component, OnInit, OnChanges, SimpleChanges, Input, ViewChild } from '@angular/core';
 
 import { ChatService, Message } from '../shared/model/chat.service';
 import { UserService } from '../shared/model/user.service';
@@ -37,6 +37,26 @@ export class ChatComponent implements OnInit, OnChanges {
 				},
 				err => {
 					console.log(`Getting chat messages error: ${err}`);
+				}
+			);
+		}
+	}
+
+	onKeyPress(event: KeyboardEvent) {
+		if (event.key == 'Enter') {
+			let message = <HTMLInputElement>event.target;
+			this.send(message);
+		}
+	}
+
+	send(message: HTMLInputElement) {
+		if (message.value) {
+			this.chatService.sendMessage(message.value, this.key).subscribe(
+				data => {
+					message.value = null;
+				},
+				err => {
+					console.log(`Sending message error: ${err}`);
 				}
 			);
 		}

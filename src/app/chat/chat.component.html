@@ -4,5 +4,5 @@
 	</div>
 	<!-- TODO: Maybe put a Bootstrap divider here or something? -->
 </ol>
-<input #message placeholder="type your message here!" />
-<button type="button" class="btn btn-primary" (click)="chatService.sendMessage(message.value, key)">Send</button>
+<input #message placeholder="type your message here!" (keypress)="onKeyPress($event)" />
+<button type="button" class="btn btn-primary" (click)="send(message)">Send</button>
