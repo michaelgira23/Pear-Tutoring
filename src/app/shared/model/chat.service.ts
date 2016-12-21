@@ -10,14 +10,14 @@ export class ChatService {
 	authInfo: FirebaseAuthState;
 
 	constructor(private af: AngularFire, private authService: AuthService) {
-		// this.authService.auth$.subscribe(
-		// 	data => {
-		// 		this.authInfo = data;
-		// 	},
-		// 	err => {
-		// 		console.log('auth error chat service', err);
-		// 	}
-		// );
+		this.authService.auth$.subscribe(
+			data => {
+				this.authInfo = data;
+			},
+			err => {
+				console.log('auth error chat service', err);
+			}
+		);
 	}
 
 	getAllMessages(chatKey: string): FirebaseListObservable<any> {
