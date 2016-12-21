@@ -51,9 +51,9 @@ export class ChatService {
 
 	sendMessage(options: MessageOptions): Observable<any> {
 		const chatMessages = this.af.database.list('chatMessages');
-		const message = Object.assign({
+		const message: Message = Object.assign({
 			from: this.authInfo ? this.authInfo.uid : null,
-			sent: Date.now()
+			time: Date.now()
 		}, options);
 		return Observable.from([chatMessages.push(message)]);
 	}

@@ -31,14 +31,6 @@ export class ChatComponent implements OnInit {
 		);
 	}
 
-	getName(uid: string): Observable<any> {
-		console.log('getName called');
-		return Observable.empty();
-		// return this.userService.findUser(uid).take(1).map(user => {
-		// 	return user.name ? user.name : 'an anonymous user';
-		// });
-	}
-
 	sendMessage(message: string) {
 		this.chatService.sendMessage({
 			chat: this.key ? this.key : null,
