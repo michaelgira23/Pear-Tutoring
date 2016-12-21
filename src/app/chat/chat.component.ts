@@ -1,8 +1,7 @@
-import { AuthService } from '../shared/security/auth.service';
 import { Component, OnInit, Input } from '@angular/core';
-import { ChatService, Message } from '../shared/model/chat.service';
-import { FirebaseAuthState } from 'angularfire2';
 import { Observable } from 'rxjs';
+
+import { ChatService, Message } from '../shared/model/chat.service';
 import { UserService } from '../shared/model/user.service';
 
 @Component({
@@ -15,9 +14,8 @@ export class ChatComponent implements OnInit {
 	@Input() key: string = 'anonymous';
 
 	allMessages: Message[];
-	authInfo: FirebaseAuthState;
 
-	constructor(private authService: AuthService, private chatService: ChatService, private userService: UserService) { }
+	constructor(private chatService: ChatService, private userService: UserService) { }
 
 	ngOnInit() {
 		this.chatService.getAllMessages(this.key).subscribe(
@@ -31,15 +29,6 @@ export class ChatComponent implements OnInit {
 				console.log(`Getting chat messages error: ${err}`);
 			}
 		);
-
-		this.authService.auth$.subscribe(
-			data => {
-				this.authInfo = data;
-			},
-			err => {
-				console.log(`Getting auth data error: ${err}`);
-			}
-		);
 	}
 
 	getName(uid: string): Observable<any> {
@@ -51,9 +40,7 @@ export class ChatComponent implements OnInit {
 	sendMessage(message: string) {
 		this.chatService.sendMessage({
 			chat: this.key ? this.key : null,
-			text: message,
-			from: this.authInfo ? this.authInfo.uid : null,
-			time: new Date().getTime()
+			text: message
 		});
 	}
 }

@@ -10,14 +10,14 @@ export class ChatService {
 	authInfo: FirebaseAuthState;
 
 	constructor(private af: AngularFire, private authService: AuthService) {
-		this.authService.auth$.subscribe(
-			data => {
-				this.authInfo = data;
-			},
-			err => {
-				console.log('auth error chat service', err);
-			}
-		);
+		// this.authService.auth$.subscribe(
+		// 	data => {
+		// 		this.authInfo = data;
+		// 	},
+		// 	err => {
+		// 		console.log('auth error chat service', err);
+		// 	}
+		// );
 	}
 
 	getAllMessages(chatKey: string): FirebaseListObservable<any> {
@@ -39,8 +39,12 @@ export class ChatService {
 		return Observable.from([chats.push(chatObj)]);
 	}
 
-	sendMessage(message: Message): Observable<any> {
+	sendMessage(options: MessageOptions): Observable<any> {
 		const chatMessages = this.af.database.list('chatMessages');
+		const message = Object.assign({
+			from: this.authInfo ? this.authInfo.uid : null,
+			sent: Date.now()
+		}, options);
 		return Observable.from([chatMessages.push(message)]);
 	}
 
@@ -56,4 +60,9 @@ export interface Message {
 	text: string;
 	from: string;
 	time: number;
+}
+
+export interface MessageOptions {
+	chat: string;
+	text: string;
 }
