@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { AngularFire, FirebaseAuthState, FirebaseListObservable, FirebaseObjectObservable } from 'angularfire2';
-import { Observable } from 'rxjs/Rx';
+import { Observable, Subject } from 'rxjs/Rx';
 
 import { AuthService } from '../security/auth.service';
 
@@ -116,7 +116,7 @@ export class WhiteboardService {
 		whiteboard.created = Date.now();
 		whiteboard.createdBy = this.authInfo ? this.authInfo.uid : null;
 
-		return Observable.from([this.whiteboards.push(whiteboard)]);
+		return this.observableToPromise(this.whiteboards.push(whiteboard));
 	}
 
 	/**
@@ -138,7 +138,7 @@ export class WhiteboardService {
 		};
 
 		const whiteboardMarkings = this.getMarkings(key);
-		return Observable.from([whiteboardMarkings.push(marking)]);
+		return this.observableToPromise(whiteboardMarkings.push(marking));
 	}
 
 	/**
@@ -146,10 +146,9 @@ export class WhiteboardService {
 	 */
 
 	eraseMarking(whiteboardKey: string, markingKey: string): Observable<any> {
-		return Observable.from([
+		return this.observableToPromise(
 			this.af.database.object('whiteboardMarkings/' + whiteboardKey + '/' + markingKey)
-				.update({ erased: Date.now() })
-		]);
+				.update({ erased: Date.now() }));
 	}
 
 	/**
@@ -170,16 +169,16 @@ export class WhiteboardService {
 		};
 
 		const whiteboardText = this.af.database.list('whiteboardText/' + key);
-		return Observable.from([whiteboardText.push(text)]);
+		return this.observableToPromise(whiteboardText.push(text));
 	}
 
 	editText(whiteboardKey: string, textKey: string, content: string, options: WhiteboardTextOptions, position: Position): Observable<any> {
 		const textObject = this.af.database.object(`whiteboardText/${whiteboardKey}/${textKey}`);
-		return Observable.from([textObject.update({
+		return this.observableToPromise(textObject.update({
 			content,
 			options,
 			position
-		})]);
+		}));
 	}
 
 	/**
@@ -207,7 +206,24 @@ export class WhiteboardService {
 		};
 
 		const whiteboardShape = this.af.database.list('whiteboardShape/' + key);
-		return Observable.from([whiteboardShape.push(shape)]);
+		return this.observableToPromise([whiteboardShape.push(shape)]);
+	}
+
+	private observableToPromise(promise): Observable<any> {
+
+		const subject = new Subject<any>();
+
+		promise
+			.then(res => {
+					subject.next(res);
+					subject.complete();
+				},
+				err => {
+					subject.error(err);
+					subject.complete();
+				});
+
+		return subject.asObservable();
 	}
 
 }
