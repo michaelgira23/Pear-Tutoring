@@ -4,5 +4,7 @@
 	</div>
 	<!-- TODO: Maybe put a Bootstrap divider here or something? -->
 </ol>
-<input #message placeholder="type your message here!" (keypress)="onKeyPress($event)" />
-<button type="button" class="btn btn-primary" (click)="send(message)">Send</button>
+<form #msgForm (submit)="send(message.value); msgForm.reset()">
+	<input #message placeholder="type your message here!" required>
+	<button type="button" class="btn btn-primary">Send</button>
+</form>
