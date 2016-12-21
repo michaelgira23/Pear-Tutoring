@@ -68,6 +68,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		if (this.markings) {
 			this.markingsToCanvas(this.markings);
 		}
+		document.addEventListener('keydown', this.keyboardInput);
 	}
 
 	ngOnChanges(changes: SimpleChanges) {
@@ -221,6 +222,17 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 					this.resizingBackground = false;
 				}
 			}, 100);
+		}
+	}
+
+	keyboardInput(event: KeyboardEvent) {
+		if (event.keyCode == 90 && event.ctrlKey) {
+			window.alert("Undo"); 
+			var newMarks = [];
+			for (var i = 0; i < (this.markings.length - 1); ++i) {
+				newMarks[i] = this.markings[i];
+			}
+			this.markingsToCanvas(newMarks);
 		}
 	}
 

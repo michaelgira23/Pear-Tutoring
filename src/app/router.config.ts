@@ -5,7 +5,11 @@ import { HomeComponent } from './home/home.component';
 import { CreateWhiteboardComponent } from './create-whiteboard/create-whiteboard.component';
 import { ViewWhiteboardComponent } from './view-whiteboard/view-whiteboard.component';
 import { LoginComponent } from './login/login.component';
+import { SchedulingComponent } from './scheduling/scheduling.component';
+import { CreateSessionComponent } from './scheduling/create-session/create-session.component';
 import { RegisterComponent } from './register/register.component';
+import { SessionComponent } from './session/session.component';
+import { SettingsComponent } from './settings/settings.component';
 
 export const routerConfig: Route[] = [
 	{
@@ -36,15 +40,36 @@ export const routerConfig: Route[] = [
 		]
 	},
 	{
+		path: 'chat',
+		component: ChatComponent
+	},
+	{
 		path: 'login',
 		component: LoginComponent
+	},
+	{
+		path: 'scheduling',
+		children: [
+			{
+				path: '',
+				component: SchedulingComponent
+			},
+			{
+				path: 'create',
+				component: CreateSessionComponent
+			}
+		]
 	},
 	{
 		path: 'register',
 		component: RegisterComponent
 	},
 	{
-		path: 'chat',
-		component: ChatComponent
+		path: 'session/:id',
+		component: SessionComponent
+	},
+	{
+		path: 'settings',
+		component: SettingsComponent
 	}
 ];

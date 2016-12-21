@@ -9,20 +9,36 @@ import { ColorPickerModule } from 'angular2-color-picker';
 import { routerConfig } from './router.config';
 import { firebaseConfig, authConfig } from '../environments/environment';
 
+// General components and services
 import { AppComponent } from './app.component';
 import { NavbarComponent } from './navbar/navbar.component';
+import { LoginComponent } from './login/login.component';
+import { RegisterComponent } from './register/register.component';
 import { HomeComponent } from './home/home.component';
+import { SettingsComponent } from './settings/settings.component';
+
+import { AuthService } from './shared/security/auth.service';
+import { UserService } from './shared/model/user.service';
+
+// Whiteboard components and services
 import { WhiteboardComponent } from './whiteboard/whiteboard.component';
 import { CreateWhiteboardComponent } from './create-whiteboard/create-whiteboard.component';
 import { ViewWhiteboardComponent } from './view-whiteboard/view-whiteboard.component';
-import { ChatComponent } from './chat/chat.component';
-import { LoginComponent } from './login/login.component';
-import { RegisterComponent } from './register/register.component';
 
-import { AuthService } from './shared/security/auth.service';
-import { ChatService } from './shared/model/chat.service';
-import { UserService } from './shared/model/user.service';
 import { WhiteboardService } from './shared/model/whiteboard.service';
+
+// Chat components and services
+import { ChatComponent } from './chat/chat.component';
+
+import { ChatService } from './shared/model/chat.service';
+
+// Scheduling/session components and services
+import { SchedulingComponent } from './scheduling/scheduling.component';
+import { SessionComponent } from './session/session.component';
+import { CreateSessionComponent } from './scheduling/create-session/create-session.component';
+import { DisplaySessionComponent } from './scheduling/display-session/display-session.component';
+
+import { SessionService } from './shared/model/session.service';
 
 @NgModule({
 	declarations: [
@@ -34,7 +50,13 @@ import { WhiteboardService } from './shared/model/whiteboard.service';
 		ViewWhiteboardComponent,
 		ChatComponent,
 		LoginComponent,
-		RegisterComponent
+		SchedulingComponent,
+		RegisterComponent,
+		CreateSessionComponent,
+		SessionComponent,
+		DisplaySessionComponent,
+		RegisterComponent,
+		SettingsComponent
 	],
 	imports: [
 		BrowserModule,
@@ -45,7 +67,7 @@ import { WhiteboardService } from './shared/model/whiteboard.service';
 		AngularFireModule.initializeApp(firebaseConfig, authConfig),
 		ColorPickerModule
 	],
-	providers: [AuthService, ChatService, UserService, WhiteboardService],
+	providers: [AuthService, ChatService, SessionService, UserService, WhiteboardService],
 	bootstrap: [AppComponent]
 })
 export class AppModule { }
