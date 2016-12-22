@@ -66,7 +66,6 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	/**
 	* Selected entities
 	*/
-	selectedItems = [];
 	selectedPoints = [];
 
 	/**
@@ -339,20 +338,9 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	* Selection functions
 	*/
 
-	deselectAllItems(): void {
-		this.selectedItems.forEach(function(item) {
-			item.selected = false;
+	selectedItems() {
+		return paper.project.getItems({
+			selected: true
 		});
-		this.selectedItems = [];
-	}
-
-	selectItem(item: any): void {
-		item.selected = true;
-		this.selectedItems.push(item);
-	}
-
-	selectOnly(item: any): void {
-		this.deselectAllItems();
-		this.selectItem(item);
 	}
 }
