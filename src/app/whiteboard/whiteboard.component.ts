@@ -1,4 +1,5 @@
-import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy, ViewChild, HostListener } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy, ViewChild, HostListener} from '@angular/core';
+import { Observable, Subject } from 'rxjs/Rx';
 import {
 	WhiteboardService,
 	Whiteboard,
@@ -36,7 +37,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	@ViewChild('whiteboard')
 	canvas;
 	// Actual canvas DOM reference
-	canvasEl: any;
+	canvasEl: HTMLCanvasElement;
 
 	whiteboardSubscription: any;
 	// Latest value of whiteboard object from database
@@ -98,6 +99,15 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		shape : new Shape(this)
 	};
 
+	savingSnapshot: boolean;
+
+	startingWidth: number;
+	startingHeight: number;
+	widthScaleFactor: number;
+	heightScaleFactor: number;
+
+	onResize$: Subject<any> = new Subject();
+
 	constructor(public whiteboardService: WhiteboardService) { }
 
 	/**
@@ -114,6 +124,31 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		if (this.whiteboard) {
 			this.setBackgroundColor(this.whiteboard.background);
 		}
+		console.log('memes')
+		this.onResize$.debounceTime(150).subscribe(val => {
+			// map the mouse event to the correct points when event triggered
+			// Scale the canvas whenever window is resized
+			this.widthScaleFactor = paper.project.view.size.getWidth() / this.startingWidth;
+			this.heightScaleFactor = paper.project.view.size.getHeight() / this.startingHeight;
+
+			paper.project.view.scale(this.widthScaleFactor, this.heightScaleFactor, new paper.Point(0, 0));
+			paper.project.view.update();
+			if (!this.resizingBackground && this.whiteboard) {
+				this.resizingBackground = true;
+
+				if (this.resizingBackground) {
+					if (this.whiteboard.background) {
+						this.setBackgroundColor(this.whiteboard.background);
+					}
+					this.resizingBackground = false;
+				}
+			}
+		});
+
+		this.startingWidth = 1920;
+		this.startingHeight = 1080;
+		paper.project.view.viewSize = new paper.Size(1920, 1080);
+		window.dispatchEvent(new Event('resize'));
 	}
 
 	ngOnChanges(changes: SimpleChanges) {
@@ -201,9 +236,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 
 	ngOnDestroy() {
 		this.cleanUp();
-		// Save a snapshot of the current whiteboard to its metadata in db
-		document.getElementById('whiteboard');
-
+		this.saveSnapshot();
 	}
 
 	cleanUp() {
@@ -254,18 +287,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	// When the window resizes, reset the background
 	@HostListener('window:resize', ['$event'])
 	onResize(event) {
-		if (!this.resizingBackground) {
-			this.resizingBackground = true;
-
-			setTimeout(() => {
-				if (this.resizingBackground) {
-					if (this.whiteboard.background) {
-						this.setBackgroundColor(this.whiteboard.background);
-					}
-					this.resizingBackground = false;
-				}
-			}, 100);
-		}
+		this.onResize$.next(event);
 	}
 
 	@HostListener('window:keydown', ['$event'])
@@ -287,8 +309,10 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	cursorPoint(event) {
 		// Return a paper.js point where the mouse is at relative to the canvas
 		const canvasPos = this.canvasEl.getBoundingClientRect();
-		const cursorX = event.clientX - canvasPos.left;
-		const cursorY = event.clientY - canvasPos.top;
+		const cursorX = (event.clientX - canvasPos.left) / paper.project.view.viewSize.getWidth() * 1920;
+		const cursorY = (event.clientY - canvasPos.top) / paper.project.view.viewSize.getHeight() * 1080;
+
+		console.log(cursorX, cursorY);
 
 		return new paper.Point(cursorX, cursorY);
 	}
@@ -341,4 +365,31 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		this.deselectAllItems();
 		this.selectItem(item);
 	}
+
+	saveSnapshot() {
+		// Save a snapshot of the current whiteboard to its metadata in db
+		if (this.key) {
+			// Scale the image down so it doesn't take up as much bandwidth to download
+			this.savingSnapshot = true;
+			setTimeout(() => {
+				paper.project.view.viewSize = new paper.Size(250, 125);
+				paper.project.view.scale(250 / window.innerWidth, new paper.Point(0, 0));
+				window.dispatchEvent(new Event('resize'));
+				setTimeout(() => {
+					this.canvasEl.toBlob((imgBlob: Blob) => {
+						this.whiteboardService.storeSnapshot(this.key + '.png', imgBlob).subscribe(
+							val => {
+								val.then(pval => console.log('whiteboard snapshot is saved'))
+									.catch(err => console.log('error when saving whiteboard snapshot', err));
+							},
+							err => {
+								console.log('error when saving whiteboard snapshot', err);
+							}
+						);
+					});
+				}, 1);
+			}, 1);
+		}
+	}
+
 }
