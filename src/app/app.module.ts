@@ -5,6 +5,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 import { AngularFireModule } from 'angularfire2';
 import { ColorPickerModule } from 'angular2-color-picker';
+import { CalendarModule } from 'angular-calendar';
 
 import { routerConfig } from './router.config';
 import { firebaseConfig, authConfig } from '../environments/environment';
@@ -39,7 +40,8 @@ import { SchedulingComponent } from './scheduling/scheduling.component';
 import { SessionComponent } from './session/session.component';
 import { CreateSessionComponent } from './scheduling/create-session/create-session.component';
 import { DisplaySessionComponent } from './scheduling/display-session/display-session.component';
-
+import { SessionCalendarComponent } from './scheduling/session-calendar/session-calendar.component';
+import { DisplayUserComponent } from './scheduling/display-user/display-user.component';
 import { SessionService } from './shared/model/session.service';
 
 @NgModule({
@@ -59,6 +61,8 @@ import { SessionService } from './shared/model/session.service';
 		DisplaySessionComponent,
 		RegisterComponent,
 		SettingsComponent,
+		SessionCalendarComponent,
+		DisplayUserComponent,
 		CreateChatComponent,
 		ViewChatComponent
 	],
@@ -69,7 +73,8 @@ import { SessionService } from './shared/model/session.service';
 		HttpModule,
 		RouterModule.forRoot(routerConfig),
 		AngularFireModule.initializeApp(firebaseConfig, authConfig),
-		ColorPickerModule
+		ColorPickerModule,
+		CalendarModule.forRoot()
 	],
 	providers: [AuthService, ChatService, SessionService, UserService, WhiteboardService],
 	bootstrap: [AppComponent]
