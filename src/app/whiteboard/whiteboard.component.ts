@@ -340,7 +340,8 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 
 	selectedItems() {
 		return paper.project.getItems({
-			selected: true
+			selected: true,
+			class: paper.Path
 		});
 	}
 }

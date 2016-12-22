@@ -8,13 +8,16 @@ export class Cursor {
 	// mouse coords at original click
 	startPoint: any;
 	// original bounds at moment transform started
-	originalBounds: any;	
+	originalBounds: any;
 	// options for hit test
 	hitOptions: any;
 
 	// Case-specific variables
 
+	/* RESIZING */
 	resizing: boolean;
+	// item that was clicked - resizing ignores other selected items
+	originalItem: any;
 	// are we resizing an item horizontally, vertically, or both? depends on what part of its bounding box we drag
 	// implicit in hitTop is hitBottom, since you can only get the top or bottom of a bounding rectangle
 	// so if hitTop is true, hitBottom is false, and vice versa. same with hitLeft and hitRight
@@ -22,10 +25,13 @@ export class Cursor {
 	hitBottom: boolean;
 	hitLeft: boolean;
 	hitRight: boolean;
-	// or are we moving an item?
+	/* MOVING */
 	moving: boolean;
-	// or are we drawing a selection box?
+	// mouse coords after the last mousemove() function
+	lastPoint: any;
+	/* SELECTING */
 	selecting: boolean;
+	// highlighted box to show current selection area
 	selectionPath: any;
 
 	constructor(private whiteboard: WhiteboardComponent) {
@@ -36,7 +42,7 @@ export class Cursor {
 			bounds: true,
 			tolerance: 5,
 			match: function(result) {
-			return result.item.id !== self.whiteboard.background.id;
+				return result.item.id !== self.whiteboard.background.id;
 			}
 		}
 	}
@@ -49,42 +55,37 @@ export class Cursor {
 		const point = this.whiteboard.cursorPoint(event);
 		// set start point to current mouse position
 		this.startPoint = point;
+		this.lastPoint = point;
 
-		paper.project.deselectAll();
 		const hit = paper.project.hitTest(point, this.hitOptions);
 
-		// if !hit, then we're drawing a selection box
-		if (!hit) {
-			this.selecting = true;
-			return;
-		} else {
-
+		if (hit) {
 			let item = hit.item;
-
-			// not working for some weird reason:
-			// item.brintToFront();
-
-			// deselects all other items
-			// TEMPORARY: later, may implement selecting (to move) multiple items
-			item.selected = true;
-			
-			// set original bounds
+			item.bringToFront();
 			this.originalBounds = item.bounds;
+			// shift key allows you to add more items to existing selection
+			// otherwise, clicking an unselected item unselects everything else
+			if (!item.selected && !this.whiteboard.shiftKey)
+				paper.project.deselectAll();
+			// if holding shift, toggles the selected state rather than always setting it to true
+			item.selected = this.whiteboard.shiftKey ? !item.selected : true;
 
 			if (hit.type === 'bounds') {
-
+				this.resizing = true;
+				this.originalItem = item;
 				// which anchor point is being dragged?
 				this.hitTop = hit.point.y === item.bounds.top;
 				this.hitBottom = hit.point.y === item.bounds.bottom;
 				this.hitLeft = hit.point.x === item.bounds.left;
 				this.hitRight = hit.point.x === item.bounds.right;
-				this.resizing = true;
 
 			} else if (hit.type === 'fill') {
-
 				this.moving = true;
-
 			}
+		// if not hit, we're drawing a selection box
+		} else {
+			this.selecting = true;
+			paper.project.deselectAll();
 		}
 	}
 
@@ -94,12 +95,9 @@ export class Cursor {
 			const point = this.whiteboard.cursorPoint(event);
 
 			// RESIZING
-
 			if (this.resizing) {
-
 				// In order to edit the item's bounds, we must pick a point that is diagonal
 				// from where the mouse started dragging. we do this through addX and addY
-
 				// if mouse drags on right, we want the left side point, which means addX = 0
 				let addX = 0;
 				if (this.hitRight) {}
@@ -115,47 +113,46 @@ export class Cursor {
 				else point.y = this.originalBounds.y + this.originalBounds.height;
 
 				let scalePoint = new paper.Point(this.originalBounds.x + addX, this.originalBounds.y + addY);
-
-				this.whiteboard.selectedItems().forEach(function(item) {
-					item.bounds = new paper.Rectangle(scalePoint, point);
-				});
+				// prevents shape from degenerating into a limp ass line
+				if (scalePoint.x !== point.x && scalePoint.y !== point.y) {
+					this.originalItem.bounds = new paper.Rectangle(scalePoint, point);
+				}
 
 			// MOVING
-
 			} else if (this.moving) {
-				let deltaX = point.x - this.startPoint.x;
-				let deltaY = point.y - this.startPoint.y;
-				// because Rectangle bounds' position is their top left corner:
-				let ob = this.originalBounds;
-				let originalCenter = new paper.Point(ob.x + ob.width / 2, ob.y + ob.height / 2);
-
+				let offset = new paper.Point(point.x - this.lastPoint.x, point.y - this.lastPoint.y);
 				this.whiteboard.selectedItems().forEach(function(item) {
-					item.position = new paper.Point(originalCenter.x + deltaX, originalCenter.y + deltaY);
+					item.translate(offset);
 				});
 
 			// SELECTING
-
 			} else if (this.selecting) {
 				let selectionBox = new paper.Rectangle(this.startPoint, point);
-
-				// creates a selection path if there isn't one				
-				if (!this.selectionPath) {
-					this.selectionPath = new paper.Path.Rectangle(new paper.Rectangle(point, point));
-					this.selectionPath.strokeColor = '#08f';
-					this.selectionPath.dashArray = [10, 5];
-				}
-				// updates selection path
-				this.selectionPath.bounds = selectionBox;
-
-				// selects all items intersecting the selection path
-				let allItems = paper.project.getItems();
-				let self = this;
-				allItems.forEach(function(item) {
-					if (self.selectionPath.intersects(item)) {
-						item.selected = true;
+				if (selectionBox.height > 0 && selectionBox.width > 0) {
+					// creates a selection path if there isn't one				
+					if (!this.selectionPath) {
+						this.selectionPath = new paper.Path.Rectangle(selectionBox);
+						this.selectionPath.strokeColor = '#08f';
+						this.selectionPath.dashArray = [10, 5];
 					}
-				});
+					// updates selection path
+					this.selectionPath.bounds = selectionBox;
+
+					let self = this;
+					// selects all items intersecting the selection path
+					let allItems = paper.project.getItems({
+						overlapping: selectionBox,
+						class: paper.Path,
+						match: function(result) {
+							return result.id !== self.whiteboard.background.id;
+						}
+					});
+					allItems.forEach(function(item) {
+						item.selected = true;
+					});
+				}
 			}
+			this.lastPoint = point;
 		}
 	}
 
@@ -191,8 +188,10 @@ export class Cursor {
 				this.moving = false;
 			} else if (this.selecting) {
 				this.selecting = false;
-				this.selectionPath.remove();
-				this.selectionPath = null;
+				if (this.selectionPath) {
+					this.selectionPath.remove();
+					this.selectionPath = null;
+				}
 			}
 		}
 	}
