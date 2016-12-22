@@ -38,7 +38,6 @@ export class UserService {
 				const newUid = val.uid;
 				let userToSave = Object.assign({}, regOpt);
 				delete userToSave.password;
-				userToSave.name = regOpt.firstName + ' ' + regOpt.middleName + ' ' + regOpt.lastName;
 				return this.saveUser(userToSave, newUid);
 			});
 	}

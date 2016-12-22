@@ -15,7 +15,6 @@ export class RegisterComponent implements OnInit {
 	constructor(private fb: FormBuilder, private router: Router, private userService: UserService) {
 		this.form = this.fb.group({
 			firstName: ['', Validators.required],
-			middleName: ['', Validators.required],
 			lastName: ['', Validators.required],
 			email: ['', Validators.required],
 			password: ['', Validators.required]
@@ -29,7 +28,7 @@ export class RegisterComponent implements OnInit {
 		let formValue: RegisterOptions = Object.assign({}, this.form.value);
 		for (let prop in formValue) {
 			if (formValue[prop]) {
-				formValue[prop] = formValue[prop].trim()
+				formValue[prop] = formValue[prop].trim();
 			}
 		}
 		this.userService.register(formValue).subscribe(

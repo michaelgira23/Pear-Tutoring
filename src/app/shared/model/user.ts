@@ -1,6 +1,7 @@
 export class User {
-	static fromJson({$key, name, email, tutor, tutorSessions, tuteeSessions, status}): User {
-		return new User($key, name, email, tutor, tutorSessions, tuteeSessions, status);
+	static fromJson({$key, firstName, lastName, email, tutor, tutorSessions, tuteeSessions, status}): User {
+		let name = firstName + lastName;
+		return new User($key, firstName, lastName, name, email, tutor, tutorSessions, tuteeSessions, status);
 	}
 
 	static fromJsonList(list: any[]): User[] {
@@ -8,6 +9,8 @@ export class User {
 	}
 	constructor(
 		public $key: string,
+		public firstName: string,
+		public lastName: string,
 		public name: string,
 		public email: string,
 		public tutor: boolean,
