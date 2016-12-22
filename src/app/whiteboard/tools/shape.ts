@@ -17,6 +17,10 @@ export class Shape {
 	currentShapeFinished: boolean = true;
 	// Point upon mousedown
 	startPoint: any;
+	// 'through' point of arc
+	arcPoint: any;
+	// Actual arc point object on canvas
+	visualArcPoint: any;
 	// Rectangle from mouse down to mouse move/up
 	creationRect: any;
 	// Ghost rectangle for visualizing shape creation
@@ -43,6 +47,7 @@ export class Shape {
 			this.currentShapeType = this.whiteboard.shapeType;
 			switch (this.currentShapeType) {
 				case 'line':
+				case 'arc':
 					this.currentShape = new paper.Path.Line({
 						// Stroke Style
 						strokeColor  : this.whiteboard.shapeOptions.strokeColor,
@@ -105,10 +110,51 @@ export class Shape {
 			if (this.creationRect.width > 0 && this.creationRect.height > 0) {
 				// Resize the shape we are currently drawing
 				switch (this.currentShapeType) {
+					case 'arc':
+						if (this.arcPoint) {
+							const secondPhaseRect = new paper.Rectangle(this.arcPoint, point);
+
+							if (secondPhaseRect.width > 0 && secondPhaseRect.height > 0) {
+								// We must create a new arc for each new set of points, otherwise the curve gets messed up
+								this.currentShape.remove();
+								// Create point from shadow offset
+								const shadowOffsetPoint = new paper.Point(this.whiteboard.shapeOptions.shadowOffset.x, this.whiteboard.shapeOptions.shadowOffset.y);
+								console.log('new arc mouse move with given arguments', this.startPoint, this.arcPoint, point);
+								this.currentShape = new paper.Path.Arc({
+									// Stroke Style
+									strokeColor  : this.whiteboard.shapeOptions.strokeColor,
+									strokeWidth  : this.whiteboard.shapeOptions.strokeWidth,
+									strokeCap    : this.whiteboard.shapeOptions.strokeCap,
+									strokeJoin   : this.whiteboard.shapeOptions.strokeJoin,
+									dashOffset   : this.whiteboard.shapeOptions.dashOffset,
+									strokeScaling: this.whiteboard.shapeOptions.strokeScaling,
+									dashArray    : this.whiteboard.shapeOptions.dashArray,
+									miterLimit   : this.whiteboard.shapeOptions.miterLimit,
+									// Fill Style
+									fillColor    : this.whiteboard.shapeOptions.fillColor,
+									// Shadow Style
+									shadowColor  : this.whiteboard.shapeOptions.shadowColor,
+									shadowBlur   : this.whiteboard.shapeOptions.shadowBlur,
+									shadowOffset : shadowOffsetPoint,
+									// Shape
+									from: [this.startPoint.x, this.startPoint.y],
+									through: [this.arcPoint.x, this.arcPoint.y],
+									to: [point.x, point.y]
+								});
+								this.currentShape.selected = true;
+								this.visualArcPoint.bringToFront();
+							}
+							break;
+						}
+
+						// We want to fallthrough the 'arc' case because the first phase is treated the exact same as a line
+						// tslint:disable-next-line
 					case 'line':
-						console.log('segments', this.currentShape.segments.length);
-						this.currentShape.insert(1, point);
-						this.currentShape.removeSegment(2);
+
+						const segmentsLength = this.currentShape.segments.length;
+
+						this.currentShape.insert(segmentsLength - 1, point);
+						this.currentShape.removeSegment(segmentsLength - 2);
 						break;
 					default:
 						this.currentShape.bounds = this.creationRect;
@@ -127,11 +173,65 @@ export class Shape {
 
 	mouseup(event) {
 		if (this.creationRect.width > 0 && this.creationRect.height > 0) {
+			console.log('on mouseup, segments length', this.currentShape.segments.length);
+
+			// If we're drawing an arc, make that the `through` field
+			if (this.currentShapeType === 'arc' && !this.arcPoint) {
+				this.arcPoint = this.whiteboard.cursorPoint(event);
+				// Visualize this arc point on the canvas
+				this.visualArcPoint = new paper.Shape.Circle({
+					// Stroke Style
+					strokeColor: this.whiteboard.shapeOptions.strokeColor,
+					// Fill Style
+					fillColor  : this.whiteboard.shapeOptions.fillColor,
+					// Position
+					center: [this.arcPoint.x, this.arcPoint.y],
+					radius: 5,
+				});
+				console.log('arc, but line. make arc.', this.arcPoint);
+				// Create point from shadow offset
+				const shadowOffsetPoint = new paper.Point(this.whiteboard.shapeOptions.shadowOffset.x, this.whiteboard.shapeOptions.shadowOffset.y);
+
+				this.currentShape.remove();
+				this.currentShape = new paper.Path.Arc({
+					// Stroke Style
+					strokeColor  : this.whiteboard.shapeOptions.strokeColor,
+					strokeWidth  : this.whiteboard.shapeOptions.strokeWidth,
+					strokeCap    : this.whiteboard.shapeOptions.strokeCap,
+					strokeJoin   : this.whiteboard.shapeOptions.strokeJoin,
+					dashOffset   : this.whiteboard.shapeOptions.dashOffset,
+					strokeScaling: this.whiteboard.shapeOptions.strokeScaling,
+					dashArray    : this.whiteboard.shapeOptions.dashArray,
+					miterLimit   : this.whiteboard.shapeOptions.miterLimit,
+					// Fill Style
+					fillColor    : this.whiteboard.shapeOptions.fillColor,
+					// Shadow Style
+					shadowColor  : this.whiteboard.shapeOptions.shadowColor,
+					shadowBlur   : this.whiteboard.shapeOptions.shadowBlur,
+					shadowOffset : shadowOffsetPoint,
+					// Shape
+					from: [this.startPoint.x, this.startPoint.y],
+					through: [this.arcPoint.x, this.arcPoint.y],
+					to: [this.arcPoint.x + 1, this.arcPoint.y + 1]
+				});
+				console.log('after making arc', this.currentShape.segments.length);
+				return;
+			}
+
+			console.log('finished shape');
+
 			this.currentShapeFinished = true;
 
 			this.currentShape.selected = false;
 			this.visualRect.remove();
 			this.visualRect = null;
+
+			// Clean up arc stuff
+			this.arcPoint = null;
+			if (this.visualArcPoint) {
+				this.visualArcPoint.remove();
+				this.visualArcPoint = null;
+			}
 		}
 		/*
 		if (this.selectedShape && this.whiteboard.allowWrite) {
