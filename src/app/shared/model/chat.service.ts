@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { AngularFire, FirebaseAuthState } from 'angularfire2';
+import { Injectable, Inject } from '@angular/core';
+import { AngularFire, FirebaseRef, FirebaseAuthState } from 'angularfire2';
 import { Observable, Subject } from 'rxjs/Rx';
 
 import { AuthService } from '../security/auth.service';
@@ -8,12 +8,32 @@ import { UserService } from '../model/user.service';
 @Injectable()
 export class ChatService {
 
+	sdkDb: any;
 	authInfo: FirebaseAuthState;
+	queue: { key: string, chatKey: string, status: Status }[] = [];
 
-	constructor(private af: AngularFire, private authService: AuthService, private userService: UserService) {
+	constructor(private af: AngularFire, @Inject(FirebaseRef) fb, private authService: AuthService, private userService: UserService) {
+		this.sdkDb = fb.database().ref();
+
 		this.authService.auth$.subscribe(
 			data => {
 				this.authInfo = data;
+
+				// Check if there are any status updates in the queue before authInfo was initialized
+				if (this.queue.length > 0) {
+					this.queue.forEach(value => {
+						const statusMessages = this.af.database.object(`statusMessages/${value.chatKey}/${value.key}`);
+						this.observableToPromise(statusMessages.set(value.status))
+							.subscribe(
+								key => {
+									console.log('set status success', key);
+								},
+								err => {
+									console.log('set status error', err);
+								}
+							);
+					});
+				}
 			},
 			err => {
 				console.log('auth error chat service', err);
@@ -68,13 +88,23 @@ export class ChatService {
 	}
 
 	sendStatus(statusType: StatusOptions, chatKey: string): Observable<any> {
-		const statusMessages = this.af.database.list(`statusMessages/${chatKey}`);
 		const status: Status = {
 			type: statusType,
 			time: Date.now(),
 			user: this.authInfo ? this.authInfo.uid : null,
 		};
-		return this.observableToPromise(statusMessages.push(status));
+		const key = this.sdkDb.push().key;
+
+		if (typeof this.authInfo !== 'undefined') {
+			// Insert status into database like normal
+			const statusMessages = this.af.database.object(`statusMessages/${chatKey}/${key}`);
+			return this.observableToPromise(statusMessages.set(status))
+				.map(() => key);
+		} else {
+			// Add status into queue until authInfo is initialized
+			this.queue.push({ key, chatKey, status });
+			return Observable.of(key);
+		}
 	}
 
 	private observableToPromise(promise): Observable<any> {

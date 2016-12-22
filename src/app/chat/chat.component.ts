@@ -99,9 +99,9 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 	}
 
 	statusVerb(status: Status) {
-		if (status.type == 'join') {
+		if (status.type === 'join') {
 			return 'joined';
-		} else if (status.type == 'leave') {
+		} else if (status.type === 'leave') {
 			return 'left';
 		}
 	}
