@@ -51,7 +51,7 @@ export class UserService {
 	}
 
 	findAllUsers(): Observable<User[]> {
-		return this.db.list('users').do(console.log)
+		return this.db.list('users')
 		.map(User.fromJsonList);
 	}
 

@@ -26,5 +26,7 @@
   <div class="whiteboard-container" *ngIf="sessionExist">
     <app-whiteboard [key]="sessionInfo.whiteboard"></app-whiteboard>
   </div>
-  <!--<app-chat [chatKey]="sessionInfo.chat"></app-chat>-->
+  <div class="chat-container" *ngIf="sessionExist">
+    <app-chat [key]="sessionInfo.chat"></app-chat>
+  </div>
 </div>

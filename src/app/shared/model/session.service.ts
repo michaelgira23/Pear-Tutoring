@@ -4,6 +4,7 @@ import { AngularFireDatabase, FirebaseRef } from 'angularfire2';
 import { Session } from './session';
 import { User } from './user';
 import { UserService, userStatus } from './user.service';
+import { ChatService } from './chat.service';
 import { AuthService } from '../security/auth.service';
 import { WhiteboardService, WhiteboardOptions } from './whiteboard.service';
 import * as moment from 'moment';
@@ -13,7 +14,7 @@ export class SessionService {
 	sdkDb: any;
 	uid: string;
 
-	constructor(private db: AngularFireDatabase, @Inject(FirebaseRef) fb, private userService: UserService, private whiteboardService: WhiteboardService, private auth: AuthService) {
+	constructor(private db: AngularFireDatabase, @Inject(FirebaseRef) fb, private userService: UserService, private whiteboardService: WhiteboardService, private auth: AuthService, private chatService: ChatService) {
 		this.sdkDb = fb.database().ref();
 		this.auth.auth$.subscribe(val => {
 			if (val) this.uid = val.uid;
@@ -136,13 +137,12 @@ export class SessionService {
 	updateSession(sessionId: string, session: SessionOptions): Observable<any> {
 		if (!this.uid) return Observable.throw('Rip no login info');
 		let sessionToSave = Object.assign({}, session);
-		const uidsToSave = {};
+		let uidsToSave = {};
 		session.tutees.forEach(uid => {
 			if (uid !== this.uid) {
 				uidsToSave[uid] = false;
 			}
 		});
-		sessionToSave.tutor = this.uid;
 
 		let dataToSave = {};
 		dataToSave['sessions/' + sessionId] = sessionToSave;
@@ -159,11 +159,19 @@ export class SessionService {
 	createSession(session: SessionOptions, wbOpt?: WhiteboardOptions): Observable<any> {
 		const wbOptDefault = {
 			background: '#FFF'
-		}
+		};
+		let wbId;
+		let chatId;
 		return this.whiteboardService.createWhiteboard(wbOpt.background.match('^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$') ? wbOpt : wbOptDefault)
 		.switchMap(wb => {
+			wbId = wb.key;
+			return this.chatService.createChat();
+		})
+		.switchMap(chat => {
+			chatId = chat.key;
 			const newSessionKey = this.sdkDb.child('sessions').push().key;
-			session.whiteboard = [wb.key];
+			session.whiteboard = [wbId];
+			session.chat = chatId;
 			session.canceled = false;
 			return this.updateSession(newSessionKey, session);
 		});
@@ -227,6 +235,7 @@ export interface SessionOptions {
 	tutees: string[];
 	tags: string[];
 	whiteboard: string[];
+	chat: string;
 	canceled: boolean;
 }
 
