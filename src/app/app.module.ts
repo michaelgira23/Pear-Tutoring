@@ -41,6 +41,7 @@ import { CreateSessionComponent } from './scheduling/create-session/create-sessi
 import { DisplaySessionComponent } from './scheduling/display-session/display-session.component';
 
 import { SessionService } from './shared/model/session.service';
+import { NamePipe } from './shared/model/name.pipe';
 
 @NgModule({
 	declarations: [
@@ -60,7 +61,8 @@ import { SessionService } from './shared/model/session.service';
 		RegisterComponent,
 		SettingsComponent,
 		CreateChatComponent,
-		ViewChatComponent
+		ViewChatComponent,
+		NamePipe
 	],
 	imports: [
 		BrowserModule,

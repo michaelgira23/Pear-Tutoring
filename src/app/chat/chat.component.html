@@ -1,10 +1,15 @@
-<ol class="message-block">
-	<div class="message-list" *ngFor="let message of allMessages">
-		<li><p>From {{ message.from.name ? message.from.name : (message.from.email ? message.from.email : 'an anonymous user') }}: {{ message.text }}</p></li>
+<ol class="chat-block">
+	<div class="chat-list" *ngFor="let entry of allEntries">
+		<div *ngIf="isMessage(entry)">
+			<li class="message">From {{ entry.from | name }}: {{ entry.text }}</li>
+		</div>
+		<div *ngIf="isStatus(entry)">
+			<li class="status">{{ entry.user | name:true }} {{ statusVerb(entry) }} the chat room</li>
+		</div>
 	</div>
 	<!-- TODO: Maybe put a Bootstrap divider here or something? -->
 </ol>
-<form #msgForm (submit)="send(message.value); msgForm.reset()">
-	<input #message placeholder="type your message here!" required>
+<form #msgForm (submit)="send(msgBox.value); msgForm.reset()">
+	<input #msgBox placeholder="type your message here!" required>
 	<button type="button" class="btn btn-primary">Send</button>
 </form>

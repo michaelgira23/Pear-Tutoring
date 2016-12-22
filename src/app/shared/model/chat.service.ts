@@ -34,6 +34,19 @@ export class ChatService {
 		});
 	}
 
+	getAllStatuses(chatKey: string): Observable<Status[]> {
+		let statusArrTemp: Status[];
+		return this.af.database.list(`statusMessages/${chatKey}`).flatMap(statusArr => {
+			statusArrTemp = statusArr;
+			return Observable.combineLatest(statusArr.map(status => (this.userService.findUser(status.user))));
+		}).map(userArr => {
+			return statusArrTemp.map((status, statusIndex) => {
+				status.user = userArr[statusIndex];
+				return status;
+			});
+		});
+	}
+
 	createChat(): Observable<any> {
 		const chats = this.af.database.list('chats');
 		const chatObj: Chat = {
@@ -52,6 +65,16 @@ export class ChatService {
 			time: Date.now(),
 		};
 		return this.observableToPromise(chatMessages.push(message));
+	}
+
+	sendStatus(statusType: StatusOptions, chatKey: string): Observable<any> {
+		const statusMessages = this.af.database.list(`statusMessages/${chatKey}`);
+		const status: Status = {
+			type: statusType,
+			time: Date.now(),
+			user: this.authInfo ? this.authInfo.uid : null,
+		};
+		return this.observableToPromise(statusMessages.push(status));
 	}
 
 	private observableToPromise(promise): Observable<any> {
@@ -83,3 +106,11 @@ export interface Message {
 	from: string | any;
 	time: number;
 }
+
+export interface Status {
+	type: StatusOptions;
+	time: number;
+	user: string | any;
+}
+
+export type StatusOptions = 'join' | 'leave';
