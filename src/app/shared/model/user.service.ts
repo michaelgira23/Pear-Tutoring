@@ -54,7 +54,7 @@ export class UserService {
 	}
 
 	findUser(uid: string): Observable<User> {
-		return this.db.object(`users/${uid}`).do(console.log)
+		return this.db.object(`users/${uid}`)
 		.map(User.fromJson);
 	}
 

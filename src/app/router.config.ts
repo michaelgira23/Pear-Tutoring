@@ -1,5 +1,7 @@
 import { Route } from '@angular/router';
 
+import { CreateChatComponent } from './create-chat/create-chat.component';
+import { ViewChatComponent } from './view-chat/view-chat.component';
 import { HomeComponent } from './home/home.component';
 import { CreateWhiteboardComponent } from './create-whiteboard/create-whiteboard.component';
 import { ViewWhiteboardComponent } from './view-whiteboard/view-whiteboard.component';
@@ -36,6 +38,24 @@ export const routerConfig: Route[] = [
 			{
 				path: ':key',
 				component: ViewWhiteboardComponent
+			}
+		]
+	},
+	{
+		path: 'chat',
+		children: [
+			{
+				path: '',
+				redirectTo: 'new',
+				pathMatch: 'full'
+			},
+			{
+				path: 'new',
+				component: CreateChatComponent
+			},
+			{
+				path: ':key',
+				component: ViewChatComponent
 			}
 		]
 	},

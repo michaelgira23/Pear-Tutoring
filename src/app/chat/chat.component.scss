@@ -1,0 +1,9 @@
+.message-block {
+	/*
+	 * This removes the bullets and indentation from the list elements.
+	 * Effectively, it makes the <ol> element purely markup.
+	 */
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
