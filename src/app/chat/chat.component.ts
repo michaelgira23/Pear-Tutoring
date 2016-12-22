@@ -1,4 +1,4 @@
-import { Component, OnInit, OnChanges, OnDestroy, SimpleChanges, Input, ViewChild } from '@angular/core';
+import { Component, OnInit, OnChanges, OnDestroy, SimpleChanges, Input } from '@angular/core';
 
 import { ChatService, Message, Status } from '../shared/model/chat.service';
 import { UserService } from '../shared/model/user.service';
