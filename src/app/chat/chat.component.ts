@@ -82,13 +82,15 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 	}
 
 	mergeEntries() {
-		console.log('this.allMessages and this.allStatuses', this.allMessages, this.allStatuses);
-		this.allEntries = this.allEntries.concat(this.allMessages, this.allStatuses);
-		console.log('this.allEntries before sort', this.allEntries);
-		this.allEntries.sort((a, b) => {
-			return a.time - b.time;
-		});
-		console.log('this.allEntries after sort', this.allEntries);
+		if (this.allMessages && this.allStatuses) {
+			console.log('this.allMessages and this.allStatuses', this.allMessages, this.allStatuses);
+			this.allEntries = this.allEntries.concat(this.allMessages).concat(this.allStatuses);
+			console.log('this.allEntries before sort', this.allEntries);
+			this.allEntries.sort((a, b) => {
+				return a.time - b.time;
+			});
+			console.log('this.allEntries after sort', this.allEntries);
+		}
 	}
 
 	isMessage(x: any): x is Message {
