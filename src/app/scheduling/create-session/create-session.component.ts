@@ -19,7 +19,11 @@ export class CreateSessionComponent implements OnInit {
 	uid: string;
 	allowedSubjects: string[] = allowedSubjects;
 
-	constructor(private fb: FormBuilder, private sessionService: SessionService, private userService: UserService, private auth: AuthService, private router: Router) { }
+	constructor(private fb: FormBuilder,
+				private sessionService: SessionService,
+				private userService: UserService,
+				private auth: AuthService,
+				private router: Router) { }
 
 	ngOnInit() {
 		this.createSessionForm = this.fb.group({

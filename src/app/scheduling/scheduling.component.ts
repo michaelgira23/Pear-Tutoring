@@ -22,7 +22,10 @@ export class SchedulingComponent implements OnInit {
 		return this.tutorSessions.concat(this.tuteeSessions);
 	};
 
-	constructor(private sessionService: SessionService, private fb: FormBuilder, private router: Router, private userService: UserService, private auth: AuthService) { }
+	constructor(private sessionService: SessionService,
+				private fb: FormBuilder, private router: Router,
+				private userService: UserService,
+				private auth: AuthService) { }
 
 	ngOnInit() {
 		this.joinSessionForm = this.fb.group({
@@ -31,18 +34,18 @@ export class SchedulingComponent implements OnInit {
 		this.auth.auth$.subscribe(val => {
 			this.sessionService.findMySessions().tutorSessions
 			.subscribe(
-				val => this.tutorSessions = val,
+				val1 => this.tutorSessions = val1,
 				err => console.log(err)
 			);
 			this.sessionService.findMySessions().tuteeSessions
 			.subscribe(
-				val => this.tuteeSessions = val,
+				val2 => this.tuteeSessions = val2,
 				err => console.log(err)
 			);
 
 			this.sessionService.findPublicSessions()
 			.subscribe(
-				val => this.publicSessions = val,
+				val3 => this.publicSessions = val3,
 				err => console.log(err)
 			);
 		});

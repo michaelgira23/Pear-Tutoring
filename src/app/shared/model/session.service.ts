@@ -41,15 +41,20 @@ export class SessionService {
 		return subject.asObservable();
 	}
 
+	// Take a firebase query for a single session and insert a user object into the tutor and tutee fields. 
+	// Wrap this function around a firebase query to a session i can get the session object with the users
 	combineWithUser(sessionQuery: Observable<any>): Observable<Session> {
 		let sessionWithUser;
+		// First query the tutor
 		return sessionQuery.switchMap(val => {
 			sessionWithUser = val;
 			return this.db.object('users/' + val.tutor);
 		}).map(val => {
 			sessionWithUser.tutor = val;
 			return sessionWithUser;
-		}).switchMap(val => {
+		})
+		// Then query the tutees, note the session is stored temporarily in sessionsWithUser, and used later to combine with the users info. 
+		.switchMap(val => {
 			sessionWithUser = val;
 			return Observable.combineLatest(val.tutees.map(tutee => {
 				if (typeof tutee !== 'string') {
@@ -63,17 +68,22 @@ export class SessionService {
 		});
 	}
 
+	// Take a firebase query for an array of sessions and insert a user object into the tutor and tutee fields. 
 	combineArrWithUser(sessionQuery: Observable<any[]>): Observable<Session[]> {
 		let sessionsWithUser: any[];
+		// First fill in the tutor field of each session
 		return sessionQuery.switchMap((val: any[]) => {
 			sessionsWithUser = val;
 			return Observable.combineLatest(
 				val.map((session) => this.db.object('users/' + session.tutor))
 			);
-		}).map((val: any[]) => {
+		})
+		.map((val: any[]) => {
 			sessionsWithUser.map((session, index) => session.tutor = val[index]);
 			return sessionsWithUser;
-		}).switchMap((val: any[]) => {
+		})
+		// Then fill in the tutees array of each session, note sessions are stored temporarily in the sessionsWithUser variable
+		.switchMap((val: any[]) => {
 			sessionsWithUser = val;
 			return Observable.combineLatest(
 				val.map((session) => Observable.combineLatest(
@@ -94,6 +104,7 @@ export class SessionService {
 		});
 	}
 
+	// find a single session and combine it with user data
 	findSession(id: string, query?: {}): Observable<any> {
 		return this.combineWithUser(
 			this.db.object('/sessions/' + id)
@@ -101,6 +112,7 @@ export class SessionService {
 		);
 	}
 
+	// Find the session ids where the user is a tutor or a tutee. Note the info in stored in the user object. 
 	findMySessions(): {tutorSessions: Observable<Session[]>, tuteeSessions: Observable<Session[]>} {
 		if (!this.uid) { return {tutorSessions: Observable.throw('Rip no login info'), tuteeSessions: Observable.throw('Rip no login info')}; };
 		return {
@@ -115,6 +127,7 @@ export class SessionService {
 		};
 	}
 
+	// Find all of the sessions where the listed field is true. 
 	findPublicSessions(): Observable<Session[]> {
 		return this.combineArrWithUser(
 			this.db.list('sessions', {
@@ -126,9 +139,9 @@ export class SessionService {
 		).map(Session.fromJsonArray);
 	}
 
+	// Find session by tags, sessions are already stored in sessionsByTags node in firebase
 	findSessionsByTags(tags: string[]): Observable<Session[]> {
-		return Observable.of(tags)
-			.map(tags => tags.map(tag => this.db.list('sessionsByTags/' + tag)))
+		return Observable.of(tags.map(tag => this.db.list('sessionsByTags/' + tag)))
 			.flatMap(tags$arr => Observable.combineLatest(tags$arr))
 			.map(sessionsByTag => {sessionsByTag = sessionsByTag.reduce((a, b) => a.concat(b));
 				return sessionsByTag.map(session => this.findSession(session.$key).do(console.log)); })
@@ -136,6 +149,7 @@ export class SessionService {
 			.map(Session.fromJsonArray);
 	}
 
+	// Update the information of a session
 	updateSession(sessionId: string, session: SessionOptions): Observable<any> {
 		if (!this.uid) { return Observable.throw('Rip no login info'); };
 		let sessionToSave = Object.assign({}, session);
@@ -158,6 +172,7 @@ export class SessionService {
 		return this.firebaseUpdate(dataToSave);
 	}
 
+	// Use the update function to create a session
 	createSession(session: SessionOptions, wbOpt?: WhiteboardOptions): Observable<any> {
 		const wbOptDefault = {
 			background: '#FFF'
@@ -179,18 +194,29 @@ export class SessionService {
 		});
 	}
 
+	// WIP:  create an anonymous session, for quick access and sharing of the whiteboard. 
 	createAnonSession(): Observable<any> {
 		return Observable.from(undefined);
 	}
 
+	// Delete a session. 
 	deleteSession(sessionId: string): Observable<any> {
 		// calling update null on a location in the database will cause it to be deleted. 
-		let dataToDelete = {};
+		if (!this.uid) { return Observable.throw('Rip no login info'); };
+		return this.db.object('sessions' + sessionId).switchMap(session => {
+			let dataToSave = {};
+			dataToSave['sessions/' + sessionId] = null;
+			dataToSave['usersInSession/' + sessionId] = null;
+			dataToSave[`users/${this.uid}/tutorSessions/${sessionId}`] = null;
+			session.tutees.forEach(uid => dataToSave[`users/${uid}/tuteeSessions/${sessionId}`] = null);
+			session.tags.forEach(tag => dataToSave[`sessionsByTags/${tag}/${sessionId}`] = null);
+			dataToSave[`sessionsBySubject/${session.subject}/${sessionId}`] = null;
 
-		dataToDelete['sessions/' + sessionId] = null;
-		return this.firebaseUpdate(dataToDelete);
+			return this.firebaseUpdate(dataToSave);
+		})
 	}
 
+	// Adds the user to the pool of online users in a session, and change the user's status to "inSession"
 	joinSession(sessionId: String): Observable<any> {
 		if (!this.uid) { return Observable.throw('Rip no login info'); }
 
@@ -202,6 +228,7 @@ export class SessionService {
 		return this.firebaseUpdate(dataToSave);
 	}
 
+	// remove the user from the pool of online users for the session, and change his status to "online"
 	leaveSession(sessionId: string): Observable<any> {
 		let dataToSave = {};
 		dataToSave[`/usersInSession/${sessionId}/${this.uid}`] = false;
@@ -209,12 +236,9 @@ export class SessionService {
 		return this.firebaseUpdate(dataToSave);
 	}
 
+	// get only the uids of users from the pool of online users for a session
 	getOnlineUsers(sessionId): Observable<any[]> {
 		return this.db.list('usersInSession/' + sessionId);
-		// .map(uids => uids.map(uid => this.db.object('users/' + uid.$key)))
-		// .flatMap(uid$arr => Observable.combineLatest(uid$arr))
-		// .map(User.fromJsonList);
-		// Probably dont need to query the users because we can just compare the uids in the component
 	}
 
 	// addWb(sessionId: string) {}
