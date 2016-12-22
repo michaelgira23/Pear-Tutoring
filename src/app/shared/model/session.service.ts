@@ -7,6 +7,8 @@ import { ChatService } from './chat.service';
 import { AuthService } from '../security/auth.service';
 import { WhiteboardService, WhiteboardOptions } from './whiteboard.service';
 
+export const allowedSubjects = ['Math', 'English', 'Art'];
+
 @Injectable()
 export class SessionService {
 	sdkDb: any;
@@ -213,7 +215,7 @@ export class SessionService {
 			dataToSave[`sessionsBySubject/${session.subject}/${sessionId}`] = null;
 
 			return this.firebaseUpdate(dataToSave);
-		})
+		});
 	}
 
 	// Adds the user to the pool of online users in a session, and change the user's status to "inSession"
@@ -264,5 +266,3 @@ export interface SessionOptions {
 	chat: string;
 	canceled: boolean;
 }
-
-export const allowedSubjects = ['Math', 'English', 'Art'];
