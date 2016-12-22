@@ -55,7 +55,7 @@ export class SchedulingComponent implements OnInit {
 		this.sessionService.deleteSession(sessionId).subscribe(
 			val => console.log('deleted'),
 			err => console.log(err)
-		)
+		);
 	}
 
 	joinSession() {

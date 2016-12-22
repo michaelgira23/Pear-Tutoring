@@ -6,23 +6,23 @@ import { DebugElement } from '@angular/core';
 import { SessionCalendarComponent } from './session-calendar.component';
 
 describe('SessionCalendarComponent', () => {
-  let component: SessionCalendarComponent;
-  let fixture: ComponentFixture<SessionCalendarComponent>;
+	let component: SessionCalendarComponent;
+	let fixture: ComponentFixture<SessionCalendarComponent>;
 
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      declarations: [ SessionCalendarComponent ]
-    })
-    .compileComponents();
-  }));
+	beforeEach(async(() => {
+		TestBed.configureTestingModule({
+			declarations: [ SessionCalendarComponent ]
+		})
+		.compileComponents();
+	}));
 
-  beforeEach(() => {
-    fixture = TestBed.createComponent(SessionCalendarComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+	beforeEach(() => {
+		fixture = TestBed.createComponent(SessionCalendarComponent);
+		component = fixture.componentInstance;
+		fixture.detectChanges();
+	});
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+	it('should create', () => {
+		expect(component).toBeTruthy();
+	});
 });
