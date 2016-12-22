@@ -35,9 +35,7 @@ export class Shape {
 	mousedown(event) {
 		if (this.currentShapeFinished) {
 			this.currentShapeFinished = false;
-			const point = this.whiteboard.cursorPoint(event);
-			// Create new shape
-			this.startPoint = point;
+			this.startPoint = this.whiteboard.cursorPoint(event);
 			// Create a rectangle for the shape bounds
 			this.creationRect = new paper.Rectangle(this.startPoint, this.startPoint);
 			// Create point from shadow offset
@@ -69,6 +67,28 @@ export class Shape {
 						to: [this.startPoint.x + 1, this.startPoint.y + 1]
 					});
 					break;
+				case 'ellipse':
+					this.currentShape = new paper.Path.Ellipse({
+						// Stroke Style
+						strokeColor  : this.whiteboard.shapeOptions.strokeColor,
+						strokeWidth  : this.whiteboard.shapeOptions.strokeWidth,
+						strokeCap    : this.whiteboard.shapeOptions.strokeCap,
+						strokeJoin   : this.whiteboard.shapeOptions.strokeJoin,
+						dashOffset   : this.whiteboard.shapeOptions.dashOffset,
+						strokeScaling: this.whiteboard.shapeOptions.strokeScaling,
+						dashArray    : this.whiteboard.shapeOptions.dashArray,
+						miterLimit   : this.whiteboard.shapeOptions.miterLimit,
+						// Fill Style
+						fillColor    : this.whiteboard.shapeOptions.fillColor,
+						// Shadow Style
+						shadowColor  : this.whiteboard.shapeOptions.shadowColor,
+						shadowBlur   : this.whiteboard.shapeOptions.shadowBlur,
+						shadowOffset : shadowOffsetPoint,
+						// Shape
+						point: [this.startPoint.x, this.startPoint.y],
+						radius: 1
+					});
+					break;
 				case 'polygon':
 					const sides = parseInt(this.whiteboard.polygonSides, 10);
 					this.currentShape = new paper.Path.RegularPolygon({
@@ -93,7 +113,7 @@ export class Shape {
 					});
 					break;
 				default:
-					console.log(`unrecognized shape! (${this.whiteboard.polygonSides})`);
+					console.log(`Unrecognized shape! (${this.currentShapeType})`);
 			}
 
 			this.currentShape.selected = true;
@@ -119,7 +139,6 @@ export class Shape {
 								this.currentShape.remove();
 								// Create point from shadow offset
 								const shadowOffsetPoint = new paper.Point(this.whiteboard.shapeOptions.shadowOffset.x, this.whiteboard.shapeOptions.shadowOffset.y);
-								console.log('new arc mouse move with given arguments', this.startPoint, this.arcPoint, point);
 								this.currentShape = new paper.Path.Arc({
 									// Stroke Style
 									strokeColor  : this.whiteboard.shapeOptions.strokeColor,
@@ -157,7 +176,12 @@ export class Shape {
 						this.currentShape.removeSegment(segmentsLength - 2);
 						break;
 					default:
-						this.currentShape.bounds = this.creationRect;
+						// If holding shift key, maintain aspect ratio
+						if (this.whiteboard.shiftKey) {
+							this.currentShape.fitBounds(this.creationRect, true);
+						} else {
+							this.currentShape.bounds = this.creationRect;
+						}
 				}
 
 				// If there isn't a visual box, create one
@@ -173,25 +197,22 @@ export class Shape {
 
 	mouseup(event) {
 		if (this.creationRect.width > 0 && this.creationRect.height > 0) {
-			console.log('on mouseup, segments length', this.currentShape.segments.length);
-
-			// If we're drawing an arc, make that the `through` field
+			// Check if we just finished the first part of the arc
 			if (this.currentShapeType === 'arc' && !this.arcPoint) {
 				this.arcPoint = this.whiteboard.cursorPoint(event);
+
 				// Visualize this arc point on the canvas
 				this.visualArcPoint = new paper.Shape.Circle({
-					// Stroke Style
 					strokeColor: this.whiteboard.shapeOptions.strokeColor,
-					// Fill Style
 					fillColor  : this.whiteboard.shapeOptions.fillColor,
-					// Position
 					center: [this.arcPoint.x, this.arcPoint.y],
-					radius: 5,
+					radius: 5
 				});
-				console.log('arc, but line. make arc.', this.arcPoint);
+
 				// Create point from shadow offset
 				const shadowOffsetPoint = new paper.Point(this.whiteboard.shapeOptions.shadowOffset.x, this.whiteboard.shapeOptions.shadowOffset.y);
 
+				// Remove the current line for the first phase of the arc, and add an actual arc for the next mousedown
 				this.currentShape.remove();
 				this.currentShape = new paper.Path.Arc({
 					// Stroke Style
@@ -214,14 +235,11 @@ export class Shape {
 					through: [this.arcPoint.x, this.arcPoint.y],
 					to: [this.arcPoint.x + 1, this.arcPoint.y + 1]
 				});
-				console.log('after making arc', this.currentShape.segments.length);
 				return;
 			}
 
-			console.log('finished shape');
-
+			// Finish drawing shape
 			this.currentShapeFinished = true;
-
 			this.currentShape.selected = false;
 			this.visualRect.remove();
 			this.visualRect = null;
@@ -285,6 +303,10 @@ export class Shape {
 
 	toolchange(nextTool) {
 		this.deselectAllShapes();
+	}
+
+	modifierKey(event: KeyboardEvent) {
+
 	}
 
 	/**

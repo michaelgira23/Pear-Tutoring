@@ -42,13 +42,17 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	// Latest value of whiteboard object from database
 	whiteboard: Whiteboard;
 
-	// Whether or not mouse is being clicked; used for drawing and things
-	mouseDown: boolean = false;
 	// Whether or not to show toolbar
 	@Input()
 	showToolbar: boolean = true;
 	// Whether or not user can make changes to whiteboard
 	allowWrite: boolean = false;
+
+	// For detecting if certain keys are pressed
+	mouseDown: boolean = false;
+	ctrlKey: boolean = false;
+	metaKey: boolean = false;
+	shiftKey: boolean = false;
 
 	/**
 	 * Background variables
@@ -267,6 +271,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 
 	@HostListener('window:keydown', ['$event'])
 	onKeydown(event: KeyboardEvent) {
+		this.mapKeys(event);
 		if (event.keyCode === 90 && event.ctrlKey) {
 			window.alert('Undo');
 			let newMarks = [];
@@ -275,6 +280,18 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 			}
 			this.tools.pen.markingsToCanvas(newMarks);
 		}
+	}
+
+	@HostListener('window:keyup', ['$event'])
+	onKeyup(event: KeyboardEvent) {
+		this.mapKeys(event);
+	}
+
+	mapKeys(event: KeyboardEvent) {
+		this.ctrlKey = event.ctrlKey;
+		this.metaKey = event.metaKey;
+		this.shiftKey = event.shiftKey;
+		this.triggerToolEvent(this.tool, 'modifierKey', event);
 	}
 
 	/**
