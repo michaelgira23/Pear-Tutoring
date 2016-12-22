@@ -11,6 +11,7 @@ import { CreateSessionComponent } from './scheduling/create-session/create-sessi
 import { RegisterComponent } from './register/register.component';
 import { SessionComponent } from './session/session.component';
 import { SettingsComponent } from './settings/settings.component';
+import { UpdateSessionComponent } from './scheduling/update-session/update-session.component';
 
 export const routerConfig: Route[] = [
 	{
@@ -72,6 +73,10 @@ export const routerConfig: Route[] = [
 			{
 				path: 'create',
 				component: CreateSessionComponent
+			},
+			{
+				path: 'update/:id',
+				component: UpdateSessionComponent
 			}
 		]
 	},

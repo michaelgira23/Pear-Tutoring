@@ -16,11 +16,12 @@
     add tutees: <br/>
     <textarea formControlName="tutees" required row=1></textarea>
   </fieldset>
-  <fieldset>
+  <fieldset *ngIf="!sessionId && !sessionInfo">
     whiteboard options: <br/>
     background: <input formControlName="wbBackground">
   </fieldset>
-  <button>Create</button>
+  <button *ngIf="!sessionId && !sessionInfo" class="btn btn-primary">Create</button>
+  <button *ngIf="sessionId || sessionInfo" class="btn btn-primary" type="button" (click)="createSession()">Update</button>
 </form>
 
 <h2> All Users </h2>

@@ -11,4 +11,7 @@
     <p class="card-text">{{ startTime }} ~ {{ endTime }}</p>
     <button (click)="joinSession()" class="btn btn-primary">Join Session</button>
   </div>
+  <div class="card-data" *ngIf="user.uid === session.tutor.$key">
+    <button class="btn btn-outline-primary btn-sm" (click)="updateSession()">Update</button>
+  </div>
 </div>

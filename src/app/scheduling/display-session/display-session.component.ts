@@ -2,6 +2,7 @@ import { Component, OnInit, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { Session } from '../../shared/model/session';
 import * as moment from 'moment';
+import { UserService } from '../../shared/model/user.service';
 
 @Component({
 	selector: 'app-display-session',
@@ -19,12 +20,16 @@ export class DisplaySessionComponent implements OnInit {
 		return moment(this.session.end, 'X').format('M/D/Y');
 	}
 
-	constructor(private router: Router) { }
+	constructor(private router: Router, private user: UserService) { }
 
 	ngOnInit() {
 	}
 
 	joinSession() {
 		this.router.navigate(['session', this.session.$key]);
+	}
+
+	updateSession() {
+		this.router.navigate(['scheduling', 'update', this.session.$key])
 	}
 }
