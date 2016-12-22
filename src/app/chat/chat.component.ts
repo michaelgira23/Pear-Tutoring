@@ -1,4 +1,4 @@
-import { Component, OnInit, OnChanges, OnDestroy, SimpleChanges, Input } from '@angular/core';
+import { Component, HostListener, OnInit, OnChanges, OnDestroy, SimpleChanges, Input } from '@angular/core';
 
 import { ChatService, Message, Status } from '../shared/model/chat.service';
 import { UserService } from '../shared/model/user.service';
@@ -63,7 +63,7 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 		}
 	}
 
-	ngOnDestroy() {
+	@HostListener('window:unload') ngOnDestroy() {
 		this.chatService.sendStatus('leave', this.key).subscribe(
 			data => {},
 			err => {
@@ -83,13 +83,10 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 
 	mergeEntries() {
 		if (this.allMessages && this.allStatuses) {
-			console.log('this.allMessages and this.allStatuses', this.allMessages, this.allStatuses);
-			this.allEntries = this.allEntries.concat(this.allMessages).concat(this.allStatuses);
-			console.log('this.allEntries before sort', this.allEntries);
+			this.allEntries = [].concat(this.allMessages, this.allStatuses);
 			this.allEntries.sort((a, b) => {
 				return a.time - b.time;
 			});
-			console.log('this.allEntries after sort', this.allEntries);
 		}
 	}
 
