@@ -9,7 +9,12 @@ export class Shape {
 	// paper.js shape objects on the whiteboard
 	canvasShapes: any = {};
 
-	selectedShape: any;
+	// Shape currently being drawn
+	currentShape: any;
+	// Type of shape currently being drawn
+	currentShapeType: string;
+	// If shape is currently being drawn
+	currentShapeFinished: boolean = true;
 	// Point upon mousedown
 	startPoint: any;
 	// Rectangle from mouse down to mouse move/up
@@ -24,69 +29,92 @@ export class Shape {
 	 */
 
 	mousedown(event) {
-		const point = this.whiteboard.cursorPoint(event);
-		const hit = paper.project.hitTest(point, {
-			tolerance: 1000,
-			class: paper.Shape,
-			fill: true,
-			stroke: true,
-			segments: true,
-			bounds: true
-		});
-
-		console.log(hit);
-
-		let key = null;
-
-		if (hit) {
-			key = this.shapeIdToPushKey(hit.item.id);
-
-			if (key) {
-				this.selectedShape = this.canvasShapes[key];
-			}
-		}
-
-		if (!key) {
+		if (this.currentShapeFinished) {
+			this.currentShapeFinished = false;
+			const point = this.whiteboard.cursorPoint(event);
 			// Create new shape
 			this.startPoint = point;
-			const shadowOffsetPoint = new paper.Point(this.whiteboard.shapeOptions.shadowOffset.x, this.whiteboard.shapeOptions.shadowOffset.y);
-			const sides = parseInt(this.whiteboard.polygonSides, 10);
-			this.selectedShape = new paper.Path.RegularPolygon({
-				// Stroke Style
-				strokeColor  : this.whiteboard.shapeOptions.strokeColor,
-				strokeWidth  : this.whiteboard.shapeOptions.strokeWidth,
-				strokeCap    : this.whiteboard.shapeOptions.strokeCap,
-				strokeJoin   : this.whiteboard.shapeOptions.strokeJoin,
-				dashOffset   : this.whiteboard.shapeOptions.dashOffset,
-				strokeScaling: this.whiteboard.shapeOptions.strokeScaling,
-				dashArray    : this.whiteboard.shapeOptions.dashArray,
-				miterLimit   : this.whiteboard.shapeOptions.miterLimit,
-				// Fill Style
-				fillColor    : this.whiteboard.shapeOptions.fillColor,
-				// Shadow Style
-				shadowColor  : this.whiteboard.shapeOptions.shadowColor,
-				shadowBlur   : this.whiteboard.shapeOptions.shadowBlur,
-				shadowOffset : shadowOffsetPoint,
-				// Shape
-				sides: sides ? sides : 4,
-				radius: 1
-			});
-
+			// Create a rectangle for the shape bounds
 			this.creationRect = new paper.Rectangle(this.startPoint, this.startPoint);
-		}
+			// Create point from shadow offset
+			const shadowOffsetPoint = new paper.Point(this.whiteboard.shapeOptions.shadowOffset.x, this.whiteboard.shapeOptions.shadowOffset.y);
 
-		this.deselectAllShapes();
-		this.selectedShape.selected = true;
+			// Create a shape
+			this.currentShapeType = this.whiteboard.shapeType;
+			switch (this.currentShapeType) {
+				case 'line':
+					this.currentShape = new paper.Path.Line({
+						// Stroke Style
+						strokeColor  : this.whiteboard.shapeOptions.strokeColor,
+						strokeWidth  : this.whiteboard.shapeOptions.strokeWidth,
+						strokeCap    : this.whiteboard.shapeOptions.strokeCap,
+						strokeJoin   : this.whiteboard.shapeOptions.strokeJoin,
+						dashOffset   : this.whiteboard.shapeOptions.dashOffset,
+						strokeScaling: this.whiteboard.shapeOptions.strokeScaling,
+						dashArray    : this.whiteboard.shapeOptions.dashArray,
+						miterLimit   : this.whiteboard.shapeOptions.miterLimit,
+						// Fill Style
+						fillColor    : this.whiteboard.shapeOptions.fillColor,
+						// Shadow Style
+						shadowColor  : this.whiteboard.shapeOptions.shadowColor,
+						shadowBlur   : this.whiteboard.shapeOptions.shadowBlur,
+						shadowOffset : shadowOffsetPoint,
+						// Shape
+						from: [this.startPoint.x, this.startPoint.y],
+						to: [this.startPoint.x + 1, this.startPoint.y + 1]
+					});
+					break;
+				case 'polygon':
+					const sides = parseInt(this.whiteboard.polygonSides, 10);
+					this.currentShape = new paper.Path.RegularPolygon({
+						// Stroke Style
+						strokeColor  : this.whiteboard.shapeOptions.strokeColor,
+						strokeWidth  : this.whiteboard.shapeOptions.strokeWidth,
+						strokeCap    : this.whiteboard.shapeOptions.strokeCap,
+						strokeJoin   : this.whiteboard.shapeOptions.strokeJoin,
+						dashOffset   : this.whiteboard.shapeOptions.dashOffset,
+						strokeScaling: this.whiteboard.shapeOptions.strokeScaling,
+						dashArray    : this.whiteboard.shapeOptions.dashArray,
+						miterLimit   : this.whiteboard.shapeOptions.miterLimit,
+						// Fill Style
+						fillColor    : this.whiteboard.shapeOptions.fillColor,
+						// Shadow Style
+						shadowColor  : this.whiteboard.shapeOptions.shadowColor,
+						shadowBlur   : this.whiteboard.shapeOptions.shadowBlur,
+						shadowOffset : shadowOffsetPoint,
+						// Shape
+						sides: sides ? sides : 4,
+						radius: 1
+					});
+					break;
+				default:
+					console.log(`unrecognized shape! (${this.whiteboard.polygonSides})`);
+			}
+
+			this.currentShape.selected = true;
+		}
 	}
 
 	mousemove(event) {
-		if (this.selectedShape && this.whiteboard.mouseDown) {
+		if (this.currentShape && !this.currentShapeFinished) {
 			// Check if mouse is over any of the manipulation points
 			const point = this.whiteboard.cursorPoint(event);
 			this.creationRect = new paper.Rectangle(this.startPoint, point);
-			if (this.creationRect.width > 0 && this.creationRect.height > 0) {
-				this.selectedShape.bounds = this.creationRect;
 
+			// Shapes will not show up anymore if their height and width are zero
+			if (this.creationRect.width > 0 && this.creationRect.height > 0) {
+				// Resize the shape we are currently drawing
+				switch (this.currentShapeType) {
+					case 'line':
+						console.log('segments', this.currentShape.segments.length);
+						this.currentShape.insert(1, point);
+						this.currentShape.removeSegment(2);
+						break;
+					default:
+						this.currentShape.bounds = this.creationRect;
+				}
+
+				// If there isn't a visual box, create one
 				if (!this.visualRect) {
 					this.visualRect = new paper.Path.Rectangle(this.creationRect);
 					this.visualRect.strokeColor = '#08f';
@@ -98,6 +126,13 @@ export class Shape {
 	}
 
 	mouseup(event) {
+		if (this.creationRect.width > 0 && this.creationRect.height > 0) {
+			this.currentShapeFinished = true;
+
+			this.currentShape.selected = false;
+			this.visualRect.remove();
+			this.visualRect = null;
+		}
 		/*
 		if (this.selectedShape && this.whiteboard.allowWrite) {
 			const positionPosition: Point = {

@@ -7,11 +7,11 @@ import {
 	defaultShapeOptions } from '../shared/model/whiteboard.service';
 
 // Whiteboard tools
+import { Cursor } from './tools/cursor';
 import { Pen } from './tools/pen';
 import { Eraser } from './tools/eraser';
 import { Text } from './tools/text';
 import { Shape } from './tools/shape';
-import {Cursor} from './tools/cursor';
 
 declare const paper;
 

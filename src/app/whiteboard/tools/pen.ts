@@ -11,7 +11,7 @@ export class Pen {
 	canvasMarkings: any = {};
 
 	currentPath: any;
-	currentcanvasMarkingstarted: number;
+	currentPathStarted: number;
 	currentPathFinished: boolean = true;
 
 	constructor(private whiteboard: WhiteboardComponent) { }
@@ -42,7 +42,7 @@ export class Pen {
 				shadowBlur   : this.whiteboard.markingOptions.shadowBlur,
 				shadowOffset : shadowOffsetPoint
 			});
-			this.currentcanvasMarkingstarted = Date.now();
+			this.currentPathStarted = Date.now();
 			this.currentPathFinished = false;
 		} else {
 			// User unclicked the mouse outside of the window, just continue with previous path
@@ -79,7 +79,7 @@ export class Pen {
 			if (this.currentPath.segments.length > 1) {
 				// Insert path into database
 				this.whiteboard.whiteboardService.createMarking(
-					this.whiteboard.key, path, this.whiteboard.markingOptions, this.currentcanvasMarkingstarted)
+					this.whiteboard.key, path, this.whiteboard.markingOptions, this.currentPathStarted)
 					.subscribe(
 						data => {
 							console.log('successfully added marking', data);
