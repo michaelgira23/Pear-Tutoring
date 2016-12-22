@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@angular/core';
-import { AngularFireDatabase, FirebaseRef, FirebaseAuthState } from 'angularfire2';
+import { AngularFireDatabase, FirebaseRef } from 'angularfire2';
 import { AuthService } from '../security/auth.service';
-import { Observable, Subject, BehaviorSubject } from 'rxjs/Rx';
+import { Observable, Subject } from 'rxjs/Rx';
 import { User } from './user';
 
 export const userStatus = {
@@ -60,7 +60,7 @@ export class UserService {
 	}
 
 	uploadPfp(pfp: File): Observable<any> {
-		if (!this.uid) return Observable.throw('Rip no login info');
+		if (!this.uid) { return Observable.throw('Rip no login info'); }
 		return Observable.from(this.sdkStorage.child(`userPfps/${this.uid}/`).put(pfp))
 			.flatMap((snap: any) => {
 				let userToSave = Object.assign({}, {pfp: snap.metadata.downloadURLs[0]});
@@ -85,13 +85,13 @@ export class UserService {
 			.then(
 				val => {
 					subject.next(val);
-					subject.complete();							
+					subject.complete();
 
 				},
 				err => {
 					subject.error(err);
 					subject.complete();
-				}								
+				}
 			);
 
 		return subject.asObservable();

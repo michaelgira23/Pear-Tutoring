@@ -2,22 +2,24 @@ import { Injectable, Inject } from '@angular/core';
 import { Observable, Subject } from 'rxjs/Rx';
 import { AngularFireDatabase, FirebaseRef } from 'angularfire2';
 import { Session } from './session';
-import { User } from './user';
 import { UserService, userStatus } from './user.service';
 import { ChatService } from './chat.service';
 import { AuthService } from '../security/auth.service';
 import { WhiteboardService, WhiteboardOptions } from './whiteboard.service';
-import * as moment from 'moment';
 
 @Injectable()
 export class SessionService {
 	sdkDb: any;
 	uid: string;
 
-	constructor(private db: AngularFireDatabase, @Inject(FirebaseRef) fb, private userService: UserService, private whiteboardService: WhiteboardService, private auth: AuthService, private chatService: ChatService) {
+	constructor(private db: AngularFireDatabase, @Inject(FirebaseRef) fb,
+				private userService: UserService,
+				private whiteboardService: WhiteboardService,
+				private auth: AuthService,
+				private chatService: ChatService) {
 		this.sdkDb = fb.database().ref();
 		this.auth.auth$.subscribe(val => {
-			if (val) this.uid = val.uid;
+			if (val) { this.uid = val.uid; };
 		});
 	}
 
@@ -100,7 +102,7 @@ export class SessionService {
 	}
 
 	findMySessions(): {tutorSessions: Observable<Session[]>, tuteeSessions: Observable<Session[]>} {
-		if (!this.uid) return {tutorSessions: Observable.throw('Rip no login info'), tuteeSessions: Observable.throw('Rip no login info')};
+		if (!this.uid) { return {tutorSessions: Observable.throw('Rip no login info'), tuteeSessions: Observable.throw('Rip no login info')}; };
 		return {
 			tutorSessions: this.db.list(`/users/${this.uid}/tutorSessions`)
 				.map(sessions => sessions.map(session => this.findSession(session.$key)))
@@ -110,7 +112,7 @@ export class SessionService {
 				.map(sessions => sessions.map(session => this.findSession(session.$key)))
 				.flatMap(sessions$arr => Observable.combineLatest(sessions$arr))
 				.map(Session.fromJsonArray)
-		}
+		};
 	}
 
 	findPublicSessions(): Observable<Session[]> {
@@ -129,13 +131,13 @@ export class SessionService {
 			.map(tags => tags.map(tag => this.db.list('sessionsByTags/' + tag)))
 			.flatMap(tags$arr => Observable.combineLatest(tags$arr))
 			.map(sessionsByTag => {sessionsByTag = sessionsByTag.reduce((a, b) => a.concat(b));
-				return sessionsByTag.map(session => this.findSession(session.$key).do(console.log))})
+				return sessionsByTag.map(session => this.findSession(session.$key).do(console.log)); })
 			.flatMap(session$arr => Observable.combineLatest(session$arr))
 			.map(Session.fromJsonArray);
 	}
 
 	updateSession(sessionId: string, session: SessionOptions): Observable<any> {
-		if (!this.uid) return Observable.throw('Rip no login info');
+		if (!this.uid) { return Observable.throw('Rip no login info'); };
 		let sessionToSave = Object.assign({}, session);
 		let uidsToSave = {};
 		session.tutees.forEach(uid => {
@@ -190,7 +192,7 @@ export class SessionService {
 	}
 
 	joinSession(sessionId: String): Observable<any> {
-		if (!this.uid) return Observable.throw('Rip no login info');
+		if (!this.uid) { return Observable.throw('Rip no login info'); }
 
 		// this.sdkDb.child(`/usersInSession/${sessionId}/${this.uid}`).onDisconnect().set(false);
 
@@ -239,4 +241,4 @@ export interface SessionOptions {
 	canceled: boolean;
 }
 
-export const allowedSubjects = ['Math', 'English', 'Art']
+export const allowedSubjects = ['Math', 'English', 'Art'];
