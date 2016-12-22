@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Validators, FormGroup, FormBuilder } from '@angular/forms';
-import { UserService } from '../shared/model/user.service';
+import { UserService, RegisterOptions } from '../shared/model/user.service';
 
 @Component({
 	selector: 'app-register',
@@ -14,6 +14,9 @@ export class RegisterComponent implements OnInit {
 
 	constructor(private fb: FormBuilder, private router: Router, private userService: UserService) {
 		this.form = this.fb.group({
+			firstName: ['', Validators.required],
+			middleName: ['', Validators.required],
+			lastName: ['', Validators.required],
 			email: ['', Validators.required],
 			password: ['', Validators.required]
 		});
@@ -23,8 +26,13 @@ export class RegisterComponent implements OnInit {
 	}
 
 	register() {
-		const formValue = this.form.value;
-		this.userService.register(formValue.email, formValue.password).subscribe(
+		let formValue: RegisterOptions = Object.assign({}, this.form.value);
+		for (let prop in formValue) {
+			if (formValue[prop]) {
+				formValue[prop] = formValue[prop].trim()
+			}
+		}
+		this.userService.register(formValue).subscribe(
 			data => {
 				this.router.navigate(['/home']);
 			},

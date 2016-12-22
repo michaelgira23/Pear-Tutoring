@@ -32,17 +32,19 @@ export class UserService {
 		});
 	}
 
-	register(email: string, password: string): Observable<any> {
-		return this.auth.register(email, password)
+	register(regOpt: RegisterOptions): Observable<any> {
+		return this.auth.register(regOpt.email, regOpt.password)
 			.flatMap(val => {
-				let newUid = val.uid;
-				return this.saveUser({email}, newUid);
-			})
+				const newUid = val.uid;
+				let userToSave = Object.assign({}, regOpt);
+				delete userToSave.password;
+				userToSave.name = regOpt.firstName + ' ' + regOpt.middleName + ' ' + regOpt.lastName;
+				return this.saveUser(userToSave, newUid);
+			});
 	}
 
 	saveUser(user: any, uid: string): Observable<any> {
-		let userToSave = Object.assign({}, user, {uid});
-		delete userToSave.uid;
+		let userToSave = Object.assign({}, user);
 		let dataToSave = {};
 		dataToSave[`users/${uid}`] = userToSave;
 		return this.firebaseUpdate(dataToSave);
@@ -95,4 +97,13 @@ export class UserService {
 
 		return subject.asObservable();
 	}
+}
+
+export interface RegisterOptions {
+	firstName: string;
+	middleName: string;
+	lastName: string;
+	email: string;
+	password: string;
+	name?: string;
 }
