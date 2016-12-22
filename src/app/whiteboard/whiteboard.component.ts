@@ -339,9 +339,13 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	*/
 
 	selectedItems() {
+		let self = this;
 		return paper.project.getItems({
 			selected: true,
-			class: paper.Path
+			match: function(item) {
+				return item.id !== self.background.id &&
+						item.id !== paper.project.activeLayer.id;
+			}
 		});
 	}
 }

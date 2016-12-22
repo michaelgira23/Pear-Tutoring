@@ -142,9 +142,9 @@ export class Cursor {
 					// selects all items intersecting the selection path
 					let allItems = paper.project.getItems({
 						overlapping: selectionBox,
-						class: paper.Path,
 						match: function(result) {
-							return result.id !== self.whiteboard.background.id;
+							return result.id !== self.whiteboard.background.id &&
+									result.id !== paper.project.activeLayer.id;
 						}
 					});
 					allItems.forEach(function(item) {
