@@ -1,6 +1,6 @@
 <ol class="message-block">
 	<div class="message-list" *ngFor="let message of allMessages">
-		<li><p>From {{ message.from.name ? message.from.name : 'an anonymous user' }}: {{ message.text }}</p></li>
+		<li><p>From {{ message.from.name ? message.from.name : (message.from.email ? message.from.email : 'an anonymous user') }}: {{ message.text }}</p></li>
 	</div>
 	<!-- TODO: Maybe put a Bootstrap divider here or something? -->
 </ol>
