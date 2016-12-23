@@ -101,11 +101,6 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 
 	savingSnapshot: boolean;
 
-	startingWidth: number;
-	startingHeight: number;
-	widthScaleFactor: number;
-	heightScaleFactor: number;
-
 	onResize$: Subject<any> = new Subject();
 
 	constructor(public whiteboardService: WhiteboardService) { }
@@ -124,14 +119,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		if (this.whiteboard) {
 			this.setBackgroundColor(this.whiteboard.background);
 		}
-		this.onResize$.debounceTime(150).subscribe(val => {
-			// map the mouse event to the correct points when event triggered
-			// Scale the canvas whenever window is resized
-			this.widthScaleFactor = paper.project.view.size.getWidth() / this.startingWidth;
-			this.heightScaleFactor = paper.project.view.size.getHeight() / this.startingHeight;
-
-			paper.project.view.scale(this.widthScaleFactor, this.heightScaleFactor, new paper.Point(0, 0));
-			paper.project.view.update();
+		this.onResize$.debounceTime(100).subscribe(val => {
 			if (!this.resizingBackground && this.whiteboard) {
 				this.resizingBackground = true;
 
@@ -143,11 +131,6 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 				}
 			}
 		});
-
-		this.startingWidth = 1920;
-		this.startingHeight = 1080;
-		paper.project.view.viewSize = new paper.Size(1920, 1080);
-		window.dispatchEvent(new Event('resize'));
 	}
 
 	ngOnChanges(changes: SimpleChanges) {
@@ -308,8 +291,8 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	cursorPoint(event) {
 		// Return a paper.js point where the mouse is at relative to the canvas
 		const canvasPos = this.canvasEl.getBoundingClientRect();
-		const cursorX = (event.clientX - canvasPos.left) / paper.project.view.viewSize.getWidth() * 1920;
-		const cursorY = (event.clientY - canvasPos.top) / paper.project.view.viewSize.getHeight() * 1080;
+		const cursorX = (event.clientX - canvasPos.left);
+		const cursorY = (event.clientY - canvasPos.top);
 
 		return new paper.Point(cursorX, cursorY);
 	}
