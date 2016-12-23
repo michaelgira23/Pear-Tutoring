@@ -91,4 +91,18 @@ export class SessionCalendarComponent implements OnInit, OnChanges {
 	nextMonth() {
 		this.momentViewDate.add(1, 'M');
 	}
+
+	onDayClick({date, events}: {date: Date, events: CalendarEvent[]}): void {
+		if (moment(date).isSame(this.momentViewDate, 'month')) {
+			if (
+				(moment(date).isSame(this.momentViewDate, 'day') && this.activeDayIsOpen === true) ||
+				events.length === 0
+			) {
+				this.activeDayIsOpen = false;
+			} else {
+				this.activeDayIsOpen = true;
+				this.momentViewDate = moment(date);
+			}
+		}
+	}
 }
