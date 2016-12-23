@@ -124,7 +124,6 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		if (this.whiteboard) {
 			this.setBackgroundColor(this.whiteboard.background);
 		}
-		console.log('memes')
 		this.onResize$.debounceTime(150).subscribe(val => {
 			// map the mouse event to the correct points when event triggered
 			// Scale the canvas whenever window is resized
@@ -311,8 +310,6 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		const canvasPos = this.canvasEl.getBoundingClientRect();
 		const cursorX = (event.clientX - canvasPos.left) / paper.project.view.viewSize.getWidth() * 1920;
 		const cursorY = (event.clientY - canvasPos.top) / paper.project.view.viewSize.getHeight() * 1080;
-
-		console.log(cursorX, cursorY);
 
 		return new paper.Point(cursorX, cursorY);
 	}
