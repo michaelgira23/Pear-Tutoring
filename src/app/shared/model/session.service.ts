@@ -113,7 +113,7 @@ export class SessionService {
 		let sessionWithWb;
 		return sessionQuery.flatMap(val => {
 			sessionWithWb = val;
-			return this.db.list('whiteboardsBySessions/' + val.$key).do(val => console.log('whiteboard value changed'));
+			return this.db.list('whiteboardsBySessions/' + val.$key);
 		}).map(val => {
 			sessionWithWb.whiteboards = val.map(wbKey => {
 				return wbKey.$key;
@@ -225,7 +225,7 @@ export class SessionService {
 	deleteSession(sessionId: string): Observable<any> {
 		// calling update null on a location in the database will cause it to be deleted. 
 		if (!this.uid) { return Observable.throw('Rip no login info'); };
-		return this.db.object('sessions' + sessionId).flatMap(session => {
+		return this.db.object('sessions/' + sessionId).flatMap(session => {
 			let dataToSave = {};
 			dataToSave['sessions/' + sessionId] = null;
 			dataToSave['usersInSession/' + sessionId] = null;

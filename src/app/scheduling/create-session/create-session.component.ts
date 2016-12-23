@@ -49,6 +49,8 @@ export class CreateSessionComponent implements OnInit, OnChanges {
 			val => this.allUsers = val,
 			err => console.log('Getting users error', err)
 		);
+
+		this.refreshSessionInfo();
 	}
 
 	ngOnChanges(changes: SimpleChanges) {

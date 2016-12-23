@@ -13,5 +13,6 @@
   </div>
   <div class="card-data" *ngIf="user.uid === session.tutor.$key">
     <button class="btn btn-outline-primary btn-sm" (click)="updateSession()">Update</button>
+    <button class="btn btn-outline-danger btn-sm" (click)="deleteSession()">Delete</button>
   </div>
 </div>

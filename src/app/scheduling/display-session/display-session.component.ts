@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { Session } from '../../shared/model/session';
 import * as moment from 'moment';
 import { UserService } from '../../shared/model/user.service';
+import { SessionService } from '../../shared/model/session.service';
 
 @Component({
 	selector: 'app-display-session',
@@ -20,7 +21,7 @@ export class DisplaySessionComponent implements OnInit {
 		return moment(this.session.end, 'X').format('M/D/Y');
 	}
 
-	constructor(private router: Router, private user: UserService) { }
+	constructor(private router: Router, private user: UserService, private sessionService: SessionService) { }
 
 	ngOnInit() {
 	}
@@ -31,5 +32,12 @@ export class DisplaySessionComponent implements OnInit {
 
 	updateSession() {
 		this.router.navigate(['scheduling', 'update', this.session.$key])
+	}
+
+	deleteSession() {
+		this.sessionService.deleteSession(this.session.$key).subscribe(
+			val => console.log('deleted'),
+			err => console.log(err)
+		);
 	}
 }

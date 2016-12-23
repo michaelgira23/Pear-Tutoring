@@ -1,11 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { SessionService } from '../shared/model/session.service';
-import { UserService } from '../shared/model/user.service';
 import { AuthService } from '../shared/security/auth.service';
 import { Session } from '../shared/model/session';
 import { Validators, FormGroup, FormBuilder } from '@angular/forms';
-import { Router } from '@angular/router';
-
 @Component({
 	selector: 'app-scheduling',
 	templateUrl: './scheduling.component.html',
@@ -23,8 +20,7 @@ export class SchedulingComponent implements OnInit {
 	};
 
 	constructor(private sessionService: SessionService,
-				private fb: FormBuilder, private router: Router,
-				private userService: UserService,
+				private fb: FormBuilder,
 				private auth: AuthService) { }
 
 	ngOnInit() {
@@ -49,18 +45,6 @@ export class SchedulingComponent implements OnInit {
 				err => console.log(err)
 			);
 		});
-	}
-
-	deleteSession(sessionId: string) {
-		this.sessionService.deleteSession(sessionId).subscribe(
-			val => console.log('deleted'),
-			err => console.log(err)
-		);
-	}
-
-	joinSession() {
-		const sessionId = this.joinSessionForm.value.sessionId;
-		this.router.navigate(['session/' + sessionId]);
 	}
 
 	findSessionsByTags(tagsStr: string) {
