@@ -3,13 +3,21 @@ declare const paper;
 
 export class Cursor {
 
-	// mouse coords at original click
-	mouseAnchorX: number;
-	mouseAnchorY: number;
-	// original bounds at moment transform started
-	originalBounds: any;	
+	// General variables
 
+	// mouse coords at original click
+	startPoint: any;
+	// original bounds at moment transform started
+	originalBounds: any;
+	// options for hit test
+	hitOptions: any;
+
+	// Case-specific variables
+
+	/* RESIZING */
 	resizing: boolean;
+	// item that was clicked - resizing ignores other selected items
+	originalItem: any;
 	// are we resizing an item horizontally, vertically, or both? depends on what part of its bounding box we drag
 	// implicit in hitTop is hitBottom, since you can only get the top or bottom of a bounding rectangle
 	// so if hitTop is true, hitBottom is false, and vice versa. same with hitLeft and hitRight
@@ -17,12 +25,14 @@ export class Cursor {
 	hitBottom: boolean;
 	hitLeft: boolean;
 	hitRight: boolean;
-	// or are we moving an item?
+	/* MOVING */
 	moving: boolean;
-	// or are we drawing a selection box?
+	// mouse coords after the last mousemove() function
+	lastPoint: any;
+	/* SELECTING */
 	selecting: boolean;
-
-	hitOptions: any;
+	// highlighted box to show current selection area
+	selectionPath: any;
 
 	constructor(private whiteboard: WhiteboardComponent) {
 		var self = this;
@@ -31,7 +41,6 @@ export class Cursor {
 			stroke: true,
 			bounds: true,
 			tolerance: 5,
-			// ensures that hit test doesn't pick up the background rectangle
 			match: function(result) {
 				return result.item.id !== self.whiteboard.background.id;
 			}
@@ -44,44 +53,39 @@ export class Cursor {
 
 	mousedown(event) {
 		const point = this.whiteboard.cursorPoint(event);
+		// set start point to current mouse position
+		this.startPoint = point;
+		this.lastPoint = point;
+
 		const hit = paper.project.hitTest(point, this.hitOptions);
 
-		if (!hit) {
-			this.whiteboard.deselectAllItems();
-			return;
-		} else {
-
+		if (hit) {
 			let item = hit.item;
-
-			// not working for some weird reason:
-			// item.brintToFront();
-
-			// deselects all other items
-			// TEMPORARY: later, may implement selecting (to move) multiple items
-			this.whiteboard.selectOnly(item);
-			// set mouse anchor to current mouse position
-			this.mouseAnchorX = point.x;
-			this.mouseAnchorY = point.y;
-			// set original bounds
+			item.bringToFront();
 			this.originalBounds = item.bounds;
+			// shift key allows you to add more items to existing selection
+			// otherwise, clicking an unselected item unselects everything else
+			if (!item.selected && !this.whiteboard.shiftKey)
+				paper.project.deselectAll();
+			// if holding shift, toggles the selected state rather than always setting it to true
+			item.selected = this.whiteboard.shiftKey ? !item.selected : true;
 
 			if (hit.type === 'bounds') {
-
+				this.resizing = true;
+				this.originalItem = item;
 				// which anchor point is being dragged?
 				this.hitTop = hit.point.y === item.bounds.top;
 				this.hitBottom = hit.point.y === item.bounds.bottom;
 				this.hitLeft = hit.point.x === item.bounds.left;
 				this.hitRight = hit.point.x === item.bounds.right;
-				this.resizing = true;
-
-			} else if (hit.type === 'fill') {
-
-				this.moving = true;
-				console.log("here");
 
 			} else {
-				this.selecting = true;
+				this.moving = true;
 			}
+		// if not hit, we're drawing a selection box
+		} else {
+			this.selecting = true;
+			paper.project.deselectAll();
 		}
 	}
 
@@ -89,18 +93,11 @@ export class Cursor {
 		// if mouse is dragged
 		if (this.whiteboard.mouseDown) {
 			const point = this.whiteboard.cursorPoint(event);
-		
+
+			// RESIZING
 			if (this.resizing) {
-
 				// In order to edit the item's bounds, we must pick a point that is diagonal
-				// from where the mouse started dragging. However, if the mouse dragged the side
-				// of the bounding box, we have to change the mouse's "position" so that only
-				// the right dimension is scaled.
-				// addX and addY = 0, width, or height of originalBounds
-				// if addX = width, the point we pick is on the right side of originalBounds,
-				// because originalBounds.x + originalBounds.width = x coordinate of its right side
-				// and vice versa. also applies to y.
-
+				// from where the mouse started dragging. we do this through addX and addY
 				// if mouse drags on right, we want the left side point, which means addX = 0
 				let addX = 0;
 				if (this.hitRight) {}
@@ -116,46 +113,52 @@ export class Cursor {
 				else point.y = this.originalBounds.y + this.originalBounds.height;
 
 				let scalePoint = new paper.Point(this.originalBounds.x + addX, this.originalBounds.y + addY);
+				// prevents shape from degenerating into a limp ass line
+				if (scalePoint.x !== point.x && scalePoint.y !== point.y) {
+					this.originalItem.bounds = new paper.Rectangle(scalePoint, point);
+				}
 
-				this.whiteboard.selectedItems.forEach(function(item) {
-					item.bounds = new paper.Rectangle(scalePoint, point);
-				});
-
+			// MOVING
 			} else if (this.moving) {
-				let deltaX = point.x - this.mouseAnchorX;
-				let deltaY = point.y - this.mouseAnchorY;
-				// because Rectangle bounds' position is their top left corner:
-				let ob = this.originalBounds;
-				let originalCenter = new paper.Point(ob.x + ob.width / 2, ob.y + ob.height / 2);
-
-				this.whiteboard.selectedItems.forEach(function(item) {
-					item.position = new paper.Point(originalCenter.x + deltaX, originalCenter.y + deltaY);
+				let offset = new paper.Point(point.x - this.lastPoint.x, point.y - this.lastPoint.y);
+				this.whiteboard.selectedItems().forEach(function(item) {
+					item.translate(offset);
 				});
+
+			// SELECTING
 			} else if (this.selecting) {
-
-				let selectionBox = new paper.Rectangle(new paper.Point(this.mouseAnchorX, this.mouseAnchorY), point);
-				let self = this;
-
-				let items = paper.project.getItems({
-					recursive: true,
-					overlapping: selectionBox,
-					// don't highlight the background
-					match: function(result) {
-						return result.item.id !== self.whiteboard.background.id;
+				let selectionBox = new paper.Rectangle(this.startPoint, point);
+				if (selectionBox.height > 0 && selectionBox.width > 0) {
+					// creates a selection path if there isn't one				
+					if (!this.selectionPath) {
+						this.selectionPath = new paper.Path.Rectangle(selectionBox);
+						this.selectionPath.strokeColor = '#08f';
+						this.selectionPath.dashArray = [10, 5];
 					}
-				});
-				console.log(selectionBox);
-				console.log(items);
-				items.forEach(function(item) {
-					self.whiteboard.selectItem(item);
-				});
+					// updates selection path
+					this.selectionPath.bounds = selectionBox;
+
+					let self = this;
+					// selects all items intersecting the selection path
+					let allItems = paper.project.getItems({
+						overlapping: selectionBox,
+						match: function(result) {
+							return result.id !== self.whiteboard.background.id &&
+									result.id !== paper.project.activeLayer.id;
+						}
+					});
+					allItems.forEach(function(item) {
+						item.selected = true;
+					});
+				}
 			}
+			this.lastPoint = point;
 		}
 	}
 
 	mouseup(event) {
 		if (this.whiteboard.allowWrite) {
-	
+			console.log('writing');
 			if (this.resizing) {
 				this.resizing = false;
 
@@ -185,6 +188,10 @@ export class Cursor {
 				this.moving = false;
 			} else if (this.selecting) {
 				this.selecting = false;
+				if (this.selectionPath) {
+					this.selectionPath.remove();
+					this.selectionPath = null;
+				}
 			}
 		}
 	}

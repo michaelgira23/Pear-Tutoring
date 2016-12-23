@@ -1,5 +1,15 @@
-.whiteboard-container {
-    app-whiteboard{
-        width: 90vw;
+.container-fluid {
+    .tutees-display {
+        display: flex;
+    }
+    .online-users-display {
+        display: flex;
+    }
+
+    .whiteboard-container {
+        app-whiteboard{
+            width: 100%;
+            padding: 2em;
+        }
     }
 }

@@ -1,20 +1,32 @@
-<h2>
-  Session Info
-</h2>
-<div>
-  {{ sessionInfo | json }}
-</div>
-<div *ngIf="!sessionExist">
-  Session does not exist
-</div>
-<h2>
-  online users
-</h2>
-<div *ngFor="let user of onlineUsers">
-  {{ user | json }}<br/>
-</div>
+<div class="container-fluid">
+  <h2>
+    Session Info
+  </h2>
+  <div class="session-info">
+    {{ sessionInfo | json }}
+    <h3>Tutor</h3>
+    <div>
+      <app-display-user [user]="sessionInfo?.tutor"></app-display-user>
+    </div>
+    <h3>Tutees:</h3>
+    <div class="tutees-display">
+      <app-display-user *ngFor="let tutee of sessionInfo?.tutees" [user]="tutee"></app-display-user>
+    </div>
+  </div>
+  <div *ngIf="!sessionExist">
+    Session does not exist
+  </div>
+  <h2>
+    online users
+  </h2>
+  <div class="online-users-display">
+    <app-display-user *ngFor="let user of onlineUsers" [user]="user"></app-display-user>
+  </div>
 
-<div class="whiteboard-container" *ngIf="sessionExist">
-  <app-whiteboard [key]="sessionInfo.whiteboard"></app-whiteboard>
+  <div class="whiteboard-container" *ngIf="sessionExist">
+    <app-whiteboard [key]="sessionInfo.whiteboard"></app-whiteboard>
+  </div>
+  <div class="chat-container" *ngIf="sessionExist">
+    <app-chat [key]="sessionInfo.chat"></app-chat>
+  </div>
 </div>
-<!--<app-chat [chatKey]="sessionInfo.chat"></app-chat>-->

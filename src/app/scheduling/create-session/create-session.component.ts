@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { Validators, FormGroup, FormBuilder } from '@angular/forms';
-import { SessionService, SessionOptions } from '../../shared/model/session.service';
-import { AuthService } from '../../shared/security/auth.service';
+import { Router } from '@angular/router';
+import { SessionService, allowedSubjects } from '../../shared/model/session.service';
 import * as moment from 'moment';
 import { UserService } from '../../shared/model/user.service';
+import { AuthService } from '../../shared/security/auth.service';
 import { User } from '../../shared/model/user';
 
 @Component({
@@ -16,13 +17,19 @@ export class CreateSessionComponent implements OnInit {
 	createSessionForm: FormGroup;
 	allUsers: User[];
 	uid: string;
+	allowedSubjects: string[] = allowedSubjects;
 
-	constructor(private fb: FormBuilder, private sessionService: SessionService, private userService: UserService, private auth: AuthService) { }
+	constructor(private fb: FormBuilder,
+				private sessionService: SessionService,
+				private userService: UserService,
+				private auth: AuthService,
+				private router: Router) { }
 
 	ngOnInit() {
 		this.createSessionForm = this.fb.group({
 			start: ['', Validators.required],
 			end: ['', Validators.required],
+			subject: ['', Validators.required],
 			max: ['', Validators.required],
 			listed: [false, Validators.required],
 			title: ['', [Validators.required]],
@@ -50,9 +57,9 @@ export class CreateSessionComponent implements OnInit {
 		delete sessionToCreate.wbBackground;
 		let wbOpt = {
 			background: this.createSessionForm.value.wbBackground
-		}
+		};
 		this.sessionService.createSession(sessionToCreate, wbOpt).subscribe(
-			val => console.log('session created'),
+			val => this.router.navigate(['scheduling']),
 			err => console.log(err)
 		);
 	}
