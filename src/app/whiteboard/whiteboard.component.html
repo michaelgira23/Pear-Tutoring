@@ -1,8 +1,10 @@
 <!-- Canvas for paper.js -->
-	<canvas id="whiteboard" #whiteboard resize
-		(mousedown)="onMouseDown($event)"
-		(mousemove)="onMouseMove($event)"
-		(mouseup)="onMouseUp($event)" [style.height]="savingSnapshot ? '125px' : 'inherit'" [style.width]="savingSnapshot ? '250px' : 'inherit'"></canvas>
+<canvas #whiteboard resize
+	(mousedown)="onMouseDown($event)"
+	(mousemove)="onMouseMove($event)"
+	(mouseup)="onMouseUp($event)"
+	[style.height]="savingSnapshot ? '125px' : 'inherit'"
+	[style.width]="savingSnapshot ? '250px' : 'inherit'"></canvas>
 
 <!-- Tool selection -->
 <div *ngIf="showToolbar" class="toolbar">

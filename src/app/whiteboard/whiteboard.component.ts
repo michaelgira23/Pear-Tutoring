@@ -1,5 +1,4 @@
 import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy, ViewChild, HostListener} from '@angular/core';
-import { Observable, Subject } from 'rxjs/Rx';
 import {
 	WhiteboardService,
 	Whiteboard,
@@ -42,6 +41,9 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	whiteboardSubscription: any;
 	// Latest value of whiteboard object from database
 	whiteboard: Whiteboard;
+
+	// Whether or not taking a screenshot
+	savingSnapshot: boolean = false;
 
 	// Whether or not to show toolbar
 	@Input()
@@ -107,10 +109,6 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		shape : new Shape(this)
 	};
 
-	savingSnapshot: boolean;
-
-	onResize$: Subject<any> = new Subject();
-
 	constructor(public whiteboardService: WhiteboardService) { }
 
 	/**
@@ -127,18 +125,6 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		if (this.whiteboard) {
 			this.setBackgroundColor(this.whiteboard.background);
 		}
-		this.onResize$.debounceTime(100).subscribe(val => {
-			if (!this.resizingBackground && this.whiteboard) {
-				this.resizingBackground = true;
-
-				if (this.resizingBackground) {
-					if (this.whiteboard.background) {
-						this.setBackgroundColor(this.whiteboard.background);
-					}
-					this.resizingBackground = false;
-				}
-			}
-		});
 	}
 
 	ngOnChanges(changes: SimpleChanges) {
@@ -277,7 +263,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	// When the window resizes, reset the background
 	@HostListener('window:resize', ['$event'])
 	onResize(event) {
-		this.onResize$.next(event);
+		this.setBackgroundColor(this.whiteboard.background);
 	}
 
 	@HostListener('window:keydown', ['$event'])
@@ -363,27 +349,30 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 
 	saveSnapshot() {
 		// Save a snapshot of the current whiteboard to its metadata in db
-		if (this.key) {
+		if (this.key && this.validKey) {
+			const canvasWidth = this.canvasEl.width / paper.project.view.pixelRatio;
 			// Scale the image down so it doesn't take up as much bandwidth to download
 			this.savingSnapshot = true;
+			paper.project.view.viewSize = new paper.Size(250, 125);
+			paper.project.view.scale(250 / canvasWidth, new paper.Point(0, 0));
+			// Wait for canvas to become 250x125
 			setTimeout(() => {
-				paper.project.view.viewSize = new paper.Size(250, 125);
-				paper.project.view.scale(250 / window.innerWidth, new paper.Point(0, 0));
-				window.dispatchEvent(new Event('resize'));
+				// Now update background with new dimensions
+				this.setBackgroundColor(this.whiteboard.background);
 				setTimeout(() => {
+					// After everything is updated, save image
 					this.canvasEl.toBlob((imgBlob: Blob) => {
-						this.whiteboardService.storeSnapshot(this.key + '.png', imgBlob).subscribe(
-							val => {
-								val.then(pval => console.log('whiteboard snapshot is saved'))
-									.catch(err => console.log('error when saving whiteboard snapshot', err));
+						this.whiteboardService.storeSnapshot(this.key, imgBlob).subscribe(
+							data => {
+								console.log('whiteboard snapshot is saved', data);
 							},
 							err => {
 								console.log('error when saving whiteboard snapshot', err);
 							}
 						);
 					});
-				}, 1);
-			}, 1);
+				}, 0);
+			}, 0);
 		}
 	}
 

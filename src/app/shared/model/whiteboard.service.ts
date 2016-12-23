@@ -211,6 +211,13 @@ export class WhiteboardService {
 		return this.observableToPromise([whiteboardShape.push(shape)]);
 	}
 
+	storeSnapshot(wbId: string, snapshot: Blob | File): Observable<any> {
+		return this.observableToPromise(this.sdkStorage.child('wbSnapShots/' + wbId).put(snapshot))
+			.map((snap: any) => {
+				return this.af.database.object('whiteboards/' + wbId).update({ snapshot: snap.metadata.downloadURLs[0] });
+			});
+	}
+
 	private observableToPromise(promise): Observable<any> {
 
 		const subject = new Subject<any>();
@@ -226,13 +233,6 @@ export class WhiteboardService {
 				});
 
 		return subject.asObservable();
-	}
-
-	storeSnapshot(wbId: string, snapshot: Blob | File): Observable<any> {
-		return Observable.from(this.sdkStorage.child('wbSnapShots/' + wbId).put(snapshot))
-			.map((snap: any) => {
-				return this.af.database.object('whiteboards/' + wbId).update({snapshot: snap.metadata.downloadURLs[0]});
-			});
 	}
 
 }
