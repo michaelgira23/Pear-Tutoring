@@ -5,9 +5,9 @@ import { User } from './user';
 import prisma from 'prisma';
 
 export class Session {
-	static fromJson({ $key, start, end, subject, tutor, tutees, max, listed, whiteboard, chat, title, desc, canceled, tags}): Session {
+	static fromJson({ $key, start, end, subject, tutor, tutees, max, listed, whiteboards, chat, title, desc, canceled, tags}): Session {
 		let color = subject ? prisma(subject).hex : '#000' ;
-		return new Session($key, start, end, subject, color, tutor, tutees, max, listed, whiteboard, chat, title, desc, canceled, tags);
+		return new Session($key, start, end, subject, color, tutor, tutees, max, listed, whiteboards, chat, title, desc, canceled, tags);
 	}
 
 	static fromJsonArray(json: any[]): Session[] {
@@ -24,7 +24,7 @@ export class Session {
 		public tutees: User[],
 		public max: number,
 		public listed: boolean,
-		public whiteboard: string,
+		public whiteboards: string[],
 		public chat: string,
 		public title: string,
 		public desc: string,

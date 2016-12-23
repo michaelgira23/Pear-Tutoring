@@ -16,16 +16,18 @@ export class SessionComponent implements OnInit, OnDestroy {
 	sessionExist: boolean;
 	sessionInfo: Session;
 	onlineUsers: User[] = [];
+	findSession$;
+
+	selectedWb: string;
 
 	constructor(private route:  ActivatedRoute, private sessionService: SessionService, private userService: UserService) { }
 
 	ngOnInit() {
 		this.route.params.subscribe(params => {
 			this.sessionId = params['id'];
-			this.sessionService.findSession(this.sessionId).take(2).subscribe(session => {
+			this.findSession$ = this.sessionService.findSession(this.sessionId).subscribe(session => {
 				this.sessionExist = true;
 				this.sessionInfo = session;
-				console.log(session.chat);
 				this.sessionService.joinSession(this.sessionId).subscribe(data => {}, console.error,
 				() => {
 					this.sessionService.getOnlineUsers(this.sessionId).subscribe(userIds => {
@@ -50,6 +52,25 @@ export class SessionComponent implements OnInit, OnDestroy {
 	}
 
 	ngOnDestroy() {
+		this.findSession$.unsubscribe();
 		this.sessionService.leaveSession(this.sessionInfo.$key);
+	}
+
+	onSelectWb(id: string) {
+		this.selectedWb = id
+	}
+
+	addWb() {
+		this.sessionService.addWb(this.sessionId).subscribe(val => {
+			console.log('added Whiteboard')
+		}, console.log);
+	}
+
+	deleteWb() {
+		if (this.selectedWb) {
+			this.sessionService.deleteWb(this.sessionId, this.selectedWb).subscribe(val => {
+				console.log('deleted whiteboard');
+			}, console.log);
+		}
 	}
 }

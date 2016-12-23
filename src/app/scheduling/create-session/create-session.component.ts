@@ -76,7 +76,7 @@ export class CreateSessionComponent implements OnInit, OnChanges {
 			desc: [this.sessionInfo.desc, Validators.required],
 			tutees: [this.sessionInfo.tutees.map(tutee => tutee.$key).join(', '), Validators.required],
 			wbBackground: [''],
-			tags: [this.sessionInfo.tags.join(', ')]
+			tags: [this.sessionInfo.tags ? this.sessionInfo.tags.join(', ') : '']
 		});
 	}
 

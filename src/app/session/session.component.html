@@ -23,8 +23,12 @@
     <app-display-user *ngFor="let user of onlineUsers" [user]="user"></app-display-user>
   </div>
 
+  <div class="btn-group">
+    <button (click)="addWb()" class="btn btn-default">Add Whiteboard</button>
+    <button (click)="deleteWb()" class="btn btn-default">Delete Whiteboard</button>
+  </div>
   <div class="whiteboard-container" *ngIf="sessionExist">
-    <app-whiteboard [key]="sessionInfo.whiteboard"></app-whiteboard>
+    <app-whiteboard *ngFor="let wbKey of sessionInfo.whiteboards" [key]="wbKey" (click)="onSelectWb(wbKey)"></app-whiteboard>
   </div>
   <div class="chat-container" *ngIf="sessionExist">
     <app-chat [key]="sessionInfo.chat"></app-chat>

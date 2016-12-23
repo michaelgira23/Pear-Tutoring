@@ -48,15 +48,18 @@ export class SessionService {
 	combineWithUser(sessionQuery: Observable<any>): Observable<Session> {
 		let sessionWithUser;
 		// First query the tutor
-		return sessionQuery.switchMap(val => {
+		return sessionQuery.flatMap(val => {
 			sessionWithUser = val;
+			if (typeof val.tutor !== 'string') {
+				return this.db.object('users/' + val.tutor.$key);
+			}
 			return this.db.object('users/' + val.tutor);
 		}).map(val => {
 			sessionWithUser.tutor = val;
 			return sessionWithUser;
 		})
 		// Then query the tutees, note the session is stored temporarily in sessionsWithUser, and used later to combine with the users info. 
-		.switchMap(val => {
+		.flatMap(val => {
 			sessionWithUser = val;
 			return Observable.combineLatest(val.tutees.map(tutee => {
 				if (typeof tutee !== 'string') {
@@ -74,7 +77,7 @@ export class SessionService {
 	combineArrWithUser(sessionQuery: Observable<any[]>): Observable<Session[]> {
 		let sessionsWithUser: any[];
 		// First fill in the tutor field of each session
-		return sessionQuery.switchMap((val: any[]) => {
+		return sessionQuery.flatMap((val: any[]) => {
 			sessionsWithUser = val;
 			return Observable.combineLatest(
 				val.map((session) => this.db.object('users/' + session.tutor))
@@ -85,7 +88,7 @@ export class SessionService {
 			return sessionsWithUser;
 		})
 		// Then fill in the tutees array of each session, note sessions are stored temporarily in the sessionsWithUser variable
-		.switchMap((val: any[]) => {
+		.flatMap((val: any[]) => {
 			sessionsWithUser = val;
 			return Observable.combineLatest(
 				val.map((session) => Observable.combineLatest(
@@ -106,11 +109,26 @@ export class SessionService {
 		});
 	}
 
+	combineWithWb(sessionQuery: Observable<any>): Observable<Session[]> {
+		let sessionWithWb;
+		return sessionQuery.flatMap(val => {
+			sessionWithWb = val;
+			return this.db.list('whiteboardsBySessions/' + val.$key).do(val => console.log('whiteboard value changed'));
+		}).map(val => {
+			sessionWithWb.whiteboards = val.map(wbKey => {
+				return wbKey.$key;
+			});
+			return sessionWithWb;
+		});
+	}
+
 	// find a single session and combine it with user data
 	findSession(id: string, query?: {}): Observable<any> {
 		return this.combineWithUser(
-			this.db.object('/sessions/' + id)
-			.flatMap(val => val.$exists() ? Observable.of(val) : Observable.throw(`Session ${val.$key} does not exist`))
+			this.combineWithWb(
+				this.db.object('/sessions/' + id)
+				.flatMap(val => val.$exists() ? Observable.of(val) : Observable.throw(`Session ${val.$key} does not exist`))
+			)
 		);
 	}
 
@@ -155,6 +173,7 @@ export class SessionService {
 	updateSession(sessionId: string, session: SessionOptions): Observable<any> {
 		if (!this.uid) { return Observable.throw('Rip no login info'); };
 		let sessionToSave = Object.assign({}, session);
+		delete sessionToSave.whiteboard;
 		let uidsToSave = {};
 		session.tutees.forEach(uid => {
 			if (uid !== this.uid) {
@@ -166,6 +185,7 @@ export class SessionService {
 		dataToSave['sessions/' + sessionId] = sessionToSave;
 		dataToSave['usersInSession/' + sessionId] = uidsToSave;
 		dataToSave[`users/${this.uid}/tutorSessions/${sessionId}`] = true;
+		dataToSave[`whiteboardsBySessions/${sessionId}/${session.whiteboard}`] = true;
 		session.tutees.forEach(uid => dataToSave[`users/${uid}/tuteeSessions/${sessionId}`] = true);
 		session.tags.forEach(tag => dataToSave[`sessionsByTags/${tag}/${sessionId}`] = true);
 		if (allowedSubjects.find((val) => session.subject === val)) {
@@ -182,14 +202,14 @@ export class SessionService {
 		let wbId;
 		let chatId;
 		return this.whiteboardService.createWhiteboard(wbOpt.background.match('^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$') ? wbOpt : wbOptDefault)
-		.switchMap(wb => {
+		.flatMap(wb => {
 			wbId = wb.key;
 			return this.chatService.createChat();
 		})
-		.switchMap(chat => {
+		.flatMap(chat => {
 			chatId = chat.key;
 			const newSessionKey = this.sdkDb.child('sessions').push().key;
-			session.whiteboard = [wbId];
+			session.whiteboard = wbId;
 			session.chat = chatId;
 			session.canceled = false;
 			return this.updateSession(newSessionKey, session);
@@ -205,7 +225,7 @@ export class SessionService {
 	deleteSession(sessionId: string): Observable<any> {
 		// calling update null on a location in the database will cause it to be deleted. 
 		if (!this.uid) { return Observable.throw('Rip no login info'); };
-		return this.db.object('sessions' + sessionId).switchMap(session => {
+		return this.db.object('sessions' + sessionId).flatMap(session => {
 			let dataToSave = {};
 			dataToSave['sessions/' + sessionId] = null;
 			dataToSave['usersInSession/' + sessionId] = null;
@@ -243,12 +263,40 @@ export class SessionService {
 		return this.db.list('usersInSession/' + sessionId);
 	}
 
-	// addWb(sessionId: string) {}
+	addWb(sessionId: string): Observable<any> {
+		return this.whiteboardService.createWhiteboard().flatMap(wb => {
+			let pushVal = {};
+			pushVal[wb.key] = true;
+			return this.observableToPromise(this.db.list('whiteboardsBySessions/').update(sessionId, pushVal));
+		});
+	}
 
-	// deleteWb(sessionId: string) {}
+	deleteWb(sessionId: string, wbKey: string): Observable<any> {
+		return this.observableToPromise(this.db.list('whiteboardsBySessions/' + sessionId).remove(wbKey))
+			.flatMap(val => {
+				return this.observableToPromise(this.db.list('whiteboards').remove(wbKey));
+			});
+	}
 
 	// addTutee(sessionId: string, tuteeId: string) {}
 	// Might as well just use updateSession
+
+	private observableToPromise(promise): Observable<any> {
+
+		const subject = new Subject<any>();
+
+		promise
+			.then(res => {
+					subject.next(res);
+					subject.complete();
+				},
+				err => {
+					subject.error(err);
+					subject.complete();
+				});
+
+		return subject.asObservable();
+	}
 }
 
 export interface SessionOptions {
@@ -262,7 +310,8 @@ export interface SessionOptions {
 	desc: string;
 	tutees: string[];
 	tags: string[];
-	whiteboard: string[];
-	chat: string;
+	// this is the initial whiteboard that gets created when a session is created
+	whiteboard?: string;
+	chat?: string;
 	canceled: boolean;
 }
