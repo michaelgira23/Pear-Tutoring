@@ -90,7 +90,7 @@ export class Shape {
 					});
 					break;
 				case 'polygon':
-					const sides = parseInt(this.whiteboard.polygonSides, 10);
+					const polygonSides = parseInt(this.whiteboard.polygonSides, 10);
 					this.currentShape = new paper.Path.RegularPolygon({
 						// Stroke Style
 						strokeColor  : this.whiteboard.shapeOptions.strokeColor,
@@ -108,8 +108,34 @@ export class Shape {
 						shadowBlur   : this.whiteboard.shapeOptions.shadowBlur,
 						shadowOffset : shadowOffsetPoint,
 						// Shape
-						sides: sides ? sides : 4,
+						sides: polygonSides ? polygonSides : 4,
 						radius: 1
+					});
+					break;
+				case 'star':
+					const starSides = parseInt(this.whiteboard.starSides, 10);
+					const radius1 = 1;
+					const radius2 = (this.whiteboard.starRadiusPercentage / 100) * radius1;
+					this.currentShape = new paper.Path.Star({
+						// Stroke Style
+						strokeColor  : this.whiteboard.shapeOptions.strokeColor,
+						strokeWidth  : this.whiteboard.shapeOptions.strokeWidth,
+						strokeCap    : this.whiteboard.shapeOptions.strokeCap,
+						strokeJoin   : this.whiteboard.shapeOptions.strokeJoin,
+						dashOffset   : this.whiteboard.shapeOptions.dashOffset,
+						strokeScaling: this.whiteboard.shapeOptions.strokeScaling,
+						dashArray    : this.whiteboard.shapeOptions.dashArray,
+						miterLimit   : this.whiteboard.shapeOptions.miterLimit,
+						// Fill Style
+						fillColor    : this.whiteboard.shapeOptions.fillColor,
+						// Shadow Style
+						shadowColor  : this.whiteboard.shapeOptions.shadowColor,
+						shadowBlur   : this.whiteboard.shapeOptions.shadowBlur,
+						shadowOffset : shadowOffsetPoint,
+						// Shape
+						points: starSides ? starSides : 5,
+						radius1,
+						radius2
 					});
 					break;
 				default:
@@ -177,6 +203,7 @@ export class Shape {
 						break;
 					default:
 						// If holding shift key, maintain aspect ratio
+						console.log('move shape bounds');
 						if (this.whiteboard.shiftKey) {
 							this.currentShape.fitBounds(this.creationRect, true);
 						} else {

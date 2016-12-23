@@ -100,6 +100,8 @@
 			<fieldset class="form-group">
 				<input id="shape-star" type="radio" value="star" [(ngModel)]="shapeType">
 				<label for="shape-star">Star</label>
+				<input class="number" type="number" [(ngModel)]="starSides">
+				<input class="number" type="number" min="1" max="99" [(ngModel)]="starRadiusPercentage">
 			</fieldset>
 		</div>
 	</div>

@@ -46,6 +46,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	@Input()
 	showToolbar: boolean = true;
 	// Whether or not user can make changes to whiteboard
+	@Input()
 	allowWrite: boolean = false;
 
 	// For detecting if certain keys are pressed
@@ -91,6 +92,10 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	shapeType: string = 'polygon';
 	@Input()
 	polygonSides: any = 4;
+	@Input()
+	starSides: any = 5;
+	@Input()
+	starRadiusPercentage: any = 50;
 
 	// Tools
 	tools = {
