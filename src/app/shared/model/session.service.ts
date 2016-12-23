@@ -164,9 +164,17 @@ export class SessionService {
 		return Observable.of(tags.map(tag => this.db.list('sessionsByTags/' + tag)))
 			.flatMap(tags$arr => Observable.combineLatest(tags$arr))
 			.map(sessionsByTag => {sessionsByTag = sessionsByTag.reduce((a, b) => a.concat(b));
-				return sessionsByTag.map(session => this.findSession(session.$key).do(console.log)); })
+				return sessionsByTag.map(session => this.findSession(session.$key)); })
 			.flatMap(session$arr => Observable.combineLatest(session$arr))
 			.map(Session.fromJsonArray);
+	}
+
+	findSessionsBySubject(subject: string) {
+		return this.combineArrWithUser(
+			this.db.list('sessionsBySubject/' + subject)
+				// List of session ids --> list of session objects without user inserted
+				.flatMap(ids => Observable.combineLatest(ids.map(id => this.db.object('sessions/' + id.$key))))
+		).map(Session.fromJsonArray);
 	}
 
 	// Update the information of a session
@@ -185,11 +193,14 @@ export class SessionService {
 		dataToSave['sessions/' + sessionId] = sessionToSave;
 		dataToSave['usersInSession/' + sessionId] = uidsToSave;
 		dataToSave[`users/${this.uid}/tutorSessions/${sessionId}`] = true;
-		dataToSave[`whiteboardsBySessions/${sessionId}/${session.whiteboard}`] = true;
 		session.tutees.forEach(uid => dataToSave[`users/${uid}/tuteeSessions/${sessionId}`] = true);
-		session.tags.forEach(tag => dataToSave[`sessionsByTags/${tag}/${sessionId}`] = true);
-		if (allowedSubjects.find((val) => session.subject === val)) {
-			dataToSave[`sessionsBySubject/${session.subject}/${sessionId}`] = true;
+		// below are only for the public sessions, because we want the private sessions to be unsearchable in the catalogs
+		if (session.listed) {
+			dataToSave[`whiteboardsBySessions/${sessionId}/${session.whiteboard}`] = true;
+			session.tags.forEach(tag => dataToSave[`sessionsByTags/${tag}/${sessionId}`] = true);
+			if (allowedSubjects.find((val) => session.subject === val)) {
+				dataToSave[`sessionsBySubject/${session.subject}/${sessionId}`] = true;
+			}
 		}
 		return this.firebaseUpdate(dataToSave);
 	}

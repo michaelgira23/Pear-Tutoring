@@ -13,8 +13,10 @@ export class SchedulingComponent implements OnInit {
 	tutorSessions: Session[] = [];
 	tuteeSessions: Session[] = [];
 	publicSessions: Session[] = [];
-	joinSessionForm: FormGroup;
+	searchByTagForm: FormGroup;
+	searchBySubjectForm: FormGroup;
 	sessionsByTags: Session[] = [];
+	sessionsBySubject: Session[] = [];
 	get mySessions(): Session[] {
 		return this.tutorSessions.concat(this.tuteeSessions);
 	};
@@ -24,9 +26,14 @@ export class SchedulingComponent implements OnInit {
 				private auth: AuthService) { }
 
 	ngOnInit() {
-		this.joinSessionForm = this.fb.group({
-			'sessionId': ['', [Validators.required]]
+		this.searchByTagForm = this.fb.group({
+			tags: ['', Validators.required]
 		});
+
+		this.searchBySubjectForm = this.fb.group({
+			subject: ['', Validators.required]
+		});
+
 		this.auth.auth$.subscribe(val => {
 			this.sessionService.findMySessions().tutorSessions
 			.subscribe(
@@ -47,10 +54,18 @@ export class SchedulingComponent implements OnInit {
 		});
 	}
 
-	findSessionsByTags(tagsStr: string) {
-		let tags = tagsStr.split(',').map(tag => tag.trim());
+	findSessionsByTags() {
+		let tags = this.searchByTagForm.value.tags.split(',').map(tag => tag.trim());
 		this.sessionService.findSessionsByTags(tags).subscribe(val => {
 			this.sessionsByTags = val;
-		});
+		}, console.log);
+	}
+
+	findSessionsBySubject() {
+		let subject = this.searchBySubjectForm.value.subject;
+		this.sessionService.findSessionsBySubject(subject).subscribe(val => {
+			console.log(val)
+			this.sessionsBySubject = val;
+		}, console.log);
 	}
 }
