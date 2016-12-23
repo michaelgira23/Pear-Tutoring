@@ -211,9 +211,15 @@ export class WhiteboardService {
 		return this.observableToPromise([whiteboardShape.push(shape)]);
 	}
 
+	/**
+	 * Snapshot
+	 */
+
 	storeSnapshot(wbId: string, snapshot: Blob | File): Observable<any> {
+		// Upload file
 		return this.observableToPromise(this.sdkStorage.child('wbSnapShots/' + wbId).put(snapshot))
 			.map((snap: any) => {
+				// Store 'snapshot' property in the whiteboard object
 				return this.af.database.object('whiteboards/' + wbId).update({ snapshot: snap.metadata.downloadURLs[0] });
 			});
 	}
