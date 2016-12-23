@@ -79,7 +79,7 @@ export class Cursor {
 				this.hitLeft = hit.point.x === item.bounds.left;
 				this.hitRight = hit.point.x === item.bounds.right;
 
-			} else if (hit.type === 'fill') {
+			} else {
 				this.moving = true;
 			}
 		// if not hit, we're drawing a selection box
