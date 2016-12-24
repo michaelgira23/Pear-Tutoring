@@ -64,7 +64,7 @@ export class SessionService {
 		// Then query the tutees, note the session is stored temporarily in sessionsWithUser, and used later to combine with the users info. 
 		.flatMap(val => {
 			sessionWithUser = val;
-			return Observable.combineLatest(val.tutees.map(tutee => {
+			return Observable.combineLatest(objToArr(val.tutees).map(tutee => {
 				if (typeof tutee !== 'string') {
 					return this.db.object('users/' + tutee.$key);
 				}
@@ -95,7 +95,7 @@ export class SessionService {
 			sessionsWithUser = val;
 			return Observable.combineLatest(
 				val.map((session) => Observable.combineLatest(
-					session.tutees.map(tutee => {
+					objToArr(session.tutees).map(tutee => {
 						if (typeof tutee !== 'string') {
 							return this.db.object('users/' + tutee.$key);
 						}
@@ -105,7 +105,7 @@ export class SessionService {
 			);
 		}).map((val: any[][]) => {
 			sessionsWithUser.forEach((session, sessionIndex) => {
-				sessionsWithUser[sessionIndex].tutees = session.tutees.map((tutee, tuteeIndex) => val[sessionIndex][tuteeIndex]);
+				sessionsWithUser[sessionIndex].tutees = objToArr(session.tutees).map((tutee, tuteeIndex) => val[sessionIndex][tuteeIndex]);
 			});
 			return sessionsWithUser;
 		});
@@ -160,23 +160,21 @@ export class SessionService {
 	findSession(id: string, query?: {}): Observable<any> {
 		return this.combineWithUser(
 			this.combineWithWb(
-				this.db.object('/sessions/' + id)
+				this.db.object('sessions/' + id)
 				.flatMap(val => val.$exists() ? Observable.of(val) : Observable.throw(`Session ${val.$key} does not exist`))
 			)
-		);
+		).map(Session.fromJson);
 	}
 
 	// Find the session ids where the user is a tutor or a tutee. Note the info in stored in the user object. 
 	findMySessions(): {tutorSessions: Observable<Session[]>, tuteeSessions: Observable<Session[]>} {
 		if (!this.uid) { return {tutorSessions: Observable.throw('Rip no login info'), tuteeSessions: Observable.throw('Rip no login info')}; };
 		return {
-			tutorSessions: this.db.list(`/users/${this.uid}/tutorSessions`)
-				.map(sessions => sessions.map(session => this.findSession(session.$key)))
-				.flatMap(sessions$arr => Observable.combineLatest(sessions$arr))
+			tutorSessions: this.combineArrWithUser(this.combineArrWithWb(this.db.list(`/users/${this.uid}/tutorSessions`)
+																			.flatMap(ids => Observable.combineLatest(ids.map(id => this.db.object('sessions/' + id.$key))))))
 				.map(Session.fromJsonArray),
-			tuteeSessions: this.db.list(`/users/${this.uid}/tuteeSessions`)
-				.map(sessions => sessions.map(session => this.findSession(session.$key)))
-				.flatMap(sessions$arr => Observable.combineLatest(sessions$arr))
+			tuteeSessions: this.combineArrWithUser(this.combineArrWithWb(this.db.list(`/users/${this.uid}/tuteeSessions`)
+																			.flatMap(ids => Observable.combineLatest(ids.map(id => this.db.object('sessions/' + id.$key))))))
 				.map(Session.fromJsonArray)
 		};
 	}
@@ -218,8 +216,10 @@ export class SessionService {
 	// Update the information of a session
 	updateSession(sessionId: string, session: SessionOptions): Observable<any> {
 		if (!this.uid) { return Observable.throw('Rip no login info'); };
-		let sessionToSave = Object.assign({}, session);
+
+		let sessionToSave: any = Object.assign({}, session);
 		delete sessionToSave.whiteboard;
+
 		let uidsToSave = {};
 		session.tutees.forEach(uid => {
 			if (uid !== this.uid) {
@@ -228,7 +228,6 @@ export class SessionService {
 		});
 
 		let dataToSave = {};
-		dataToSave['sessions/' + sessionId] = sessionToSave;
 		dataToSave['usersInSession/' + sessionId] = uidsToSave;
 		dataToSave[`users/${this.uid}/tutorSessions/${sessionId}`] = true;
 		session.tutees.forEach(uid => dataToSave[`users/${uid}/tuteeSessions/${sessionId}`] = true);
@@ -240,10 +239,16 @@ export class SessionService {
 				dataToSave[`sessionsBySubject/${session.subject}/${sessionId}`] = true;
 			}
 		}
+
+		// Transform the arrays in the object to firebase-friendly objects
+		sessionToSave.tutees = arrToObj(sessionToSave.tutees);
+		sessionToSave.tags = arrToObj(sessionToSave.tags);
+		dataToSave['sessions/' + sessionId] = sessionToSave;
+
 		return this.firebaseUpdate(dataToSave);
 	}
 
-	// Use the update function to create a session
+	// Use the update function to create a session, and create a starting whiteboard and chat
 	createSession(session: SessionOptions, wbOpt?: WhiteboardOptions): Observable<any> {
 		let wbId;
 		let chatId;
@@ -276,8 +281,8 @@ export class SessionService {
 			dataToSave['sessions/' + sessionId] = null;
 			dataToSave['usersInSession/' + sessionId] = null;
 			dataToSave[`users/${this.uid}/tutorSessions/${sessionId}`] = null;
-			session.tutees.forEach(uid => dataToSave[`users/${uid}/tuteeSessions/${sessionId}`] = null);
-			session.tags.forEach(tag => dataToSave[`sessionsByTags/${tag}/${sessionId}`] = null);
+			objToArr(session.tutees).forEach(uid => dataToSave[`users/${uid}/tuteeSessions/${sessionId}`] = null);
+			objToArr(session.tags).forEach(tag => dataToSave[`sessionsByTags/${tag}/${sessionId}`] = null);
 			dataToSave[`sessionsBySubject/${session.subject}/${sessionId}`] = null;
 
 			return this.firebaseUpdate(dataToSave);
@@ -324,8 +329,32 @@ export class SessionService {
 			});
 	}
 
-	// addTutee(sessionId: string, tuteeId: string) {}
-	// Might as well just use updateSession
+	addTutee(sessionId: string, tuteeId: string) {
+		let dataToSave = {}
+		dataToSave[`sessions/${sessionId}/tutees/${tuteeId}`] = true;
+		dataToSave[`users/${tuteeId}/tuteeSessions/${sessionId}`] = true;
+		return this.firebaseUpdate(dataToSave);
+	}
+}
+
+// Helper function to transform array to object with properties as array's values and values as true
+export function arrToObj(arr: string[]): {[key: string]: true} {
+	let objTmp = {};
+	arr.forEach(val => {
+		objTmp[val] = true;
+	});
+	return objTmp;
+}
+
+// Helper function that does the reverse to the above one
+export function objToArr(obj: {[key: string]: true}): any[] {
+	let arrTemp = [];
+	for (let prop in obj) {
+		if (obj[prop]) {
+			arrTemp.push(prop);
+		}
+	}
+	return arrTemp;
 }
 
 export interface SessionOptions {

@@ -12,8 +12,8 @@
 				width: 100%;
 			}
 		}
-		.row:nth-child(2) {
-			img:nth-child(1){
+		.row:nth-child(1+n) {
+			img {
 				width: 50%;
 			}
 		}

@@ -44,6 +44,8 @@ import { SessionCalendarComponent } from './scheduling/session-calendar/session-
 import { DisplayUserComponent } from './scheduling/display-user/display-user.component';
 import { SessionService } from './shared/model/session.service';
 import { UpdateSessionComponent } from './scheduling/update-session/update-session.component';
+import { TimePickerComponent } from './settings/time-picker/time-picker.component';
+import { MyScheduleComponent } from './scheduling/my-schedule/my-schedule.component';
 
 @NgModule({
 	declarations: [
@@ -66,7 +68,9 @@ import { UpdateSessionComponent } from './scheduling/update-session/update-sessi
 		DisplayUserComponent,
 		CreateChatComponent,
 		ViewChatComponent,
-		UpdateSessionComponent
+		UpdateSessionComponent,
+		TimePickerComponent,
+		MyScheduleComponent
 	],
 	imports: [
 		BrowserModule,
