@@ -7,9 +7,6 @@
     }
 
     .whiteboard-container {
-        overflow: scroll;
-        display: flex;
-        flex-wrap: nowrap;
         app-whiteboard{
             width: 100%;
             padding: 1em;

@@ -1,5 +1,21 @@
 .card {
-	img {
-		height: 300px
+	.session-thumbnails {
+		display: flex;
+		flex-direction: column;
+		max-height: 229px;
+		.row {
+			display: flex;
+			justify-content: space-between;
+			margin: 0;
+			flex-wrap: nowrap;
+			img {
+				width: 100%;
+			}
+		}
+		.row:nth-child(2) {
+			img:nth-child(1){
+				width: 50%;
+			}
+		}
 	}
 }

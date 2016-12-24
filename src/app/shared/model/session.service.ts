@@ -25,22 +25,25 @@ export class SessionService {
 		});
 	}
 
-	firebaseUpdate(dataToSave) {
-		const subject = new Subject();
+	private promiseToObservable(promise): Observable<any> {
 
-		this.sdkDb.update(dataToSave)
-			.then(
-				val => {
-					subject.next(val);
+		const subject = new Subject<any>();
+
+		promise
+			.then(res => {
+					subject.next(res);
 					subject.complete();
 				},
 				err => {
 					subject.error(err);
 					subject.complete();
-				}
-			);
+				});
 
 		return subject.asObservable();
+	}
+
+	firebaseUpdate(dataToSave): Observable<any> {
+		return this.promiseToObservable(this.sdkDb.update(dataToSave));
 	}
 
 	// Take a firebase query for a single session and insert a user object into the tutor and tutee fields. 
@@ -242,12 +245,9 @@ export class SessionService {
 
 	// Use the update function to create a session
 	createSession(session: SessionOptions, wbOpt?: WhiteboardOptions): Observable<any> {
-		const wbOptDefault = {
-			background: '#FFF'
-		};
 		let wbId;
 		let chatId;
-		return this.whiteboardService.createWhiteboard(wbOpt.background.match('^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$') ? wbOpt : wbOptDefault)
+		return this.whiteboardService.createWhiteboard(wbOpt)
 		.flatMap(wb => {
 			wbId = wb.key;
 			return this.chatService.createChat();
@@ -313,36 +313,19 @@ export class SessionService {
 		return this.whiteboardService.createWhiteboard().flatMap(wb => {
 			let pushVal = {};
 			pushVal[wb.key] = true;
-			return this.observableToPromise(this.db.list('whiteboardsBySessions/').update(sessionId, pushVal));
+			return this.promiseToObservable(this.db.list('whiteboardsBySessions/').update(sessionId, pushVal));
 		});
 	}
 
 	deleteWb(sessionId: string, wbKey: string): Observable<any> {
-		return this.observableToPromise(this.db.list('whiteboardsBySessions/' + sessionId).remove(wbKey))
+		return this.promiseToObservable(this.db.list('whiteboardsBySessions/' + sessionId).remove(wbKey))
 			.flatMap(val => {
-				return this.observableToPromise(this.db.list('whiteboards').remove(wbKey));
+				return this.promiseToObservable(this.db.list('whiteboards').remove(wbKey));
 			});
 	}
 
 	// addTutee(sessionId: string, tuteeId: string) {}
 	// Might as well just use updateSession
-
-	private observableToPromise(promise): Observable<any> {
-
-		const subject = new Subject<any>();
-
-		promise
-			.then(res => {
-					subject.next(res);
-					subject.complete();
-				},
-				err => {
-					subject.error(err);
-					subject.complete();
-				});
-
-		return subject.asObservable();
-	}
 }
 
 export interface SessionOptions {

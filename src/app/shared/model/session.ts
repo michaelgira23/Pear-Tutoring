@@ -2,6 +2,7 @@
 // Maybe store the start and end values internally in this class as a moment object for use?
 // In database, must be stored as int because of Firebase
 import { User } from './user';
+import { Whiteboard } from './whiteboard.service';
 import prisma from 'prisma';
 
 export class Session {
@@ -24,7 +25,7 @@ export class Session {
 		public tutees: User[],
 		public max: number,
 		public listed: boolean,
-		public whiteboards: string[],
+		public whiteboards: Whiteboard[],
 		public chat: string,
 		public title: string,
 		public desc: string,
