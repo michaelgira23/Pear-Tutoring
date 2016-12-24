@@ -351,30 +351,9 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		});
 	}
 
-	scaleDown() {
-		const canvasWidth = this.canvasEl.width / paper.project.view.pixelRatio;
-		// Scale the image down so it doesn't take up as much bandwidth to download
-		this.takingSnapshot = true;
-		paper.project.view.viewSize = new paper.Size(250, 125);
-		paper.project.view.scale(250 / canvasWidth, new paper.Point(0, 0));
-	}
-
-	updateBackground() {
-		this.setBackgroundColor(this.whiteboard.background);
-	}
-
-	saveThumbnail() {
-		this.canvasEl.toBlob((imgBlob: Blob) => {
-			this.whiteboardService.storeSnapshot(this.key, imgBlob).subscribe(
-				data => {
-					console.log('whiteboard snapshot is saved', data);
-				},
-				err => {
-					console.log('error when saving whiteboard snapshot', err);
-				}
-			);
-		});
-	}
+	/**
+	 * Snapshot functions
+	 */
 
 	takeSnapshot() {
 		// Make it's a valid whiteboard first
