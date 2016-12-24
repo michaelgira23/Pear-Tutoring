@@ -36,11 +36,18 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	@ViewChild('whiteboard')
 	canvas;
 	// Actual canvas DOM reference
-	canvasEl: any;
+	canvasEl: HTMLCanvasElement;
 
 	whiteboardSubscription: any;
 	// Latest value of whiteboard object from database
 	whiteboard: Whiteboard;
+
+	// Whether or not taking a snapshot
+	takingSnapshot: boolean = false;
+	snapshotDimensions = {
+		width: 250,
+		height: 125
+	};
 
 	// Whether or not to show toolbar
 	@Input()
@@ -209,6 +216,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 
 	ngOnDestroy() {
 		this.cleanUp();
+		this.takeSnapshot();
 	}
 
 	cleanUp() {
@@ -259,18 +267,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	// When the window resizes, reset the background
 	@HostListener('window:resize', ['$event'])
 	onResize(event) {
-		if (!this.resizingBackground) {
-			this.resizingBackground = true;
-
-			setTimeout(() => {
-				if (this.resizingBackground) {
-					if (this.whiteboard.background) {
-						this.setBackgroundColor(this.whiteboard.background);
-					}
-					this.resizingBackground = false;
-				}
-			}, 100);
-		}
+		this.setBackgroundColor(this.whiteboard.background);
 	}
 
 	@HostListener('window:keydown', ['$event'])
@@ -305,8 +302,8 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	cursorPoint(event) {
 		// Return a paper.js point where the mouse is at relative to the canvas
 		const canvasPos = this.canvasEl.getBoundingClientRect();
-		const cursorX = event.clientX - canvasPos.left;
-		const cursorY = event.clientY - canvasPos.top;
+		const cursorX = (event.clientX - canvasPos.left);
+		const cursorY = (event.clientY - canvasPos.top);
 
 		return new paper.Point(cursorX, cursorY);
 	}
@@ -353,4 +350,70 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 			}
 		});
 	}
+
+	scaleDown() {
+		const canvasWidth = this.canvasEl.width / paper.project.view.pixelRatio;
+		// Scale the image down so it doesn't take up as much bandwidth to download
+		this.takingSnapshot = true;
+		paper.project.view.viewSize = new paper.Size(250, 125);
+		paper.project.view.scale(250 / canvasWidth, new paper.Point(0, 0));
+	}
+
+	updateBackground() {
+		this.setBackgroundColor(this.whiteboard.background);
+	}
+
+	saveThumbnail() {
+		this.canvasEl.toBlob((imgBlob: Blob) => {
+			this.whiteboardService.storeSnapshot(this.key, imgBlob).subscribe(
+				data => {
+					console.log('whiteboard snapshot is saved', data);
+				},
+				err => {
+					console.log('error when saving whiteboard snapshot', err);
+				}
+			);
+		});
+	}
+
+	takeSnapshot() {
+		// Make it's a valid whiteboard first
+		if (this.key && this.validKey) {
+			// Calculate scale required to make canvas the snapshot dimensions
+			const canvasWidth = this.canvasEl.width / paper.project.view.pixelRatio;
+			const scaleWidth = this.snapshotDimensions.width / canvasWidth;
+			const canvasHeight = this.canvasEl.height / paper.project.view.pixelRatio;
+			const scaleHeight = this.snapshotDimensions.height / canvasHeight;
+
+			const originalViewSize = paper.project.view.viewSize;
+
+			// Scale the image down so it doesn't take up as much bandwidth to download
+			this.takingSnapshot = true;
+			paper.project.view.viewSize = new paper.Size(this.snapshotDimensions.width, this.snapshotDimensions.height);
+			paper.project.view.scale(scaleWidth, scaleHeight, new paper.Point(0, 0));
+
+			// Wait for changes to take place
+			setTimeout(() => {
+				// Save canvas as an image
+				this.canvasEl.toBlob((imgBlob: Blob) => {
+					// Revert whiteboard to original size
+					paper.project.view.scale(1 / scaleWidth, 1 / scaleHeight, new paper.Point(0, 0));
+					paper.project.view.viewSize = originalViewSize;
+					this.takingSnapshot = false;
+					this.setBackgroundColor(this.whiteboard.background);
+
+					// Upload image to Firebase
+					this.whiteboardService.storeSnapshot(this.key, imgBlob).subscribe(
+						data => {
+							console.log('whiteboard snapshot is saved', data);
+						},
+						err => {
+							console.log('error when saving whiteboard snapshot', err);
+						}
+					);
+				});
+			}, 15);
+		}
+	}
+
 }

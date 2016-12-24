@@ -2,7 +2,9 @@
 <canvas #whiteboard resize
 	(mousedown)="onMouseDown($event)"
 	(mousemove)="onMouseMove($event)"
-	(mouseup)="onMouseUp($event)"></canvas>
+	(mouseup)="onMouseUp($event)"
+	[style.height]="takingSnapshot ? snapshotDimensions.height + 'px' : 'inherit'"
+	[style.width]="takingSnapshot ?  snapshotDimensions.width + 'px' : 'inherit'"></canvas>
 
 <!-- Tool selection -->
 <div *ngIf="showToolbar" class="toolbar">
@@ -105,6 +107,10 @@
 			</fieldset>
 		</div>
 	</div>
+</div>
+
+<div class="taking-snapshot" [class.show]="takingSnapshot">
+	<h1>Taking Snapshot...</h1>
 </div>
 
 <div class="invalid-key" [class.show]="!validKey">

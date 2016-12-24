@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { AngularFire, FirebaseAuthState, FirebaseListObservable, FirebaseObjectObservable } from 'angularfire2';
+import { Injectable, Inject } from '@angular/core';
+import { AngularFire, FirebaseAuthState, FirebaseListObservable, FirebaseObjectObservable, FirebaseRef } from 'angularfire2';
 import { Observable, Subject } from 'rxjs/Rx';
 
 import { AuthService } from '../security/auth.service';
@@ -85,8 +85,10 @@ export class WhiteboardService {
 
 	authInfo: FirebaseAuthState;
 	whiteboards: FirebaseListObservable<any>;
+	sdkStorage: any;
 
-	constructor(private af: AngularFire, private authService: AuthService) {
+	constructor(private af: AngularFire, private authService: AuthService, @Inject(FirebaseRef) fb) {
+		this.sdkStorage = fb.storage().ref();
 		this.whiteboards = this.af.database.list('whiteboards');
 
 		this.authService.auth$.subscribe(
@@ -207,6 +209,19 @@ export class WhiteboardService {
 
 		const whiteboardShape = this.af.database.list('whiteboardShape/' + key);
 		return this.observableToPromise([whiteboardShape.push(shape)]);
+	}
+
+	/**
+	 * Snapshot
+	 */
+
+	storeSnapshot(wbId: string, snapshot: Blob | File): Observable<any> {
+		// Upload file
+		return this.observableToPromise(this.sdkStorage.child('wbSnapShots/' + wbId).put(snapshot))
+			.map((snap: any) => {
+				// Store 'snapshot' property in the whiteboard object
+				return this.af.database.object('whiteboards/' + wbId).update({ snapshot: snap.metadata.downloadURLs[0] });
+			});
 	}
 
 	private observableToPromise(promise): Observable<any> {
