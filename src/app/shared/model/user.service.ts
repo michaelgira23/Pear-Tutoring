@@ -16,6 +16,7 @@ export class UserService {
 	sdkDb: any;
 	sdkStorage: any;
 	uid: string;
+	status: number;
 
 	constructor(@Inject(FirebaseRef) fb, private db: AngularFireDatabase, private auth: AuthService) {
 		this.sdkDb = fb.database().ref();
@@ -71,10 +72,12 @@ export class UserService {
 	}
 
 	changeStatus(status: number): void {
-		if (status === userStatus.ONLINE || status === userStatus.OFFLINE || status === userStatus.IN_SESSION) {
-			status = this.uid ? status : userStatus.OFFLINE;
-			console.log(status);
-			this.db.object(`users/${this.uid}`).update({status});
+		if (this.status !== status) {
+			if (status === userStatus.ONLINE || status === userStatus.OFFLINE || status === userStatus.IN_SESSION) {
+				status = this.uid ? status : userStatus.OFFLINE;
+				console.log(status);
+				this.db.object(`users/${this.uid}`).update({status}).then(val => this.status = status);
+			}
 		}
 	}
 

@@ -32,8 +32,7 @@
         <option *ngFor="let wb of sessionInfo.whiteboards; let i = index" [value]="i">{{ wb.name }}</option>
       </select>
     </div>
-    <form (submit)="onWbNameChange(wbName.value)"><input name="wbName" [(ngModel)]="selectedWb.name" (blur)="onWbNameChange(wbName.value)" #wbName></form>
-    <app-whiteboard  [key]="selectedWb.$key"></app-whiteboard>
+    <app-whiteboard  [key]="selectedWb?.$key"></app-whiteboard>
   </div>
   <div class="chat-container" *ngIf="sessionExist">
     <app-chat [key]="sessionInfo.chat"></app-chat>
