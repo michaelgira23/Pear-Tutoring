@@ -101,9 +101,8 @@ export class SessionService {
 				))
 			);
 		}).map((val: any[][]) => {
-			sessionsWithUser = sessionsWithUser.map((session, sessionIndex) => {
-				session.tutees = session.tutees.map((tutee, tuteeIndex) => val[sessionIndex][tuteeIndex]);
-				return session;
+			sessionsWithUser.forEach((session, sessionIndex) => {
+				sessionsWithUser[sessionIndex].tutees = session.tutees.map((tutee, tuteeIndex) => val[sessionIndex][tuteeIndex]);
 			});
 			return sessionsWithUser;
 		});
@@ -118,8 +117,8 @@ export class SessionService {
 		// returns a list of whiteboard key that belongs to the session
 		.flatMap(wbKeys => {
 			return Observable.combineLatest(wbKeys.map(wbKey => {
-				return this.db.object('whiteboards' + wbKey);
-			}))
+				return this.db.object('whiteboards/' + wbKey.$key);
+			}));
 		})
 		// returns a list of actual whiteboard objects
 		.map(val => {
@@ -140,18 +139,18 @@ export class SessionService {
 		// this step returns an array of array of whiteboard keys for each session in the list
 		.flatMap(val => {
 			return Observable.combineLatest(val.map(wbKeys => {
-				Observable.combineLatest(wbKeys.map(key => {
-					this.db.object('whiteboards/' + key)
-				}))
+				return Observable.combineLatest(wbKeys.map(key => {
+					return this.db.object('whiteboards/' + key.$key);
+				}));
 			}));
 		})
 		// this step returns the previous two dimentional array but with a whiteboard object replacing each key
 		.map((val: any[][]) => {
-			sessionsWithWb = sessionsWithWb.map((session, sessionIndex) => {
-				return session.whiteboards = val[sessionIndex];
+			sessionsWithWb.forEach((session, sessionIndex) => {
+				sessionsWithWb[sessionIndex].whiteboards = val[sessionIndex];
 			});
-			return sessionsWithWb
-		})
+			return sessionsWithWb;
+		});
 	}
 
 	// find a single session and combine it with user data
@@ -190,7 +189,7 @@ export class SessionService {
 					}
 				})
 			)
-		).map(Session.fromJsonArray)
+		).map(Session.fromJsonArray);
 	}
 
 	// Find session by tags, sessions are already stored in sessionsByTags node in firebase
@@ -210,7 +209,7 @@ export class SessionService {
 					// List of session ids --> list of session objects without user inserted
 					.flatMap(ids => Observable.combineLatest(ids.map(id => this.db.object('sessions/' + id.$key))))
 			)
-		).map(Session.fromJsonArray)
+		).map(Session.fromJsonArray);
 	}
 
 	// Update the information of a session
