@@ -10,7 +10,7 @@ export class ChatService {
 
 	sdkDb: any;
 	authInfo: FirebaseAuthState;
-	queue: { key: string, chatKey: string, status: Status }[] = [];
+	queue: { key: string, chatKey: string, status: StatusOptions, time: number }[] = [];
 
 	constructor(private af: AngularFire, @Inject(FirebaseRef) fb, private authService: AuthService, private userService: UserService) {
 		this.sdkDb = fb.database().ref();
@@ -20,10 +20,10 @@ export class ChatService {
 				this.authInfo = data;
 
 				// Check if there are any status updates in the queue before authInfo was initialized
-				if (this.queue.length > 0) {
+				if (typeof this.authInfo !== 'undefined' && this.queue.length > 0) {
+					console.log('handle queue of length', this.queue.length, this.authInfo);
 					this.queue.forEach(value => {
-						const statusMessages = this.af.database.object(`statusMessages/${value.chatKey}/${value.key}`);
-						this.observableToPromise(statusMessages.set(value.status))
+						this.sendStatus(value.status, value.chatKey, value.time)
 							.subscribe(
 								key => {
 									console.log('set status success', key);
@@ -33,6 +33,7 @@ export class ChatService {
 								}
 							);
 					});
+					this.queue = [];
 				}
 			},
 			err => {
@@ -87,10 +88,10 @@ export class ChatService {
 		return this.observableToPromise(chatMessages.push(message));
 	}
 
-	sendStatus(statusType: StatusOptions, chatKey: string): Observable<any> {
+	sendStatus(statusType: StatusOptions, chatKey: string, time?: number): Observable<any> {
 		const status: Status = {
 			type: statusType,
-			time: Date.now(),
+			time: time || Date.now(),
 			user: this.authInfo ? this.authInfo.uid : null,
 		};
 		const key = this.sdkDb.push().key;
@@ -102,7 +103,7 @@ export class ChatService {
 				.map(() => key);
 		} else {
 			// Add status into queue until authInfo is initialized
-			this.queue.push({ key, chatKey, status });
+			this.queue.push({ key, chatKey, status: statusType, time: status.time });
 			return Observable.of(key);
 		}
 	}
