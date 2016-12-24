@@ -15,8 +15,8 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 	messageSubscription: any;
 	statusSubscription: any;
 
-	allMessages: Message[];
-	allStatuses: Status[];
+	allMessages: Message[] = [];
+	allStatuses: Status[] = [];
 	allEntries: (Message|Status)[] = [];
 
 	constructor(private chatService: ChatService, private userService: UserService) { }
@@ -82,12 +82,10 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 	}
 
 	mergeEntries() {
-		if (this.allMessages && this.allStatuses) {
-			this.allEntries = [].concat(this.allMessages, this.allStatuses);
-			this.allEntries.sort((a, b) => {
-				return a.time - b.time;
-			});
-		}
+		this.allEntries = [].concat(this.allMessages, this.allStatuses);
+		this.allEntries.sort((a, b) => {
+			return a.time - b.time;
+		});
 	}
 
 	isMessage(x: any): x is Message {

@@ -12,6 +12,8 @@ import { RegisterComponent } from './register/register.component';
 import { SessionComponent } from './session/session.component';
 import { SettingsComponent } from './settings/settings.component';
 
+import { TestAuthComponent } from './test-auth/test-auth.component';
+
 export const routerConfig: Route[] = [
 	{
 		path: '',
@@ -86,5 +88,9 @@ export const routerConfig: Route[] = [
 	{
 		path: 'settings',
 		component: SettingsComponent
+	},
+	{
+		path: 'test-auth',
+		component: TestAuthComponent
 	}
 ];
