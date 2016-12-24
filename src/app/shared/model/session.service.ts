@@ -101,7 +101,7 @@ export class SessionService {
 				))
 			);
 		}).map((val: any[][]) => {
-			sessionsWithUser.map((session, sessionIndex) => {
+			sessionsWithUser = sessionsWithUser.map((session, sessionIndex) => {
 				session.tutees = session.tutees.map((tutee, tuteeIndex) => val[sessionIndex][tuteeIndex]);
 				return session;
 			});
@@ -114,12 +114,44 @@ export class SessionService {
 		return sessionQuery.flatMap(val => {
 			sessionWithWb = val;
 			return this.db.list('whiteboardsBySessions/' + val.$key);
-		}).map(val => {
-			sessionWithWb.whiteboards = val.map(wbKey => {
-				return wbKey.$key;
-			});
+		})
+		// returns a list of whiteboard key that belongs to the session
+		.flatMap(wbKeys => {
+			return Observable.combineLatest(wbKeys.map(wbKey => {
+				return this.db.object('whiteboards' + wbKey);
+			}))
+		})
+		// returns a list of actual whiteboard objects
+		.map(val => {
+			sessionWithWb.whiteboards = val;
 			return sessionWithWb;
 		});
+	}
+
+	combineArrWithWb(sessionQuery: Observable<any[]>): Observable<Session[]> {
+		let sessionsWithWb: any[];
+		// Fill in the whiteboard field of each session with the whiteboard info
+		return sessionQuery.flatMap((val: any[]) => {
+			sessionsWithWb = val;
+			return Observable.combineLatest(
+				val.map((session) => this.db.list('whiteboardsBySessions/' + session.$key))
+			);
+		})
+		// this step returns an array of array of whiteboard keys for each session in the list
+		.flatMap(val => {
+			return Observable.combineLatest(val.map(wbKeys => {
+				Observable.combineLatest(wbKeys.map(key => {
+					this.db.object('whiteboards/' + key)
+				}))
+			}));
+		})
+		// this step returns the previous two dimentional array but with a whiteboard object replacing each key
+		.map((val: any[][]) => {
+			sessionsWithWb = sessionsWithWb.map((session, sessionIndex) => {
+				return session.whiteboards = val[sessionIndex];
+			});
+			return sessionsWithWb
+		})
 	}
 
 	// find a single session and combine it with user data
@@ -150,13 +182,15 @@ export class SessionService {
 	// Find all of the sessions where the listed field is true. 
 	findPublicSessions(): Observable<Session[]> {
 		return this.combineArrWithUser(
-			this.db.list('sessions', {
-				query: {
-					orderByChild: 'listed',
-					equalTo: true
-				}
-			})
-		).map(Session.fromJsonArray);
+			this.combineArrWithWb(
+				this.db.list('sessions', {
+					query: {
+						orderByChild: 'listed',
+						equalTo: true
+					}
+				})
+			)
+		).map(Session.fromJsonArray)
 	}
 
 	// Find session by tags, sessions are already stored in sessionsByTags node in firebase
@@ -171,10 +205,12 @@ export class SessionService {
 
 	findSessionsBySubject(subject: string) {
 		return this.combineArrWithUser(
-			this.db.list('sessionsBySubject/' + subject)
-				// List of session ids --> list of session objects without user inserted
-				.flatMap(ids => Observable.combineLatest(ids.map(id => this.db.object('sessions/' + id.$key))))
-		).map(Session.fromJsonArray);
+			this.combineArrWithWb(
+				this.db.list('sessionsBySubject/' + subject)
+					// List of session ids --> list of session objects without user inserted
+					.flatMap(ids => Observable.combineLatest(ids.map(id => this.db.object('sessions/' + id.$key))))
+			)
+		).map(Session.fromJsonArray)
 	}
 
 	// Update the information of a session
@@ -194,9 +230,9 @@ export class SessionService {
 		dataToSave['usersInSession/' + sessionId] = uidsToSave;
 		dataToSave[`users/${this.uid}/tutorSessions/${sessionId}`] = true;
 		session.tutees.forEach(uid => dataToSave[`users/${uid}/tuteeSessions/${sessionId}`] = true);
+		dataToSave[`whiteboardsBySessions/${sessionId}/${session.whiteboard}`] = true;
 		// below are only for the public sessions, because we want the private sessions to be unsearchable in the catalogs
 		if (session.listed) {
-			dataToSave[`whiteboardsBySessions/${sessionId}/${session.whiteboard}`] = true;
 			session.tags.forEach(tag => dataToSave[`sessionsByTags/${tag}/${sessionId}`] = true);
 			if (allowedSubjects.find((val) => session.subject === val)) {
 				dataToSave[`sessionsBySubject/${session.subject}/${sessionId}`] = true;

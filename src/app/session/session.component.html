@@ -28,7 +28,7 @@
     <button (click)="deleteWb()" class="btn btn-default">Delete Whiteboard</button>
   </div>
   <div class="whiteboard-container" *ngIf="sessionExist">
-    <app-whiteboard *ngFor="let wbKey of sessionInfo.whiteboards" [key]="wbKey" (click)="onSelectWb(wbKey)"></app-whiteboard>
+    <app-whiteboard *ngFor="let wb of sessionInfo.whiteboards" [key]="wb.$ey" (click)="onSelectWb(wbKey)"></app-whiteboard>
   </div>
   <div class="chat-container" *ngIf="sessionExist">
     <app-chat [key]="sessionInfo.chat"></app-chat>
