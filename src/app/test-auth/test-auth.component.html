@@ -2,3 +2,7 @@
 <p>Time of <code>ngOnInit()</code> being called: {{ initTime }}</p>
 <p>Time of <code>auth$</code> being most recently called: {{ authFireTime }}</p>
 <p>Amount of times <code>auth$</code> has fired: {{ count }}</p>
+
+<ul>
+	<li *ngFor="let action of actions">{{ action }}</li>
+</ul>

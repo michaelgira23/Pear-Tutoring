@@ -13,6 +13,7 @@ export class TestAuthComponent implements OnInit {
 	constructionTime: number;
 	count: number = 0;
 	initTime: number;
+	actions: string[] = [];
 
 	constructor(private authService: AuthService) {
 		this.constructionTime = Date.now();
@@ -25,9 +26,14 @@ export class TestAuthComponent implements OnInit {
 			data => {
 				this.count++;
 				this.authFireTime = Date.now();
+				this.actions.push(`auth$ emitted ${data} after ${ Date.now() - this.initTime } ms`);
 			},
 			err => {
 				console.log(`Getting auth$ error: ${err}`);
+				this.actions.push(`auth$ errored ${err} after ${ Date.now() - this.initTime } ms`);
+			},
+			() => {
+				this.actions.push(`auth$ completed after ${ Date.now() - this.initTime } ms`);
 			}
 		);
 	}
