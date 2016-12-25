@@ -19,21 +19,8 @@ $sophisticated-white: #eee;
 
 	color: $sophisticated-white;
 	background-color: rgba(0, 0, 0, 0.8);
+	text-align: center;
 	border-radius: 0.25rem;
-
-	.tool-selection {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-
-		button {
-			width: 100%;
-
-			&.active {
-				width: calc(100% - 1rem);
-			}
-		}
-	}
 }
 
 .tool-toolbar {
@@ -41,7 +28,6 @@ $sophisticated-white: #eee;
 	top: 2.5rem;
 	left: 2.5rem + 5rem + 2.5rem;
 
-	height: 5rem;
 	display: flex;
 	padding: 0.5rem;
 

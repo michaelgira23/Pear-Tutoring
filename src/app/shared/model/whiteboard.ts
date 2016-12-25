@@ -8,7 +8,8 @@ export interface Whiteboard extends Metadata {
 }
 
 export interface WhiteboardOptions {
-	background?: string;
+	name: string;
+	background: string;
 }
 
 /**
@@ -20,8 +21,6 @@ export interface WhiteboardMarking extends WhiteboardItem {
 	path: Point[];
 }
 
-export interface WhiteboardMarkingOptions { }
-
 /**
  * Whiteboard Text
  */
@@ -32,9 +31,9 @@ export interface WhiteboardText extends WhiteboardItem {
 }
 
 export interface Font {
-	fontFamily?: string;
-	fontWeight?: string | number;
-	fontSize?: number | string;
+	fontFamily: string;
+	fontWeight: string | number;
+	fontSize: number | string;
 }
 
 /**
@@ -58,14 +57,14 @@ export interface WhiteboardArc extends WhiteboardShape {
 
 export interface WhiteboardEllipse extends WhiteboardShape {
 	data: {
-		radius?: number | Size;
+		radius: number | Size;
 	};
 }
 
 export interface WhiteboardPolygon extends WhiteboardShape {
 	data: {
 		sides: number;
-		radius?: number | Size;
+		radius: number | Size;
 	};
 }
 
@@ -88,7 +87,6 @@ export interface WhiteboardShape extends WhiteboardItem {
 export interface WhiteboardItem extends Metadata {
 	position: Position;
 	color: ColorOptions;
-	edits?: Edits;
 	erased?: number;
 }
 
@@ -96,6 +94,7 @@ export interface Metadata {
 	$key?: string;
 	created: number;
 	createdBy: number;
+	edits?: Edits;
 }
 
 // Key should be timestamp, value should be any property changed
@@ -105,26 +104,26 @@ export interface Edits {
 
 export interface ColorOptions {
 	// Stroke Style
-	strokeColor?: string;
-	strokeWidth?: number;
-	strokeCap?: string;
-	strokeJoin?: string;
-	dashOffset?: number;
-	strokeScaling?: boolean;
-	dashArray?: number[];
-	miterLimit?: number;
+	strokeColor: string;
+	strokeWidth: number;
+	strokeCap: string;
+	strokeJoin: string;
+	dashOffset: number;
+	strokeScaling: boolean;
+	dashArray: number[];
+	miterLimit: number;
 	// Fill Style
-	fillColor?: string;
+	fillColor: string;
 	// Shadow Style
-	shadowColor?: string;
-	shadowBlur?: number;
-	shadowOffset?: Point;
+	shadowColor: string;
+	shadowBlur: number;
+	shadowOffset: Point;
 }
 
 export interface Position {
-	anchor?: Point;
-	rotation?: number;
-	scaling?: Point;
+	anchor: Point;
+	rotation: number;
+	scaling: Point;
 }
 
 export interface Size {
