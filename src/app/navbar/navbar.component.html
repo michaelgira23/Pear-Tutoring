@@ -1,59 +1,9 @@
-<!-- Navbar -->
-<nav class="navbar navbar-dark bg-primary">
+<md-toolbar color="primary">
+	<span>Pear Tutoring</span>
 
-	<!-- Collapse button -->
-	<button class="navbar-toggler hidden-sm-up" type="button" data-toggle="collapse" data-target="#collapseEx2">
-		<i class="fa fa-bars"></i>
-	</button>
-
-	<div class="container">
-
-		<!-- Collapse content -->
-		<div class="collapse navbar-toggleable-xs" id="collapseEx2">
-			<!-- Navbar Brand -->
-			<a class="navbar-brand">Pear Tutoring</a>
-			<!-- Links -->
-			<ul class="nav navbar-nav">
-				<li class="nav-item">
-					<a class="nav-link" routerLink="home" routerLinkActive="active">Home</a>
-				</li>
-				<li class="nav-item">
-					<a class="nav-link" routerLink="whiteboard" routerLinkActive="active">Whiteboard</a>
-				</li>
-				<li class="nav-item">
-					<a class="nav-link" routerLink="scheduling" routerLinkActive="active">Scheduling</a>
-				</li>
-				<li class="nav-item">
-					<a class="nav-link" routerLink="chat" routerLinkActive="active">Chat</a>
-				</li>
-				<li class="nav-item">
-					<a class="nav-link" routerLink="settings" routerLinkActive="active">Settings</a>
-				</li>
-			</ul>
-
-			<!-- If user is logged out -->
-			<ul *ngIf="!authInfo" class="nav navbar-nav nav-flex-icons">
-				<li class="nav-item">
-					<a class="nav-link" routerLink="login">Login</a>
-				</li>
-				<li class="nav-item">
-					<a class="nav-link" routerLink="register">Register</a>
-				</li>
-			</ul>
-
-			<!-- If user is logged in -->
-			<ul *ngIf="authInfo" class="nav navbar-nav nav-flex-icons">
-				<li class="nav-item">
-					<a class="nav-link">Signed in as {{ authInfo.auth.email }}</a>
-				</li>
-				<li class="nav-item">
-					<a class="nav-link" (click)="authService.logout()">Logout</a>
-				</li>
-			</ul>
-		</div>
-		<!-- /.Collapse content -->
-
-	</div>
-
-</nav>
-<!-- /.Navbar -->
+	<a md-button routerLink="home">Home</a>
+	<a md-button routerLink="whiteboard">Whiteboard</a>
+	<a md-button routerLink="scheduling">Scheduling</a>
+	<a md-button routerLink="chat">Chat</a>
+	<a md-button routerLink="settings">Settings</a>
+</md-toolbar>

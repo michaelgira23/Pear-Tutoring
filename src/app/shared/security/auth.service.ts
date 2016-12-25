@@ -6,7 +6,7 @@ import { FirebaseAuth, FirebaseAuthState } from 'angularfire2';
 @Injectable()
 export class AuthService {
 
-	auth$: BehaviorSubject<FirebaseAuthState> = new BehaviorSubject(null);
+	auth$: BehaviorSubject<FirebaseAuthState> = new BehaviorSubject(undefined);
 
 	constructor (private auth: FirebaseAuth, private router: Router) {
 		this.auth.subscribe(
