@@ -23,7 +23,8 @@
 				"../node_modules/angular-calendar/scss/angular-calendar.scss"
 			],
 			"scripts": [
-				"../node_modules/paper/dist/paper-full.min.js"
+				"../node_modules/paper/dist/paper-full.min.js",
+				"../node_modules/hammerjs/hammer.min.js"
 			],
 			"environments": {
 				"source": "environments/environment.ts",
