@@ -1,5 +1,5 @@
-<div class="card">
-  <div class="view overlay hm-white-slight">
+<md-card class="card">
+  <div md-card-image>
     <div class="session-thumbnails">
       <div class="row">
         <img *ngIf="session.whiteboards[0]" class="img-fluid" [src]="session.whiteboards[0].snapshot">
@@ -14,14 +14,24 @@
       <div class="mask"></div>
     </a>
   </div>
-  <div class="card-block">
-    <h4 class="card-title">{{ session.title }}</h4>
-    <p class="card-text">{{ session.desc }}</p>
-    <p class="card-text">{{ startTime }} ~ {{ endTime }}</p>
-    <button (click)="joinSession()" class="btn btn-primary">Join Session</button>
-  </div>
-  <div class="card-data" *ngIf="user.uid === session.tutor.$key">
-    <button class="btn btn-outline-primary btn-sm" (click)="updateSession()">Update</button>
-    <button class="btn btn-outline-danger btn-sm" (click)="deleteSession()">Delete</button>
-  </div>
-</div>
+
+  <md-card-header>
+    <img md-card-avatar [src]="session.tutor.pfp">
+    <md-card-title><h4>{{ session.title }}</h4></md-card-title>
+  </md-card-header>
+
+  <md-card-content>
+    <p>{{ session.desc }}</p>
+    <p>{{ startTime }} ~ {{ endTime }}</p>
+    <md-chip-list>
+      <md-chip *ngFor="let tag of session.tags">{{ tag }}</md-chip>
+    </md-chip-list>
+  </md-card-content>
+
+  <button md-button (click)="joinSession()" class="join-session">Join Session</button>
+
+  <md-card-actions *ngIf="user.uid === session.tutor.$key">
+    <button md-button class="btn btn-outline-primary btn-sm" (click)="updateSession()">Update</button>
+    <button md-button class="btn btn-outline-danger btn-sm" (click)="deleteSession()">Delete</button>
+  </md-card-actions>
+</md-card>
