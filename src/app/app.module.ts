@@ -20,6 +20,7 @@ import { HomeComponent } from './home/home.component';
 import { SettingsComponent } from './settings/settings.component';
 
 import { AuthService } from './shared/security/auth.service';
+import { NotificationsService } from './shared/model/notifications.service';
 import { UserService } from './shared/model/user.service';
 
 // Whiteboard components and services
@@ -78,7 +79,7 @@ import { SessionService } from './shared/model/session.service';
 		ColorPickerModule,
 		CalendarModule.forRoot()
 	],
-	providers: [AuthService, ChatService, SessionService, UserService, WhiteboardService],
+	providers: [AuthService, ChatService, SessionService, NotificationsService, UserService, WhiteboardService],
 	bootstrap: [AppComponent]
 })
 export class AppModule { }
