@@ -20,6 +20,9 @@ export class DisplaySessionComponent implements OnInit {
 	get endTime(): string {
 		return moment(this.session.end, 'X').format('M/D/Y');
 	}
+	get subject(): string {
+		return this.session.subject.toLowerCase();
+	}
 
 	constructor(private router: Router, private user: UserService, private sessionService: SessionService) { }
 

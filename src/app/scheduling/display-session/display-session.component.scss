@@ -1,4 +1,7 @@
-.card {
+@import '../../shared/styles/colors';
+
+@mixin color-theme($subject-color) {
+	border: 5px solid $subject-color;
 	.session-thumbnails {
 		display: flex;
 		flex-direction: column;
@@ -17,5 +20,35 @@
 				width: 50%;
 			}
 		}
+	}
+
+	.join-session {
+		text-transform: uppercase;
+		background: $subject-color;
+		display: block;
+		margin: 0 auto;
+	}
+	md-card-actions {
+		button {
+			font-size: 0.8em;
+			line-height: 1.5em;
+			border: 1px solid $subject-color;
+		}
+		.delete-session:hover {
+			background-color: $fruity-rose;
+		}
+	}
+}
+
+.card {
+	@include color-theme(black);
+	&.math {
+		@include color-theme($fruity-grape);
+	}
+	&.english {
+		@include color-theme($fruity-blue);
+	}
+	&.art {
+		@include color-theme($fruity-grape);
 	}
 }

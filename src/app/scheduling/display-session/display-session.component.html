@@ -1,4 +1,4 @@
-<md-card class="card">
+<md-card class="card" [ngClass]="subject">
   <div md-card-image>
     <div class="session-thumbnails">
       <div class="row">
@@ -17,7 +17,7 @@
 
   <md-card-header>
     <img md-card-avatar [src]="session.tutor.pfp">
-    <md-card-title><h4>{{ session.title }}</h4></md-card-title>
+    <md-card-title>{{ session.title }}</md-card-title>
   </md-card-header>
 
   <md-card-content>
@@ -28,10 +28,12 @@
     </md-chip-list>
   </md-card-content>
 
-  <button md-button (click)="joinSession()" class="join-session">Join Session</button>
+  <md-card-content>
+    <button md-raised-button (click)="joinSession()" class="join-session">Join Session</button>
+  </md-card-content>
 
   <md-card-actions *ngIf="user.uid === session.tutor.$key">
-    <button md-button class="btn btn-outline-primary btn-sm" (click)="updateSession()">Update</button>
-    <button md-button class="btn btn-outline-danger btn-sm" (click)="deleteSession()">Delete</button>
+    <button md-button class="update-session" (click)="updateSession()">Update</button>
+    <button md-button class="delete-session" (click)="deleteSession()">Delete</button>
   </md-card-actions>
 </md-card>
