@@ -4,11 +4,10 @@
 import { User } from './user';
 import { Whiteboard } from './whiteboard.service';
 import { objToArr } from './session.service'
-import prisma from 'prisma';
 
 export class Session {
 	static fromJson({ $key, start, end, subject, tutor, tutees, max, listed, whiteboards, chat, title, desc, canceled, tags}): Session {
-		let color = subject ? prisma(subject).hex : '#000' ;
+		let color = subject ? SessionColors[subject] : '#000' ;
 		if (!Array.isArray(tutees)) {
 			tutees = objToArr(tutees);
 		}
@@ -39,4 +38,10 @@ export class Session {
 		public canceled: boolean,
 		public tags: string[]
 	) { }
+}
+
+export const SessionColors = {
+	Math: '#05999B',
+	Art: '#FF5C5C',
+	English: '#86F243'
 }
