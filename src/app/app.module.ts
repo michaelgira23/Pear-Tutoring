@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 import { AngularFireModule } from 'angularfire2';
+import { MaterialModule } from '@angular/material';
 import { ColorPickerModule } from 'angular2-color-picker';
 import { CalendarModule } from 'angular-calendar';
 
@@ -77,6 +78,7 @@ import { TestAuthComponent } from './test-auth/test-auth.component';
 		HttpModule,
 		RouterModule.forRoot(routerConfig),
 		AngularFireModule.initializeApp(firebaseConfig, authConfig),
+		MaterialModule.forRoot(),
 		ColorPickerModule,
 		CalendarModule.forRoot()
 	],
