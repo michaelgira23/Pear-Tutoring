@@ -32,6 +32,17 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	// Whether or not whiteboard with key exists
 	validKey: boolean = true;
 
+	// Name of the whiteboard
+	get wbName(): string {
+		if (this.whiteboard) {
+			return this.whiteboard.name;
+		}
+		return '';
+	};
+	set wbName(name: string) {
+		this.wbName = name;
+	}
+
 	// Whiteboard <canvas>
 	@ViewChild('whiteboard')
 	canvas;
@@ -293,6 +304,14 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		this.metaKey = event.metaKey;
 		this.shiftKey = event.shiftKey;
 		this.triggerToolEvent(this.tool, 'modifierKey', event);
+	}
+
+	changeWbName(name: string): void {
+		if (name !== this.wbName) {
+			this.whiteboardService.changeName(this.key, name).subscribe(val => {
+				console.log('name changed');
+			}, console.log);
+		}
 	}
 
 	/**

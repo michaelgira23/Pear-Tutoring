@@ -6,6 +6,13 @@
 	[style.height]="takingSnapshot ? snapshotDimensions.height + 'px' : 'inherit'"
 	[style.width]="takingSnapshot ?  snapshotDimensions.width + 'px' : 'inherit'"></canvas>
 
+<!--Whiteboard Name-->
+<md-input-container class="whiteboard-name">
+	<form (submit)="changeWbName(wbNameInput.value)">
+		<input #wbNameInput md-input type="text" (blur)=changeWbName(wbNameInput.value) [value]="wbName">
+	</form>
+</md-input-container>
+
 <!-- Tool selection -->
 <div *ngIf="showToolbar" class="toolbar">
 	<md-button-toggle-group [vertical]="true" [(ngModel)]="tool">

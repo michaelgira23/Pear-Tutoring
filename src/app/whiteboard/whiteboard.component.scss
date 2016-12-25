@@ -5,6 +5,13 @@ $sophisticated-white: #eee;
 	display: inline-block;
 }
 
+.whiteboard-name {
+	position: absolute;
+	top: 0;
+	right: 0;
+	font-size: 2em;
+}
+
 .toolbar {
 	position: absolute;;
 	top: 2.5rem;

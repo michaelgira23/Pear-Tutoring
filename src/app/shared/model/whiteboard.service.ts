@@ -117,8 +117,13 @@ export class WhiteboardService {
 		let whiteboard: any = options;
 		whiteboard.created = Date.now();
 		whiteboard.createdBy = this.authInfo ? this.authInfo.uid : null;
+		whiteboard.name = 'New Whiteboard';
 
 		return this.observableToPromise(this.whiteboards.push(whiteboard));
+	}
+
+	changeName(key: string, name: string): Observable<any> {
+		return this.observableToPromise(this.af.database.object('whiteboards/' + key).update({name}));
 	}
 
 	/**
