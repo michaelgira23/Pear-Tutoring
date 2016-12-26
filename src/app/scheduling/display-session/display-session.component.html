@@ -28,6 +28,8 @@
     </md-chip-list>
   </md-card-content>
 
+  <md-divider></md-divider>
+
   <md-card-actions>
     <button md-raised-button (click)="joinSession()" class="join-session">Join Session</button>
     <button md-icon-button [mdMenuTriggerFor]="menu" *ngIf="user.uid === session.tutor.$key" class="session-admin">

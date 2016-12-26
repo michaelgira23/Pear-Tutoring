@@ -1,3 +1,27 @@
-<p>
-	time-picker works!
-</p>
+<md-grid-list cols="7" rowHeight="fit">
+	<md-grid-tile *ngFor="let day of freeTimesProps">
+		<md-grid-tile-header>{{ day }}</md-grid-tile-header>
+		<md-list>
+			<md-list-item *ngFor="let time of freeTimesModel[day]; let timeIndex = index">
+				<div md-line>
+					<md-input-container>
+						<h4 md-prefix>From</h4>
+						<input md-input type="time" [(ngModel)]="freeTimesModel[day][timeIndex].from">
+					</md-input-container>
+				</div>
+				<div>
+					<md-input-container>
+						<h4 md-prefix>to</h4>
+						<input md-input type="time" [(ngModel)]="freeTimesModel[day][timeIndex].to">
+					</md-input-container>
+				</div>
+				<button md-icon-button type="button" (click)="removeTime(day, timeIndex)">
+					<md-icon>close</md-icon>
+				</button>
+			</md-list-item>
+			<md-list-item>
+				<button md-raised-button type="button" (click)="addTime(day)">Add Time</button>
+			</md-list-item>
+		</md-list>
+	</md-grid-tile>
+</md-grid-list>

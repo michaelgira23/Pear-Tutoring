@@ -1,0 +1,15 @@
+md-grid-list {
+	height: 30em;
+	md-grid-tile {
+		overflow: scroll;
+		md-list {
+			width: 100%;
+			md-list-item {
+				margin-bottom: 2em;
+				md-input-container {
+				}
+			}
+		}
+	}
+}
+
