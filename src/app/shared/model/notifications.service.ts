@@ -9,6 +9,8 @@ export class NotificationsService {
 
 	constructor() { }
 
+	// `init()` stays separate from the `constructor()` since we don't want this to run every single time
+	// that we create a new instance of this class.
 	init() {
 		// There's no `.then()` clause here, since the Notifications API puts the permissions granted into a global `Notification.permission`.
 		Notification.requestPermission().catch(err => {
@@ -17,9 +19,11 @@ export class NotificationsService {
 	}
 
 	send(title: string, body?: string) {
-		let n = new Notification(title, {body: body});
+		if (this.support && Notification.permission === 'granted') {
+			let n = new Notification(title, {body: body});
 
-		// Automatically closes the notification after 4 seconds
-		setTimeout(n.close.bind(n), 4000);
+			// Automatically closes the notification after 4 seconds
+			setTimeout(n.close.bind(n), 4000);
+		}
 	}
 }
