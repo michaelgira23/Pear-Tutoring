@@ -28,12 +28,14 @@
     </md-chip-list>
   </md-card-content>
 
-  <md-card-content>
+  <md-card-actions>
     <button md-raised-button (click)="joinSession()" class="join-session">Join Session</button>
-  </md-card-content>
-
-  <md-card-actions *ngIf="user.uid === session.tutor.$key">
-    <button md-button class="update-session" (click)="updateSession()">Update</button>
-    <button md-button class="delete-session" (click)="deleteSession()">Delete</button>
+    <button md-icon-button [mdMenuTriggerFor]="menu" *ngIf="user.uid === session.tutor.$key" class="session-admin">
+      <md-icon>more_vert</md-icon>
+    </button>
+    <md-menu #menu="mdMenu">
+      <button md-menu-item class="update-session" (click)="updateSession()">Update</button>
+      <button md-menu-item class="delete-session" (click)="deleteSession()">Delete</button>
+    </md-menu>
   </md-card-actions>
 </md-card>

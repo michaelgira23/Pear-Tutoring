@@ -2,6 +2,9 @@
 
 @mixin color-theme($subject-color) {
 	border: 5px solid $subject-color;
+	width: 250px;
+	height: 300px;
+
 	.session-thumbnails {
 		display: flex;
 		flex-direction: column;
@@ -21,21 +24,29 @@
 			}
 		}
 	}
-
-	.join-session {
-		text-transform: uppercase;
-		background: $subject-color;
-		display: block;
-		margin: 0 auto;
-	}
-	md-card-actions {
-		button {
-			font-size: 0.8em;
+	md-card-header {
+		md-card-title {
+			font-size: 1.5em;
 			line-height: 1.5em;
-			border: 1px solid $subject-color;
 		}
-		.delete-session:hover {
-			background-color: $fruity-rose;
+	}
+
+	md-card-actions {
+		position: absolute;
+		bottom: 2.5em;
+		left: 2.5em;
+		.join-session {
+			text-transform: uppercase;
+			background: $subject-color;
+		}
+		.session-admin {
+			position: relative;
+			right: -5em;
+		}
+		md-menu {
+			.delete-session:hover {
+				background-color: $fruity-rose;
+			}
 		}
 	}
 }
