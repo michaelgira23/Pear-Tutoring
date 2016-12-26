@@ -20,7 +20,7 @@ export class NotificationsService {
 
 	send(title: string, body?: string) {
 		if (this.support && Notification.permission === 'granted') {
-			let n = new Notification(title, {body: body});
+			let n = new Notification(title, {body});
 
 			// Automatically closes the notification after 4 seconds
 			setTimeout(n.close.bind(n), 4000);
