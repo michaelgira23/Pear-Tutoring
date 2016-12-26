@@ -30,12 +30,6 @@ export interface WhiteboardText extends WhiteboardItem {
 	font: Font;
 }
 
-export interface Font {
-	fontFamily: string;
-	fontWeight: string | number;
-	fontSize: number | string;
-}
-
 /**
  * Whiteboard Shapes
  */
@@ -81,12 +75,12 @@ export interface WhiteboardShape extends WhiteboardItem {
 }
 
 /**
- * General types
+ * General Types
  */
 
 export interface WhiteboardItem extends Metadata {
 	position: Position;
-	color: ColorOptions;
+	style: StyleOptions;
 	erased?: number;
 }
 
@@ -102,29 +96,52 @@ export interface Edits {
 	[key: number]: any;
 }
 
-export interface ColorOptions {
-	// Stroke Style
-	strokeColor: string;
-	strokeWidth: number;
-	strokeCap: string;
-	strokeJoin: string;
-	dashOffset: number;
-	strokeScaling: boolean;
-	dashArray: number[];
-	miterLimit: number;
-	// Fill Style
-	fillColor: string;
-	// Shadow Style
-	shadowColor: string;
-	shadowBlur: number;
-	shadowOffset: Point;
-}
-
 export interface Position {
 	anchor: Point;
 	rotation: number;
 	scaling: Point;
 }
+
+/**
+ * Styling
+ */
+
+export interface StyleOptions {
+	stroke: Stroke;
+	fill: Fill;
+	shadow: Shadow;
+}
+
+export interface Stroke {
+	color: string;
+	width: number;
+	cap: string;
+	join: string;
+	dashOffset: number;
+	scaling: boolean;
+	dashArray: number[];
+	miterLimit: number;
+}
+
+export interface Fill {
+	color: string;
+}
+
+export interface Shadow {
+	color: string;
+	blur: number;
+	offset: Point;
+}
+
+export interface Font {
+	family: string;
+	weight: string | number;
+	size: number | string;
+}
+
+/**
+ * Simple Types
+ */
 
 export interface Size {
 	width: number;
