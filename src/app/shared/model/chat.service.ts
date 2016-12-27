@@ -1,5 +1,6 @@
 import { Injectable, Inject } from '@angular/core';
 import { AngularFire, FirebaseRef, FirebaseAuthState } from 'angularfire2';
+import 'firebase';
 import { Observable, Subject } from 'rxjs/Rx';
 
 import { AuthService } from '../security/auth.service';
@@ -71,7 +72,7 @@ export class ChatService {
 	createChat(): Observable<any> {
 		const chats = this.af.database.list('chats');
 		const chatObj: Chat = {
-			created: Date.now(),
+			created: firebase.database['ServerValue']['TIMESTAMP'],
 			createdBy: this.authInfo ? this.authInfo.uid : null
 		};
 
@@ -83,7 +84,7 @@ export class ChatService {
 		const message: Message = {
 			text: msgText,
 			from: this.authInfo ? this.authInfo.uid : null,
-			time: Date.now(),
+			time: firebase.database['ServerValue']['TIMESTAMP'],
 		};
 		return this.observableToPromise(chatMessages.push(message));
 	}
@@ -91,7 +92,7 @@ export class ChatService {
 	sendStatus(statusType: StatusOptions, chatKey: string, time?: number): Observable<any> {
 		const status: Status = {
 			type: statusType,
-			time: time || Date.now(),
+			time: time || firebase.database['ServerValue']['TIMESTAMP'],
 			user: this.authInfo ? this.authInfo.uid : null,
 		};
 		const key = this.sdkDb.push().key;

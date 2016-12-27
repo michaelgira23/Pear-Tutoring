@@ -57,7 +57,6 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 				data => {
 					if (!this.keyChanged) {
 						for (let msg of data) {
-							console.log(msg);
 							// We have to use a type assertion here because the `Message` interface doesn't have a `$key` field.
 							// However, the object returned by Firebase actually *does*.
 							if (!this.messageKeys.includes((msg as any).$key)) {
@@ -67,7 +66,6 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 								);
 							}
 						}
-						console.log(this.allMessages);
 					} else {
 						this.keyChanged = false;
 					}
