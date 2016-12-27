@@ -70,7 +70,7 @@ export class SessionService {
 				}
 				return this.db.object('users/' + tutee);
 			}));
-		}).map(val => {
+		}).do(console.log).map(val => {
 			sessionWithUser.tutees = val;
 			return sessionWithUser;
 		});
@@ -348,6 +348,9 @@ export function arrToObj(arr: string[]): {[key: string]: true} {
 
 // Helper function that does the reverse to the above one
 export function objToArr(obj: {[key: string]: true}): any[] {
+	if (Array.isArray(obj)) {
+		return obj;
+	}
 	let arrTemp = [];
 	for (let prop in obj) {
 		if (obj[prop]) {

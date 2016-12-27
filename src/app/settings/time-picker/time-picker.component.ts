@@ -27,7 +27,6 @@ export class TimePickerComponent implements OnInit {
 	ngOnInit() {
 		this.userService.getFreeTimes().subscribe(val => {
 			this.freeTimesModel = Object.assign(this.freeTimesModel, val);
-			console.log(this.freeTimesModel);
 		});
 	}
 
