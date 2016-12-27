@@ -3,7 +3,8 @@
 // In database, must be stored as int because of Firebase
 import { User } from './user';
 import { Whiteboard } from './whiteboard.service';
-import { objToArr } from './session.service'
+import { objToArr } from './session.service';
+import * as moment from 'moment';
 
 export class Session {
 	static fromJson({ $key, start, end, subject, tutor, tutees, max, listed, whiteboards, chat, title, desc, canceled, tags}): Session {
@@ -14,6 +15,8 @@ export class Session {
 		if (!Array.isArray(tags)) {
 			tags = objToArr(tags);
 		}
+		start = moment(start, 'X');
+		end = moment(end, 'X');
 		return new Session($key, start, end, subject, color, tutor, tutees, max, listed, whiteboards, chat, title, desc, canceled, tags);
 	}
 
@@ -23,8 +26,8 @@ export class Session {
 
 	constructor (
 		public $key: string,
-		public start: number,
-		public end: number,
+		public start: moment.Moment,
+		public end: moment.Moment,
 		public subject: string,
 		public color: string,
 		public tutor: User,

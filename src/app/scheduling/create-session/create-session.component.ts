@@ -1,7 +1,7 @@
 import { Component, OnInit, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { Validators, FormGroup, FormBuilder } from '@angular/forms';
 import { Router } from '@angular/router';
-import { SessionService, allowedSubjects } from '../../shared/model/session.service';
+import { SessionService, AllowedSubjects } from '../../shared/model/session.service';
 import { Session } from '../../shared/model/session';
 import * as moment from 'moment';
 import { UserService } from '../../shared/model/user.service';
@@ -17,7 +17,7 @@ export class CreateSessionComponent implements OnInit, OnChanges {
 
 	createSessionForm: FormGroup;
 	allUsers: User[];
-	allowedSubjects: string[] = allowedSubjects;
+	allowedSubjects: string[] = AllowedSubjects;
 
 	// The component detects if there's a session id provided, and prefill the form with values from the session information
 	sessionInfo: Session;
@@ -69,8 +69,8 @@ export class CreateSessionComponent implements OnInit, OnChanges {
 
 	formInit() {
 		this.createSessionForm = this.fb.group({
-			start: [moment(this.sessionInfo.start, 'X').format('MM-DD-YYYY'), Validators.required],
-			end: [moment(this.sessionInfo.end, 'X').format('MM-DD-YYYY'), Validators.required],
+			start: [this.sessionInfo.start.format('MM-DD-YYYY'), Validators.required],
+			end: [this.sessionInfo.end.format('MM-DD-YYYY'), Validators.required],
 			subject: [this.sessionInfo.subject, Validators.required],
 			max: [this.sessionInfo.max, Validators.required],
 			listed: [this.sessionInfo.listed, Validators.required],
@@ -84,8 +84,8 @@ export class CreateSessionComponent implements OnInit, OnChanges {
 
 	createSession() {
 		let sessionToCreate = Object.assign({}, this.createSessionForm.value);
-		sessionToCreate.start = moment(sessionToCreate.start, 'MM-DD-YYYY').format('X');
-		sessionToCreate.end = moment(sessionToCreate.end, 'MM-DD-YYYY').format('X');
+		sessionToCreate.start = moment(sessionToCreate.start, 'MM-DD-YYYY');
+		sessionToCreate.end = moment(sessionToCreate.end, 'MM-DD-YYYY');
 		sessionToCreate.tags = sessionToCreate.tags.split(',').map(val => val.trim());
 		sessionToCreate.tutees = sessionToCreate.tutees.split(',').map(val => val.trim());
 		sessionToCreate.tutor = this.userService.uid;

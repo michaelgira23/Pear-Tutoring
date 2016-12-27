@@ -21,10 +21,10 @@
     background: <input formControlName="wbBackground">
   </fieldset>
   <button *ngIf="!sessionId && !sessionInfo" class="btn btn-primary">Create</button>
-  <button *ngIf="sessionId || sessionInfo" class="btn btn-primary">Update</button>
+  <button *ngIf="sessionId || sessionInfo" class="btn btn-primary" type="button" (click)="createSession()">Update</button>
 </form>
 
 <h2> All Users </h2>
 <div *ngFor="let user of allUsers"> 
-	<div> {{user | json}} </div>
+  <app-display-user [user]="user"></app-display-user>
 </div>

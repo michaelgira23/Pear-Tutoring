@@ -29,7 +29,10 @@ export class UserService {
 				this.changeStatus(userStatus.ONLINE);
 				this.sdkDb.child(`users/${this.uid}/status`).onDisconnect().set(userStatus.OFFLINE);
 			} else {
-				this.changeStatus(userStatus.OFFLINE);
+				if (this.uid) {
+					this.changeStatus(userStatus.OFFLINE);
+				}
+				this.uid = null;
 			}
 		});
 	}

@@ -1,7 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { Session } from '../../shared/model/session';
-import * as moment from 'moment';
 import { UserService } from '../../shared/model/user.service';
 import { SessionService } from '../../shared/model/session.service';
 
@@ -15,10 +14,10 @@ export class DisplaySessionComponent implements OnInit {
 	@Input()
 	session: Session;
 	get startTime(): string {
-		return moment(this.session.start, 'X').format('M/D/Y');
+		return this.session.start.format('M/D/Y');
 	};
 	get endTime(): string {
-		return moment(this.session.end, 'X').format('M/D/Y');
+		return this.session.end.format('M/D/Y');
 	}
 	get subject(): string {
 		return this.session.subject.toLowerCase();

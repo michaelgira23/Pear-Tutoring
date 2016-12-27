@@ -23,6 +23,7 @@ export class DisplayUserComponent implements OnInit, OnChanges {
 	constructor() { }
 
 	ngOnInit() {
+		console.log(this.user);
 	}
 
 	ngOnChanges(changes: {[key: string]: SimpleChange}) {

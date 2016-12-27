@@ -6,8 +6,9 @@ import { UserService, userStatus } from './user.service';
 import { ChatService } from './chat.service';
 import { AuthService } from '../security/auth.service';
 import { WhiteboardService, WhiteboardOptions } from './whiteboard.service';
+import { Moment } from 'moment';
 
-export const allowedSubjects = ['Math', 'English', 'Art'];
+export const AllowedSubjects = ['Math', 'English', 'Art'];
 
 @Injectable()
 export class SessionService {
@@ -54,9 +55,9 @@ export class SessionService {
 		return sessionQuery.flatMap(val => {
 			sessionWithUser = val;
 			if (typeof val.tutor !== 'string') {
-				return this.db.object('users/' + val.tutor.$key);
+				return this.userService.findUser(val.tutor.$key);
 			}
-			return this.db.object('users/' + val.tutor);
+			return this.userService.findUser(val.tutor);
 		}).map(val => {
 			sessionWithUser.tutor = val;
 			return sessionWithUser;
@@ -66,11 +67,11 @@ export class SessionService {
 			sessionWithUser = val;
 			return Observable.combineLatest(objToArr(val.tutees).map(tutee => {
 				if (typeof tutee !== 'string') {
-					return this.db.object('users/' + tutee.$key);
+					return this.userService.findUser(tutee.$key);
 				}
-				return this.db.object('users/' + tutee);
+				return this.userService.findUser(tutee);
 			}));
-		}).do(console.log).map(val => {
+		}).map(val => {
 			sessionWithUser.tutees = val;
 			return sessionWithUser;
 		});
@@ -83,7 +84,7 @@ export class SessionService {
 		return sessionQuery.flatMap((val: any[]) => {
 			sessionsWithUser = val;
 			return Observable.combineLatest(
-				val.map((session) => this.db.object('users/' + session.tutor))
+				val.map((session) => this.userService.findUser(session.tutor))
 			);
 		})
 		.map((val: any[]) => {
@@ -97,9 +98,9 @@ export class SessionService {
 				val.map((session) => Observable.combineLatest(
 					objToArr(session.tutees).map(tutee => {
 						if (typeof tutee !== 'string') {
-							return this.db.object('users/' + tutee.$key);
+							return this.userService.findUser(tutee.$key);
 						}
-						return this.db.object('users/' + tutee);
+						return this.userService.findUser(tutee);
 					})
 				))
 			);
@@ -213,6 +214,11 @@ export class SessionService {
 		).map(Session.fromJsonArray);
 	}
 
+	// Find sessions that fits the free times of the user. 
+	findSessionsByFreeTime(day: string) {
+		let findFreeTime
+	}
+
 	// Update the information of a session
 	updateSession(sessionId: string, session: SessionOptions): Observable<any> {
 		if (!this.uid) { return Observable.throw('Rip no login info'); };
@@ -235,14 +241,17 @@ export class SessionService {
 		// below are only for the public sessions, because we want the private sessions to be unsearchable in the catalogs
 		if (session.listed) {
 			session.tags.forEach(tag => dataToSave[`sessionsByTags/${tag}/${sessionId}`] = true);
-			if (allowedSubjects.find((val) => session.subject === val)) {
+			if (AllowedSubjects.find((val) => session.subject === val)) {
 				dataToSave[`sessionsBySubject/${session.subject}/${sessionId}`] = true;
 			}
 		}
 
 		// Transform the arrays in the object to firebase-friendly objects
+		sessionToSave.start = session.start.format('X');
+		sessionToSave.end = session.end.format('X');
 		sessionToSave.tutees = arrToObj(sessionToSave.tutees);
 		sessionToSave.tags = arrToObj(sessionToSave.tags);
+		sessionToSave['dayInWeek'] = session.end.format('d');
 		dataToSave['sessions/' + sessionId] = sessionToSave;
 
 		return this.firebaseUpdate(dataToSave);
@@ -361,8 +370,8 @@ export function objToArr(obj: {[key: string]: true}): any[] {
 }
 
 export interface SessionOptions {
-	start: string;
-	end: string;
+	start: Moment;
+	end: Moment;
 	tutor: string;
 	subject: string;
 	max: number;
