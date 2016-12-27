@@ -51,7 +51,7 @@ export interface WhiteboardLine extends WhiteboardShape {
 	};
 }
 
-export interface WhiteboardLineOptions extends WhiteboardItemOptions {
+export interface WhiteboardLineOptions extends WhiteboardShapeOptions {
 	data: {
 		from: Point;
 		to: Point;
@@ -66,7 +66,7 @@ export interface WhiteboardArc extends WhiteboardShape {
 	};
 }
 
-export interface WhiteboardArcOptions extends WhiteboardItemOptions {
+export interface WhiteboardArcOptions extends WhiteboardShapeOptions {
 	data: {
 		from: Point,
 		through: Point;
@@ -80,7 +80,7 @@ export interface WhiteboardEllipse extends WhiteboardShape {
 	};
 }
 
-export interface WhiteboardEllipseOptions extends WhiteboardItemOptions {
+export interface WhiteboardEllipseOptions extends WhiteboardShapeOptions {
 	data: {
 		radius: number | Size;
 	};
@@ -93,7 +93,7 @@ export interface WhiteboardPolygon extends WhiteboardShape {
 	};
 }
 
-export interface WhiteboardPolygonOptions extends WhiteboardItemOptions {
+export interface WhiteboardPolygonOptions extends WhiteboardShapeOptions {
 	data: {
 		sides: number;
 		radius: number | Size;
@@ -108,7 +108,7 @@ export interface WhiteboardStar extends WhiteboardShape {
 	};
 }
 
-export interface WhiteboardStarOptions extends WhiteboardItemOptions {
+export interface WhiteboardStarOptions extends WhiteboardShapeOptions {
 	data: {
 		points: number;
 		radius1: number;
@@ -121,8 +121,18 @@ export interface WhiteboardShape extends WhiteboardItem {
 	data: any;
 }
 
+export interface WhiteboardShapeOptions extends WhiteboardItemOptions {
+	type: WhiteboardShapeType;
+	data: any;
+}
+
 export type WhiteboardShapeType = 'line' | 'arc' | 'ellipse' | 'polygon' | 'star';
 export type WhiteboardAnyShape = WhiteboardLine | WhiteboardArc | WhiteboardEllipse | WhiteboardPolygon | WhiteboardStar;
+export type WhiteboardAnyShapeOptions = WhiteboardLineOptions
+	| WhiteboardArcOptions
+	| WhiteboardEllipseOptions
+	| WhiteboardPolygonOptions
+	| WhiteboardStarOptions;
 
 /**
  * General Types

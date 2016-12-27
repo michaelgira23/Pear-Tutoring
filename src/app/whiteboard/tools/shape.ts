@@ -1,10 +1,11 @@
 import { WhiteboardComponent } from '../whiteboard.component';
-import { WhiteboardAnyShape,
-	WhiteboardLine,
-	WhiteboardArc,
-	WhiteboardEllipse,
-	WhiteboardPolygon,
-	WhiteboardStar } from '../../shared/model/whiteboard';
+import { WhiteboardShapeType, WhiteboardShapeOptions,
+	WhiteboardAnyShape, WhiteboardAnyShapeOptions,
+	WhiteboardLine, WhiteboardLineOptions,
+	WhiteboardArc, WhiteboardArcOptions,
+	WhiteboardEllipse, WhiteboardEllipseOptions,
+	WhiteboardPolygon, WhiteboardPolygonOptions,
+	WhiteboardStar, WhiteboardStarOptions } from '../../shared/model/whiteboard';
 declare const paper;
 
 export class Shape {
@@ -17,7 +18,7 @@ export class Shape {
 	// Shape currently being drawn
 	currentShape: any;
 	// Type of shape currently being drawn
-	currentShapeType: string;
+	currentShapeType: WhiteboardShapeType;
 	// If shape is currently being drawn
 	currentShapeFinished: boolean = true;
 	// Point upon mousedown
@@ -139,9 +140,72 @@ export class Shape {
 			}
 
 			// Save shape
-			// let shape = {
-			//
-			// };
+			const shapePosition = {
+				anchor: {
+					x: this.currentShape.position.x,
+					y: this.currentShape.position.y
+				},
+				rotation: this.currentShape.rotation,
+				scaling: {
+					x: this.currentShape.scaling.x,
+					y: this.currentShape.scaling.y
+				}
+			};
+
+			let shape: WhiteboardShapeOptions = {
+				type: this.currentShapeType,
+				data: {},
+				position: shapePosition,
+				style: this.whiteboard.styleOptions
+			};
+
+			// Add shape-specific properties
+			switch (this.currentShapeType) {
+				case 'line':
+					// Add shape-specific options
+					(<WhiteboardLineOptions>shape).data.from = {
+						x: this.currentShape.segments[0].point.x,
+						y: this.currentShape.segments[0].point.y
+					};
+					(<WhiteboardLineOptions>shape).data.to = {
+						x: this.currentShape.segments[1].point.x,
+						y: this.currentShape.segments[1].point.y
+					};
+					break;
+				case 'arc':
+					// Add shape-specific options
+					(<WhiteboardArcOptions>shape).data.from = {
+						x: this.currentShape.segments[0].point.x,
+						y: this.currentShape.segments[0].point.y
+					};
+					(<WhiteboardArcOptions>shape).data.through = {
+						x: this.arcPoint.x,
+						y: this.arcPoint.y
+					};
+					(<WhiteboardArcOptions>shape).data.to = {
+						x: this.currentShape.segments[2].point.x,
+						y: this.currentShape.segments[2].point.y
+					};
+					break;
+				case 'ellipse':
+					// Add shape-specific options
+					// shape.point = [(<WhiteboardEllipse>shape).position.anchor.x, (<WhiteboardEllipse>shape).position.anchor.y];
+					// shape.radius = (<WhiteboardEllipse>shape).data.radius;
+					break;
+				case 'polygon':
+					// Add shape-specific options
+					// shape.sides = (<WhiteboardPolygon>shape).data.sides;
+					// shape.radius = (<WhiteboardPolygon>shape).data.radius;
+					break;
+				case 'star':
+					// Add shape-specific options
+					// shape.points = (<WhiteboardStar>shape).data.points;
+					// shape.radius1 = (<WhiteboardStar>shape).data.radius1;
+					// shape.radius2 = (<WhiteboardStar>shape).data.radius2;
+					break;
+				default:
+					console.log(`Unrecognized shape! (${shape.type})`);
+			}
 		}
 		/*
 		if (this.selectedShape && this.whiteboard.allowWrite) {
@@ -306,10 +370,7 @@ export class Shape {
 						this.canvasShapes[shape.$key] = new paper.Shape.Arc(paperOptions);
 						break;
 					case 'ellipse':
-						// Tell TypeScript we're dealing with an 'ellipse' type
-						shape = <WhiteboardEllipse>shape;
 						// Add shape-specific options
-						paperOptions.point = [(<WhiteboardEllipse>shape).position.anchor.x, (<WhiteboardEllipse>shape).position.anchor.y];
 						paperOptions.radius = (<WhiteboardEllipse>shape).data.radius;
 						// Create ellipse
 						this.canvasShapes[shape.$key] = new paper.Shape.Ellipse(paperOptions);
@@ -322,8 +383,6 @@ export class Shape {
 						this.canvasShapes[shape.$key] = new paper.Shape.RegularPolygon(paperOptions);
 						break;
 					case 'star':
-						// Tell TypeScript we're dealing with a 'star' type
-						shape = <WhiteboardStar>shape;
 						// Add shape-specific options
 						paperOptions.points = (<WhiteboardStar>shape).data.points;
 						paperOptions.radius1 = (<WhiteboardStar>shape).data.radius1;

@@ -1,5 +1,5 @@
 import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy, ViewChild, HostListener } from '@angular/core';
-import { Whiteboard, StyleOptions } from '../shared/model/whiteboard';
+import { Whiteboard, WhiteboardShapeType, Position, StyleOptions, Font } from '../shared/model/whiteboard';
 import { WhiteboardService, defaultStyleOptions, defaultFontOptions } from '../shared/model/whiteboard.service';
 
 // Whiteboard tools
@@ -99,7 +99,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 
 	// Shape tool
 	@Input()
-	shapeType: string = 'polygon';
+	shapeType: WhiteboardShapeType = 'polygon';
 	@Input()
 	polygonSides: any = 4;
 	@Input()
@@ -344,6 +344,24 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 			shadowColor  : styleOptions.shadow.color,
 			shadowBlur   : styleOptions.shadow.blur,
 			shadowOffset : shadowOffsetPoint,
+		};
+	}
+
+	positionObjectToPaperObject(position: Position): any {
+		return {
+			// Position
+			position: new paper.point(position.anchor.x, position.anchor.y),
+			rotation: position.rotation,
+			scaling: new paper.point(position.scaling.x, position.scaling.y)
+		};
+	}
+
+	fontObjectToPaperObject(fontOptions: Font): any {
+		return {
+			// Character Style
+			fontFamily: fontOptions.family,
+			fontWeight: fontOptions.weight,
+			fontSize: fontOptions.size
 		};
 	}
 

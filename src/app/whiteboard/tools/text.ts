@@ -92,11 +92,8 @@ export class Text {
 
 				let paperOptions = this.whiteboard.styleObjectToPaperObject(text.style);
 				paperOptions.content = text.content;
-
-				// Font
-				paperOptions.fontFamily = text.font.family;
-				paperOptions.fontWeight = text.font.weight;
-				paperOptions.fontSize = text.font.size;
+				// Add font properties
+				paperOptions = Object.assign(paperOptions, this.whiteboard.fontObjectToPaperObject(text.font));
 
 				// Position
 				paperOptions.point = new paper.Point(text.position.anchor.x, text.position.anchor.y);
