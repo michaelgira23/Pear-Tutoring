@@ -1,13 +1,8 @@
 <h1>Settings</h1>
-<form [formGroup]="form" (ngSubmit)="saveSettings()">
-  <fieldset>
-    <h2>Profile picture</h2>
-    <input type="file" (change)="onPfpChange($event)">
-    <button>submit</button>
-  </fieldset>
-  <fieldset>
-    <h2>Free Times</h2>
-    <app-time-picker></app-time-picker>
-  </fieldset>
-</form>
+<md-card>
+  <app-pfp-upload></app-pfp-upload>
+</md-card>
+<md-card>
+  <app-time-picker></app-time-picker>
+</md-card>
 <h2 *ngIf="finished">changes saved</h2>

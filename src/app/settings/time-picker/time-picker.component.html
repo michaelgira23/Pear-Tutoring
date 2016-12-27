@@ -3,25 +3,24 @@
 		<md-grid-tile-header>{{ day }}</md-grid-tile-header>
 		<md-list>
 			<md-list-item *ngFor="let time of freeTimesModel[day]; let timeIndex = index">
-				<div md-line>
-					<md-input-container>
-						<h4 md-prefix>From</h4>
-						<input md-input type="time" [(ngModel)]="freeTimesModel[day][timeIndex].from">
-					</md-input-container>
-				</div>
 				<div>
-					<md-input-container>
-						<h4 md-prefix>to</h4>
-						<input md-input type="time" [(ngModel)]="freeTimesModel[day][timeIndex].to">
-					</md-input-container>
+					{{ time.fromD.format('HH:mm') }} ~ {{ time.toD.format('HH:mm') }}
 				</div>
 				<button md-icon-button type="button" (click)="removeTime(day, timeIndex)">
 					<md-icon>close</md-icon>
 				</button>
 			</md-list-item>
-			<md-list-item>
-				<button md-raised-button type="button" (click)="addTime(day)">Add Time</button>
-			</md-list-item>
+			<form>
+				<md-input-container>
+					<h4 md-prefix>From</h4>
+					<input md-input type="time" #timeFrom>
+				</md-input-container>
+				<md-input-container>
+					<h4 md-prefix>to</h4>
+					<input md-input type="time" #timeTo>
+				</md-input-container>
+				<button md-line md-raised-button type="button" (click)="addTime(day, timeFrom.value, timeTo.value)">Add Time</button>
+			</form>
 		</md-list>
 	</md-grid-tile>
 </md-grid-list>

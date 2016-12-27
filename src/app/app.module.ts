@@ -47,6 +47,7 @@ import { SessionService } from './shared/model/session.service';
 import { UpdateSessionComponent } from './scheduling/update-session/update-session.component';
 import { TimePickerComponent } from './settings/time-picker/time-picker.component';
 import { MyScheduleComponent } from './scheduling/my-schedule/my-schedule.component';
+import { PfpUploadComponent } from './settings/pfp-upload/pfp-upload.component';
 
 @NgModule({
 	declarations: [
@@ -71,7 +72,8 @@ import { MyScheduleComponent } from './scheduling/my-schedule/my-schedule.compon
 		ViewChatComponent,
 		UpdateSessionComponent,
 		TimePickerComponent,
-		MyScheduleComponent
+		MyScheduleComponent,
+		PfpUploadComponent
 	],
 	imports: [
 		BrowserModule,

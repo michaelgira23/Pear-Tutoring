@@ -3,6 +3,7 @@ import { AngularFireDatabase, FirebaseRef } from 'angularfire2';
 import { AuthService } from '../security/auth.service';
 import { Observable, Subject } from 'rxjs/Rx';
 import { User } from './user';
+import { arrToObj, objToArr } from './session.service';
 
 export const userStatus = {
 	IN_SESSION: 2,
@@ -81,23 +82,53 @@ export class UserService {
 		}
 	}
 
-	private firebaseUpdate(dataToSave) {
-		const subject = new Subject();
+	getFreeTimes(): Observable<FreeTimes> {
+		return this.db.list(`freeTimesByUsers/${this.uid}/`)
+			.map(freeTimes => {
+				let temp = {};
+				for (let day in freeTimes) {
+					if (temp[day]) {
+						temp[day] = {
+							from: freeTimes[day].$key.substr(0, 13),
+							to: freeTimes[day].$key.substr(13, 13)
+						};
+					}
+				}
+				return temp;
+			});
+	}
 
-		this.sdkDb.update(dataToSave)
-			.then(
-				val => {
-					subject.next(val);
+	addFreeTime(day: string, time: FreeTime): Observable<any> {
+		let concatTime = '' + time.from + time.to;
+		let pushData = {};
+		pushData[concatTime] = true;
+		return this.promiseToObservable(this.db.object(`freeTimesByUsers/${this.uid}/${day}`).update(pushData));
+	}
+
+	removeFreeTime(day: string, time: FreeTime): Observable<any> {
+		let concatTime = '' + time.from + time.to;
+		return this.promiseToObservable(this.db.list(`freeTimesByUsers/${this.uid}/${day}`).remove(concatTime));
+	}
+
+	private promiseToObservable(promise): Observable<any> {
+
+		const subject = new Subject<any>();
+
+		promise
+			.then(res => {
+					subject.next(res);
 					subject.complete();
-
 				},
 				err => {
 					subject.error(err);
 					subject.complete();
-				}
-			);
+				});
 
 		return subject.asObservable();
+	}
+
+	firebaseUpdate(dataToSave): Observable<any> {
+		return this.promiseToObservable(this.sdkDb.update(dataToSave));
 	}
 }
 
@@ -109,3 +140,9 @@ export interface RegisterOptions {
 	password: string;
 	name?: string;
 }
+
+export interface FreeTimes {
+	[dayInWeek: string]: FreeTime[];
+};
+
+export interface FreeTime {from: number; to: number; };
