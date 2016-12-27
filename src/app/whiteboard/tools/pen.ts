@@ -1,5 +1,6 @@
-import { WhiteboardComponent } from './../whiteboard.component';
-import { WhiteboardMarking, Point } from './../../shared/model/whiteboard.service';
+import { WhiteboardMarking, WhiteboardMarkingOptions, Point } from '../../shared/model/whiteboard';
+import { WhiteboardComponent } from '../whiteboard.component';
+import { defaultPosition } from '../../shared/model/whiteboard.service';
 
 declare const paper;
 
@@ -22,26 +23,11 @@ export class Pen {
 
 	mousedown(event) {
 		if (this.currentPathFinished) {
-			// Create a new path
-			const shadowOffsetPoint = new paper.Point(this.whiteboard.markingOptions.shadowOffset.x, this.whiteboard.markingOptions.shadowOffset.y);
-			this.currentPath = new paper.Path({
-				segments: [this.whiteboard.cursorPoint(event)],
-				// Stroke Style
-				strokeColor  : this.whiteboard.markingOptions.strokeColor,
-				strokeWidth  : this.whiteboard.markingOptions.strokeWidth,
-				strokeCap    : this.whiteboard.markingOptions.strokeCap,
-				strokeJoin   : this.whiteboard.markingOptions.strokeJoin,
-				dashOffset   : this.whiteboard.markingOptions.dashOffset,
-				strokeScaling: this.whiteboard.markingOptions.strokeScaling,
-				dashArray    : this.whiteboard.markingOptions.dashArray,
-				miterLimit   : this.whiteboard.markingOptions.miterLimit,
-				// Fill Style
-				fillColor    : this.whiteboard.markingOptions.fillColor,
-				// Shadow Style
-				shadowColor  : this.whiteboard.markingOptions.shadowColor,
-				shadowBlur   : this.whiteboard.markingOptions.shadowBlur,
-				shadowOffset : shadowOffsetPoint
-			});
+
+			let paperOptions = this.whiteboard.styleObjectToPaperObject(this.whiteboard.styleOptions);
+			paperOptions.segments = [this.whiteboard.cursorPoint(event)];
+
+			this.currentPath = new paper.Path(paperOptions);
 			this.currentPathStarted = Date.now();
 			this.currentPathFinished = false;
 		} else {
@@ -78,8 +64,13 @@ export class Pen {
 			// Check if we're still allowed to draw and it's more than just one point
 			if (this.currentPath.segments.length > 1) {
 				// Insert path into database
-				this.whiteboard.whiteboardService.createMarking(
-					this.whiteboard.key, path, this.whiteboard.markingOptions, this.currentPathStarted)
+				const markingOptions: WhiteboardMarkingOptions = {
+					started: this.currentPathStarted,
+					path,
+					position: defaultPosition,
+					style: this.whiteboard.styleOptions
+				};
+				this.whiteboard.whiteboardService.createMarking(this.whiteboard.key, markingOptions)
 					.subscribe(
 						data => {
 							console.log('successfully added marking', data);
@@ -114,19 +105,9 @@ export class Pen {
 					points.push(new paper.Point(point.x, point.y));
 				});
 
-				const path = new paper.Path({
-					segments: points,
-					strokeColor  : marking.options.strokeColor,
-					strokeWidth  : marking.options.strokeWidth,
-					strokeCap    : marking.options.strokeCap,
-					strokeJoin   : marking.options.strokeJoin,
-					dashOffset   : marking.options.dashOffset,
-					strokeScaling: marking.options.strokeScaling,
-					dashArray    : marking.options.dashArray,
-					miterLimit   : marking.options.miterLimit
-				});
-
-				this.canvasMarkings[marking.$key] = path;
+				let paperOptions = this.whiteboard.styleObjectToPaperObject(marking.style);
+				paperOptions.segments = points;
+				this.canvasMarkings[marking.$key] = new paper.Path(paperOptions);
 			}
 		});
 	}

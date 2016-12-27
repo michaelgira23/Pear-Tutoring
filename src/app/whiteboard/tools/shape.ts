@@ -1,11 +1,16 @@
-import { WhiteboardComponent } from './../whiteboard.component';
-import { WhiteboardShape } from './../../shared/model/whiteboard.service';
+import { WhiteboardComponent } from '../whiteboard.component';
+import { WhiteboardAnyShape,
+	WhiteboardLine,
+	WhiteboardArc,
+	WhiteboardEllipse,
+	WhiteboardPolygon,
+	WhiteboardStar } from '../../shared/model/whiteboard';
 declare const paper;
 
 export class Shape {
 
 	shapesSubscription: any;
-	shapes: WhiteboardShape[];
+	shapes: WhiteboardAnyShape[];
 	// paper.js shape objects on the whiteboard
 	canvasShapes: any = {};
 
@@ -40,105 +45,36 @@ export class Shape {
 			this.startPoint = this.whiteboard.cursorPoint(event);
 			// Create a rectangle for the shape bounds
 			this.creationRect = this.getRect(this.startPoint, this.startPoint, this.whiteboard.shiftKey);
+
 			// Create point from shadow offset
-			const shadowOffsetPoint = new paper.Point(this.whiteboard.shapeOptions.shadowOffset.x, this.whiteboard.shapeOptions.shadowOffset.y);
+			let paperOptions = this.whiteboard.styleObjectToPaperObject(this.whiteboard.styleOptions);
 
 			// Create a shape
 			this.currentShapeType = this.whiteboard.shapeType;
 			switch (this.currentShapeType) {
 				case 'line':
 				case 'arc':
-					this.currentShape = new paper.Path.Line({
-						// Stroke Style
-						strokeColor  : this.whiteboard.shapeOptions.strokeColor,
-						strokeWidth  : this.whiteboard.shapeOptions.strokeWidth,
-						strokeCap    : this.whiteboard.shapeOptions.strokeCap,
-						strokeJoin   : this.whiteboard.shapeOptions.strokeJoin,
-						dashOffset   : this.whiteboard.shapeOptions.dashOffset,
-						strokeScaling: this.whiteboard.shapeOptions.strokeScaling,
-						dashArray    : this.whiteboard.shapeOptions.dashArray,
-						miterLimit   : this.whiteboard.shapeOptions.miterLimit,
-						// Fill Style
-						fillColor    : this.whiteboard.shapeOptions.fillColor,
-						// Shadow Style
-						shadowColor  : this.whiteboard.shapeOptions.shadowColor,
-						shadowBlur   : this.whiteboard.shapeOptions.shadowBlur,
-						shadowOffset : shadowOffsetPoint,
-						// Shape
-						from: [this.startPoint.x, this.startPoint.y],
-						to: [this.startPoint.x + 1, this.startPoint.y + 1]
-					});
+					paperOptions.from = [this.startPoint.x, this.startPoint.y];
+					paperOptions.to = [this.startPoint.x + 1, this.startPoint.y + 1];
+					this.currentShape = new paper.Path.Line(paperOptions);
 					break;
 				case 'ellipse':
-					this.currentShape = new paper.Path.Ellipse({
-						// Stroke Style
-						strokeColor  : this.whiteboard.shapeOptions.strokeColor,
-						strokeWidth  : this.whiteboard.shapeOptions.strokeWidth,
-						strokeCap    : this.whiteboard.shapeOptions.strokeCap,
-						strokeJoin   : this.whiteboard.shapeOptions.strokeJoin,
-						dashOffset   : this.whiteboard.shapeOptions.dashOffset,
-						strokeScaling: this.whiteboard.shapeOptions.strokeScaling,
-						dashArray    : this.whiteboard.shapeOptions.dashArray,
-						miterLimit   : this.whiteboard.shapeOptions.miterLimit,
-						// Fill Style
-						fillColor    : this.whiteboard.shapeOptions.fillColor,
-						// Shadow Style
-						shadowColor  : this.whiteboard.shapeOptions.shadowColor,
-						shadowBlur   : this.whiteboard.shapeOptions.shadowBlur,
-						shadowOffset : shadowOffsetPoint,
-						// Shape
-						point: [this.startPoint.x, this.startPoint.y],
-						radius: 1
-					});
+					paperOptions.point = [this.startPoint.x, this.startPoint.y];
+					paperOptions.radius = 1;
+					this.currentShape = new paper.Path.Ellipse(paperOptions);
 					break;
 				case 'polygon':
 					const polygonSides = parseInt(this.whiteboard.polygonSides, 10);
-					this.currentShape = new paper.Path.RegularPolygon({
-						// Stroke Style
-						strokeColor  : this.whiteboard.shapeOptions.strokeColor,
-						strokeWidth  : this.whiteboard.shapeOptions.strokeWidth,
-						strokeCap    : this.whiteboard.shapeOptions.strokeCap,
-						strokeJoin   : this.whiteboard.shapeOptions.strokeJoin,
-						dashOffset   : this.whiteboard.shapeOptions.dashOffset,
-						strokeScaling: this.whiteboard.shapeOptions.strokeScaling,
-						dashArray    : this.whiteboard.shapeOptions.dashArray,
-						miterLimit   : this.whiteboard.shapeOptions.miterLimit,
-						// Fill Style
-						fillColor    : this.whiteboard.shapeOptions.fillColor,
-						// Shadow Style
-						shadowColor  : this.whiteboard.shapeOptions.shadowColor,
-						shadowBlur   : this.whiteboard.shapeOptions.shadowBlur,
-						shadowOffset : shadowOffsetPoint,
-						// Shape
-						sides: polygonSides ? polygonSides : 4,
-						radius: 1
-					});
+					paperOptions.sides = polygonSides ? polygonSides : 4;
+					paperOptions.radius = 1;
+					this.currentShape = new paper.Path.RegularPolygon(paperOptions);
 					break;
 				case 'star':
-					const starSides = parseInt(this.whiteboard.starSides, 10);
-					const radius1 = 1;
-					const radius2 = (this.whiteboard.starRadiusPercentage / 100) * radius1;
-					this.currentShape = new paper.Path.Star({
-						// Stroke Style
-						strokeColor  : this.whiteboard.shapeOptions.strokeColor,
-						strokeWidth  : this.whiteboard.shapeOptions.strokeWidth,
-						strokeCap    : this.whiteboard.shapeOptions.strokeCap,
-						strokeJoin   : this.whiteboard.shapeOptions.strokeJoin,
-						dashOffset   : this.whiteboard.shapeOptions.dashOffset,
-						strokeScaling: this.whiteboard.shapeOptions.strokeScaling,
-						dashArray    : this.whiteboard.shapeOptions.dashArray,
-						miterLimit   : this.whiteboard.shapeOptions.miterLimit,
-						// Fill Style
-						fillColor    : this.whiteboard.shapeOptions.fillColor,
-						// Shadow Style
-						shadowColor  : this.whiteboard.shapeOptions.shadowColor,
-						shadowBlur   : this.whiteboard.shapeOptions.shadowBlur,
-						shadowOffset : shadowOffsetPoint,
-						// Shape
-						points: starSides ? starSides : 5,
-						radius1,
-						radius2
-					});
+					const starPoints = parseInt(this.whiteboard.starPoints, 10);
+					paperOptions.points = starPoints ? starPoints : 5;
+					paperOptions.radius1 = 1;
+					paperOptions.radius2 = (this.whiteboard.starRadiusPercentage / 100) * paperOptions.radius1;
+					this.currentShape = new paper.Path.Star(paperOptions);
 					break;
 				default:
 					console.log(`Unrecognized shape! (${this.currentShapeType})`);
@@ -156,52 +92,43 @@ export class Shape {
 	}
 
 	mouseup(event) {
-		if (this.creationRect.width > 0 && this.creationRect.height > 0) {
+		if ((this.creationRect.width > 0 && this.creationRect.height > 0)
+			// If shapeType is line or arc, either width or height can be 0
+			|| ((this.currentShapeType === 'line' || this.currentShapeType === 'arc')
+				&& (this.creationRect.width > 0 || this.creationRect.height > 0))) {
+
 			// Check if we just finished the first part of the arc
 			if (this.currentShapeType === 'arc' && !this.arcPoint) {
 				this.arcPoint = this.getFarthestPoint(this.creationRect, this.startPoint);
 
 				// Visualize this arc point on the canvas
 				this.visualArcPoint = new paper.Shape.Circle({
-					strokeColor: this.whiteboard.shapeOptions.strokeColor,
-					fillColor  : this.whiteboard.shapeOptions.fillColor,
+					strokeColor: this.whiteboard.styleOptions.stroke.color,
+					fillColor  : this.whiteboard.styleOptions.fill.color,
 					center: [this.arcPoint.x, this.arcPoint.y],
 					radius: 5
 				});
 
-				// Create point from shadow offset
-				const shadowOffsetPoint = new paper.Point(this.whiteboard.shapeOptions.shadowOffset.x, this.whiteboard.shapeOptions.shadowOffset.y);
+				// Create options for arc
+				let paperOptions = this.whiteboard.styleObjectToPaperObject(this.whiteboard.styleOptions);
+				paperOptions.from = [this.startPoint.x, this.startPoint.y];
+				paperOptions.through = [this.arcPoint.x, this.arcPoint.y];
+				paperOptions.to = [this.arcPoint.x + 1, this.arcPoint.y + 1];
 
 				// Remove the current line for the first phase of the arc, and add an actual arc for the next mousedown
 				this.currentShape.remove();
-				this.currentShape = new paper.Path.Arc({
-					// Stroke Style
-					strokeColor  : this.whiteboard.shapeOptions.strokeColor,
-					strokeWidth  : this.whiteboard.shapeOptions.strokeWidth,
-					strokeCap    : this.whiteboard.shapeOptions.strokeCap,
-					strokeJoin   : this.whiteboard.shapeOptions.strokeJoin,
-					dashOffset   : this.whiteboard.shapeOptions.dashOffset,
-					strokeScaling: this.whiteboard.shapeOptions.strokeScaling,
-					dashArray    : this.whiteboard.shapeOptions.dashArray,
-					miterLimit   : this.whiteboard.shapeOptions.miterLimit,
-					// Fill Style
-					fillColor    : this.whiteboard.shapeOptions.fillColor,
-					// Shadow Style
-					shadowColor  : this.whiteboard.shapeOptions.shadowColor,
-					shadowBlur   : this.whiteboard.shapeOptions.shadowBlur,
-					shadowOffset : shadowOffsetPoint,
-					// Shape
-					from: [this.startPoint.x, this.startPoint.y],
-					through: [this.arcPoint.x, this.arcPoint.y],
-					to: [this.arcPoint.x + 1, this.arcPoint.y + 1]
-				});
+				this.currentShape = new paper.Path.Arc(paperOptions);
+
+				// We just converted the first phase of an arc into an actual arc. Alas, there is more to be done!
 				return;
 			}
 
 			// Finish drawing shape
 			this.currentShapeFinished = true;
 			this.currentShape.selected = false;
-			this.visualRect.remove();
+			if (this.visualRect) {
+				this.visualRect.remove();
+			}
 			this.visualRect = null;
 
 			// Clean up arc stuff
@@ -210,6 +137,11 @@ export class Shape {
 				this.visualArcPoint.remove();
 				this.visualArcPoint = null;
 			}
+
+			// Save shape
+			// let shape = {
+			//
+			// };
 		}
 		/*
 		if (this.selectedShape && this.whiteboard.allowWrite) {
@@ -284,9 +216,11 @@ export class Shape {
 				// Resize the shape we are currently drawing
 				switch (this.currentShapeType) {
 					case 'arc':
+						// Check if we are on the second phase of the arc
 						if (this.arcPoint) {
 							let secondPhaseRect = this.getRect(this.arcPoint, point, this.whiteboard.shiftKey);
-							// Point to send line to
+
+							// Calculate the third point on the arc
 							let linePoint = null;
 							if (this.whiteboard.shiftKey) {
 								linePoint = this.roundLinePoint(this.arcPoint, point);
@@ -295,47 +229,22 @@ export class Shape {
 								linePoint = this.getFarthestPoint(secondPhaseRect, this.arcPoint);
 							}
 
+							// Check if current point has moved from the second point of arc
 							if (secondPhaseRect.width > 0 || secondPhaseRect.height > 0) {
+								// Create paper options for the arc
+								let paperOptions = this.whiteboard.styleObjectToPaperObject(this.whiteboard.styleOptions);
+								paperOptions.from = [this.startPoint.x, this.startPoint.y];
+								paperOptions.through = [this.arcPoint.x, this.arcPoint.y];
+								paperOptions.to = [linePoint.x, linePoint.y];
+
 								// We must create a new arc for each new set of points, otherwise the curve gets messed up
 								this.currentShape.remove();
-								// Create point from shadow offset
-								const shadowOffsetPoint = new paper.Point(this.whiteboard.shapeOptions.shadowOffset.x, this.whiteboard.shapeOptions.shadowOffset.y);
-								this.currentShape = new paper.Path.Arc({
-									// Stroke Style
-									strokeColor  : this.whiteboard.shapeOptions.strokeColor,
-									strokeWidth  : this.whiteboard.shapeOptions.strokeWidth,
-									strokeCap    : this.whiteboard.shapeOptions.strokeCap,
-									strokeJoin   : this.whiteboard.shapeOptions.strokeJoin,
-									dashOffset   : this.whiteboard.shapeOptions.dashOffset,
-									strokeScaling: this.whiteboard.shapeOptions.strokeScaling,
-									dashArray    : this.whiteboard.shapeOptions.dashArray,
-									miterLimit   : this.whiteboard.shapeOptions.miterLimit,
-									// Fill Style
-									fillColor    : this.whiteboard.shapeOptions.fillColor,
-									// Shadow Style
-									shadowColor  : this.whiteboard.shapeOptions.shadowColor,
-									shadowBlur   : this.whiteboard.shapeOptions.shadowBlur,
-									shadowOffset : shadowOffsetPoint,
-									// Shape
-									from: [this.startPoint.x, this.startPoint.y],
-									through: [this.arcPoint.x, this.arcPoint.y],
-									to: [linePoint.x, linePoint.y]
-								});
+								this.currentShape = new paper.Path.Arc(paperOptions);
 								this.currentShape.selected = true;
 
-								// If there isn't a visual box, create one
-								if (secondPhaseRect.width > 0 && secondPhaseRect.height > 0) {
-									if (!this.visualRect) {
-										this.visualRect = new paper.Path.Rectangle(secondPhaseRect);
-										this.visualRect.strokeColor = '#08f';
-										this.visualRect.dashArray = [10, 5];
-									}
-									this.visualRect.bounds = secondPhaseRect;
-								} else if (this.visualRect) {
-									this.visualRect.remove();
-									this.visualRect = null;
-								}
-
+								// We need some visuals!
+								this.ensureVisualRect(secondPhaseRect);
+								// Make sure arc point is showing
 								this.visualArcPoint.bringToFront();
 							}
 							break;
@@ -357,35 +266,18 @@ export class Shape {
 						this.currentShape.insert(segmentsLength - 1, linePoint);
 						this.currentShape.removeSegment(segmentsLength - 2);
 
-						// If there isn't a visual box, create one
-						if (this.creationRect.width > 0 && this.creationRect.height > 0) {
-							if (!this.visualRect) {
-								this.visualRect = new paper.Path.Rectangle(this.creationRect);
-								this.visualRect.strokeColor = '#08f';
-								this.visualRect.dashArray = [10, 5];
-							}
-							this.visualRect.bounds = this.creationRect;
-						} else if (this.visualRect) {
-							this.visualRect.remove();
-							this.visualRect = null;
-						}
+						// Close your eyes - imagine the rectangle
+						this.ensureVisualRect(this.creationRect);
 						break;
 					default:
 						this.currentShape.bounds = this.creationRect;
-
-						// If there isn't a visual box, create one
-						if (!this.visualRect) {
-							this.visualRect = new paper.Path.Rectangle(this.creationRect);
-							this.visualRect.strokeColor = '#08f';
-							this.visualRect.dashArray = [10, 5];
-						}
-						this.visualRect.bounds = this.creationRect;
+						this.ensureVisualRect(this.creationRect);
 				}
 			}
 		}
 	}
 
-	shapesToCanvas(shapes) {
+	shapesToCanvas(shapes: WhiteboardAnyShape[]) {
 		console.log('shapes to canvas', shapes);
 		this.clearShapes();
 
@@ -395,37 +287,52 @@ export class Shape {
 			// Make sure shape isn't erased
 			if (!shape.erased) {
 
-				const shadowOffsetPoint = new paper.Point(shape.options.shadowOffset.x, shape.options.shadowOffset.y);
-				const shapeOptions = {
-					// Stroke Style
-					strokeColor  : shape.options.strokeColor,
-					strokeWidth  : shape.options.strokeWidth,
-					strokeCap    : shape.options.strokeCap,
-					strokeJoin   : shape.options.strokeJoin,
-					dashOffset   : shape.options.dashOffset,
-					strokeScaling: shape.options.strokeScaling,
-					dashArray    : shape.options.dashArray,
-					miterLimit   : shape.options.miterLimit,
-					// Fill Style
-					fillColor    : shape.options.fillColor,
-					// Shadow Style
-					shadowColor  : shape.options.shadowColor,
-					shadowBlur   : shape.options.shadowBlur,
-					shadowOffset : shadowOffsetPoint
-				};
+				let paperOptions = this.whiteboard.styleObjectToPaperObject(shape.style);
 
 				switch (shape.type) {
-					case 'circle':
-						this.canvasShapes[shape.$key] = new paper.Shape.Circle(shapeOptions);
+					case 'line':
+						// Add shape-specific options
+						paperOptions.from = [(<WhiteboardLine>shape).data.from.x, (<WhiteboardLine>shape).data.from.y];
+						paperOptions.to = [(<WhiteboardLine>shape).data.to.x, (<WhiteboardLine>shape).data.to.y];
+						// Create line
+						this.canvasShapes[shape.$key] = new paper.Shape.Line(paperOptions);
 						break;
-					case 'rectangle':
-						this.canvasShapes[shape.$key] = new paper.Shape.Rectangle(shapeOptions);
+					case 'arc':
+						// Add shape-specific options
+						paperOptions.from = [(<WhiteboardArc>shape).data.from.x, (<WhiteboardArc>shape).data.from.y];
+						paperOptions.through = [(<WhiteboardArc>shape).data.through.x, (<WhiteboardArc>shape).data.through.y];
+						paperOptions.to = [(<WhiteboardArc>shape).data.to.x, (<WhiteboardArc>shape).data.to.y];
+						// Create arc
+						this.canvasShapes[shape.$key] = new paper.Shape.Arc(paperOptions);
 						break;
 					case 'ellipse':
-						this.canvasShapes[shape.$key] = new paper.Shape.Ellipse(shapeOptions);
+						// Tell TypeScript we're dealing with an 'ellipse' type
+						shape = <WhiteboardEllipse>shape;
+						// Add shape-specific options
+						paperOptions.point = [(<WhiteboardEllipse>shape).position.anchor.x, (<WhiteboardEllipse>shape).position.anchor.y];
+						paperOptions.radius = (<WhiteboardEllipse>shape).data.radius;
+						// Create ellipse
+						this.canvasShapes[shape.$key] = new paper.Shape.Ellipse(paperOptions);
+						break;
+					case 'polygon':
+						// Add shape-specific options
+						paperOptions.sides = (<WhiteboardPolygon>shape).data.sides;
+						paperOptions.radius = (<WhiteboardPolygon>shape).data.radius;
+						// Create polygon
+						this.canvasShapes[shape.$key] = new paper.Shape.RegularPolygon(paperOptions);
+						break;
+					case 'star':
+						// Tell TypeScript we're dealing with a 'star' type
+						shape = <WhiteboardStar>shape;
+						// Add shape-specific options
+						paperOptions.points = (<WhiteboardStar>shape).data.points;
+						paperOptions.radius1 = (<WhiteboardStar>shape).data.radius1;
+						paperOptions.radius2 = (<WhiteboardStar>shape).data.radius2;
+						// Create a star
+						this.canvasShapes[shape.$key] = new paper.Shape.Star(paperOptions);
 						break;
 					default:
-						console.log('Unrecognized shape!', shape.type);
+						console.log(`Unrecognized shape! (${shape.type})`);
 				}
 			}
 		});
@@ -553,6 +460,23 @@ export class Shape {
 		}
 
 		return edgePoint;
+	}
+
+	ensureVisualRect(bounds) {
+		// Make sure bounds have dimensions
+		if (bounds.width > 0 && bounds.height > 0) {
+			// If there isn't already a visual rectangle, create one
+			if (!this.visualRect) {
+				this.visualRect = new paper.Path.Rectangle(bounds);
+				this.visualRect.strokeColor = '#08f';
+				this.visualRect.dashArray = [10, 5];
+			}
+			this.visualRect.bounds = this.creationRect;
+		} else if (this.visualRect) {
+			// One of the bounds is 0, so remove the current visual rectangle
+			this.visualRect.remove();
+			this.visualRect = null;
+		}
 	}
 
 	clearShapes() {

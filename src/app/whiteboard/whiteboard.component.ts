@@ -1,10 +1,6 @@
 import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy, ViewChild, HostListener } from '@angular/core';
-import {
-	WhiteboardService,
-	Whiteboard,
-	defaultMarkingOptions,
-	defaultTextOptions,
-	defaultShapeOptions } from '../shared/model/whiteboard.service';
+import { Whiteboard, StyleOptions } from '../shared/model/whiteboard';
+import { WhiteboardService, defaultStyleOptions, defaultFontOptions } from '../shared/model/whiteboard.service';
 
 // Whiteboard tools
 import { Cursor } from './tools/cursor';
@@ -95,23 +91,19 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	@Input()
 	tool: string = 'cursor';
 
-	// Pen tool
+	// Options when creating things
 	@Input()
-	markingOptions = defaultMarkingOptions;
-
-	// Text tool
+	styleOptions = defaultStyleOptions;
 	@Input()
-	textOptions = defaultTextOptions;
+	fontOptions = defaultFontOptions;
 
 	// Shape tool
-	@Input()
-	shapeOptions = defaultShapeOptions;
 	@Input()
 	shapeType: string = 'polygon';
 	@Input()
 	polygonSides: any = 4;
 	@Input()
-	starSides: any = 5;
+	starPoints: any = 5;
 	@Input()
 	starRadiusPercentage: any = 50;
 
@@ -331,6 +323,28 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		this.tools.pen.clearMarkings();
 		this.tools.text.clearText();
 		this.tools.shape.clearShapes();
+	}
+
+	styleObjectToPaperObject(styleOptions: StyleOptions): any {
+		// Create point from shadow offset
+		const shadowOffsetPoint = new paper.Point(styleOptions.shadow.offset.x, styleOptions.shadow.offset.y);
+		return {
+			// Stroke Style
+			strokeColor  : styleOptions.stroke.color,
+			strokeWidth  : styleOptions.stroke.width,
+			strokeCap    : styleOptions.stroke.cap,
+			strokeJoin   : styleOptions.stroke.join,
+			dashOffset   : styleOptions.stroke.dashOffset,
+			strokeScaling: styleOptions.stroke.scaling,
+			dashArray    : styleOptions.stroke.dashArray,
+			miterLimit   : styleOptions.stroke.miterLimit,
+			// Fill Style
+			fillColor    : styleOptions.fill.color,
+			// Shadow Style
+			shadowColor  : styleOptions.shadow.color,
+			shadowBlur   : styleOptions.shadow.blur,
+			shadowOffset : shadowOffsetPoint,
+		};
 	}
 
 	/**

@@ -102,7 +102,7 @@ export interface WhiteboardPolygonOptions extends WhiteboardItemOptions {
 
 export interface WhiteboardStar extends WhiteboardShape {
 	data: {
-		sides: number;
+		points: number;
 		radius1: number;
 		radius2: number;
 	};
@@ -110,7 +110,7 @@ export interface WhiteboardStar extends WhiteboardShape {
 
 export interface WhiteboardStarOptions extends WhiteboardItemOptions {
 	data: {
-		sides: number;
+		points: number;
 		radius1: number;
 		radius2: number;
 	};
@@ -141,6 +141,7 @@ export interface WhiteboardItemOptions {
 
 export interface Metadata {
 	$key?: string;
+	$exists?: () => boolean;
 	created: number;
 	createdBy: string;
 	edits?: Edits;

@@ -41,14 +41,14 @@
 	<div class="option">
 		<label>Color</label>
 		<button class="color"
-			[(colorPicker)]="markingOptions.strokeColor"
-			[cpFallbackColor]="markingOptions.strokeColor"
-			[style.background]="markingOptions.strokeColor"></button>
+			[(colorPicker)]="styleOptions.stroke.color"
+			[cpFallbackColor]="styleOptions.stroke.color"
+			[style.background]="styleOptions.stroke.color"></button>
 	</div>
 	<div class="option">
 		<label>Width</label>
 		<md-slider
-			[(ngModel)]="markingOptions.strokeWidth"
+			[(ngModel)]="styleOptions.stroke.width"
 			[min]="1"
 			[max]="100"
 			[thumb-label]="true"></md-slider>
@@ -60,14 +60,14 @@
 	<div class="option">
 		<label>Color</label>
 		<button class="color"
-			[(colorPicker)]="textOptions.fillColor"
-			[cpFallbackColor]="textOptions.fillColor"
-			[style.background]="textOptions.fillColor"></button>
+			[(colorPicker)]="styleOptions.fill.color"
+			[cpFallbackColor]="styleOptions.fill.color"
+			[style.background]="styleOptions.fill.color"></button>
 	</div>
 	<div class="option">
 		<label>Size</label>
 		<md-slider
-			[(ngModel)]="textOptions.fontSize"
+			[(ngModel)]="fontOptions.size"
 			[min]="1"
 			[max]="100"
 			[thumb-label]="true"></md-slider>
@@ -79,21 +79,21 @@
 	<div class="option">
 		<label>Fill Color</label>
 		<button class="color"
-			[(colorPicker)]="shapeOptions.fillColor"
-			[cpFallbackColor]="shapeOptions.fillColor"
-			[style.background]="shapeOptions.fillColor"></button>
+			[(colorPicker)]="styleOptions.fill.color"
+			[cpFallbackColor]="styleOptions.fill.color"
+			[style.background]="styleOptions.fill.color"></button>
 	</div>
 	<div class="option">
 		<label>Stroke Color</label>
 		<button class="color"
-			[(colorPicker)]="shapeOptions.strokeColor"
-			[cpFallbackColor]="shapeOptions.strokeColor"
-			[style.background]="shapeOptions.strokeColor"></button>
+			[(colorPicker)]="styleOptions.stroke.color"
+			[cpFallbackColor]="styleOptions.stroke.color"
+			[style.background]="styleOptions.stroke.color"></button>
 	</div>
 	<div class="option">
 		<label>Stroke Size</label>
 		<md-slider
-			[(ngModel)]="shapeOptions.strokeWidth"
+			[(ngModel)]="styleOptions.stroke.width"
 			[min]="1"
 			[max]="100"
 			[thumb-label]="true"></md-slider>
@@ -110,7 +110,7 @@
 			</md-radio-button>
 			<md-radio-button value="star">
 				Star
-				<input class="number" type="number" [(ngModel)]="starSides">
+				<input class="number" type="number" [(ngModel)]="starPoints">
 				<input class="number" type="number" min="1" max="99" [(ngModel)]="starRadiusPercentage">
 			</md-radio-button>
 		</md-radio-group>

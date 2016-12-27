@@ -12,12 +12,19 @@ import { Whiteboard, WhiteboardOptions,
 	WhiteboardEllipse, WhiteboardEllipseOptions,
 	WhiteboardPolygon, WhiteboardPolygonOptions,
 	WhiteboardStar, WhiteboardStarOptions,
+	Position,
 	StyleOptions,
 	Font } from './whiteboard';
 
 export const defaultWhiteboardOptions: WhiteboardOptions = {
 	name: 'Unnamed Whiteboard',
 	background: '#fff'
+};
+
+export const defaultPosition: Position = {
+	anchor: { x: 0, y: 0 },
+	rotation: 0,
+	scaling: { x: 1, y: 1 }
 };
 
 export const defaultStyleOptions: StyleOptions = {
@@ -41,7 +48,7 @@ export const defaultStyleOptions: StyleOptions = {
 	}
 };
 
-export const defaultFont: Font = {
+export const defaultFontOptions: Font = {
 	family: 'sans-serif',
 	weight: 400,
 	size: '2.5rem'
@@ -76,7 +83,7 @@ export class WhiteboardService {
 		return this.af.database.object('whiteboards/' + key);
 	}
 
-	createWhiteboard(options: WhiteboardOptions): Observable<Whiteboard> {
+	createWhiteboard(options: WhiteboardOptions): Observable<any> {
 		const whiteboard: Whiteboard = {
 			created: Date.now(),
 			createdBy: this.authInfo ? this.authInfo.uid : null,
@@ -98,7 +105,7 @@ export class WhiteboardService {
 		return this.af.database.list('whiteboardMarkings/' + key);
 	}
 
-	createMarking(key: string, options: WhiteboardMarkingOptions): Observable<WhiteboardMarking> {
+	createMarking(key: string, options: WhiteboardMarkingOptions): Observable<any> {
 		const marking: WhiteboardMarking = {
 			created: Date.now(),
 			createdBy: this.authInfo ? this.authInfo.uid : null,
@@ -224,7 +231,7 @@ export class WhiteboardService {
 			createdBy: this.authInfo ? this.authInfo.uid : null,
 			type: 'star',
 			data: {
-				sides: options.data.sides,
+				points: options.data.points,
 				radius1: options.data.radius1,
 				radius2: options.data.radius2
 			},

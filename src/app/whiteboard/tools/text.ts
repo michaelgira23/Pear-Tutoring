@@ -1,5 +1,5 @@
 import { WhiteboardComponent } from './../whiteboard.component';
-import { WhiteboardText, Position, Point } from './../../shared/model/whiteboard.service';
+import { WhiteboardText, WhiteboardTextOptions, Position } from './../../shared/model/whiteboard';
 
 declare const paper;
 
@@ -11,8 +11,7 @@ export class Text {
 	canvasText: any = {};
 
 	selectedText: any;
-	// Whether or not to create or edit text on mouseup
-	editExisting: boolean = false;
+	selectedTextFinished: boolean = true;
 
 	constructor(private whiteboard: WhiteboardComponent) { }
 
@@ -22,12 +21,9 @@ export class Text {
 
 	mousedown(event) {
 		const point = this.whiteboard.cursorPoint(event);
-		this.editExisting = false;
-
-		let text = prompt("enter text here: ", "TEXT");
-
+		this.selectedTextFinished = false;
 		this.selectedText = new paper.PointText({
-			content: text,
+			content: 'TEXT',
 			point: point,
 			fillColor: 'black',
 			fontSize: '2.5em',
@@ -35,57 +31,44 @@ export class Text {
 		});
 	}
 
+	mousemove(event) {
+		if (this.selectedText && !this.selectedTextFinished) {
+			const point = this.whiteboard.cursorPoint(event);
+			this.selectedText.point = point;
+		}
+	}
+
 	mouseup(event) {
 		if (this.selectedText && this.whiteboard.allowWrite) {
-			console.log('mouseup', this.selectedText);
-
-			// Convert points into objects for database
-			const anchor: Point = {
-				x: this.selectedText.point.x,
-				y: this.selectedText.point.y
-			};
-			const positionPosition: Point = {
-				x: this.selectedText.position.x,
-				y: this.selectedText.position.y
-			};
-			const scaling: Point = {
-				x: this.selectedText.scaling.x,
-				y: this.selectedText.scaling.y
-			};
-
+			this.selectedTextFinished = true;
+			this.selectedText.content = prompt('Enter text here:', 'TEXT');
+			// Create new text in database
 			const position: Position = {
-				anchor,
-				position: positionPosition,
+				anchor: {
+					x: this.selectedText.point.x,
+					y: this.selectedText.point.y
+				},
 				rotation: this.selectedText.rotation,
-				scaling
+				scaling: {
+					x: this.selectedText.scaling.x,
+					y: this.selectedText.scaling.y
+				}
 			};
-
-			if (this.editExisting) {
-				// Modify existing text in database
-				const pushKey = this.textIdToPushKey(this.selectedText.id);
-				this.whiteboard.whiteboardService.editText(
-					this.whiteboard.key, pushKey, this.selectedText.content, this.whiteboard.textOptions, position)
-					.subscribe(
-						data => {
-							console.log('successfully editted text', data);
-						},
-						err => {
-							console.log('edit text error', err);
-						}
-					);
-			} else {
-				// Create new text in database
-				this.whiteboard.whiteboardService.createText(
-					this.whiteboard.key, this.selectedText.content, this.whiteboard.textOptions, position)
-					.subscribe(
-						data => {
-							console.log('successfully added text', data);
-						},
-						err => {
-							console.log('add text error', err);
-						}
-					);
-			}
+			const text: WhiteboardTextOptions = {
+				content: this.selectedText.content,
+				font: this.whiteboard.fontOptions,
+				position,
+				style: this.whiteboard.styleOptions
+			};
+			this.whiteboard.whiteboardService.createText(this.whiteboard.key, text)
+				.subscribe(
+					data => {
+						console.log('successfully added text', data);
+					},
+					err => {
+						console.log('add text error', err);
+					}
+				);
 		}
 	}
 
@@ -107,36 +90,20 @@ export class Text {
 			// Make sure text isn't erased
 			if (!text.erased) {
 
-				const shadowOffsetPoint = new paper.Point(text.options.shadowOffset.x, text.options.shadowOffset.y);
-				const path = new paper.PointText({
-					content: text.content,
-					// Stroke Style
-					strokeColor  : text.options.strokeColor,
-					strokeWidth  : text.options.strokeWidth,
-					strokeCap    : text.options.strokeCap,
-					strokeJoin   : text.options.strokeJoin,
-					dashOffset   : text.options.dashOffset,
-					strokeScaling: text.options.strokeScaling,
-					dashArray    : text.options.dashArray,
-					miterLimit   : text.options.miterLimit,
-					// Fill Style
-					fillColor    : text.options.fillColor,
-					// Shadow Style
-					shadowColor  : text.options.shadowColor,
-					shadowBlur   : text.options.shadowBlur,
-					shadowOffset : shadowOffsetPoint,
-					// Character Style
-					fontFamily   : text.options.fontFamily,
-					fontWeight   : text.options.fontWeight,
-					fontSize     : text.options.fontSize,
-					// Position
-					point        : new paper.Point(text.position.anchor.x, text.position.anchor.y),
-					position     : new paper.Point(text.position.position.x, text.position.position.y),
-					rotation     : text.position.rotation,
-					scaling      : new paper.Point(text.position.scaling.x, text.position.scaling.y),
-				});
+				let paperOptions = this.whiteboard.styleObjectToPaperObject(text.style);
+				paperOptions.content = text.content;
 
-				this.canvasText[text.$key] = path;
+				// Font
+				paperOptions.fontFamily = text.font.family;
+				paperOptions.fontWeight = text.font.weight;
+				paperOptions.fontSize = text.font.size;
+
+				// Position
+				paperOptions.point = new paper.Point(text.position.anchor.x, text.position.anchor.y);
+				paperOptions.rotation = text.position.rotation;
+				paperOptions.scaling = new paper.Point(text.position.scaling.x, text.position.scaling.y);
+
+				this.canvasText[text.$key] = new paper.PointText(paperOptions);
 			}
 		});
 	}
@@ -149,6 +116,11 @@ export class Text {
 				this.canvasText[key].remove();
 				delete this.canvasText[key];
 			});
+		}
+
+		// Erase current text too, if it isn't in the process of being created
+		if (this.selectedTextFinished && this.selectedText) {
+			this.selectedText.remove();
 		}
 	}
 
