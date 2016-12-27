@@ -34,7 +34,9 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 	}
 
 	ngOnChanges(changes: SimpleChanges) {
+		console.log('ngOnChanges fired');
 		if (changes['key'] && changes['key'].currentValue !== changes['key'].previousValue) {
+			console.log('key changed');
 			this.keyChanged = true;
 
 			if (this.messageSubscription) {
@@ -45,37 +47,41 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 				this.statusSubscription.unsubscribe();
 				this.statusSubscription = null;
 			}
-		}
 
-		this.messageSubscription = this.chatService.getAllMessages(this.key).subscribe(
-			data => {
-				this.allMessages = data;
-				this.mergeEntries();
-				if (!this.keyChanged) {
-					console.log('we detected a new message');
-					for (let msg of data) {
+			this.messageSubscription = this.chatService.getAllMessages(this.key).subscribe(
+				data => {
+					this.allMessages = data;
+					this.mergeEntries();
+					console.log('getAllMessages observable fired');
+					if (!this.keyChanged) {
+						console.log('we detected a new message');
 						this.keyChanged = false;
-						this.notificationsService.send(
-							'New message',
-							this.notificationFormat(msg)
-						);
+						for (let msg of data) {
+							this.notificationsService.send(
+								'New message',
+								this.notificationFormat(msg)
+							);
+						}
 					}
+				},
+				err => {
+					console.log(`Getting chat messages error: ${err}`);
 				}
-			},
-			err => {
-				console.log(`Getting chat messages error: ${err}`);
-			}
-		);
+			);
 
-		this.statusSubscription = this.chatService.getAllStatuses(this.key).subscribe(
-			data => {
-				this.allStatuses = data;
-				this.mergeEntries();
-			},
-			err => {
-				console.log(`Getting chat statuses error: ${err}`);
-			}
-		);
+			this.statusSubscription = this.chatService.getAllStatuses(this.key).subscribe(
+				data => {
+					this.allStatuses = data;
+					this.mergeEntries();
+				},
+				err => {
+					console.log(`Getting chat statuses error: ${err}`);
+				}
+			);
+		} else {
+			console.log('ngOnChanges fired, key hasn\'t changed');
+			this.keyChanged = false;
+		}
 	}
 
 	@HostListener('window:unload') ngOnDestroy() {
