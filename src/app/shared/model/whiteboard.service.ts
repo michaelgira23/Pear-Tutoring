@@ -3,88 +3,55 @@ import { AngularFire, FirebaseAuthState, FirebaseListObservable, FirebaseObjectO
 import { Observable, Subject } from 'rxjs/Rx';
 
 import { AuthService } from '../security/auth.service';
+import { Whiteboard, WhiteboardOptions,
+	WhiteboardMarking, WhiteboardMarkingOptions,
+	WhiteboardText, WhiteboardTextOptions,
+	WhiteboardAnyShape,
+	WhiteboardLine, WhiteboardLineOptions,
+	WhiteboardArc, WhiteboardArcOptions,
+	WhiteboardEllipse, WhiteboardEllipseOptions,
+	WhiteboardPolygon, WhiteboardPolygonOptions,
+	WhiteboardStar, WhiteboardStarOptions,
+	StyleOptions,
+	Font } from './whiteboard';
 
 export const defaultWhiteboardOptions: WhiteboardOptions = {
-	background: '#FFF'
+	name: 'Unnamed Whiteboard',
+	background: '#fff'
 };
 
-export const defaultMarkingOptions: WhiteboardMarkingOptions = {
-	// Stroke Style
-	strokeColor: '#111',
-	strokeWidth: 2,
-	strokeCap: 'round',
-	strokeJoin: 'miter',
-	dashOffset: 0,
-	strokeScaling: true,
-	dashArray: [],
-	miterLimit: 10,
-	// Fill Style
-	fillColor: 'rgba(0, 0, 0, 0)',
-	// Shadow Style
-	shadowColor: 'rgba(0, 0, 0, 0)',
-	shadowBlur: 0,
-	shadowOffset: { x: 0, y: 0 }
+export const defaultStyleOptions: StyleOptions = {
+	stroke: {
+		color: '#111',
+		width: 2,
+		cap: 'round',
+		join: 'miter',
+		dashOffset: 0,
+		scaling: true,
+		dashArray: [],
+		miterLimit: 10
+	},
+	fill: {
+		color: '#0bf'
+	},
+	shadow: {
+		color: 'rgba(0, 0, 0, 0)',
+		blur: 0,
+		offset: { x: 0, y: 0 }
+	}
 };
 
-export const defaultTextOptions: WhiteboardTextOptions = {
-	// Stroke Style
-	strokeColor: 'rgba(0, 0, 0, 0)',
-	strokeWidth: 0,
-	strokeCap: 'round',
-	strokeJoin: 'miter',
-	dashOffset: 0,
-	strokeScaling: true,
-	dashArray: [],
-	miterLimit: 10,
-	// Fill Style
-	fillColor: '#111',
-	// Shadow Style
-	shadowColor: 'rgba(0, 0, 0, 0)',
-	shadowBlur: 0,
-	shadowOffset: { x: 0, y: 0 },
-	// Character Style
-	fontFamily: 'sans-serif',
-	fontWeight: 600,
-	fontSize: '2.5em'
-};
-
-export const defaultTextPosition: Position = {
-	anchor  : { x: 0, y: 0 },
-	position: { x: 0, y: 0 },
-	rotation: 0,
-	scaling : { x: 1, y: 1 }
-};
-
-export const defaultShapeOptions: WhiteboardShapeOptions = {
-	// Stroke Style
-	strokeColor: '#111',
-	strokeWidth: 5,
-	strokeCap: 'round',
-	strokeJoin: 'miter',
-	dashOffset: 0,
-	strokeScaling: true,
-	dashArray: [],
-	miterLimit: 10,
-	// Fill Style
-	fillColor: '#00bbff',
-	// Shadow Style
-	shadowColor: 'rgba(0, 0, 0, 0)',
-	shadowBlur: 0,
-	shadowOffset: { x: 0, y: 0 }
-};
-
-export const defaultShapePosition: Position = {
-	anchor  : { x: 0, y: 0 },
-	position: { x: 0, y: 0 },
-	rotation: 0,
-	scaling : { x: 1, y: 1 }
+export const defaultFont: Font = {
+	family: 'sans-serif',
+	weight: 400,
+	size: '2.5rem'
 };
 
 @Injectable()
 export class WhiteboardService {
 
 	authInfo: FirebaseAuthState;
-	whiteboards: FirebaseListObservable<any>;
+	whiteboards: FirebaseListObservable<Whiteboard[]>;
 	sdkStorage: any;
 
 	constructor(private af: AngularFire, private authService: AuthService, @Inject(FirebaseRef) fb) {
@@ -105,24 +72,21 @@ export class WhiteboardService {
 	 * Whiteboard
 	 */
 
-	getWhiteboard(key: string): FirebaseObjectObservable<any> {
+	getWhiteboard(key: string): FirebaseObjectObservable<Whiteboard> {
 		return this.af.database.object('whiteboards/' + key);
 	}
 
-	createWhiteboard(options?: WhiteboardOptions): Observable<any> {
-		// Override default options with any options supplied
-		options = Object.assign(defaultWhiteboardOptions, options);
-
-		// Object to insert in the database
-		let whiteboard: any = options;
-		whiteboard.created = Date.now();
-		whiteboard.createdBy = this.authInfo ? this.authInfo.uid : null;
-		whiteboard.name = 'New Whiteboard';
-
+	createWhiteboard(options: WhiteboardOptions): Observable<Whiteboard> {
+		const whiteboard: Whiteboard = {
+			created: Date.now(),
+			createdBy: this.authInfo ? this.authInfo.uid : null,
+			name: options.name,
+			background: options.background
+		};
 		return this.observableToPromise(this.whiteboards.push(whiteboard));
 	}
 
-	changeName(key: string, name: string): Observable<any> {
+	changeName(key: string, name: string): Observable<Whiteboard> {
 		return this.observableToPromise(this.af.database.object('whiteboards/' + key).update({name}));
 	}
 
@@ -130,102 +94,180 @@ export class WhiteboardService {
 	 * Whiteboard Markings
 	 */
 
-	getMarkings(key: string): FirebaseListObservable<any> {
+	getMarkings(key: string): FirebaseListObservable<WhiteboardMarking[]> {
 		return this.af.database.list('whiteboardMarkings/' + key);
 	}
 
-	createMarking(key: string, path: Point[], options?: WhiteboardMarkingOptions, started: number = Date.now()): Observable<any> {
-		// By default, use default options
-		let marking: WhiteboardMarking = {
-			started: started,
-			finished: Date.now(),
+	createMarking(key: string, options: WhiteboardMarkingOptions): Observable<WhiteboardMarking> {
+		const marking: WhiteboardMarking = {
+			created: Date.now(),
 			createdBy: this.authInfo ? this.authInfo.uid : null,
-			options: Object.assign(defaultMarkingOptions, options),
-			path
+			started: options.started,
+			path: options.path,
+			position: options.position,
+			style: options.style
 		};
-
 		const whiteboardMarkings = this.getMarkings(key);
 		return this.observableToPromise(whiteboardMarkings.push(marking));
-	}
-
-	/**
-	 * Eraser
-	 */
-
-	eraseMarking(whiteboardKey: string, markingKey: string): Observable<any> {
-		return this.observableToPromise(
-			this.af.database.object('whiteboardMarkings/' + whiteboardKey + '/' + markingKey)
-				.update({ erased: Date.now() }));
 	}
 
 	/**
 	 * Whiteboard Text
 	 */
 
-	getTexts(key: string): FirebaseListObservable<any> {
+	getTexts(key: string): FirebaseListObservable<WhiteboardText[]> {
 		return this.af.database.list('whiteboardText/' + key);
 	}
 
-	createText(key: string, content: string, options: WhiteboardTextOptions, position: Position): Observable<any> {
-		let text: WhiteboardText = {
+	createText(key: string, options: WhiteboardTextOptions): Observable<WhiteboardText> {
+		const text: WhiteboardText = {
 			created: Date.now(),
 			createdBy: this.authInfo ? this.authInfo.uid : null,
-			options: Object.assign(defaultTextOptions, options),
-			content,
-			position
+			content: options.content,
+			font: options.font,
+			position: options.position,
+			style: options.style
 		};
 
-		const whiteboardText = this.af.database.list('whiteboardText/' + key);
+		const whiteboardText = this.getTexts(key);
 		return this.observableToPromise(whiteboardText.push(text));
 	}
 
-	editText(whiteboardKey: string, textKey: string, content: string, options: WhiteboardTextOptions, position: Position): Observable<any> {
-		const textObject = this.af.database.object(`whiteboardText/${whiteboardKey}/${textKey}`);
-		return this.observableToPromise(textObject.update({
-			content,
-			options,
-			position
-		}));
-	}
+	// editText(whiteboardKey: string, textKey: string, content: string, options: WhiteboardTextOptions, position: Position): Observable<any> {
+	// 	const textObject = this.af.database.object(`whiteboardText/${whiteboardKey}/${textKey}`);
+	// 	return this.observableToPromise(textObject.update({
+	// 		content,
+	// 		options,
+	// 		position
+	// 	}));
+	// }
 
 	/**
 	 * Whiteboard Shapes
 	 */
 
-	getShapes(key: string): FirebaseListObservable<any> {
+	getShapes(key: string): FirebaseListObservable<WhiteboardAnyShape[]> {
 		return this.af.database.list('whiteboardShapes/' + key);
 	}
 
-	createShape(
-		key: string,
-		type: string,
-		options: WhiteboardShapeOptions,
-		position: Position,
-		size: Size,
-		radius: number | Size): Observable<any> {
-
-		let shape: WhiteboardShape = {
+	createLine(key: string, options: WhiteboardLineOptions): Observable<WhiteboardLine> {
+		const line: WhiteboardLine = {
 			created: Date.now(),
 			createdBy: this.authInfo ? this.authInfo.uid : null,
-			type,
-			options: Object.assign(defaultShapeOptions, options),
-
+			type: 'line',
+			data: {
+				from: options.data.from,
+				to: options.data.to
+			},
+			position: options.position,
+			style: options.style
 		};
 
-		const whiteboardShape = this.af.database.list('whiteboardShape/' + key);
-		return this.observableToPromise([whiteboardShape.push(shape)]);
+		const whiteboardShapes = this.getShapes(key);
+		return this.observableToPromise(whiteboardShapes.push(line));
+	}
+
+	createArc(key: string, options: WhiteboardArcOptions): Observable<WhiteboardArc> {
+		const arc: WhiteboardArc = {
+			created: Date.now(),
+			createdBy: this.authInfo ? this.authInfo.uid : null,
+			type: 'arc',
+			data: {
+				from: options.data.from,
+				through: options.data.through,
+				to: options.data.to
+			},
+			position: options.position,
+			style: options.style
+		};
+
+		const whiteboardShapes = this.getShapes(key);
+		return this.observableToPromise(whiteboardShapes.push(arc));
+	}
+
+	createEllipse(key: string, options: WhiteboardEllipseOptions): Observable<WhiteboardEllipse> {
+		const ellipse: WhiteboardEllipse = {
+			created: Date.now(),
+			createdBy: this.authInfo ? this.authInfo.uid : null,
+			type: 'ellipse',
+			data: {
+				radius: options.data.radius,
+			},
+			position: options.position,
+			style: options.style
+		};
+
+		const whiteboardShapes = this.getShapes(key);
+		return this.observableToPromise(whiteboardShapes.push(ellipse));
+	}
+
+	createPolygon(key: string, options: WhiteboardPolygonOptions): Observable<WhiteboardPolygon> {
+		const polygon: WhiteboardPolygon = {
+			created: Date.now(),
+			createdBy: this.authInfo ? this.authInfo.uid : null,
+			type: 'polygon',
+			data: {
+				sides: options.data.sides,
+				radius: options.data.radius
+			},
+			position: options.position,
+			style: options.style
+		};
+
+		const whiteboardShapes = this.getShapes(key);
+		return this.observableToPromise(whiteboardShapes.push(polygon));
+	}
+
+	createStar(key: string, options: WhiteboardStarOptions): Observable<WhiteboardStar> {
+		const star: WhiteboardStar = {
+			created: Date.now(),
+			createdBy: this.authInfo ? this.authInfo.uid : null,
+			type: 'star',
+			data: {
+				sides: options.data.sides,
+				radius1: options.data.radius1,
+				radius2: options.data.radius2
+			},
+			position: options.position,
+			style: options.style
+		};
+
+		const whiteboardShapes = this.getShapes(key);
+		return this.observableToPromise(whiteboardShapes.push(star));
+	}
+
+	/**
+	 * Eraser
+	 */
+
+	eraseMarking(whiteboardKey: string, markingKey: string): Observable<WhiteboardMarking> {
+		return this.observableToPromise(
+			this.af.database.object('whiteboardMarkings/' + whiteboardKey + '/' + markingKey)
+				.update({ erased: Date.now() }));
+	}
+
+	eraseText(whiteboardKey: string, textKey: string): Observable<WhiteboardText> {
+		return this.observableToPromise(
+			this.af.database.object('whiteboardText/' + whiteboardKey + '/' + textKey)
+				.update({ erased: Date.now() }));
+	}
+
+	eraseShape(whiteboardKey: string, shapeKey: string): Observable<WhiteboardAnyShape> {
+		return this.observableToPromise(
+			this.af.database.object('whiteboardShapes/' + whiteboardKey + '/' + shapeKey)
+				.update({ erased: Date.now() }));
 	}
 
 	/**
 	 * Snapshot
 	 */
 
-	storeSnapshot(wbId: string, snapshot: Blob | File): Observable<any> {
+	storeSnapshot(key: string, snapshot: Blob | File): Observable<any> {
 		// Upload file
-		return this.observableToPromise(this.sdkStorage.child('wbSnapShots/' + wbId).put(snapshot))
+		return this.observableToPromise(this.sdkStorage.child('wbSnapShots/' + key).put(snapshot))
 			.map((snap: any) => {
 				// Store 'snapshot' property in the whiteboard object
-				return this.af.database.object('whiteboards/' + wbId).update({ snapshot: snap.metadata.downloadURLs[0] });
+				return this.af.database.object('whiteboards/' + key).update({ snapshot: snap.metadata.downloadURLs[0] });
 			});
 	}
 
@@ -246,113 +288,4 @@ export class WhiteboardService {
 		return subject.asObservable();
 	}
 
-}
-
-/**
- * Whiteboard
- */
-
-export interface Whiteboard {
-	$key: string;
-	created: number;
-	createdBy: string;
-	background: string;
-}
-
-export interface WhiteboardOptions {
-	background?: string;
-}
-
-/**
- * Whiteboard Markings
- */
-
-export interface WhiteboardMarking {
-	$key?: string;
-	started: number;
-	finished: number;
-	createdBy: string;
-	options?: WhiteboardMarkingOptions;
-	path: Point[];
-	erased?: boolean;
-}
-
-export interface WhiteboardMarkingOptions extends ItemOptions { }
-
-/**
- * Whiteboard Text
- */
-
-export interface WhiteboardText {
-	$key?: string;
-	created: number;
-	createdBy: string;
-	options?: WhiteboardTextOptions;
-	position?: Position;
-	content: string;
-	erased?: boolean;
-}
-
-export interface WhiteboardTextOptions extends ItemOptions {
-	// Character Style
-	fontFamily?: string;
-	fontWeight?: string | number;
-	fontSize?: number | string;
-}
-
-/**
- * Whiteboard Shapes
- */
-
-export interface WhiteboardShape {
-	$key?: string;
-	created: number;
-	createdBy: string;
-	type: string;
-	options?: WhiteboardShapeOptions;
-	position?: Position;
-	size?: Size;
-	radius?: number | Size;
-	erased?: boolean;
-}
-
-export interface WhiteboardShapeOptions extends ItemOptions { }
-
-/**
- * Generic Types
- */
-
-interface ItemOptions {
-	// Stroke Style
-	strokeColor?: string;
-	strokeWidth?: number;
-	strokeCap?: string;
-	strokeJoin?: string;
-	dashOffset?: number;
-	strokeScaling?: boolean;
-	dashArray?: number[];
-	miterLimit?: number;
-	// Fill Style
-	fillColor?: string;
-	// Shadow Style
-	shadowColor?: string;
-	shadowBlur?: number;
-	shadowOffset?: Point;
-}
-
-export interface Position {
-	anchor?: Point;
-	position?: Point;
-	rotation?: number;
-	scaling?: Point;
-}
-
-export interface Size {
-	width: number;
-	height: number;
-}
-
-export interface Point {
-	x: number;
-	y: number;
 }

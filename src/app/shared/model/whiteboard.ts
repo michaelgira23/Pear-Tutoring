@@ -21,11 +21,21 @@ export interface WhiteboardMarking extends WhiteboardItem {
 	path: Point[];
 }
 
+export interface WhiteboardMarkingOptions extends WhiteboardItemOptions {
+	started: number;
+	path: Point[];
+}
+
 /**
  * Whiteboard Text
  */
 
 export interface WhiteboardText extends WhiteboardItem {
+	content: string;
+	font: Font;
+}
+
+export interface WhiteboardTextOptions extends WhiteboardItemOptions {
 	content: string;
 	font: Font;
 }
@@ -41,6 +51,13 @@ export interface WhiteboardLine extends WhiteboardShape {
 	};
 }
 
+export interface WhiteboardLineOptions extends WhiteboardItemOptions {
+	data: {
+		from: Point;
+		to: Point;
+	};
+}
+
 export interface WhiteboardArc extends WhiteboardShape {
 	data: {
 		from: Point;
@@ -49,7 +66,21 @@ export interface WhiteboardArc extends WhiteboardShape {
 	};
 }
 
+export interface WhiteboardArcOptions extends WhiteboardItemOptions {
+	data: {
+		from: Point,
+		through: Point;
+		to: Point;
+	};
+}
+
 export interface WhiteboardEllipse extends WhiteboardShape {
+	data: {
+		radius: number | Size;
+	};
+}
+
+export interface WhiteboardEllipseOptions extends WhiteboardItemOptions {
 	data: {
 		radius: number | Size;
 	};
@@ -62,17 +93,36 @@ export interface WhiteboardPolygon extends WhiteboardShape {
 	};
 }
 
+export interface WhiteboardPolygonOptions extends WhiteboardItemOptions {
+	data: {
+		sides: number;
+		radius: number | Size;
+	};
+}
+
 export interface WhiteboardStar extends WhiteboardShape {
 	data: {
+		sides: number;
+		radius1: number;
+		radius2: number;
+	};
+}
+
+export interface WhiteboardStarOptions extends WhiteboardItemOptions {
+	data: {
+		sides: number;
 		radius1: number;
 		radius2: number;
 	};
 }
 
 export interface WhiteboardShape extends WhiteboardItem {
-	type: string;
+	type: WhiteboardShapeType;
 	data: any;
 }
+
+export type WhiteboardShapeType = 'line' | 'arc' | 'ellipse' | 'polygon' | 'star';
+export type WhiteboardAnyShape = WhiteboardLine | WhiteboardArc | WhiteboardEllipse | WhiteboardPolygon | WhiteboardStar;
 
 /**
  * General Types
@@ -84,10 +134,15 @@ export interface WhiteboardItem extends Metadata {
 	erased?: number;
 }
 
+export interface WhiteboardItemOptions {
+	position: Position;
+	style: StyleOptions;
+}
+
 export interface Metadata {
 	$key?: string;
 	created: number;
-	createdBy: number;
+	createdBy: string;
 	edits?: Edits;
 }
 
