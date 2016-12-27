@@ -1,6 +1,8 @@
 import { Component, HostListener, OnInit, OnChanges, OnDestroy, SimpleChanges, Input } from '@angular/core';
 
 import { ChatService, Message, Status } from '../shared/model/chat.service';
+import { NamePipe } from '../shared/model/name.pipe';
+import { NotificationsService } from '../shared/model/notifications.service';
 import { UserService } from '../shared/model/user.service';
 
 @Component({
@@ -11,6 +13,7 @@ import { UserService } from '../shared/model/user.service';
 export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 
 	@Input() key: string = 'anonymous';
+	keyChanged: boolean;
 
 	messageSubscription: any;
 	statusSubscription: any;
@@ -19,7 +22,7 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 	allStatuses: Status[] = [];
 	allEntries: (Message|Status)[] = [];
 
-	constructor(private chatService: ChatService, private userService: UserService) { }
+	constructor(private chatService: ChatService, private notificationsService: NotificationsService, private userService: UserService) { }
 
 	ngOnInit() {
 		this.chatService.sendStatus('join', this.key).subscribe(
@@ -32,6 +35,8 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 
 	ngOnChanges(changes: SimpleChanges) {
 		if (changes['key'] && changes['key'].currentValue !== changes['key'].previousValue) {
+			this.keyChanged = true;
+
 			if (this.messageSubscription) {
 				this.messageSubscription.unsubscribe();
 				this.messageSubscription = null;
@@ -40,27 +45,37 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 				this.statusSubscription.unsubscribe();
 				this.statusSubscription = null;
 			}
-
-			this.messageSubscription = this.chatService.getAllMessages(this.key).subscribe(
-				data => {
-					this.allMessages = data;
-					this.mergeEntries();
-				},
-				err => {
-					console.log(`Getting chat messages error: ${err}`);
-				}
-			);
-
-			this.statusSubscription = this.chatService.getAllStatuses(this.key).subscribe(
-				data => {
-					this.allStatuses = data;
-					this.mergeEntries();
-				},
-				err => {
-					console.log(`Getting chat statuses error: ${err}`);
-				}
-			);
 		}
+
+		this.messageSubscription = this.chatService.getAllMessages(this.key).subscribe(
+			data => {
+				this.allMessages = data;
+				this.mergeEntries();
+				if (!this.keyChanged) {
+					console.log('we detected a new message');
+					for (let msg of data) {
+						this.keyChanged = false;
+						this.notificationsService.send(
+							'New message',
+							this.notificationFormat(msg)
+						);
+					}
+				}
+			},
+			err => {
+				console.log(`Getting chat messages error: ${err}`);
+			}
+		);
+
+		this.statusSubscription = this.chatService.getAllStatuses(this.key).subscribe(
+			data => {
+				this.allStatuses = data;
+				this.mergeEntries();
+			},
+			err => {
+				console.log(`Getting chat statuses error: ${err}`);
+			}
+		);
 	}
 
 	@HostListener('window:unload') ngOnDestroy() {
@@ -102,5 +117,19 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 		} else if (status.type === 'leave') {
 			return 'left';
 		}
+	}
+
+	notificationFormat(msg: Message) {
+		const truncateLength = 100;
+
+		let name = new NamePipe().transform(msg.from, true);
+		let notificationMsg = `From ${name}: ${msg.text}`;
+
+		let result = notificationMsg.substring(0, truncateLength);
+
+		if (result.length < truncateLength - 3) {
+			result += '...';
+		}
+		return result;
 	}
 }
