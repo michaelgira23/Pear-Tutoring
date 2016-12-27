@@ -24,6 +24,7 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 	messageSubscription: any;
 	statusSubscription: any;
 
+	messageKeys: string[] = [];
 	allMessages: Message[] = [];
 	allStatuses: Status[] = [];
 	allEntries: (Message|Status)[] = [];
@@ -57,7 +58,9 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 					if (!this.keyChanged) {
 						for (let msg of data) {
 							console.log(msg);
-							if (!this.allMessages.includes(msg)) {
+							// We have to use a type assertion here because the `Message` interface doesn't have a `$key` field.
+							// However, the object returned by Firebase actually *does*.
+							if (!this.messageKeys.includes((msg as any).$key)) {
 								this.notificationsService.send(
 									'New message',
 									this.notificationFormat(msg)
@@ -68,6 +71,12 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 					} else {
 						this.keyChanged = false;
 					}
+
+					for (let msg of data) {
+						// See line 61.
+						this.messageKeys.push((msg as any).$key);
+					}
+
 					this.allMessages = data;
 					this.mergeEntries();
 				},
@@ -137,7 +146,8 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 
 		let result = notificationMsg.substring(0, truncateLength);
 
-		if (result.length > truncateLength - 3) {
+		// Don't add an ellipsis unless the message actually has to be truncated.
+		if (result.length > truncateLength) {
 			result += '...';
 		}
 		return result;
