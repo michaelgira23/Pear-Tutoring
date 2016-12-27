@@ -8,7 +8,7 @@ export class PermissionsService {
 
 	createPermission(type: PermissionsType, permission: Permission) { }
 
-	addScope($key: string, scope: PermissionsScopes, group: PermissionsGroups, $uid?: string) {
+	addScope($key: string, scope: Partial<PermissionsScopes>, group: PermissionsGroups, $uid?: string) {
 		if (group === 'user') {
 			// add scope, with $uid handling
 		} else {
@@ -16,7 +16,7 @@ export class PermissionsService {
 		}
 	}
 
-	removeScope($key: string, scope: PermissionsScopes, group: PermissionsGroups, $uid?: string) {
+	removeScope($key: string, scope: Partial<PermissionsScopes>, group: PermissionsGroups, $uid?: string) {
 		if (group === 'user') {
 			// add scope, with $uid handling
 		} else {
