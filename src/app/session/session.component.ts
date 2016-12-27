@@ -36,7 +36,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 				() => {
 					this.sessionService.getOnlineUsers(this.sessionId).subscribe(userIds => {
 						let allUsers = this.sessionInfo.tutees.concat(this.sessionInfo.tutor);
-						// The online state is just [uid]:boolean i wanted to preserve the boolean that 
+						// The online state is [uid]:boolean. i wanted to preserve the boolean that 
 						// represented the online state so i didn't convert the uid into a user object
 						let onlineUsers = [];
 						userIds.forEach(userOnlineState => {
