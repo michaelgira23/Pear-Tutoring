@@ -5,6 +5,12 @@ import { NamePipe } from '../shared/model/name.pipe';
 import { NotificationsService } from '../shared/model/notifications.service';
 import { UserService } from '../shared/model/user.service';
 
+declare global {
+	interface Array<T> {
+		includes(searchElement: T): boolean;
+	}
+}
+
 @Component({
 	selector: 'app-chat',
 	templateUrl: './chat.component.html',
@@ -34,9 +40,7 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 	}
 
 	ngOnChanges(changes: SimpleChanges) {
-		console.log('ngOnChanges fired');
 		if (changes['key'] && changes['key'].currentValue !== changes['key'].previousValue) {
-			console.log('key changed');
 			this.keyChanged = true;
 
 			if (this.messageSubscription) {
@@ -50,19 +54,22 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 
 			this.messageSubscription = this.chatService.getAllMessages(this.key).subscribe(
 				data => {
+					if (!this.keyChanged) {
+						for (let msg of data) {
+							console.log(msg);
+							if (!this.allMessages.includes(msg)) {
+								this.notificationsService.send(
+									'New message',
+									this.notificationFormat(msg)
+								);
+							}
+						}
+						console.log(this.allMessages);
+					} else {
+						this.keyChanged = false;
+					}
 					this.allMessages = data;
 					this.mergeEntries();
-					console.log('getAllMessages observable fired');
-					if (!this.keyChanged) {
-						console.log('we detected a new message');
-						this.keyChanged = false;
-						for (let msg of data) {
-							this.notificationsService.send(
-								'New message',
-								this.notificationFormat(msg)
-							);
-						}
-					}
 				},
 				err => {
 					console.log(`Getting chat messages error: ${err}`);
@@ -78,9 +85,6 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 					console.log(`Getting chat statuses error: ${err}`);
 				}
 			);
-		} else {
-			console.log('ngOnChanges fired, key hasn\'t changed');
-			this.keyChanged = false;
 		}
 	}
 
@@ -133,7 +137,7 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 
 		let result = notificationMsg.substring(0, truncateLength);
 
-		if (result.length < truncateLength - 3) {
+		if (result.length > truncateLength - 3) {
 			result += '...';
 		}
 		return result;
