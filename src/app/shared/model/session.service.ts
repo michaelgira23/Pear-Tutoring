@@ -216,24 +216,29 @@ export class SessionService {
 	}
 
 	// Find sessions that fits the free times of the user. 
-	findSessionsByFreeTime(day: number, timesInDay: FreeTime[]) {
+	findSessionsByFreeTime(day: number, timesInDay: FreeTime[]): Observable<Session[]> {
 		let start = 0;
-		let sessions: Session[] = [];
-		let findFreeTime = (query?: Observable<any>): Observable<any> => {
-			if (!query) {
-				let query = this.db.list('sessions', {
-					query: {
-						orderByChild: 'dayInWeek',
-						equalTo: 6,
-						startAt: start,
-						limitToFirst: 10
-					}
-				}).map(val => {
-					if (val) {}
-				})
+		let sessionsList: Session[] = [];
+		let query: Observable<any> = this.db.list('sessions', {
+			query: {
+				startAt: start,
+				limitToFirst: 10
 			}
-			return 
-		}
+		}).flatMap(sessions => {
+			sessions.forEach(session => {
+				timesInDay.forEach(time => {
+					if (time.from.unix() < session.start && time.to.unix() > session.end) {
+						sessionsList.push(session);
+					}
+				});
+			});
+			if (sessionsList.length >= 5 || !sessions) {
+				return Observable.of(sessionsList);
+			}
+			start += 10;
+			return query;
+		});
+		return query.map(Session.fromJsonArray);
 	}
 
 	// Update the information of a session
@@ -264,8 +269,8 @@ export class SessionService {
 		}
 
 		// Transform the arrays in the object to firebase-friendly objects
-		sessionToSave.start = session.start.format('X');
-		sessionToSave.end = session.end.format('X');
+		sessionToSave.start = session.start.unix();
+		sessionToSave.end = session.end.unix();
 		sessionToSave.tutees = arrToObj(sessionToSave.tutees);
 		sessionToSave.tags = arrToObj(sessionToSave.tags);
 		sessionToSave['dayInWeek'] = session.end.format('d');

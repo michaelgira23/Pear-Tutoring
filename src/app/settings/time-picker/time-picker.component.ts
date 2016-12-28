@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { UserService, FreeTimes } from '../../shared/model/user.service';
+import { SessionService } from '../../shared/model/session.service';
 import * as moment from 'moment';
 
 @Component({
@@ -22,17 +23,18 @@ export class TimePickerComponent implements OnInit {
 				Saturday: [],
 			};
 
-	constructor(private userService: UserService) { }
+	constructor(private userService: UserService, private sessionService: SessionService) { }
 
 	ngOnInit() {
 		this.userService.getFreeTimes().subscribe(val => {
 			this.freeTimesModel = Object.assign(this.freeTimesModel, val);
+			this.sessionService.findSessionsByFreeTime(6, this.freeTimesModel['Sunday']).subscribe(console.log, console.log);
 		}, console.log);
 	}
 
 	addTime(day: string, from: any, to: any) {
 		if (from && to) {
-			let fromD = moment(from, 'HH:mm'), toD = moment(to, 'HH:mm');
+			let fromD = moment(from, 'HH:mm').day(day), toD = moment(to, 'HH:mm').day(day);
 			if (toD.isSameOrAfter(fromD)) {
 				this.userService.addFreeTime(day, {from: fromD.valueOf(), to: toD.valueOf()}).subscribe(
 					val => {
