@@ -2,11 +2,12 @@ import { Injectable, Inject } from '@angular/core';
 import { Observable, Subject } from 'rxjs/Rx';
 import { AngularFireDatabase, FirebaseRef } from 'angularfire2';
 import { Session } from './session';
-import { UserService, userStatus } from './user.service';
+import { UserService, userStatus, FreeTime } from './user.service';
 import { ChatService } from './chat.service';
 import { AuthService } from '../security/auth.service';
 import { WhiteboardService, WhiteboardOptions } from './whiteboard.service';
 import { Moment } from 'moment';
+import { objToArr, arrToObj } from '../common/utils';
 
 export const AllowedSubjects = ['Math', 'English', 'Art'];
 
@@ -215,8 +216,24 @@ export class SessionService {
 	}
 
 	// Find sessions that fits the free times of the user. 
-	findSessionsByFreeTime(day: string) {
-		let findFreeTime
+	findSessionsByFreeTime(day: number, timesInDay: FreeTime[]) {
+		let start = 0;
+		let sessions: Session[] = [];
+		let findFreeTime = (query?: Observable<any>): Observable<any> => {
+			if (!query) {
+				let query = this.db.list('sessions', {
+					query: {
+						orderByChild: 'dayInWeek',
+						equalTo: 6,
+						startAt: start,
+						limitToFirst: 10
+					}
+				}).map(val => {
+					if (val) {}
+				})
+			}
+			return 
+		}
 	}
 
 	// Update the information of a session
@@ -344,29 +361,6 @@ export class SessionService {
 		dataToSave[`users/${tuteeId}/tuteeSessions/${sessionId}`] = true;
 		return this.firebaseUpdate(dataToSave);
 	}
-}
-
-// Helper function to transform array to object with properties as array's values and values as true
-export function arrToObj(arr: string[]): {[key: string]: true} {
-	let objTmp = {};
-	arr.forEach(val => {
-		objTmp[val] = true;
-	});
-	return objTmp;
-}
-
-// Helper function that does the reverse to the above one
-export function objToArr(obj: {[key: string]: true}): any[] {
-	if (Array.isArray(obj)) {
-		return obj;
-	}
-	let arrTemp = [];
-	for (let prop in obj) {
-		if (obj[prop]) {
-			arrTemp.push(prop);
-		}
-	}
-	return arrTemp;
 }
 
 export interface SessionOptions {

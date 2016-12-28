@@ -4,7 +4,7 @@
 		<md-list>
 			<md-list-item *ngFor="let time of freeTimesModel[day]; let timeIndex = index">
 				<div>
-					{{ time.fromD.format('HH:mm') }} ~ {{ time.toD.format('HH:mm') }}
+					{{ time.from.format('HH:mm') }} ~ {{ time.to.format('HH:mm') }}
 				</div>
 				<button md-icon-button type="button" (click)="removeTime(day, timeIndex)">
 					<md-icon>close</md-icon>

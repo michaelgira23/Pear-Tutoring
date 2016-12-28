@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { UserService } from '../../shared/model/user.service';
+import { UserService, FreeTimes } from '../../shared/model/user.service';
 import * as moment from 'moment';
 
 @Component({
@@ -12,7 +12,7 @@ export class TimePickerComponent implements OnInit {
 	get freeTimesProps(): string[] {
 		return Object.getOwnPropertyNames(this.freeTimesModel);
 	}
-	freeTimesModel: any = {
+	freeTimesModel: FreeTimes = {
 				Sunday: [],
 				Monday: [],
 				Tuesday: [],
@@ -27,7 +27,7 @@ export class TimePickerComponent implements OnInit {
 	ngOnInit() {
 		this.userService.getFreeTimes().subscribe(val => {
 			this.freeTimesModel = Object.assign(this.freeTimesModel, val);
-		});
+		}, console.log);
 	}
 
 	addTime(day: string, from: any, to: any) {
@@ -36,18 +36,18 @@ export class TimePickerComponent implements OnInit {
 			if (toD.isSameOrAfter(fromD)) {
 				this.userService.addFreeTime(day, {from: fromD.valueOf(), to: toD.valueOf()}).subscribe(
 					val => {
-						this.freeTimesModel[day].push({fromD, toD});
-						this.freeTimesModel[day].sort((a, b) => a.fromD.valueOf() - b.fromD.valueOf());
+						this.freeTimesModel[day].sort((a, b) => a.from.valueOf() - b.from.valueOf());
 					},
 					err => {
-						console.log('err');
+						console.log(err);
 				});
 			}
 		}
 	}
 
 	removeTime(day: string, timeIndex: number) {
-		this.userService.removeFreeTime(day, this.freeTimesModel[day][timeIndex]).subscribe(
+		let time = this.freeTimesModel[day][timeIndex];
+		this.userService.removeFreeTime(day, {from: time.from, to: time.to}).subscribe(
 			val => {
 				this.freeTimesModel[day].splice(timeIndex, 1);
 			},

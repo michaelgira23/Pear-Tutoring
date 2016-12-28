@@ -3,7 +3,8 @@ import { AngularFireDatabase, FirebaseRef } from 'angularfire2';
 import { AuthService } from '../security/auth.service';
 import { Observable, Subject } from 'rxjs/Rx';
 import { User } from './user';
-import { arrToObj, objToArr } from './session.service';
+import { arrToObj, objToArr } from '../common/utils';
+import * as moment from 'moment';
 
 export const userStatus = {
 	IN_SESSION: 2,
@@ -86,22 +87,32 @@ export class UserService {
 	}
 
 	getFreeTimes(): Observable<FreeTimes> {
-		return this.db.list(`freeTimesByUsers/${this.uid}/`)
-			.map(freeTimes => {
-				let temp = {};
-				for (let day in freeTimes) {
-					if (temp[day]) {
-						temp[day] = {
-							from: freeTimes[day].$key.substr(0, 13),
-							to: freeTimes[day].$key.substr(13, 13)
-						};
-					}
-				}
-				return temp;
-			});
+		return this.auth.auth$.switchMap(val => {
+			if (val) {
+				return this.db.object(`freeTimesByUsers/${this.uid}/`)
+					.map(freeTimes => {
+						let temp = Object.assign({}, freeTimes);
+						delete temp.$key;
+						delete temp.$exists;
+						for (let day in temp) {
+							if (temp[day]) {
+								temp[day] = [];
+								objToArr(freeTimes[day]).forEach(val => {
+									temp[day].push({
+										from: moment(val.substr(0, 13), 'x'),
+										to: moment(val.substr(13, 13), 'x')
+									});
+								});
+							}
+						}
+						return temp;
+					});
+			}
+			return Observable.of(null);
+		});
 	}
 
-	addFreeTime(day: string, time: FreeTime): Observable<any> {
+	addFreeTime(day: string, time: {from: number, to: number}): Observable<any> {
 		let concatTime = '' + time.from + time.to;
 		let pushData = {};
 		pushData[concatTime] = true;
@@ -109,7 +120,7 @@ export class UserService {
 	}
 
 	removeFreeTime(day: string, time: FreeTime): Observable<any> {
-		let concatTime = '' + time.from + time.to;
+		let concatTime = '' + time.from.valueOf() + time.to.valueOf();
 		return this.promiseToObservable(this.db.list(`freeTimesByUsers/${this.uid}/${day}`).remove(concatTime));
 	}
 
@@ -148,4 +159,4 @@ export interface FreeTimes {
 	[dayInWeek: string]: FreeTime[];
 };
 
-export interface FreeTime {from: number; to: number; };
+export interface FreeTime {from: moment.Moment; to: moment.Moment; };

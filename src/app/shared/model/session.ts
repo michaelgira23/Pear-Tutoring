@@ -3,7 +3,7 @@
 // In database, must be stored as int because of Firebase
 import { User } from './user';
 import { Whiteboard } from './whiteboard.service';
-import { objToArr } from './session.service';
+import { objToArr } from '../common/utils';
 import * as moment from 'moment';
 
 export class Session {
