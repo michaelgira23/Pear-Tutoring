@@ -94,6 +94,7 @@ export class UserService {
 						let temp = Object.assign({}, freeTimes);
 						delete temp.$key;
 						delete temp.$exists;
+						delete temp.$value;
 						for (let day in temp) {
 							if (temp[day]) {
 								temp[day] = [];
