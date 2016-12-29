@@ -24,7 +24,7 @@ export class Pen {
 			let paperOptions = styles.deserialize(this.whiteboard.styleOptions, true);
 			paperOptions.segments = [this.whiteboard.cursorPoint(event)];
 			this.currentPath = new paper.Path(paperOptions);
-		} else {
+		} else if (this.currentPath) {
 			// User unclicked the mouse outside of the window, just continue with previous path
 			this.currentPath.add(this.whiteboard.cursorPoint(event));
 		}

@@ -76,6 +76,9 @@ export class Shape {
 			}
 
 			this.currentShape.selected = true;
+		} else if (this.currentShape) {
+			this.currentPoint = this.whiteboard.cursorPoint(event);
+			this.resizeCurrentShape(this.currentPoint);
 		}
 	}
 

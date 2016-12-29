@@ -1,4 +1,4 @@
-import { rectangles } from '../utils/serialization';
+import { rectangles, styles, font } from '../utils/serialization';
 import { WhiteboardComponent } from '../whiteboard.component';
 import { WhiteboardTextOptions } from './../../shared/model/whiteboard';
 
@@ -17,14 +17,22 @@ export class Text {
 
 	mousedown(event) {
 		const point = this.whiteboard.cursorPoint(event);
-		this.currentTextFinished = false;
-		this.currentText = new paper.PointText({
-			content: 'TEXT',
-			point: point,
-			fillColor: 'black',
-			fontSize: '2.5em',
-			fontWeight: 600
-		});
+		if (this.currentTextFinished) {
+			this.currentTextFinished = false;
+
+			let paperOptions = styles.deserialize(this.whiteboard.styleOptions);
+			paperOptions.content = 'TEXT';
+			paperOptions.point = point;
+
+
+			// Combine paperOptions and fontOptions
+			const fontOptions = font.deserialize(this.whiteboard.fontOptions);
+			paperOptions = Object.assign(paperOptions, fontOptions);
+
+			this.currentText = new paper.PointText(paperOptions);
+		} else if (this.currentText) {
+			this.currentText.point = point;
+		}
 	}
 
 	mousemove(event) {
@@ -37,7 +45,7 @@ export class Text {
 	mouseup(event) {
 		if (this.currentText && this.whiteboard.allowWrite) {
 			this.currentTextFinished = true;
-			this.currentText.content = prompt('Enter text here:', 'TEXT');
+			this.currentText.content = prompt('Enter text here:', this.currentText.content);
 
 			// Save text
 			const text: WhiteboardTextOptions = {

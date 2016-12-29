@@ -47,10 +47,10 @@ export class Eraser {
 	 */
 
 	eraseMarkingsOnLine(path) {
-		const markingKeys = Object.keys(this.whiteboard.tools.pen.canvasMarkings);
+		const markingKeys = Object.keys(this.whiteboard.canvasMarkings);
 		markingKeys.forEach(markingKey => {
 			// Get intersections between path and erasing path
-			const intersections = this.whiteboard.tools.pen.canvasMarkings[markingKey].getIntersections(path);
+			const intersections = this.whiteboard.canvasMarkings[markingKey].getIntersections(path);
 
 			// If canvasMarkings intersect, erase the line
 			if (intersections.length > 0) {

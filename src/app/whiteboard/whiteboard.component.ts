@@ -203,7 +203,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 				data => {
 					this.text = data;
 
-					// Only update texts if whiteboard canvas is initialized
+					// Only update text if whiteboard canvas is initialized
 					if (this.canvasEl) {
 						this.textsToCanvas(this.text);
 					}
@@ -395,17 +395,19 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 			// Make sure text isn't erased
 			if (!text.erased) {
 				let paperOptions = styles.deserialize(text.style);
+				paperOptions.point = [0, 0];
 				paperOptions.rotation = text.rotation;
-				paperOptions.bounds = rectangles.deserialize(text.bounds);
 				paperOptions.content = text.content;
-				const fontOptions = font.deserialize(text.font);
 
 				// Combine paperOptions and fontOptions
+				const fontOptions = font.deserialize(text.font);
 				paperOptions = Object.assign(paperOptions, fontOptions);
 
 				console.log('paper options', paperOptions);
 
 				this.canvasText[text.$key] = new paper.PointText(paperOptions);
+				// Set bounds here because it doesn't work in object init for some reason
+				this.canvasText[text.$key].bounds = rectangles.deserialize(text.bounds);
 			}
 		});
 	}
