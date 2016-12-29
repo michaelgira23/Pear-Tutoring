@@ -47,13 +47,11 @@ export class Eraser {
 	 */
 
 	eraseMarkingsOnLine(path) {
+		// Erase markings
 		const markingKeys = Object.keys(this.whiteboard.canvasMarkings);
 		markingKeys.forEach(markingKey => {
-			// Get intersections between path and erasing path
-			const intersections = this.whiteboard.canvasMarkings[markingKey].getIntersections(path);
-
-			// If canvasMarkings intersect, erase the line
-			if (intersections.length > 0) {
+			// If marking and erase path intersect, erase the line
+			if (this.whiteboard.canvasMarkings[markingKey].intersects(path)) {
 				this.whiteboard.whiteboardService.eraseMarking(this.whiteboard.key, markingKey)
 					.subscribe(
 						data => {
@@ -61,6 +59,23 @@ export class Eraser {
 						},
 						err => {
 							console.log('Erase marking error', err);
+						}
+					);
+			}
+		});
+
+		// Also erase text
+		const textKeys = Object.keys(this.whiteboard.canvasText);
+		textKeys.forEach(textKey => {
+			// If text and erase path intersect, erase the line
+			if (this.whiteboard.canvasText[textKey].intersects(path)) {
+				this.whiteboard.whiteboardService.eraseText(this.whiteboard.key, textKey)
+					.subscribe(
+						data => {
+							console.log('Erased text', data);
+						},
+						err => {
+							console.log('Erase text error', err);
 						}
 					);
 			}

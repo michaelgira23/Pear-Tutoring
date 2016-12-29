@@ -104,6 +104,12 @@ export class WhiteboardService {
 		return this.observableToPromise(whiteboardMarkings.push(marking));
 	}
 
+	eraseMarking(whiteboardKey: string, markingKey: string): Observable<WhiteboardMarking> {
+		return this.observableToPromise(
+			this.af.database.object('whiteboardMarkings/' + whiteboardKey + '/' + markingKey)
+				.update({ erased: Date.now() }));
+	}
+
 	/**
 	 * Whiteboard Text
 	 */
@@ -127,6 +133,12 @@ export class WhiteboardService {
 		return this.observableToPromise(whiteboardText.push(text));
 	}
 
+	eraseText(whiteboardKey: string, textKey: string): Observable<WhiteboardText> {
+		return this.observableToPromise(
+			this.af.database.object('whiteboardText/' + whiteboardKey + '/' + textKey)
+				.update({ erased: Date.now() }));
+	}
+
 	// editText(whiteboardKey: string, textKey: string, content: string, options: WhiteboardTextOptions, position: Position): Observable<any> {
 	// 	const textObject = this.af.database.object(`whiteboardText/${whiteboardKey}/${textKey}`);
 	// 	return this.observableToPromise(textObject.update({
@@ -135,22 +147,6 @@ export class WhiteboardService {
 	// 		position
 	// 	}));
 	// }
-
-	/**
-	 * Eraser
-	 */
-
-	eraseMarking(whiteboardKey: string, markingKey: string): Observable<WhiteboardMarking> {
-		return this.observableToPromise(
-			this.af.database.object('whiteboardMarkings/' + whiteboardKey + '/' + markingKey)
-				.update({ erased: Date.now() }));
-	}
-
-	eraseText(whiteboardKey: string, textKey: string): Observable<WhiteboardText> {
-		return this.observableToPromise(
-			this.af.database.object('whiteboardText/' + whiteboardKey + '/' + textKey)
-				.update({ erased: Date.now() }));
-	}
 
 	/**
 	 * Snapshot
