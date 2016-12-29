@@ -1,26 +1,15 @@
+import { segments, styles } from '../utils/serialization';
+import { WhiteboardMarkingOptions, WhiteboardShapeType } from '../../shared/model/whiteboard';
 import { WhiteboardComponent } from '../whiteboard.component';
-import { WhiteboardShapeType, WhiteboardShapeOptions,
-	WhiteboardAnyShape, WhiteboardAnyShapeOptions,
-	WhiteboardLine, WhiteboardLineOptions,
-	WhiteboardArc, WhiteboardArcOptions,
-	WhiteboardEllipse, WhiteboardEllipseOptions,
-	WhiteboardPolygon, WhiteboardPolygonOptions,
-	WhiteboardStar, WhiteboardStarOptions } from '../../shared/model/whiteboard';
 declare const paper;
 
 export class Shape {
 
-	shapesSubscription: any;
-	shapes: WhiteboardAnyShape[];
-	// paper.js shape objects on the whiteboard
-	canvasShapes: any = {};
-
-	// Shape currently being drawn
 	currentShape: any;
-	// Type of shape currently being drawn
 	currentShapeType: WhiteboardShapeType;
-	// If shape is currently being drawn
+	currentShapeStarted: number;
 	currentShapeFinished: boolean = true;
+
 	// Point upon mousedown
 	startPoint: any;
 	// Point mouse is currently at
@@ -29,9 +18,10 @@ export class Shape {
 	arcPoint: any;
 	// Actual arc point object on canvas
 	visualArcPoint: any;
-	// Rectangle from mouse down to mouse move/up
+
+	// Rectangle from mouse down to mouse move/up (not paper.path.Rectangle!)
 	creationRect: any;
-	// Ghost rectangle for visualizing shape creation
+	// Ghost rectangle path for visualizing shape creation (not paper.Rectangle!)
 	visualRect: any;
 
 	constructor(private whiteboard: WhiteboardComponent) { }
@@ -43,12 +33,14 @@ export class Shape {
 	mousedown(event) {
 		if (this.currentShapeFinished) {
 			this.currentShapeFinished = false;
+			this.currentShapeStarted = Date.now();
 			this.startPoint = this.whiteboard.cursorPoint(event);
+
 			// Create a rectangle for the shape bounds
 			this.creationRect = this.getRect(this.startPoint, this.startPoint, this.whiteboard.shiftKey);
 
 			// Create point from shadow offset
-			let paperOptions = this.whiteboard.styleObjectToPaperObject(this.whiteboard.styleOptions);
+			let paperOptions = styles.deserialize(this.whiteboard.styleOptions);
 
 			// Create a shape
 			this.currentShapeType = this.whiteboard.shapeType;
@@ -78,7 +70,9 @@ export class Shape {
 					this.currentShape = new paper.Path.Star(paperOptions);
 					break;
 				default:
-					console.log(`Unrecognized shape! (${this.currentShapeType})`);
+					// Default to custom shape
+					paperOptions.segments = [this.whiteboard.cursorPoint(event)];
+					this.currentShape = new paper.Path(paperOptions);
 			}
 
 			this.currentShape.selected = true;
@@ -86,14 +80,18 @@ export class Shape {
 	}
 
 	mousemove(event) {
-		if (!this.currentShapeFinished) {
+		if (this.currentShape && !this.currentShapeFinished) {
 			this.currentPoint = this.whiteboard.cursorPoint(event);
 			this.resizeCurrentShape(this.currentPoint);
 		}
 	}
 
 	mouseup(event) {
-		if ((this.creationRect.width > 0 && this.creationRect.height > 0)
+		if ((this.currentShape && !this.currentShapeFinished
+			// Creaction rectangle must have moved. If it's a custom shape, it's alright as long as there's more than one segment
+			&& ((this.creationRect.width > 0 && this.creationRect.height > 0)
+				|| (this.currentShapeType === 'custom' && this.currentShape.segments.length > 1)
+			))
 			// If shapeType is line or arc, either width or height can be 0
 			|| ((this.currentShapeType === 'line' || this.currentShapeType === 'arc')
 				&& (this.creationRect.width > 0 || this.creationRect.height > 0))) {
@@ -111,7 +109,7 @@ export class Shape {
 				});
 
 				// Create options for arc
-				let paperOptions = this.whiteboard.styleObjectToPaperObject(this.whiteboard.styleOptions);
+				let paperOptions = styles.deserialize(this.whiteboard.styleOptions);
 				paperOptions.from = [this.startPoint.x, this.startPoint.y];
 				paperOptions.through = [this.arcPoint.x, this.arcPoint.y];
 				paperOptions.to = [this.arcPoint.x + 1, this.arcPoint.y + 1];
@@ -127,6 +125,7 @@ export class Shape {
 			// Finish drawing shape
 			this.currentShapeFinished = true;
 			this.currentShape.selected = false;
+			this.creationRect = null;
 			if (this.visualRect) {
 				this.visualRect.remove();
 			}
@@ -140,125 +139,21 @@ export class Shape {
 			}
 
 			// Save shape
-			const shapePosition = {
-				anchor: {
-					x: this.currentShape.position.x,
-					y: this.currentShape.position.y
-				},
-				rotation: this.currentShape.rotation,
-				scaling: {
-					x: this.currentShape.scaling.x,
-					y: this.currentShape.scaling.y
-				}
-			};
-
-			let shape: WhiteboardShapeOptions = {
-				type: this.currentShapeType,
-				data: {},
-				position: shapePosition,
+			const markingOptions: WhiteboardMarkingOptions = {
+				started: this.currentShapeStarted,
+				path: segments.serialize(this.currentShape.segments, true),
 				style: this.whiteboard.styleOptions
 			};
-
-			// Add shape-specific properties
-			switch (this.currentShapeType) {
-				case 'line':
-					// Add shape-specific options
-					(<WhiteboardLineOptions>shape).data.from = {
-						x: this.currentShape.segments[0].point.x,
-						y: this.currentShape.segments[0].point.y
-					};
-					(<WhiteboardLineOptions>shape).data.to = {
-						x: this.currentShape.segments[1].point.x,
-						y: this.currentShape.segments[1].point.y
-					};
-					break;
-				case 'arc':
-					// Add shape-specific options
-					(<WhiteboardArcOptions>shape).data.from = {
-						x: this.currentShape.segments[0].point.x,
-						y: this.currentShape.segments[0].point.y
-					};
-					(<WhiteboardArcOptions>shape).data.through = {
-						x: this.arcPoint.x,
-						y: this.arcPoint.y
-					};
-					(<WhiteboardArcOptions>shape).data.to = {
-						x: this.currentShape.segments[2].point.x,
-						y: this.currentShape.segments[2].point.y
-					};
-					break;
-				case 'ellipse':
-					// Add shape-specific options
-					// shape.point = [(<WhiteboardEllipse>shape).position.anchor.x, (<WhiteboardEllipse>shape).position.anchor.y];
-					// shape.radius = (<WhiteboardEllipse>shape).data.radius;
-					break;
-				case 'polygon':
-					// Add shape-specific options
-					// shape.sides = (<WhiteboardPolygon>shape).data.sides;
-					// shape.radius = (<WhiteboardPolygon>shape).data.radius;
-					break;
-				case 'star':
-					// Add shape-specific options
-					// shape.points = (<WhiteboardStar>shape).data.points;
-					// shape.radius1 = (<WhiteboardStar>shape).data.radius1;
-					// shape.radius2 = (<WhiteboardStar>shape).data.radius2;
-					break;
-				default:
-					console.log(`Unrecognized shape! (${shape.type})`);
-			}
-		}
-		/*
-		if (this.selectedShape && this.whiteboard.allowWrite) {
-			const positionPosition: Point = {
-				x: this.selectedShape.position.x,
-				y: this.selectedShape.position.y
-			};
-			const scaling: Point = {
-				x: this.selectedShape.scaling.x,
-				y: this.selectedShape.scaling.y
-			};
-
-			const position: Position = {
-				position: positionPosition,
-				rotation: this.selectedShape.rotation,
-				scaling
-			};
-
-			const size: Size = {
-				width: this.selectedShape.size.width,
-				height: this.selectedShape.size.height
-			};
-
-			let radius: number | Size;
-			if (typeof this.selectedShape.radius === 'number') {
-				radius = this.selectedShape.radius;
-			} else {
-				radius = {
-					width: this.selectedShape.radius.width,
-					height: this.selectedShape.radius.height
-				};
-			}
-
-			this.whiteboard.whiteboardService.createShape(
-				this.whiteboard.key,
-				this.whiteboard.shapeType,
-				this.whiteboard.shapeOptions,
-				position,
-				size,
-				radius)
+			this.whiteboard.whiteboardService.createMarking(this.whiteboard.key, markingOptions)
 				.subscribe(
 					data => {
-						console.log('successfully added text', data);
+						console.log('successfully added shape', data);
 					},
 					err => {
-						console.log('add text error', err);
+						console.log('add shape error', err);
 					}
 				);
-		}*/
-	}
-
-	toolchange(nextTool) {
-		this.deselectAllShapes();
+		}
 	}
 
 	modifierKey(event: KeyboardEvent) {
@@ -271,8 +166,16 @@ export class Shape {
 	 * Helper functions
 	 */
 
+	// Simulates mouse movement while drawing a shape
 	resizeCurrentShape(point) {
-		if (this.currentShape) {
+		if (this.currentShape && !this.currentShapeFinished) {
+
+			// If custom shape, just add segment to path
+			if (this.currentShapeType) {
+				this.currentShape.add(point);
+				return;
+			}
+
 			this.creationRect = this.getRect(this.startPoint, point, this.whiteboard.shiftKey);
 
 			// Shapes will not show up anymore if their height and width are zero
@@ -296,7 +199,7 @@ export class Shape {
 							// Check if current point has moved from the second point of arc
 							if (secondPhaseRect.width > 0 || secondPhaseRect.height > 0) {
 								// Create paper options for the arc
-								let paperOptions = this.whiteboard.styleObjectToPaperObject(this.whiteboard.styleOptions);
+								let paperOptions = styles.deserialize(this.whiteboard.styleOptions);
 								paperOptions.from = [this.startPoint.x, this.startPoint.y];
 								paperOptions.through = [this.arcPoint.x, this.arcPoint.y];
 								paperOptions.to = [linePoint.x, linePoint.y];
@@ -339,62 +242,6 @@ export class Shape {
 				}
 			}
 		}
-	}
-
-	shapesToCanvas(shapes: WhiteboardAnyShape[]) {
-		console.log('shapes to canvas', shapes);
-		this.clearShapes();
-
-		// Loop through shapes and add to canvas
-		shapes.forEach(shape => {
-
-			// Make sure shape isn't erased
-			if (!shape.erased) {
-
-				let paperOptions = this.whiteboard.styleObjectToPaperObject(shape.style);
-
-				switch (shape.type) {
-					case 'line':
-						// Add shape-specific options
-						paperOptions.from = [(<WhiteboardLine>shape).data.from.x, (<WhiteboardLine>shape).data.from.y];
-						paperOptions.to = [(<WhiteboardLine>shape).data.to.x, (<WhiteboardLine>shape).data.to.y];
-						// Create line
-						this.canvasShapes[shape.$key] = new paper.Shape.Line(paperOptions);
-						break;
-					case 'arc':
-						// Add shape-specific options
-						paperOptions.from = [(<WhiteboardArc>shape).data.from.x, (<WhiteboardArc>shape).data.from.y];
-						paperOptions.through = [(<WhiteboardArc>shape).data.through.x, (<WhiteboardArc>shape).data.through.y];
-						paperOptions.to = [(<WhiteboardArc>shape).data.to.x, (<WhiteboardArc>shape).data.to.y];
-						// Create arc
-						this.canvasShapes[shape.$key] = new paper.Shape.Arc(paperOptions);
-						break;
-					case 'ellipse':
-						// Add shape-specific options
-						paperOptions.radius = (<WhiteboardEllipse>shape).data.radius;
-						// Create ellipse
-						this.canvasShapes[shape.$key] = new paper.Shape.Ellipse(paperOptions);
-						break;
-					case 'polygon':
-						// Add shape-specific options
-						paperOptions.sides = (<WhiteboardPolygon>shape).data.sides;
-						paperOptions.radius = (<WhiteboardPolygon>shape).data.radius;
-						// Create polygon
-						this.canvasShapes[shape.$key] = new paper.Shape.RegularPolygon(paperOptions);
-						break;
-					case 'star':
-						// Add shape-specific options
-						paperOptions.points = (<WhiteboardStar>shape).data.points;
-						paperOptions.radius1 = (<WhiteboardStar>shape).data.radius1;
-						paperOptions.radius2 = (<WhiteboardStar>shape).data.radius2;
-						// Create a star
-						this.canvasShapes[shape.$key] = new paper.Shape.Star(paperOptions);
-						break;
-					default:
-						console.log(`Unrecognized shape! (${shape.type})`);
-				}
-			}
-		});
 	}
 
 	roundLinePoint(startPoint, currentPoint) {
@@ -536,34 +383,5 @@ export class Shape {
 			this.visualRect.remove();
 			this.visualRect = null;
 		}
-	}
-
-	clearShapes() {
-		// Erase current canvas markings if they exist
-		if (this.shapes) {
-			const shapeKeys = Object.keys(this.canvasShapes);
-			shapeKeys.forEach(key => {
-				this.canvasShapes[key].remove();
-				delete this.canvasShapes[key];
-			});
-		}
-	}
-
-	deselectAllShapes() {
-		const shapeKeys = Object.keys(this.canvasShapes);
-		shapeKeys.forEach(key => {
-			this.canvasShapes[key].selected = false;
-		});
-	}
-
-	shapeIdToPushKey(id) {
-		const shapeKeys = Object.keys(this.canvasShapes);
-		for (let i = 0; i < shapeKeys.length; i++) {
-			const shape = this.canvasShapes[shapeKeys[i]];
-			if (shape.id === id) {
-				return shapeKeys[i];
-			}
-		}
-		return null;
 	}
 }

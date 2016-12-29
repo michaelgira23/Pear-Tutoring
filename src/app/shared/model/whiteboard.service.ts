@@ -6,25 +6,12 @@ import { AuthService } from '../security/auth.service';
 import { Whiteboard, WhiteboardOptions,
 	WhiteboardMarking, WhiteboardMarkingOptions,
 	WhiteboardText, WhiteboardTextOptions,
-	WhiteboardAnyShape,
-	WhiteboardLine, WhiteboardLineOptions,
-	WhiteboardArc, WhiteboardArcOptions,
-	WhiteboardEllipse, WhiteboardEllipseOptions,
-	WhiteboardPolygon, WhiteboardPolygonOptions,
-	WhiteboardStar, WhiteboardStarOptions,
-	Position,
 	StyleOptions,
 	Font } from './whiteboard';
 
 export const defaultWhiteboardOptions: WhiteboardOptions = {
 	name: 'Unnamed Whiteboard',
 	background: '#fff'
-};
-
-export const defaultPosition: Position = {
-	anchor: { x: 0, y: 0 },
-	rotation: 0,
-	scaling: { x: 1, y: 1 }
 };
 
 export const defaultStyleOptions: StyleOptions = {
@@ -51,7 +38,7 @@ export const defaultStyleOptions: StyleOptions = {
 export const defaultFontOptions: Font = {
 	family: 'sans-serif',
 	weight: 400,
-	size: '2.5rem'
+	size: 32
 };
 
 @Injectable()
@@ -109,10 +96,9 @@ export class WhiteboardService {
 		const marking: WhiteboardMarking = {
 			created: Date.now(),
 			createdBy: this.authInfo ? this.authInfo.uid : null,
+			style: options.style,
 			started: options.started,
-			path: options.path,
-			position: options.position,
-			style: options.style
+			path: options.path
 		};
 		const whiteboardMarkings = this.getMarkings(key);
 		return this.observableToPromise(whiteboardMarkings.push(marking));
@@ -130,10 +116,11 @@ export class WhiteboardService {
 		const text: WhiteboardText = {
 			created: Date.now(),
 			createdBy: this.authInfo ? this.authInfo.uid : null,
+			style: options.style,
+			rotation: options.rotation,
+			bounds: options.bounds,
 			content: options.content,
-			font: options.font,
-			position: options.position,
-			style: options.style
+			font: options.font
 		};
 
 		const whiteboardText = this.getTexts(key);
@@ -150,100 +137,6 @@ export class WhiteboardService {
 	// }
 
 	/**
-	 * Whiteboard Shapes
-	 */
-
-	getShapes(key: string): FirebaseListObservable<WhiteboardAnyShape[]> {
-		return this.af.database.list('whiteboardShapes/' + key);
-	}
-
-	createLine(key: string, options: WhiteboardLineOptions): Observable<WhiteboardLine> {
-		const line: WhiteboardLine = {
-			created: Date.now(),
-			createdBy: this.authInfo ? this.authInfo.uid : null,
-			type: 'line',
-			data: {
-				from: options.data.from,
-				to: options.data.to
-			},
-			position: options.position,
-			style: options.style
-		};
-
-		const whiteboardShapes = this.getShapes(key);
-		return this.observableToPromise(whiteboardShapes.push(line));
-	}
-
-	createArc(key: string, options: WhiteboardArcOptions): Observable<WhiteboardArc> {
-		const arc: WhiteboardArc = {
-			created: Date.now(),
-			createdBy: this.authInfo ? this.authInfo.uid : null,
-			type: 'arc',
-			data: {
-				from: options.data.from,
-				through: options.data.through,
-				to: options.data.to
-			},
-			position: options.position,
-			style: options.style
-		};
-
-		const whiteboardShapes = this.getShapes(key);
-		return this.observableToPromise(whiteboardShapes.push(arc));
-	}
-
-	createEllipse(key: string, options: WhiteboardEllipseOptions): Observable<WhiteboardEllipse> {
-		const ellipse: WhiteboardEllipse = {
-			created: Date.now(),
-			createdBy: this.authInfo ? this.authInfo.uid : null,
-			type: 'ellipse',
-			data: {
-				radius: options.data.radius,
-			},
-			position: options.position,
-			style: options.style
-		};
-
-		const whiteboardShapes = this.getShapes(key);
-		return this.observableToPromise(whiteboardShapes.push(ellipse));
-	}
-
-	createPolygon(key: string, options: WhiteboardPolygonOptions): Observable<WhiteboardPolygon> {
-		const polygon: WhiteboardPolygon = {
-			created: Date.now(),
-			createdBy: this.authInfo ? this.authInfo.uid : null,
-			type: 'polygon',
-			data: {
-				sides: options.data.sides,
-				radius: options.data.radius
-			},
-			position: options.position,
-			style: options.style
-		};
-
-		const whiteboardShapes = this.getShapes(key);
-		return this.observableToPromise(whiteboardShapes.push(polygon));
-	}
-
-	createStar(key: string, options: WhiteboardStarOptions): Observable<WhiteboardStar> {
-		const star: WhiteboardStar = {
-			created: Date.now(),
-			createdBy: this.authInfo ? this.authInfo.uid : null,
-			type: 'star',
-			data: {
-				points: options.data.points,
-				radius1: options.data.radius1,
-				radius2: options.data.radius2
-			},
-			position: options.position,
-			style: options.style
-		};
-
-		const whiteboardShapes = this.getShapes(key);
-		return this.observableToPromise(whiteboardShapes.push(star));
-	}
-
-	/**
 	 * Eraser
 	 */
 
@@ -256,12 +149,6 @@ export class WhiteboardService {
 	eraseText(whiteboardKey: string, textKey: string): Observable<WhiteboardText> {
 		return this.observableToPromise(
 			this.af.database.object('whiteboardText/' + whiteboardKey + '/' + textKey)
-				.update({ erased: Date.now() }));
-	}
-
-	eraseShape(whiteboardKey: string, shapeKey: string): Observable<WhiteboardAnyShape> {
-		return this.observableToPromise(
-			this.af.database.object('whiteboardShapes/' + whiteboardKey + '/' + shapeKey)
 				.update({ erased: Date.now() }));
 	}
 

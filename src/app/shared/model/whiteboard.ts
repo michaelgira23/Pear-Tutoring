@@ -18,134 +18,44 @@ export interface WhiteboardOptions {
 
 export interface WhiteboardMarking extends WhiteboardItem {
 	started: number;
-	path: Point[];
+	path: Segment[];
 }
 
 export interface WhiteboardMarkingOptions extends WhiteboardItemOptions {
 	started: number;
-	path: Point[];
+	path: Segment[];
 }
+
+export type WhiteboardShapeType = 'line' | 'arc' | 'ellipse' | 'polygon' | 'star' | 'custom';
 
 /**
  * Whiteboard Text
  */
 
 export interface WhiteboardText extends WhiteboardItem {
+	rotation: number;
+	bounds: Rectangle;
 	content: string;
 	font: Font;
 }
 
 export interface WhiteboardTextOptions extends WhiteboardItemOptions {
+	rotation: number;
+	bounds: Rectangle;
 	content: string;
 	font: Font;
 }
-
-/**
- * Whiteboard Shapes
- */
-
-export interface WhiteboardLine extends WhiteboardShape {
-	data: {
-		from: Point;
-		to: Point;
-	};
-}
-
-export interface WhiteboardLineOptions extends WhiteboardShapeOptions {
-	data: {
-		from: Point;
-		to: Point;
-	};
-}
-
-export interface WhiteboardArc extends WhiteboardShape {
-	data: {
-		from: Point;
-		through: Point;
-		to: Point;
-	};
-}
-
-export interface WhiteboardArcOptions extends WhiteboardShapeOptions {
-	data: {
-		from: Point,
-		through: Point;
-		to: Point;
-	};
-}
-
-export interface WhiteboardEllipse extends WhiteboardShape {
-	data: {
-		radius: number | Size;
-	};
-}
-
-export interface WhiteboardEllipseOptions extends WhiteboardShapeOptions {
-	data: {
-		radius: number | Size;
-	};
-}
-
-export interface WhiteboardPolygon extends WhiteboardShape {
-	data: {
-		sides: number;
-		radius: number | Size;
-	};
-}
-
-export interface WhiteboardPolygonOptions extends WhiteboardShapeOptions {
-	data: {
-		sides: number;
-		radius: number | Size;
-	};
-}
-
-export interface WhiteboardStar extends WhiteboardShape {
-	data: {
-		points: number;
-		radius1: number;
-		radius2: number;
-	};
-}
-
-export interface WhiteboardStarOptions extends WhiteboardShapeOptions {
-	data: {
-		points: number;
-		radius1: number;
-		radius2: number;
-	};
-}
-
-export interface WhiteboardShape extends WhiteboardItem {
-	type: WhiteboardShapeType;
-	data: any;
-}
-
-export interface WhiteboardShapeOptions extends WhiteboardItemOptions {
-	type: WhiteboardShapeType;
-	data: any;
-}
-
-export type WhiteboardShapeType = 'line' | 'arc' | 'ellipse' | 'polygon' | 'star';
-export type WhiteboardAnyShape = WhiteboardLine | WhiteboardArc | WhiteboardEllipse | WhiteboardPolygon | WhiteboardStar;
-export type WhiteboardAnyShapeOptions = WhiteboardLineOptions
-	| WhiteboardArcOptions
-	| WhiteboardEllipseOptions
-	| WhiteboardPolygonOptions
-	| WhiteboardStarOptions;
 
 /**
  * General Types
  */
 
 export interface WhiteboardItem extends Metadata {
-	position: Position;
 	style: StyleOptions;
 	erased?: number;
 }
 
 export interface WhiteboardItemOptions {
-	position: Position;
 	style: StyleOptions;
 }
 
@@ -159,13 +69,7 @@ export interface Metadata {
 
 // Key should be timestamp, value should be any property changed
 export interface Edits {
-	[key: number]: any;
-}
-
-export interface Position {
-	anchor: Point;
-	rotation: number;
-	scaling: Point;
+	[timestamp: number]: any;
 }
 
 /**
@@ -201,13 +105,26 @@ export interface Shadow {
 
 export interface Font {
 	family: string;
-	weight: string | number;
+	weight: number;
 	size: number | string;
 }
 
 /**
  * Simple Types
  */
+
+export interface Segment {
+	point: Point;
+	handleIn?: Point;
+	handleOut?: Point;
+}
+
+export interface Rectangle {
+	x: number;
+	y: number;
+	width: number;
+	height: number;
+}
 
 export interface Size {
 	width: number;
