@@ -19,7 +19,7 @@ export class PermissionsService {
 	addScope(
 		$key: string,
 		type: PermissionsType,
-		scopes: Partial<PermissionsScopes>,
+		scopes: PermissionsScopes,
 		group: PermissionsGroup,
 		$uid?: string
 	): Observable<any> {
@@ -42,7 +42,7 @@ export class PermissionsService {
 	removeScope(
 		$key: string,
 		type: PermissionsType,
-		scopes: Partial<PermissionsScopes>,
+		scopes: PermissionsScopes,
 		group: PermissionsGroup,
 		$uid?: string
 	) {
@@ -80,15 +80,15 @@ export type PermissionsGroup = 'anonymous' | 'loggedIn' | 'user';
 
 export interface Permission {
 	// We can't use [T in PermissionsGroup] here since 'user' is a special case with the extra $uid.
-	anonymous: Partial<PermissionsScopes>;
-	loggedIn: Partial<PermissionsScopes>;
+	anonymous: PermissionsScopes;
+	loggedIn: PermissionsScopes;
 	user: {
-		[$uid: string]: Partial<PermissionsScopes>;
+		[$uid: string]: PermissionsScopes;
 	};
 };
 
 export interface PermissionsScopes {
-	read: boolean;
-	write: boolean;
-	moderator: boolean;
+	read?: boolean;
+	write?: boolean;
+	moderator?: boolean;
 };
