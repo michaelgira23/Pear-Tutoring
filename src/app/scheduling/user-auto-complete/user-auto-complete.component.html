@@ -2,8 +2,8 @@
   <app-display-user *ngFor="let user of selectedUsers" [user]="user"></app-display-user>
 </div>
 
-<input type="text" [ngModel]="searchStr" (ngModelChange)="onSearchKeyup($event)" (keyup.Enter)="addUser(0)" (blur)="addUser(0)">
-<button>Add</button>
+<input type="text" [ngModel]="searchStr" (ngModelChange)="onSearchKeyup($event)" (keyup.Enter)="addUser(0)">
+<button type="button">Add</button>
 
 <div class="drop-down">
   <div class="drop-down-items" *ngFor="let user of userResults; let i = index" (click)="addUser(i)">

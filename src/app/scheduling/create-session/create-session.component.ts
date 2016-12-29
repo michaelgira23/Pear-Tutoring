@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { Validators, FormGroup, FormBuilder } from '@angular/forms';
+import { Validators, FormGroup, FormBuilder, FormControl } from '@angular/forms';
 import { Router } from '@angular/router';
 import { SessionService, AllowedSubjects } from '../../shared/model/session.service';
 import { Session } from '../../shared/model/session';
@@ -15,14 +15,29 @@ import { Subscription } from 'rxjs/Rx';
 })
 export class CreateSessionComponent implements OnInit, OnChanges {
 
-	createSessionForm: FormGroup;
+	createSessionForm: FormGroup = this.fb.group({
+				start: ['', Validators.required],
+				end: ['', Validators.required],
+				subject: ['', Validators.required],
+				max: ['', Validators.required],
+				listed: [false, Validators.required],
+				title: ['', [Validators.required]],
+				desc: ['', Validators.required],
+				tutees: [[], Validators.required],
+				wbBackground: [''],
+				tags: ['']
+			});
 	allUsers: User[];
 	allowedSubjects: string[] = AllowedSubjects;
+
+	customCtrlReady = false;
 
 	// The component detects if there's a session id provided, and prefill the form with values from the session information
 	sessionInfo: Session;
 	@Input()
 	sessionId: string;
+	@Input()
+	creating: boolean;
 
 	findSession$: Subscription;
 
@@ -32,19 +47,6 @@ export class CreateSessionComponent implements OnInit, OnChanges {
 				private router: Router) { }
 
 	ngOnInit() {
-		this.createSessionForm = this.fb.group({
-			start: ['', Validators.required],
-			end: ['', Validators.required],
-			subject: ['', Validators.required],
-			max: ['', Validators.required],
-			listed: [false, Validators.required],
-			title: ['', [Validators.required]],
-			desc: ['', Validators.required],
-			tutees: [[], Validators.required],
-			wbBackground: [''],
-			tags: ['']
-		});
-
 		this.userService.findAllUsers().subscribe(
 			val => this.allUsers = val,
 			err => console.log('Getting users error', err)
@@ -54,32 +56,41 @@ export class CreateSessionComponent implements OnInit, OnChanges {
 	}
 
 	ngOnChanges(changes: SimpleChanges) {
-		if (changes['sessionId']) { this.sessionId = changes['sessionId'].currentValue; }
-		this.refreshSessionInfo();
+		if (!this.creating) {
+			if (changes['sessionId']) { this.sessionId = changes['sessionId'].currentValue; }
+			this.refreshSessionInfo();
+		} else {
+			this.customCtrlReady = true
+		}
 	}
 
 	refreshSessionInfo() {
-		// if we have the id, query the database and get the session object
-		if (this.findSession$) {this.findSession$.unsubscribe(); }
-		this.findSession$ = this.sessionService.findSession(this.sessionId).subscribe(val => {
-			this.sessionInfo = val;
-			this.formInit();
-		});
+		// if we have the id that means we are doing the update, query the database and get the session object
+		if (this.sessionId) {
+			if (this.findSession$) {this.findSession$.unsubscribe(); }
+			this.findSession$ = this.sessionService.findSession(this.sessionId).subscribe(val => {
+				this.sessionInfo = val;
+				this.formInit();
+			});
+		}
 	}
 
 	formInit() {
-		this.createSessionForm = this.fb.group({
-			start: [this.sessionInfo.start.format('YYYY-MM-DD'), Validators.required],
-			end: [this.sessionInfo.end.format('YYYY-MM-DD'), Validators.required],
-			subject: [this.sessionInfo.subject, Validators.required],
-			max: [this.sessionInfo.max, [Validators.required]],
-			listed: [this.sessionInfo.listed, Validators.required],
-			title: [this.sessionInfo.title, [Validators.required]],
-			desc: [this.sessionInfo.desc, Validators.required],
-			tutees: [this.sessionInfo.tutees, Validators.required],
-			wbBackground: [''],
-			tags: [this.sessionInfo.tags ? this.sessionInfo.tags.join(', ') : '']
-		});
+		if (this.sessionInfo) {
+			this.createSessionForm = this.fb.group({
+				start: [this.sessionInfo.start.format('YYYY-MM-DD'), Validators.required],
+				end: [this.sessionInfo.end.format('YYYY-MM-DD'), Validators.required],
+				subject: [this.sessionInfo.subject, Validators.required],
+				max: [this.sessionInfo.max, [Validators.required]],
+				listed: [this.sessionInfo.listed, Validators.required],
+				title: [this.sessionInfo.title, [Validators.required]],
+				desc: [this.sessionInfo.desc, Validators.required],
+				tutees: [this.sessionInfo.tutees, Validators.required],
+				wbBackground: [''],
+				tags: [this.sessionInfo.tags ? this.sessionInfo.tags.join(', ') : '']
+			});
+			this.customCtrlReady = true;
+		}
 	}
 
 	createSession() {

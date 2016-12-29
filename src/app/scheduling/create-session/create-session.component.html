@@ -14,7 +14,7 @@
   </fieldset>
   <fieldset>
     add tutees: <br/>
-    <app-user-auto-complete formControlName="tutees"></app-user-auto-complete>
+    <app-user-auto-complete *ngIf="customCtrlReady" formControlName="tutees"></app-user-auto-complete>
   </fieldset>
   <fieldset *ngIf="!sessionId && !sessionInfo">
     whiteboard options: <br/>

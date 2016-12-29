@@ -20,7 +20,9 @@ export class UserAutoCompleteComponent implements OnInit, ControlValueAccessor {
 	set userValue(users: User[]) {
 		if (this.selectedUsers.length !== users.length) {
 			this.selectedUsers = users;
-			this.onChangeCallback(users);
+			if (this.onChangeCallback) {
+				this.onChangeCallback(users);
+			}
 		}
 	};
 	get userValue(): User[] {
@@ -47,6 +49,8 @@ export class UserAutoCompleteComponent implements OnInit, ControlValueAccessor {
 		if (str) {
 			this.searchStr = str;
 			this.onSearchStr$.next(str);
+		} else {
+			this.searchStr = '';
 		}
 	}
 
@@ -56,8 +60,8 @@ export class UserAutoCompleteComponent implements OnInit, ControlValueAccessor {
 		this.searchStr = '';
 	}
 
-	containsUser(user: User, arr: User[]): boolean {
-		return !!arr.find(user => user.$key === user.$key);
+	containsUser(user1: User, arr: User[]): boolean {
+		return !!arr.find(user2 => user1.$key === user2.$key);
 	}
 
 	writeValue(value: User[]) {
