@@ -21,9 +21,11 @@ export class SchedulingComponent implements OnInit {
 		return this.tutorSessions.concat(this.tuteeSessions);
 	};
 
-	constructor(private sessionService: SessionService,
-				private fb: FormBuilder,
-				private auth: AuthService) { }
+	constructor(
+		private sessionService: SessionService,
+		private fb: FormBuilder,
+		private auth: AuthService
+	) { }
 
 	ngOnInit() {
 		this.searchByTagForm = this.fb.group({
@@ -64,7 +66,7 @@ export class SchedulingComponent implements OnInit {
 	findSessionsBySubject() {
 		let subject = this.searchBySubjectForm.value.subject;
 		this.sessionService.findSessionsBySubject(subject).subscribe(val => {
-			console.log(val)
+			console.log(val);
 			this.sessionsBySubject = val;
 		}, console.log);
 	}

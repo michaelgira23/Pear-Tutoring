@@ -48,7 +48,7 @@ export class SessionService {
 		return this.promiseToObservable(this.sdkDb.update(dataToSave));
 	}
 
-	// Take a firebase query for a single session and insert a user object into the tutor and tutee fields. 
+	// Take a firebase query for a single session and insert a user object into the tutor and tutee fields.
 	// Wrap this function around a firebase query to a session i can get the session object with the users
 	combineWithUser(sessionQuery: Observable<any>): Observable<Session> {
 		let sessionWithUser;
@@ -63,7 +63,7 @@ export class SessionService {
 			sessionWithUser.tutor = val;
 			return sessionWithUser;
 		})
-		// Then query the tutees, note the session is stored temporarily in sessionsWithUser, and used later to combine with the users info. 
+		// Then query the tutees, note the session is stored temporarily in sessionsWithUser, and used later to combine with the users info.
 		.flatMap(val => {
 			sessionWithUser = val;
 			return Observable.combineLatest(objToArr(val.tutees).map(tutee => {
@@ -78,7 +78,7 @@ export class SessionService {
 		});
 	}
 
-	// Take a firebase query for an array of sessions and insert a user object into the tutor and tutee fields. 
+	// Take a firebase query for an array of sessions and insert a user object into the tutor and tutee fields.
 	combineArrWithUser(sessionQuery: Observable<any[]>): Observable<Session[]> {
 		let sessionsWithUser: any[];
 		// First fill in the tutor field of each session
@@ -168,7 +168,7 @@ export class SessionService {
 		).map(Session.fromJson);
 	}
 
-	// Find the session ids where the user is a tutor or a tutee. Note the info in stored in the user object. 
+	// Find the session ids where the user is a tutor or a tutee. Note the info in stored in the user object.
 	findMySessions(): {tutorSessions: Observable<Session[]>, tuteeSessions: Observable<Session[]>} {
 		if (!this.uid) { return {tutorSessions: Observable.throw('Rip no login info'), tuteeSessions: Observable.throw('Rip no login info')}; };
 		return {
@@ -181,7 +181,7 @@ export class SessionService {
 		};
 	}
 
-	// Find all of the sessions where the listed field is true. 
+	// Find all of the sessions where the listed field is true.
 	findPublicSessions(): Observable<Session[]> {
 		return this.combineArrWithUser(
 			this.combineArrWithWb(
@@ -215,7 +215,7 @@ export class SessionService {
 		).map(Session.fromJsonArray);
 	}
 
-	// Find sessions that fits the free times of the user. 
+	// Find sessions that fits the free times of the user.
 	findSessionsByFreeTime(day: number, timesInDay: FreeTime[]): Observable<Session[]> {
 		let start = 0;
 		let sessionsList: Session[] = [];
@@ -298,14 +298,14 @@ export class SessionService {
 		});
 	}
 
-	// WIP:  create an anonymous session, for quick access and sharing of the whiteboard. 
+	// WIP:  create an anonymous session, for quick access and sharing of the whiteboard.
 	createAnonSession(): Observable<any> {
 		return Observable.from(undefined);
 	}
 
-	// Delete a session. 
+	// Delete a session.
 	deleteSession(sessionId: string): Observable<any> {
-		// calling update null on a location in the database will cause it to be deleted. 
+		// calling update null on a location in the database will cause it to be deleted.
 		if (!this.uid) { return Observable.throw('Rip no login info'); };
 		return this.db.object('sessions/' + sessionId).flatMap(session => {
 			let dataToSave = {};
@@ -361,7 +361,7 @@ export class SessionService {
 	}
 
 	addTutee(sessionId: string, tuteeId: string) {
-		let dataToSave = {}
+		let dataToSave = {};
 		dataToSave[`sessions/${sessionId}/tutees/${tuteeId}`] = true;
 		dataToSave[`users/${tuteeId}/tuteeSessions/${sessionId}`] = true;
 		return this.firebaseUpdate(dataToSave);
