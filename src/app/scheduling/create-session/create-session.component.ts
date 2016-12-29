@@ -87,7 +87,7 @@ export class CreateSessionComponent implements OnInit, OnChanges {
 		sessionToCreate.start = moment(sessionToCreate.start, 'YYYY-MM-DD');
 		sessionToCreate.end = moment(sessionToCreate.end, 'YYYY-MM-DD');
 		sessionToCreate.tags = sessionToCreate.tags.split(',').map(val => val.trim());
-		sessionToCreate.tutees = sessionToCreate.tutees.split(',').map(val => val.trim());
+		sessionToCreate.tutees = sessionToCreate.tutees.map(val => val.$key);
 		sessionToCreate.tutor = this.userService.uid;
 		delete sessionToCreate.wbBackground;
 		let wbOpt = {

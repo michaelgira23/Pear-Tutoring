@@ -33,7 +33,7 @@ export class DisplaySessionComponent implements OnInit {
 	}
 
 	updateSession() {
-		this.router.navigate(['scheduling', 'update', this.session.$key])
+		this.router.navigate(['scheduling', 'update', this.session.$key]);
 	}
 
 	deleteSession() {

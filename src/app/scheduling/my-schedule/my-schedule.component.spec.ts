@@ -6,23 +6,23 @@ import { DebugElement } from '@angular/core';
 import { MyScheduleComponent } from './my-schedule.component';
 
 describe('MyScheduleComponent', () => {
-  let component: MyScheduleComponent;
-  let fixture: ComponentFixture<MyScheduleComponent>;
+	let component: MyScheduleComponent;
+	let fixture: ComponentFixture<MyScheduleComponent>;
 
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      declarations: [ MyScheduleComponent ]
-    })
-    .compileComponents();
-  }));
+	beforeEach(async(() => {
+		TestBed.configureTestingModule({
+			declarations: [ MyScheduleComponent ]
+		})
+		.compileComponents();
+	}));
 
-  beforeEach(() => {
-    fixture = TestBed.createComponent(MyScheduleComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+	beforeEach(() => {
+		fixture = TestBed.createComponent(MyScheduleComponent);
+		component = fixture.componentInstance;
+		fixture.detectChanges();
+	});
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+	it('should create', () => {
+		expect(component).toBeTruthy();
+	});
 });
