@@ -52,6 +52,14 @@ export class UserService {
 		let userToSave = Object.assign({}, user);
 		let dataToSave = {};
 		dataToSave[`users/${uid}`] = userToSave;
+		let name = user.firstName + ' ' + user.lastName;
+		for (let i=0;i<name.length;i++) {
+			for (let j=i+1;j<name.length+1;j++) {
+				if (name.substring(i,j) !== ' ') {
+					dataToSave[`userNameIndex/${name.substring(i,j)}/${uid}`] = true;
+				}
+			}
+		}
 		return this.firebaseUpdate(dataToSave);
 	}
 
@@ -63,6 +71,13 @@ export class UserService {
 	findUser(uid: string): Observable<User> {
 		return this.db.object(`users/${uid}`)
 		.map(User.fromJson);
+	}
+
+	searchUsersByName(str: string): Observable<User[]> {
+		return this.db.list(`userNameIndex/${str}`)
+		.flatMap(uids => {
+			return Observable.combineLatest(uids.map(uid => this.findUser(uid.$key)));
+		});
 	}
 
 	uploadPfp(pfp: File): Observable<any> {
@@ -149,11 +164,9 @@ export class UserService {
 
 export interface RegisterOptions {
 	firstName: string;
-	middleName: string;
 	lastName: string;
 	email: string;
 	password: string;
-	name?: string;
 }
 
 export interface FreeTimes {

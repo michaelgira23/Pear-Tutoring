@@ -2,11 +2,11 @@ import { Injectable, Inject } from '@angular/core';
 import { Observable, Subject } from 'rxjs/Rx';
 import { AngularFireDatabase, FirebaseRef } from 'angularfire2';
 import { Session } from './session';
-import { UserService, userStatus, FreeTime } from './user.service';
+import { UserService, userStatus, FreeTimes } from './user.service';
 import { ChatService } from './chat.service';
 import { AuthService } from '../security/auth.service';
 import { WhiteboardService, WhiteboardOptions } from './whiteboard.service';
-import { Moment } from 'moment';
+import * as moment from 'moment';
 import { objToArr, arrToObj } from '../common/utils';
 
 export const AllowedSubjects = ['Math', 'English', 'Art'];
@@ -216,29 +216,33 @@ export class SessionService {
 	}
 
 	// Find sessions that fits the free times of the user. 
-	findSessionsByFreeTime(day: number, timesInDay: FreeTime[]): Observable<Session[]> {
-		let start = 0;
+	findSessionsByFreeTime(timesInDay: FreeTimes): Observable<Session[]> {
 		let sessionsList: Session[] = [];
-		let query: Observable<any> = this.db.list('sessions', {
-			query: {
-				startAt: start,
-				limitToFirst: 10
-			}
-		}).flatMap(sessions => {
-			sessions.forEach(session => {
-				timesInDay.forEach(time => {
-					if (time.from.unix() < session.start && time.to.unix() > session.end) {
-						sessionsList.push(session);
+		let queryList: Observable<any>[] = [];
+		let secFromMdn = function(m: moment.Moment) {
+			return m.startOf('day').diff(m);
+		}
+		for (let day in timesInDay) {
+			if (timesInDay[day]) {
+				let dayInNextWeek = moment().day(day);
+				queryList.push(this.db.list('sessions/', {
+					query: {
+						orderByChild: 'ywd',
+						equalTo: [dayInNextWeek.year(), dayInNextWeek.week(), dayInNextWeek.day()].join('-')
 					}
-				});
-			});
-			if (sessionsList.length >= 5 || !sessions) {
-				return Observable.of(sessionsList);
+				}).map(sessions => {
+					sessions.forEach(session => {
+						timesInDay[day].forEach(time => {
+							if (secFromMdn(moment(session.start, 'X')) < secFromMdn(time.from) && secFromMdn(moment(session.end, 'X')) > secFromMdn(time.to)) {
+								sessionsList.push(session);
+							}
+						})
+					})
+					return sessions;
+				}))
 			}
-			start += 10;
-			return query;
-		});
-		return query.map(Session.fromJsonArray);
+		}
+		return Observable.combineLatest(queryList);
 	}
 
 	// Update the information of a session
@@ -273,7 +277,8 @@ export class SessionService {
 		sessionToSave.end = session.end.unix();
 		sessionToSave.tutees = arrToObj(sessionToSave.tutees);
 		sessionToSave.tags = arrToObj(sessionToSave.tags);
-		sessionToSave['dayInWeek'] = session.end.format('d');
+		// store the date of the session in year - week in year - day in week
+		sessionToSave['ywd'] = [session.end.year(), session.end.week(), session.end.day()].join('-');
 		dataToSave['sessions/' + sessionId] = sessionToSave;
 
 		return this.firebaseUpdate(dataToSave);
@@ -369,8 +374,8 @@ export class SessionService {
 }
 
 export interface SessionOptions {
-	start: Moment;
-	end: Moment;
+	start: moment.Moment;
+	end: moment.Moment;
 	tutor: string;
 	subject: string;
 	max: number;

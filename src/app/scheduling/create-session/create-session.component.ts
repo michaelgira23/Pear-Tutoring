@@ -40,7 +40,7 @@ export class CreateSessionComponent implements OnInit, OnChanges {
 			listed: [false, Validators.required],
 			title: ['', [Validators.required]],
 			desc: ['', Validators.required],
-			tutees: ['', Validators.required],
+			tutees: [[], Validators.required],
 			wbBackground: [''],
 			tags: ['']
 		});
@@ -69,14 +69,14 @@ export class CreateSessionComponent implements OnInit, OnChanges {
 
 	formInit() {
 		this.createSessionForm = this.fb.group({
-			start: [this.sessionInfo.start.format('MM-DD-YYYY'), Validators.required],
-			end: [this.sessionInfo.end.format('MM-DD-YYYY'), Validators.required],
+			start: [this.sessionInfo.start.format('YYYY-MM-DD'), Validators.required],
+			end: [this.sessionInfo.end.format('YYYY-MM-DD'), Validators.required],
 			subject: [this.sessionInfo.subject, Validators.required],
-			max: [this.sessionInfo.max, Validators.required],
+			max: [this.sessionInfo.max, [Validators.required]],
 			listed: [this.sessionInfo.listed, Validators.required],
 			title: [this.sessionInfo.title, [Validators.required]],
 			desc: [this.sessionInfo.desc, Validators.required],
-			tutees: [this.sessionInfo.tutees.map(tutee => tutee.$key).join(', '), Validators.required],
+			tutees: [this.sessionInfo.tutees, Validators.required],
 			wbBackground: [''],
 			tags: [this.sessionInfo.tags ? this.sessionInfo.tags.join(', ') : '']
 		});
@@ -84,8 +84,8 @@ export class CreateSessionComponent implements OnInit, OnChanges {
 
 	createSession() {
 		let sessionToCreate = Object.assign({}, this.createSessionForm.value);
-		sessionToCreate.start = moment(sessionToCreate.start, 'MM-DD-YYYY');
-		sessionToCreate.end = moment(sessionToCreate.end, 'MM-DD-YYYY');
+		sessionToCreate.start = moment(sessionToCreate.start, 'YYYY-MM-DD');
+		sessionToCreate.end = moment(sessionToCreate.end, 'YYYY-MM-DD');
 		sessionToCreate.tags = sessionToCreate.tags.split(',').map(val => val.trim());
 		sessionToCreate.tutees = sessionToCreate.tutees.split(',').map(val => val.trim());
 		sessionToCreate.tutor = this.userService.uid;

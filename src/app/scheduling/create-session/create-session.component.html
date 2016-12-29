@@ -1,12 +1,12 @@
 <form [formGroup]="createSessionForm" (ngSubmit)="createSession()">
   <fieldset>
-    start: <input formControlName="start" required><br/>
-    end: <input formControlName="end" required><br/>
+    start: <input formControlName="start" requireds type="date"><br/>
+    end: <input formControlName="end" required type="date"><br/>
     Subject: 
     <select formControlName="subject">
       <option *ngFor="let option of allowedSubjects" [value]="option">{{ option }}</option>
     </select><br/>
-    max: <input formControlName="max" required><br/>
+    max: <input formControlName="max" required type="number"><br/>
     listed: <input type="checkbox" formControlName="listed" required><br/>
     title: <input formControlName="title" required><br/>
     description: <textarea formControlName="desc" required></textarea>
@@ -14,7 +14,7 @@
   </fieldset>
   <fieldset>
     add tutees: <br/>
-    <textarea formControlName="tutees" required row=1></textarea>
+    <app-user-auto-complete formControlName="tutees"></app-user-auto-complete>
   </fieldset>
   <fieldset *ngIf="!sessionId && !sessionInfo">
     whiteboard options: <br/>

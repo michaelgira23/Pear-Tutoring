@@ -28,7 +28,7 @@ export class TimePickerComponent implements OnInit {
 	ngOnInit() {
 		this.userService.getFreeTimes().subscribe(val => {
 			this.freeTimesModel = Object.assign(this.freeTimesModel, val);
-			this.sessionService.findSessionsByFreeTime(6, this.freeTimesModel['Sunday']).subscribe(console.log, console.log);
+			this.sessionService.findSessionsByFreeTime(this.freeTimesModel).subscribe(console.log, console.log);
 		}, console.log);
 	}
 
@@ -38,7 +38,7 @@ export class TimePickerComponent implements OnInit {
 			if (toD.isSameOrAfter(fromD)) {
 				this.userService.addFreeTime(day, {from: fromD.valueOf(), to: toD.valueOf()}).subscribe(
 					val => {
-						this.freeTimesModel[day].sort((a, b) => a.from.valueOf() - b.from.valueOf());
+							this.freeTimesModel[day].sort((a, b) => a.from.valueOf() - b.from.valueOf());
 					},
 					err => {
 						console.log(err);
