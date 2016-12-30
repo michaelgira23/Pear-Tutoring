@@ -42,6 +42,9 @@ export class Pen {
 		if (this.currentPath && !this.currentPathFinished && this.currentPath.segments.length > 1) {
 			this.currentPathFinished = true;
 
+			// Simplify path
+			this.currentPath.simplify(10);
+
 			// Insert path into database
 			const markingOptions: WhiteboardMarkingOptions = {
 				started: this.currentPathStarted,

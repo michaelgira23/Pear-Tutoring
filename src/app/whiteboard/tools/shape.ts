@@ -141,10 +141,18 @@ export class Shape {
 				this.visualArcPoint = null;
 			}
 
+			// Close shape
+			this.currentShape.add(this.currentShape.segments[0]);
+
+			// Simplify path if it's a custom shape
+			if (this.currentShapeType === 'custom') {
+				this.currentShape.simplify(10);
+			}
+
 			// Save shape
 			const markingOptions: WhiteboardMarkingOptions = {
 				started: this.currentShapeStarted,
-				path: segments.serialize(this.currentShape.segments, true),
+				path: segments.serialize(this.currentShape.segments),
 				style: this.whiteboard.styleOptions
 			};
 			this.whiteboard.whiteboardService.createMarking(this.whiteboard.key, markingOptions)

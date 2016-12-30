@@ -26,7 +26,7 @@ export const font = {
 };
 
 // Serialization of segments
-function paperObjectToSegmentsArray(paperSegments: any, connectLast = false): Segment[] {
+function paperObjectToSegmentsArray(paperSegments: any): Segment[] {
 	let segmentsArr: Segment[] = [];
 	paperSegments.forEach(segment => {
 		segmentsArr.push({
@@ -44,10 +44,6 @@ function paperObjectToSegmentsArray(paperSegments: any, connectLast = false): Se
 			}
 		});
 	});
-	// Connect last point to the first point
-	if (connectLast) {
-		segmentsArr.push(segmentsArr[0]);
-	}
 	return segmentsArr;
 }
 
