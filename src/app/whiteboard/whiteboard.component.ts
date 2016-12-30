@@ -374,10 +374,16 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 			});
 		}
 
-		// Erase current path in pen tool, if it isn't in the proccess of being drawn
+		// Erase current path in pen tool if it isn't in the proccess of being drawn
 		if (this.tools.pen.currentPath && this.tools.pen.currentPathFinished) {
 			this.tools.pen.currentPath.remove();
 			this.tools.pen.currentPath = null;
+		}
+
+		// Erase current shape in shape tool if it isn't in the proccess of being drawn
+		if (this.tools.shape.currentShape && this.tools.shape.currentShapeFinished) {
+			this.tools.shape.currentShape.remove();
+			this.tools.shape.currentShape = null;
 		}
 	}
 
@@ -386,7 +392,6 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	 */
 
 	textsToCanvas(canvasText: WhiteboardText[]) {
-		console.log('text to canvas', canvasText);
 		this.clearText();
 
 		// Loop through texts and add to canvas
@@ -402,8 +407,6 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 				// Combine paperOptions and fontOptions
 				const fontOptions = font.deserialize(text.font);
 				paperOptions = Object.assign(paperOptions, fontOptions);
-
-				console.log('paper options', paperOptions);
 
 				this.canvasText[text.$key] = new paper.PointText(paperOptions);
 				// Set bounds here because it doesn't work in object init for some reason
@@ -422,7 +425,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 			});
 		}
 
-		// Erase current text too, if it isn't in the process of being created
+		// Erase current text too if it isn't in the process of being created
 		if (this.tools.text.currentText && this.tools.text.currentTextFinished) {
 			this.tools.text.currentText.remove();
 			this.tools.text.currentText = null;

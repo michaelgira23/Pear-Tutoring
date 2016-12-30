@@ -7,31 +7,35 @@
 	[style.width]="takingSnapshot ?  snapshotDimensions.width + 'px' : 'inherit'"></canvas>
 
 <!--Whiteboard Name-->
-<md-input-container class="whiteboard-name">
-	<form (submit)="changeWbName(wbNameInput.value)">
-		<input #wbNameInput md-input type="text" (blur)=changeWbName(wbNameInput.value) [value]="wbName">
-	</form>
-</md-input-container>
+<form class="whiteboard-name" (submit)="changeWbName(wbNameInput.value)">
+	<div class="mdl-textfield mdl-js-textfield">
+		<input #wbNameInput id="whiteboard-name" class="mdl-textfield__input" (blur)=changeWbName(wbNameInput.value) [value]="wbName">
+		<!-- <label class="mdl-textfield__label" for="whiteboard-name">Whiteboard Name</label> -->
+	</div>
+</form>
 
 <!-- Tool selection -->
 <div *ngIf="showToolbar" class="toolbar">
-	<md-button-toggle-group [vertical]="true" [(ngModel)]="tool">
-		<md-button-toggle value="cursor">
-			<span class="fa fa-mouse-pointer"></span>
-		</md-button-toggle>
-		<md-button-toggle value="pen">
-			<span class="fa fa-pencil"></span>
-		</md-button-toggle>
-		<md-button-toggle value="eraser">
-			<span class="fa fa-eraser"></span>
-		</md-button-toggle>
-		<md-button-toggle value="text">
-			<span class="fa fa-i-cursor"></span>
-		</md-button-toggle>
-		<md-button-toggle value="shape">
-			<span class="fa fa-square"></span>
-		</md-button-toggle>
-	</md-button-toggle-group>
+	<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect"
+		[disabled]="tool === 'cursor'" (click)="tool = 'cursor'">
+		<span class="fa fa-mouse-pointer"></span>
+	</button>
+	<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect"
+		[disabled]="tool === 'pen'" (click)="tool = 'pen'">
+		<span class="fa fa-pencil"></span>
+	</button>
+	<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect"
+		[disabled]="tool === 'eraser'" (click)="tool = 'eraser'">
+		<span class="fa fa-eraser"></span>
+	</button>
+	<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect"
+		[disabled]="tool === 'text'" (click)="tool = 'text'">
+		<span class="fa fa-i-cursor"></span>
+	</button>
+	<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect"
+		[disabled]="tool === 'shape'" (click)="tool = 'shape'">
+		<span class="fa fa-square"></span>
+	</button>
 </div>
 
 <!-- Tool-Specific Toolbars -->
@@ -47,11 +51,7 @@
 	</div>
 	<div class="option">
 		<label>Width</label>
-		<md-slider
-			[(ngModel)]="styleOptions.stroke.width"
-			[min]="1"
-			[max]="100"
-			[thumb-label]="true"></md-slider>
+		<input type="range" min="1" max="100" [(ngModel)]="styleOptions.stroke.width">
 	</div>
 </div>
 
@@ -66,11 +66,7 @@
 	</div>
 	<div class="option">
 		<label>Size</label>
-		<md-slider
-			[(ngModel)]="fontOptions.size"
-			[min]="1"
-			[max]="100"
-			[thumb-label]="true"></md-slider>
+		<input type="range" min="1" max="100" [(ngModel)]="fontOptions.size">
 	</div>
 </div>
 
@@ -92,29 +88,40 @@
 	</div>
 	<div class="option">
 		<label>Stroke Size</label>
-		<md-slider
-			[(ngModel)]="styleOptions.stroke.width"
-			[min]="1"
-			[max]="100"
-			[thumb-label]="true"></md-slider>
+		<input type="range" min="1" max="100" [(ngModel)]="styleOptions.stroke.width">
 	</div>
 	<div class="option">
-		<label>Shape</label>
-		<md-radio-group [(ngModel)]="shapeType">
-			<md-radio-button value="line">Line</md-radio-button>
-			<md-radio-button value="arc">Arc</md-radio-button>
-			<md-radio-button value="ellipse">Circle/Ellipse</md-radio-button>
-			<md-radio-button value="polygon">
-				Polygon
+		<label>Shape {{ shapeType }}</label>
+		<div class="shapes">
+			<label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="shape-line">
+				<input type="radio" id="shape-line" class="mdl-radio__button" name="shape" value="line" [(ngModel)]="shapeType">
+				<span class="mdl-radio__label">Line</span>
+			</label>
+			<label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="shape-arc">
+				<input type="radio" id="shape-arc" class="mdl-radio__button" name="shape" value="arc" [(ngModel)]="shapeType">
+				<span class="mdl-radio__label">Arc</span>
+			</label>
+			<label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="shape-ellipse">
+				<input type="radio" id="shape-ellipse" class="mdl-radio__button" name="shape" value="ellipse" [(ngModel)]="shapeType">
+				<span class="mdl-radio__label">Ellipse</span>
+			</label>
+			<label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="shape-polygon">
+				<input type="radio" id="shape-polygon" class="mdl-radio__button" name="shape" value="polygon" [(ngModel)]="shapeType">
+				<span class="mdl-radio__label">Polygon</span>
 				<input class="number" type="number" [(ngModel)]="polygonSides">
-			</md-radio-button>
-			<md-radio-button value="star">
-				Star
+			</label>
+			<label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="shape-star">
+				<input type="radio" id="shape-star" class="mdl-radio__button" name="shape" value="star" [(ngModel)]="shapeType">
+				<span class="mdl-radio__label">Star</span>
 				<input class="number" type="number" [(ngModel)]="starPoints">
 				<input class="number" type="number" min="1" max="99" [(ngModel)]="starRadiusPercentage">
-			</md-radio-button>
-			<md-radio-button value="custom">Custom</md-radio-button>
-		</md-radio-group>
+			</label>
+			<label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="shape-custom">
+				<input type="radio" id="shape-custom" class="mdl-radio__button" name="shape" value="custom" [(ngModel)]="shapeType">
+				<span class="mdl-radio__label">Custom</span>
+			</label>
+		</div>
+
 	</div>
 </div>
 

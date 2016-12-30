@@ -174,7 +174,7 @@ export class Shape {
 		if (this.currentShape && !this.currentShapeFinished) {
 
 			// If custom shape, just add segment to path
-			if (this.currentShapeType) {
+			if (this.currentShapeType === 'custom') {
 				this.currentShape.add(point);
 				return;
 			}

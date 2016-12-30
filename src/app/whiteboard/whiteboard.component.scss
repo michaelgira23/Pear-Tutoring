@@ -24,10 +24,13 @@ $sophisticated-white: #eee;
 	justify-content: flex-start;
 	align-items: center;
 
-	color: $sophisticated-white;
 	background-color: rgba(0, 0, 0, 0.8);
 	text-align: center;
 	border-radius: 0.25rem;
+
+	button {
+		color: $sophisticated-white;
+	}
 }
 
 .tool-toolbar {
