@@ -1,31 +1,55 @@
-import { Injectable } from '@angular/core';
-import { AngularFire, FirebaseAuthState, FirebaseListObservable, FirebaseObjectObservable } from 'angularfire2';
-import { Observable } from 'rxjs/Rx';
+import { Injectable, Inject } from '@angular/core';
+import { AngularFire, FirebaseAuthState, FirebaseListObservable, FirebaseObjectObservable, FirebaseRef } from 'angularfire2';
+import { Observable, Subject } from 'rxjs/Rx';
 
 import { AuthService } from '../security/auth.service';
+import { Whiteboard, WhiteboardOptions,
+	WhiteboardMarking, WhiteboardMarkingOptions,
+	WhiteboardText, WhiteboardTextOptions,
+	StyleOptions,
+	Font } from './whiteboard';
 
 export const defaultWhiteboardOptions: WhiteboardOptions = {
-	background: '#FFF'
+	name: 'Unnamed Whiteboard',
+	background: '#fff'
 };
 
-export const defaultMarkingOptions: WhiteboardMarkingOptions = {
-	strokeColor: '#111',
-	strokeWidth: 2,
-	strokeCap: 'round',
-	strokeJoin: 'miter',
-	dashOffset: 0,
-	strokeScaling: true,
-	dashArray: [],
-	miterLimit: 10
+export const defaultStyleOptions: StyleOptions = {
+	stroke: {
+		color: '#111',
+		width: 2,
+		cap: 'round',
+		join: 'miter',
+		dashOffset: 0,
+		scaling: true,
+		dashArray: [],
+		miterLimit: 10
+	},
+	fill: {
+		color: '#0bf'
+	},
+	shadow: {
+		color: 'rgba(0, 0, 0, 0)',
+		blur: 0,
+		offset: { x: 0, y: 0 }
+	}
+};
+
+export const defaultFontOptions: Font = {
+	family: 'sans-serif',
+	weight: 400,
+	size: 32
 };
 
 @Injectable()
 export class WhiteboardService {
 
 	authInfo: FirebaseAuthState;
-	whiteboards: FirebaseListObservable<any>;
+	whiteboards: FirebaseListObservable<Whiteboard[]>;
+	sdkStorage: any;
 
-	constructor(private af: AngularFire, private authService: AuthService) {
+	constructor(private af: AngularFire, private authService: AuthService, @Inject(FirebaseRef) fb) {
+		this.sdkStorage = fb.storage().ref();
 		this.whiteboards = this.af.database.list('whiteboards');
 
 		this.authService.auth$.subscribe(
@@ -38,70 +62,120 @@ export class WhiteboardService {
 		);
 	}
 
-	getWhiteboard(key: string): FirebaseObjectObservable<any> {
+	/**
+	 * Whiteboard
+	 */
+
+	getWhiteboard(key: string): FirebaseObjectObservable<Whiteboard> {
 		return this.af.database.object('whiteboards/' + key);
 	}
 
-	createWhiteboard(options?: WhiteboardOptions): Observable<any> {
-		// Override default options with any options supplied
-		options = Object.assign(defaultWhiteboardOptions, options);
-
-		// Object to insert in the database
-		let whiteboard: any = options;
-		whiteboard.created = Date.now();
-		whiteboard.createdBy = this.authInfo ? this.authInfo.uid : null;
-
-		return Observable.from([this.whiteboards.push(whiteboard)]);
+	createWhiteboard(options: WhiteboardOptions): Observable<any> {
+		const whiteboard: Whiteboard = {
+			created: Date.now(),
+			createdBy: this.authInfo ? this.authInfo.uid : null,
+			name: options.name,
+			background: options.background
+		};
+		return this.observableToPromise(this.whiteboards.push(whiteboard));
 	}
 
-	getMarkings(key: string): FirebaseListObservable<any> {
+	changeName(key: string, name: string): Observable<Whiteboard> {
+		return this.observableToPromise(this.af.database.object('whiteboards/' + key).update({name}));
+	}
+
+	/**
+	 * Whiteboard Markings
+	 */
+
+	getMarkings(key: string): FirebaseListObservable<WhiteboardMarking[]> {
 		return this.af.database.list('whiteboardMarkings/' + key);
 	}
 
-	createMarking(key: string, path: Point[], options: WhiteboardMarkingOptions): Observable<any> {
-		// By default, use default options
-		let marking: WhiteboardMarking = {
+	createMarking(key: string, options: WhiteboardMarkingOptions): Observable<any> {
+		const marking: WhiteboardMarking = {
 			created: Date.now(),
 			createdBy: this.authInfo ? this.authInfo.uid : null,
-			options: Object.assign(defaultMarkingOptions, options),
-			path
+			style: options.style,
+			started: options.started,
+			path: options.path
 		};
-
 		const whiteboardMarkings = this.getMarkings(key);
-		return Observable.from([whiteboardMarkings.push(marking)]);
+		return this.observableToPromise(whiteboardMarkings.push(marking));
 	}
 
-}
+	eraseMarking(whiteboardKey: string, markingKey: string): Observable<WhiteboardMarking> {
+		return this.observableToPromise(
+			this.af.database.object('whiteboardMarkings/' + whiteboardKey + '/' + markingKey)
+				.update({ erased: Date.now() }));
+	}
 
-export interface Whiteboard {
-	created: number;
-	createdBy: string;
-	background: string;
-}
+	/**
+	 * Whiteboard Text
+	 */
 
-export interface WhiteboardOptions {
-	background?: string;
-}
+	getTexts(key: string): FirebaseListObservable<WhiteboardText[]> {
+		return this.af.database.list('whiteboardText/' + key);
+	}
 
-export interface WhiteboardMarking {
-	created: number;
-	createdBy: string;
-	options?: WhiteboardMarkingOptions;
-	path: Point[];
-}
+	createText(key: string, options: WhiteboardTextOptions): Observable<WhiteboardText> {
+		const text: WhiteboardText = {
+			created: Date.now(),
+			createdBy: this.authInfo ? this.authInfo.uid : null,
+			style: options.style,
+			rotation: options.rotation,
+			bounds: options.bounds,
+			content: options.content,
+			font: options.font
+		};
 
-export interface WhiteboardMarkingOptions {
-	strokeColor?: string;
-	strokeWidth?: number;
-	strokeCap?: string;
-	strokeJoin?: string;
-	dashOffset?: number;
-	strokeScaling?: boolean;
-	dashArray?: number[];
-	miterLimit?: number;
-}
+		const whiteboardText = this.getTexts(key);
+		return this.observableToPromise(whiteboardText.push(text));
+	}
 
-export interface Point {
-	x: number;
-	y: number;
+	eraseText(whiteboardKey: string, textKey: string): Observable<WhiteboardText> {
+		return this.observableToPromise(
+			this.af.database.object('whiteboardText/' + whiteboardKey + '/' + textKey)
+				.update({ erased: Date.now() }));
+	}
+
+	// editText(whiteboardKey: string, textKey: string, content: string, options: WhiteboardTextOptions, position: Position): Observable<any> {
+	// 	const textObject = this.af.database.object(`whiteboardText/${whiteboardKey}/${textKey}`);
+	// 	return this.observableToPromise(textObject.update({
+	// 		content,
+	// 		options,
+	// 		position
+	// 	}));
+	// }
+
+	/**
+	 * Snapshot
+	 */
+
+	storeSnapshot(key: string, snapshot: Blob | File): Observable<any> {
+		// Upload file
+		return this.observableToPromise(this.sdkStorage.child('wbSnapShots/' + key).put(snapshot))
+			.map((snap: any) => {
+				// Store 'snapshot' property in the whiteboard object
+				return this.af.database.object('whiteboards/' + key).update({ snapshot: snap.metadata.downloadURLs[0] });
+			});
+	}
+
+	private observableToPromise(promise): Observable<any> {
+
+		const subject = new Subject<any>();
+
+		promise
+			.then(res => {
+					subject.next(res);
+					subject.complete();
+				},
+				err => {
+					subject.error(err);
+					subject.complete();
+				});
+
+		return subject.asObservable();
+	}
+
 }
