@@ -1,10 +1,9 @@
-md-grid-list {
-	height: 30em;
-	md-grid-tile {
-		md-list {
-			width: 100%;
-			md-list-item {
-				md-input-container {
+.mdl-grid {
+	.mdl-card {
+		.mdl-card__actions {
+			.mdl-textfield {
+				label {
+					text-align: right;
 				}
 			}
 		}

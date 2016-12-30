@@ -5,7 +5,8 @@ import { Session } from './session';
 import { UserService, userStatus, FreeTimes } from './user.service';
 import { ChatService } from './chat.service';
 import { AuthService } from '../security/auth.service';
-import { WhiteboardService, WhiteboardOptions } from './whiteboard.service';
+import { WhiteboardService } from './whiteboard.service';
+import { WhiteboardOptions } from './whiteboard';
 import * as moment from 'moment';
 import { objToArr, arrToObj } from '../common/utils';
 

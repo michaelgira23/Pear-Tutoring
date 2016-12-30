@@ -14,14 +14,14 @@ export class TimePickerComponent implements OnInit {
 		return Object.getOwnPropertyNames(this.freeTimesModel);
 	}
 	freeTimesModel: FreeTimes = {
-				Sunday: [],
-				Monday: [],
-				Tuesday: [],
-				Wednsday: [],
-				Thursday: [],
-				Friday: [],
-				Saturday: [],
-			};
+		Sunday: [],
+		Monday: [],
+		Tuesday: [],
+		Wednsday: [],
+		Thursday: [],
+		Friday: [],
+		Saturday: [],
+	};
 
 	constructor(private userService: UserService, private sessionService: SessionService) { }
 

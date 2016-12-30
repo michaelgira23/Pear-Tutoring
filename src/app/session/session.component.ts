@@ -4,7 +4,7 @@ import { SessionService } from '../shared/model/session.service';
 import { Session } from '../shared/model/session';
 import { User } from '../shared/model/user';
 import { UserService } from '../shared/model/user.service';
-import { Whiteboard } from '../shared/model/whiteboard.service';
+import { Whiteboard } from '../shared/model/whiteboard';
 
 @Component({
 	selector: 'app-session',

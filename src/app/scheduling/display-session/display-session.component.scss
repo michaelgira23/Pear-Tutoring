@@ -24,26 +24,16 @@
 			}
 		}
 	}
-	md-card-header {
-		md-card-title {
-			font-size: 1.5em;
-			line-height: 1.5em;
-		}
-	}
 
-	md-card-actions {
-		position: absolute;
-		bottom: 2.5em;
-		left: 2.5em;
+	.mdl-card__actions {
 		.join-session {
-			text-transform: uppercase;
 			background: $subject-color;
 		}
 		.session-admin {
 			position: relative;
 			right: -5em;
 		}
-		md-menu {
+		.mdl-menu {
 			.delete-session:hover {
 				background-color: $fruity-rose;
 			}
@@ -51,7 +41,7 @@
 	}
 }
 
-.card {
+.mdl-card {
 	@include color-theme(black);
 	&.math {
 		@include color-theme($fruity-grape);
