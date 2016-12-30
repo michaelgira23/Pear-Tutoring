@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { AuthService } from './shared/security/auth.service';
 import { NotificationsService } from './shared/model/notifications.service';
 
 @Component({
@@ -8,10 +9,14 @@ import { NotificationsService } from './shared/model/notifications.service';
 })
 export class AppComponent implements OnInit {
 
-	constructor (private notificationsService: NotificationsService) { }
+	constructor (private authService: AuthService, private notificationsService: NotificationsService) { }
 
 	ngOnInit() {
 		this.notificationsService.init();
+	}
+
+	logout() {
+		this.authService.logout();
 	}
 
 }
