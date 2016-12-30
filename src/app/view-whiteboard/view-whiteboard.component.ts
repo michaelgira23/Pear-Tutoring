@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { defaultMarkingOptions } from '../shared/model/whiteboard.service';
+import { defaultStyleOptions } from '../shared/model/whiteboard.service';
 
 @Component({
 	selector: 'app-view-whiteboard',
@@ -10,7 +10,7 @@ import { defaultMarkingOptions } from '../shared/model/whiteboard.service';
 export class ViewWhiteboardComponent implements OnInit {
 
 	key: string;
-	markingOptions = defaultMarkingOptions;
+	styleOptions = defaultStyleOptions;
 	showToolbar: boolean = true;
 
 	constructor(private route: ActivatedRoute) { }
