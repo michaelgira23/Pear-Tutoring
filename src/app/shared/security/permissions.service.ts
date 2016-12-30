@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { AngularFire } from 'angularfire2';
+import { AngularFire, FirebaseObjectObservable } from 'angularfire2';
 import { Observable, Subject } from 'rxjs/Rx';
 
 @Injectable()
@@ -13,6 +13,10 @@ export class PermissionsService {
 		permObj[$key] = permission;
 
 		return this.promiseToObservable(permissions.set(permObj));
+	}
+
+	getPermission($key: string, type: PermissionsType): FirebaseObjectObservable<any> {
+		return this.af.database.object(`${type}Permissions/${$key}`);
 	}
 
 	// We have to ask for the $key and type again since that's how we organize permissions.
