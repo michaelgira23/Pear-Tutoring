@@ -34,7 +34,7 @@ export class TimePickerComponent implements OnInit {
 
 	addTime(day: string, from: any, to: any) {
 		if (from && to) {
-			let fromD = moment(from, 'HH:mm').day(day), toD = moment(to, 'HH:mm').day(day);
+			let fromD = moment(from, 'HH:mm'), toD = moment(to, 'HH:mm');
 			if (toD.isSameOrAfter(fromD)) {
 				this.userService.addFreeTime(day, {from: fromD.valueOf(), to: toD.valueOf()}).subscribe(
 					val => {
@@ -51,7 +51,6 @@ export class TimePickerComponent implements OnInit {
 		let time = this.freeTimesModel[day][timeIndex];
 		this.userService.removeFreeTime(day, {from: time.from, to: time.to}).subscribe(
 			val => {
-				this.freeTimesModel[day].splice(timeIndex, 1);
 			},
 			err => {
 				console.log(err);

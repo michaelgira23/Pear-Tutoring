@@ -231,11 +231,12 @@ export class SessionService {
 		for (let day in timesInDay) {
 			if (timesInDay[day]) {
 				// this gets the day in week from the free times, and try to find a match in the same day in week next week
-				let dayInNextWeek = moment().day(day);
+				let dayInNextWeek = moment().add(1, 'week').day(day);
+				console.log(dayInNextWeek.format('YYYY-WW-E'))
 				queryList.push(this.db.list('sessions/', {
 					query: {
 						orderByChild: 'ywd',
-						equalTo: [dayInNextWeek.year(), dayInNextWeek.week(), dayInNextWeek.day()].join('-')
+						equalTo: dayInNextWeek.format('YYYY-WW-E')
 					}
 				}).map(sessions => {
 					sessions.forEach(session => {
@@ -284,7 +285,7 @@ export class SessionService {
 		sessionToSave.tutees = arrToObj(sessionToSave.tutees);
 		sessionToSave.tags = arrToObj(sessionToSave.tags);
 		// store the date of the session in year - week in year - day in week
-		sessionToSave['ywd'] = [session.end.year(), session.end.week(), session.end.day()].join('-');
+		sessionToSave['ywd'] = session.end.format('YYYY-WW-E');
 		dataToSave['sessions/' + sessionId] = sessionToSave;
 
 		return this.firebaseUpdate(dataToSave);
