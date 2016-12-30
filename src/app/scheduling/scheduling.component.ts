@@ -39,7 +39,7 @@ export class SchedulingComponent implements OnInit {
 		this.auth.auth$.subscribe(val => {
 			this.sessionService.findMySessions().tutorSessions
 			.subscribe(
-				val1 => this.tutorSessions = val1,
+				val1 => {this.tutorSessions = val1, console.log(val1);},
 				err => console.log(err)
 			);
 			this.sessionService.findMySessions().tuteeSessions

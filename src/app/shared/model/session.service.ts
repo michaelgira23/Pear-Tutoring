@@ -80,12 +80,17 @@ export class SessionService {
 
 	// Take a firebase query for an array of sessions and insert a user object into the tutor and tutee fields.
 	combineArrWithUser(sessionQuery: Observable<any[]>): Observable<Session[]> {
-		let sessionsWithUser: any[];
+		let sessionsWithUser: any[] = [];
 		// First fill in the tutor field of each session
 		return sessionQuery.flatMap((val: any[]) => {
 			sessionsWithUser = val;
 			return Observable.combineLatest(
-				val.map((session) => this.userService.findUser(session.tutor))
+				val.map((session) => {
+					if (typeof session.tutor !== 'string') {
+						return this.userService.findUser(session.tutor.$key);
+					}
+					return this.userService.findUser(session.tutor)
+				})
 			);
 		})
 		.map((val: any[]) => {
@@ -93,6 +98,7 @@ export class SessionService {
 			return sessionsWithUser;
 		})
 		// Then fill in the tutees array of each session, note sessions are stored temporarily in the sessionsWithUser variable
+		// an empty tutees array in the session will cause a silent error
 		.flatMap((val: any[]) => {
 			sessionsWithUser = val;
 			return Observable.combineLatest(
@@ -104,13 +110,13 @@ export class SessionService {
 						return this.userService.findUser(tutee);
 					})
 				))
-			);
+			)
 		}).map((val: any[][]) => {
 			sessionsWithUser.forEach((session, sessionIndex) => {
 				sessionsWithUser[sessionIndex].tutees = objToArr(session.tutees).map((tutee, tuteeIndex) => val[sessionIndex][tuteeIndex]);
 			});
 			return sessionsWithUser;
-		});
+		})
 	}
 
 	combineWithWb(sessionQuery: Observable<any>): Observable<Session[]> {
@@ -224,6 +230,7 @@ export class SessionService {
 		}
 		for (let day in timesInDay) {
 			if (timesInDay[day]) {
+				// this gets the day in week from the free times, and try to find a match in the same day in week next week
 				let dayInNextWeek = moment().day(day);
 				queryList.push(this.db.list('sessions/', {
 					query: {
@@ -271,7 +278,6 @@ export class SessionService {
 				dataToSave[`sessionsBySubject/${session.subject}/${sessionId}`] = true;
 			}
 		}
-
 		// Transform the arrays in the object to firebase-friendly objects
 		sessionToSave.start = session.start.unix();
 		sessionToSave.end = session.end.unix();

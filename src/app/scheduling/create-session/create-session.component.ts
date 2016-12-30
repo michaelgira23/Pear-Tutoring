@@ -16,8 +16,9 @@ import { Subscription } from 'rxjs/Rx';
 export class CreateSessionComponent implements OnInit, OnChanges {
 
 	createSessionForm: FormGroup = this.fb.group({
-				start: ['', Validators.required],
-				end: ['', Validators.required],
+				date: ['', Validators.required],
+				startTime: ['', Validators.required],
+				endTime: ['', Validators.required],
 				subject: ['', Validators.required],
 				max: ['', Validators.required],
 				listed: [false, Validators.required],
@@ -36,8 +37,6 @@ export class CreateSessionComponent implements OnInit, OnChanges {
 	sessionInfo: Session;
 	@Input()
 	sessionId: string;
-	@Input()
-	creating: boolean;
 
 	findSession$: Subscription;
 
@@ -56,12 +55,8 @@ export class CreateSessionComponent implements OnInit, OnChanges {
 	}
 
 	ngOnChanges(changes: SimpleChanges) {
-		if (!this.creating) {
 			if (changes['sessionId']) { this.sessionId = changes['sessionId'].currentValue; }
 			this.refreshSessionInfo();
-		} else {
-			this.customCtrlReady = true
-		}
 	}
 
 	refreshSessionInfo() {
@@ -71,15 +66,19 @@ export class CreateSessionComponent implements OnInit, OnChanges {
 			this.findSession$ = this.sessionService.findSession(this.sessionId).subscribe(val => {
 				this.sessionInfo = val;
 				this.formInit();
+				this.customCtrlReady = true;
 			});
+		} else {
+			this.customCtrlReady = true;
 		}
 	}
 
 	formInit() {
 		if (this.sessionInfo) {
 			this.createSessionForm = this.fb.group({
-				start: [this.sessionInfo.start.format('YYYY-MM-DD'), Validators.required],
-				end: [this.sessionInfo.end.format('YYYY-MM-DD'), Validators.required],
+				date: [this.sessionInfo.start.format('YYYY-MM-DD'), Validators.required],
+				startTime: [this.sessionInfo.start.format('HH:mm'), Validators.required],
+				endTime: [this.sessionInfo.end.format('HH:mm'), Validators.required],
 				subject: [this.sessionInfo.subject, Validators.required],
 				max: [this.sessionInfo.max, [Validators.required]],
 				listed: [this.sessionInfo.listed, Validators.required],
@@ -89,18 +88,19 @@ export class CreateSessionComponent implements OnInit, OnChanges {
 				wbBackground: [''],
 				tags: [this.sessionInfo.tags ? this.sessionInfo.tags.join(', ') : '']
 			});
-			this.customCtrlReady = true;
 		}
 	}
 
 	createSession() {
 		let sessionToCreate = Object.assign({}, this.createSessionForm.value);
-		sessionToCreate.start = moment(sessionToCreate.start, 'YYYY-MM-DD');
-		sessionToCreate.end = moment(sessionToCreate.end, 'YYYY-MM-DD');
+		console.log(sessionToCreate.tutees.map(val => val.$key));
+		sessionToCreate.start = moment(sessionToCreate.date, 'YYYY-MM-DD').add(moment(sessionToCreate.startTime, 'HH:mm').hours(), 'hours').add(moment(sessionToCreate.startTime, 'HH:mm').minutes(), 'minutes');
+		sessionToCreate.end = moment(sessionToCreate.date, 'YYYY-MM-DD').add(moment(sessionToCreate.endTime, 'HH:mm').hours(), 'hours').add(moment(sessionToCreate.endTime, 'HH:mm').minutes(), 'minutes');
 		sessionToCreate.tags = sessionToCreate.tags.split(',').map(val => val.trim());
 		sessionToCreate.tutees = sessionToCreate.tutees.map(val => val.$key);
 		sessionToCreate.tutor = this.userService.uid;
 		delete sessionToCreate.wbBackground;
+		delete sessionToCreate.date, delete sessionToCreate.startTime, delete sessionToCreate.endTime;
 		let wbOpt = {
 			background: this.createSessionForm.value.wbBackground
 		};

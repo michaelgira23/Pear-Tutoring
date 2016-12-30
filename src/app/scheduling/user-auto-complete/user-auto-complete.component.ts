@@ -55,7 +55,7 @@ export class UserAutoCompleteComponent implements OnInit, ControlValueAccessor {
 	}
 
 	addUser(i: number) {
-		this.userValue.push(this.userResults[i]);
+		this.userValue = this.userValue.concat([this.userResults[i]]);
 		this.userResults = [];
 		this.searchStr = '';
 	}

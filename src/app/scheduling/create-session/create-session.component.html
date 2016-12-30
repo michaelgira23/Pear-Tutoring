@@ -1,7 +1,8 @@
 <form [formGroup]="createSessionForm" (ngSubmit)="createSession()">
   <fieldset>
-    start: <input formControlName="start" requireds type="date"><br/>
-    end: <input formControlName="end" required type="date"><br/>
+    date: <input formControlName="date" required type="date">
+    start: <input formControlName="startTime" required type="time">
+    end: <input formControlName="endTime" required type="time"> <br/>
     Subject: 
     <select formControlName="subject">
       <option *ngFor="let option of allowedSubjects" [value]="option">{{ option }}</option>
@@ -15,6 +16,7 @@
   <fieldset>
     add tutees: <br/>
     <app-user-auto-complete *ngIf="customCtrlReady" formControlName="tutees"></app-user-auto-complete>
+    <div>{{this.createSessionForm.value.tutees | json}}</div>
   </fieldset>
   <fieldset *ngIf="!sessionId && !sessionInfo">
     whiteboard options: <br/>
