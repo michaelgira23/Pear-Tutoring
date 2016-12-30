@@ -35,16 +35,15 @@ export class Cursor {
 	selectionPath: any;
 
 	constructor(private whiteboard: WhiteboardComponent) {
-		var self = this;
 		this.hitOptions = {
 			fill: true,
 			stroke: true,
 			bounds: true,
 			tolerance: 5,
-			match: function(result) {
-				return result.item.id !== self.whiteboard.background.id;
+			match: result => {
+				return result.item.id !== this.whiteboard.background.id;
 			}
-		}
+		};
 	}
 
 	/**
@@ -65,8 +64,9 @@ export class Cursor {
 			this.originalBounds = item.bounds;
 			// shift key allows you to add more items to existing selection
 			// otherwise, clicking an unselected item unselects everything else
-			if (!item.selected && !this.whiteboard.shiftKey)
+			if (!item.selected && !this.whiteboard.shiftKey) {
 				paper.project.deselectAll();
+			}
 			// if holding shift, toggles the selected state rather than always setting it to true
 			item.selected = this.whiteboard.shiftKey ? !item.selected : true;
 
@@ -100,17 +100,25 @@ export class Cursor {
 				// from where the mouse started dragging. we do this through addX and addY
 				// if mouse drags on right, we want the left side point, which means addX = 0
 				let addX = 0;
-				if (this.hitRight) {}
-				// if mouse drags on left, we want the right side point, which means addX = width
-				else if (this.hitLeft) addX = this.originalBounds.width;
-				// if mouse drags neither, we use the left side point, and set the mouse x coordinate
-				// to a constant: the originalBound's right side (so the x-scale doesn't change)
-				else point.x = this.originalBounds.x + this.originalBounds.width;
+				if (this.hitRight) {
+
+				} else if (this.hitLeft) {
+					// if mouse drags on left, we want the right side point, which means addX = width
+					addX = this.originalBounds.width;
+				} else {
+					// if mouse drags neither, we use the left side point, and set the mouse x coordinate
+					// to a constant: the originalBound's right side (so the x-scale doesn't change)
+					point.x = this.originalBounds.x + this.originalBounds.width;
+				}
 				// same with Y
 				let addY = 0;
-				if (this.hitBottom) {}
-				else if (this.hitTop) addY = this.originalBounds.height;
-				else point.y = this.originalBounds.y + this.originalBounds.height;
+				if (this.hitBottom) {
+
+				} else if (this.hitTop) {
+					addY = this.originalBounds.height;
+				} else {
+					point.y = this.originalBounds.y + this.originalBounds.height;
+				}
 
 				let scalePoint = new paper.Point(this.originalBounds.x + addX, this.originalBounds.y + addY);
 				// prevents shape from degenerating into a limp ass line
@@ -129,7 +137,7 @@ export class Cursor {
 			} else if (this.selecting) {
 				let selectionBox = new paper.Rectangle(this.startPoint, point);
 				if (selectionBox.height > 0 && selectionBox.width > 0) {
-					// creates a selection path if there isn't one				
+					// creates a selection path if there isn't one
 					if (!this.selectionPath) {
 						this.selectionPath = new paper.Path.Rectangle(selectionBox);
 						this.selectionPath.strokeColor = '#08f';
@@ -138,12 +146,11 @@ export class Cursor {
 					// updates selection path
 					this.selectionPath.bounds = selectionBox;
 
-					let self = this;
 					// selects all items intersecting the selection path
 					let allItems = paper.project.getItems({
 						overlapping: selectionBox,
-						match: function(result) {
-							return result.id !== self.whiteboard.background.id &&
+						match: result => {
+							return result.id !== this.whiteboard.background.id &&
 									result.id !== paper.project.activeLayer.id;
 						}
 					});
@@ -176,7 +183,12 @@ export class Cursor {
 				// 		}
 				// 	);
 
-				// editText(whiteboardKey: string, textKey: string, content: string, options: WhiteboardTextOptions, position: Position): Observable<any> {
+				// editText(
+				// 	whiteboardKey: string,
+				// 	textKey: string,
+				// 	content: string,
+				// 	options: WhiteboardTextOptions,
+				// 	position: Position): Observable<any> {
 				// 	const textObject = this.af.database.object(`whiteboardText/${whiteboardKey}/${textKey}`);
 				// 	return Observable.from([textObject.update({
 				// 		content,
