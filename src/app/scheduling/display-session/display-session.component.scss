@@ -1,5 +1,55 @@
-.card {
-	img {
-		height: 300px
+@import '../../shared/styles/colors';
+
+@mixin color-theme($subject-color) {
+	border: 5px solid $subject-color;
+	width: 250px;
+	height: 300px;
+
+	.session-thumbnails {
+		display: flex;
+		flex-direction: column;
+		max-height: 229px;
+		.row {
+			display: flex;
+			justify-content: space-between;
+			margin: 0;
+			flex-wrap: nowrap;
+			img {
+				width: 100%;
+			}
+		}
+		.row:nth-child(1+n) {
+			img {
+				width: 50%;
+			}
+		}
+	}
+
+	.mdl-card__actions {
+		.join-session {
+			background: $subject-color;
+		}
+		.session-admin {
+			position: relative;
+			right: -5em;
+		}
+		.mdl-menu {
+			.delete-session:hover {
+				background-color: $fruity-rose;
+			}
+		}
+	}
+}
+
+.mdl-card {
+	@include color-theme(black);
+	&.math {
+		@include color-theme($fruity-grape);
+	}
+	&.english {
+		@include color-theme($fruity-blue);
+	}
+	&.art {
+		@include color-theme($fruity-grape);
 	}
 }

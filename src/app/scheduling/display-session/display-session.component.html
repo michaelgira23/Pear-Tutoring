@@ -1,14 +1,48 @@
-<div class="card">
-  <div class="view overlay hm-white-slight">
-    <img class="img-fluid" [src]="session.tutor.pfp">
+<div class="mdl-card mdl-shadow--5dp" [ngClass]="subject">
+  <div class="mdl-card__title">
+    <div class="session-thumbnails">
+      <div class="row">
+        <img *ngIf="session.whiteboards[0]" class="img-fluid" [src]="session.whiteboards[0].snapshot">
+        <img *ngIf="session.whiteboards[1]" class="img-fluid" [src]="session.whiteboards[1].snapshot">
+      </div>
+      <div class="row">
+        <img *ngIf="session.whiteboards[2]" class="img-fluid" [src]="session.whiteboards[2].snapshot">
+        <img *ngIf="session.whiteboards[3]" class="img-fluid" [src]="session.whiteboards[3].snapshot">
+      </div>
+    </div>
     <a (click)="joinSession()">
       <div class="mask"></div>
     </a>
+    <h2 class="mdl-card__title-text">{{ session.title }}</h2>
   </div>
-  <div class="card-block">
-    <h4 class="card-title">{{ session.title }}</h4>
-    <p class="card-text">{{ session.desc }}</p>
-    <p class="card-text">{{ startTime }} ~ {{ endTime }}</p>
-    <button (click)="joinSession()" class="btn btn-primary">Join Session</button>
+
+  <div class="md-card__media">
+    <img md-card-avatar [src]="session.tutor.pfp">
+  </div>
+
+  <div class="mdl-card__supporting-text">
+    {{ session.desc }}
+  </div>
+  <div class="mdl-card-supporting-text">
+    {{ startTime }} ~ {{ endTime }}
+  </div>
+  <div class="mdl-card-supporting-text">
+    <span *ngFor="let tag of session.tags" class="mdl-chip">><span class="mdl-chip__text">{{ tag }}</span></span>
+  </div>
+
+  <div class="mdl-card__actions">
+    <button (click)="joinSession()" class="join-session mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">Join Session</button>
+    <button id="session-menu" class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect session-admin" *ngIf="user.uid === session.tutor.$key">
+      <i class="material-icons">more_vert</i>
+    </button>
+    <ul class="mdl-menu mdl-menu--top-right mdl-js-menu mdl-js-ripple-effect"
+    data-mdl-for="session-menu">
+      <li class="mdl-menu__item">
+        <button md-menu-item class="update-session" (click)="updateSession()">Update</button>
+      </li>
+      <li class="mdl-menu__item">
+        <button md-menu-item class="delete-session" (click)="deleteSession()">Delete</button>
+      </li>
+    </ul>
   </div>
 </div>

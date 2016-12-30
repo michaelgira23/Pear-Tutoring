@@ -3,6 +3,8 @@ import { AngularFireDatabase, FirebaseRef } from 'angularfire2';
 import { AuthService } from '../security/auth.service';
 import { Observable, Subject } from 'rxjs/Rx';
 import { User } from './user';
+import { arrToObj, objToArr } from '../common/utils';
+import * as moment from 'moment';
 
 export const userStatus = {
 	IN_SESSION: 2,
@@ -16,6 +18,7 @@ export class UserService {
 	sdkDb: any;
 	sdkStorage: any;
 	uid: string;
+	status: number;
 
 	constructor(@Inject(FirebaseRef) fb, private db: AngularFireDatabase, private auth: AuthService) {
 		this.sdkDb = fb.database().ref();
@@ -27,7 +30,10 @@ export class UserService {
 				this.changeStatus(userStatus.ONLINE);
 				this.sdkDb.child(`users/${this.uid}/status`).onDisconnect().set(userStatus.OFFLINE);
 			} else {
-				this.changeStatus(userStatus.OFFLINE);
+				if (this.uid) {
+					this.changeStatus(userStatus.OFFLINE);
+				}
+				this.uid = null;
 			}
 		});
 	}
@@ -46,6 +52,14 @@ export class UserService {
 		let userToSave = Object.assign({}, user);
 		let dataToSave = {};
 		dataToSave[`users/${uid}`] = userToSave;
+		let name = user.firstName + ' ' + user.lastName;
+		for (let i=0;i<name.length;i++) {
+			for (let j=i+1;j<name.length+1;j++) {
+				if (name.substring(i,j) !== ' ') {
+					dataToSave[`userNameIndex/${name.substring(i,j)}/${uid}`] = true;
+				}
+			}
+		}
 		return this.firebaseUpdate(dataToSave);
 	}
 
@@ -57,6 +71,13 @@ export class UserService {
 	findUser(uid: string): Observable<User> {
 		return this.db.object(`users/${uid}`)
 		.map(User.fromJson);
+	}
+
+	searchUsersByName(str: string): Observable<User[]> {
+		return this.db.list(`userNameIndex/${str}`)
+		.flatMap(uids => {
+			return Observable.combineLatest(uids.map(uid => this.findUser(uid.$key)));
+		});
 	}
 
 	uploadPfp(pfp: File): Observable<any> {
@@ -71,38 +92,85 @@ export class UserService {
 	}
 
 	changeStatus(status: number): void {
-		if (status === userStatus.ONLINE || status === userStatus.OFFLINE || status === userStatus.IN_SESSION) {
-			status = this.uid ? status : userStatus.OFFLINE;
-			console.log(status);
-			this.db.object(`users/${this.uid}`).update({status});
+		if (this.status !== status) {
+			if (status === userStatus.ONLINE || status === userStatus.OFFLINE || status === userStatus.IN_SESSION) {
+				status = this.uid ? status : userStatus.OFFLINE;
+				console.log(status);
+				this.db.object(`users/${this.uid}`).update({status}).then(val => this.status = status);
+			}
 		}
 	}
 
-	private firebaseUpdate(dataToSave) {
-		const subject = new Subject();
+	getFreeTimes(): Observable<FreeTimes> {
+		return this.auth.auth$.switchMap(val => {
+			if (val) {
+				return this.db.object(`freeTimesByUsers/${this.uid}/`)
+					.map(freeTimes => {
+						let temp = Object.assign({}, freeTimes);
+						delete temp.$key;
+						delete temp.$exists;
+						delete temp.$value;
+						for (let day in temp) {
+							if (temp[day]) {
+								temp[day] = [];
+								objToArr(freeTimes[day]).forEach(val => {
+									temp[day].push({
+										from: moment(val.substr(0, 13), 'x'),
+										to: moment(val.substr(13, 13), 'x')
+									});
+								});
+							}
+						}
+						return temp;
+					});
+			}
+			return Observable.of(null);
+		});
+	}
 
-		this.sdkDb.update(dataToSave)
-			.then(
-				val => {
-					subject.next(val);
+	addFreeTime(day: string, time: {from: number, to: number}): Observable<any> {
+		let concatTime = '' + time.from + time.to;
+		let pushData = {};
+		pushData[concatTime] = true;
+		return this.promiseToObservable(this.db.object(`freeTimesByUsers/${this.uid}/${day}`).update(pushData));
+	}
+
+	removeFreeTime(day: string, time: FreeTime): Observable<any> {
+		let concatTime = '' + time.from.valueOf() + time.to.valueOf();
+		return this.promiseToObservable(this.db.list(`freeTimesByUsers/${this.uid}/${day}`).remove(concatTime));
+	}
+
+	private promiseToObservable(promise): Observable<any> {
+
+		const subject = new Subject<any>();
+
+		promise
+			.then(res => {
+					subject.next(res);
 					subject.complete();
-
 				},
 				err => {
 					subject.error(err);
 					subject.complete();
-				}
-			);
+				});
 
 		return subject.asObservable();
+	}
+
+	firebaseUpdate(dataToSave): Observable<any> {
+		return this.promiseToObservable(this.sdkDb.update(dataToSave));
 	}
 }
 
 export interface RegisterOptions {
 	firstName: string;
-	middleName: string;
 	lastName: string;
 	email: string;
 	password: string;
-	name?: string;
 }
+
+export interface FreeTimes {
+	[dayInWeek: string]: FreeTime[];
+};
+
+export interface FreeTime {from: moment.Moment; to: moment.Moment; };
