@@ -12,7 +12,7 @@ export class PermissionsService {
 		const permObj = {};
 		permObj[$key] = permission;
 
-		return this.observableToPromise(permissions.set(permObj));
+		return this.promiseToObservable(permissions.set(permObj));
 	}
 
 	// We have to ask for the $key and type again since that's how we organize permissions.
@@ -33,14 +33,14 @@ export class PermissionsService {
 					const scopeObj = {};
 					scopeObj[$uid] = scopes;
 
-					subject.next(this.observableToPromise(users.update(scopeObj)));
+					subject.next(this.promiseToObservable(users.update(scopeObj)));
 					subject.complete();
 				} else {
 					const permissions = this.af.database.object(`${type}Permissions/${$key}`);
 					const scopeObj = {};
 					scopeObj[group] = scopes;
 
-					subject.next(this.observableToPromise(permissions.update(scopeObj)));
+					subject.next(this.promiseToObservable(permissions.update(scopeObj)));
 					subject.complete();
 				}
 			} else {
@@ -75,15 +75,37 @@ export class PermissionsService {
 		group: PermissionsGroup,
 		$uid?: string
 	) {
-		// TODO: figure out how to remove multiple scopes at once
-		if (group === 'user') {
-			// remove scope with $uid handling
-		} else {
-			// add scope normally
-		}
+		const permission = this.af.database.object(`${type}Permissions/${$key}`);
+		const subject = new Subject<any>();
+
+		permission.subscribe(permObj => {
+			if (permObj.$exists()) {
+				if (group === 'user') {
+					const userPermissions = this.af.database.object(`${type}Permissions/${$key}/user/${$uid}`);
+					const scopeObj = {};
+					for (let scope of Object.keys(scopes)) {
+						scopeObj[scope] = null;
+					}
+
+					subject.next(this.promiseToObservable(userPermissions.update(scopeObj)));
+					subject.complete();
+				} else {
+					const groupPermissions = this.af.database.object(`${type}Permissions/${$key}/${group}`);
+					const scopeObj = {};
+					for (let scope of Object.keys(scopes)) {
+						scopeObj[scope] = null;
+					}
+
+					subject.next(this.promiseToObservable(groupPermissions.update(scopeObj)));
+					subject.complete();
+				}
+			}
+		});
+
+		return subject.asObservable();
 	}
 
-	private observableToPromise(promise): Observable<any> {
+	private promiseToObservable(promise): Observable<any> {
 
 		const subject = new Subject<any>();
 

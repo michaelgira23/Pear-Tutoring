@@ -12,7 +12,7 @@ export class TestComponent implements OnInit {
 	constructor(private af: AngularFire, private permissionsService: PermissionsService) { }
 
 	ngOnInit() {
-		this.permissionsService.addScope('-KZzCW_RP3Fkz0Kp6KpV', 'chat', {read: true}, 'anonymous').subscribe(
+		this.permissionsService.removeScope('-KZzCW_RP3Fkz0Kp6KpV', 'chat', {read: true}, 'anonymous').subscribe(
 			data => {
 				console.log(`Successful adding of scope: ${data}`);
 			},
