@@ -1,5 +1,6 @@
 import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy, ViewChild, HostListener } from '@angular/core';
 import { segments, rectangles, styles, font } from './utils/serialization';
+import { removeRedundant } from './utils/diff';
 import { Whiteboard, WhiteboardMarking, WhiteboardText, WhiteboardShapeType } from '../shared/model/whiteboard';
 import { WhiteboardService, defaultStyleOptions, defaultFontOptions } from '../shared/model/whiteboard.service';
 
@@ -478,20 +479,46 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	editItems(items: any[]) {
 		// Edit selected items into the database
 		items.forEach(item => {
+
+			// Get key from marking and text
 			const markingKey = this.markingIdToPushKey(item.id);
 			const textKey = this.textIdToPushKey(item.id);
+
 			if (markingKey) {
-				console.log('edit marking');
+				// If marking key exists, it's a marking
+
+				// Serialize paths and styles to see what's different
+				const serializedSegments = segments.serialize(item.segments);
+				const serializedStyles = styles.serialize(item);
+
+				// console.log('edit marking');
+
 				this.whiteboardService.getFormattedMarking(this.key, markingKey)
 					.subscribe(
 						marking => {
-							console.log('finall formatted marking', marking);
+								// Determine what's different between the paths and styles
+								const newSegments = removeRedundant(marking.path, serializedSegments);
+								const newStyles = removeRedundant(marking.style, serializedStyles);
+
+								console.log('new segments', newSegments);
+								console.log('new styles', newStyles);
+								//
+								// console.log('=====["Unit Tests"]=====');
+								// console.log('Test 1:', removeRedundant(
+								// 	{ a: 'same', b: 'different', c: { d: 4, e: 2, f: 0 }, f: { g: 6, e: 9 } },
+								// 	{ a: 'same', b: 'very diff', c: { d: 4, e: 2, f: 0 }, f: { g: 0 }}));
+								//
+								// console.log('Test 1:', removeRedundant(
+								// 	{ a: 'same', b: 'different', c: { d: 4, e: 2, f: 0 }, f: { g: 6, e: 9 } },
+								// 	{ a: 'same', b: 'very diff', c: { d: 4, e: 3, f: 0 }, f: { g: 0 }}));
+
 						},
 						err => {
 							console.log('edit items whiteboard component error getting formatted marking', err);
 						}
 					);
 			} else if (textKey) {
+				// If text key exists, it's text
 				console.log('edit text');
 			} else {
 				console.log('unrecognized item!');

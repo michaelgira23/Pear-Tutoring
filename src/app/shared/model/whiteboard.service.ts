@@ -118,7 +118,6 @@ export class WhiteboardService {
 	}
 
 	getFormattedMarking(whiteboardKey: string, markingKey: string): Observable<WhiteboardMarking> {
-		console.log('get formatted marking from', whiteboardKey, 'with key', markingKey);
 		return this.getMarking(whiteboardKey, markingKey)
 			.map(this.currentMarking);
 	}
@@ -223,15 +222,6 @@ export class WhiteboardService {
 			this.af.database.object(`whiteboardText/${whiteboardKey}/${textKey}`)
 				.update({ erased: Date.now() }));
 	}
-
-	// editText(whiteboardKey: string, textKey: string, content: string, options: WhiteboardTextOptions, position: Position): Observable<any> {
-	// 	const textObject = this.af.database.object(`whiteboardText/${whiteboardKey}/${textKey}`);
-	// 	return this.observableToPromise(textObject.update({
-	// 		content,
-	// 		options,
-	// 		position
-	// 	}));
-	// }
 
 	/**
 	 * Snapshot

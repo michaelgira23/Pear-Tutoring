@@ -165,49 +165,20 @@ export class Cursor {
 
 	mouseup(event) {
 		if (this.whiteboard.allowWrite) {
-			console.log('writing');
+
+			const editItems = this.whiteboard.selectedItems();
 
 			// Edit all items that are selected
-			this.whiteboard.editItems(this.whiteboard.selectedItems());
+			this.whiteboard.editItems(editItems);
 
-			if (this.resizing) {
-				this.resizing = false;
+			// Clean everything up
+			this.resizing = false;
+			this.moving = false;
+			this.selecting = false;
 
-				// write to database
-				// some reference code:
-
-				// this.whiteboard.whiteboardService.editText(
-				// 	this.whiteboard.key, pushKey, this.selectedText.content, this.whiteboard.textOptions, position)
-				// 	.subscribe(
-				// 		data => {
-				// 			console.log('successfully editted text', data);
-				// 		},
-				// 		err => {
-				// 			console.log('edit text error', err);
-				// 		}
-				// 	);
-
-				// editText(
-				// 	whiteboardKey: string,
-				// 	textKey: string,
-				// 	content: string,
-				// 	options: WhiteboardTextOptions,
-				// 	position: Position): Observable<any> {
-				// 	const textObject = this.af.database.object(`whiteboardText/${whiteboardKey}/${textKey}`);
-				// 	return Observable.from([textObject.update({
-				// 		content,
-				// 		options,
-				// 		position
-				// 	})]);
-				// }
-			} else if (this.moving) {
-				this.moving = false;
-			} else if (this.selecting) {
-				this.selecting = false;
-				if (this.selectionPath) {
-					this.selectionPath.remove();
-					this.selectionPath = null;
-				}
+			if (this.selectionPath) {
+				this.selectionPath.remove();
+				this.selectionPath = null;
 			}
 		}
 	}
@@ -220,6 +191,5 @@ export class Cursor {
 	distance(x1: number, y1: number, x2: number, y2: number): number {
 		return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
 	}
-
 
 }

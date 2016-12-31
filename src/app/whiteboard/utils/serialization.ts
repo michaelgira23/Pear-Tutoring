@@ -102,8 +102,6 @@ function paperObjectToStyleObject(paperObject: any, clearFill = false): StyleOpt
 		styleObject.fill.color = 'rgba(0, 0, 0, 0)';
 	}
 
-	console.log('serialize styles', styleObject);
-
 	return styleObject;
 }
 
