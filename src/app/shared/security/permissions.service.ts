@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
-import { AngularFire, FirebaseObjectObservable } from 'angularfire2';
+import { AngularFire, FirebaseAuthState, FirebaseListObservable } from 'angularfire2';
 import { Observable, Subject } from 'rxjs/Rx';
+
+import { AuthService } from './auth.service';
 
 declare global {
 	interface Array<T> {
@@ -11,7 +13,18 @@ declare global {
 @Injectable()
 export class PermissionsService {
 
-	constructor(private af: AngularFire) { }
+	authInfo: FirebaseAuthState;
+
+	constructor(private af: AngularFire, private authService: AuthService) {
+		this.authService.auth$.subscribe(
+			data => {
+				this.authInfo = data;
+			},
+			err => {
+				console.log(`Error getting auth state: ${err}`);
+			}
+		);
+	}
 
 	// TODO: Restrict the `permission` property to only contain the scopes of its specific type.
 	createPermission($key: string, type: PermissionsType, permission: Permission): Observable<any> {
@@ -22,8 +35,50 @@ export class PermissionsService {
 		return this.promiseToObservable(permissions.set(permObj));
 	}
 
-	getPermission($key: string, type: PermissionsType): FirebaseObjectObservable<any> {
-		return this.af.database.object(`${type}Permissions/${$key}`);
+	getPermission($key: string, type: PermissionsType): FirebaseListObservable<any> {
+		return this.af.database.list(`${type}Permissions/${$key}`);
+	}
+
+	getUserPermission($key: string, type: PermissionsType): Observable<any> {
+		const subject = new Subject<any>();
+
+		this.getPermission($key, type).subscribe(
+			data => {
+				console.log(data);
+				// Check if there are any permissions defined for this object
+				if (data.length > 0) {
+					// Check if auth service is initialized
+					if (typeof this.authInfo !== 'undefined') {
+						// Check if logged in anonymously
+						if (this.authInfo === null) {
+							subject.next(data.anonymous);
+							subject.complete();
+						} else {
+							// Check if the `user` group contains special permissions for the current user
+							if (this.authInfo.uid in data.user) {
+								// If so, return those permissions
+								subject.next(data.user[this.authInfo.uid]);
+								subject.complete();
+							} else {
+								// If not, return the generic `loggedIn` permissions
+								subject.next(data.loggedIn);
+								subject.complete();
+							}
+						}
+					}
+				} else {
+					// If not, just send this empty array
+					subject.next(data);
+					subject.complete();
+				}
+			},
+			err => {
+				subject.error(err);
+				subject.complete();
+			}
+		);
+
+		return subject.asObservable();
 	}
 
 	// We have to ask for the $key and type again since that's how we organize permissions.
@@ -80,7 +135,7 @@ export class PermissionsService {
 		return subject.asObservable();
 	}
 
-	// See line 18
+	// See line 29
 	removeScope(
 		$key: string,
 		type: PermissionsType,
