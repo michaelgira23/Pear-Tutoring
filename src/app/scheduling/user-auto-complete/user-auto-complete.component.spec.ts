@@ -6,23 +6,23 @@ import { DebugElement } from '@angular/core';
 import { UserAutoCompleteComponent } from './user-auto-complete.component';
 
 describe('UserAutoCompleteComponent', () => {
-  let component: UserAutoCompleteComponent;
-  let fixture: ComponentFixture<UserAutoCompleteComponent>;
+	let component: UserAutoCompleteComponent;
+	let fixture: ComponentFixture<UserAutoCompleteComponent>;
 
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      declarations: [ UserAutoCompleteComponent ]
-    })
-    .compileComponents();
-  }));
+	beforeEach(async(() => {
+		TestBed.configureTestingModule({
+			declarations: [ UserAutoCompleteComponent ]
+		})
+		.compileComponents();
+	}));
 
-  beforeEach(() => {
-    fixture = TestBed.createComponent(UserAutoCompleteComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+	beforeEach(() => {
+		fixture = TestBed.createComponent(UserAutoCompleteComponent);
+		component = fixture.componentInstance;
+		fixture.detectChanges();
+	});
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+	it('should create', () => {
+		expect(component).toBeTruthy();
+	});
 });

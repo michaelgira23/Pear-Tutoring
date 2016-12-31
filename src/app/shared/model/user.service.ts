@@ -3,7 +3,7 @@ import { AngularFireDatabase, FirebaseRef } from 'angularfire2';
 import { AuthService } from '../security/auth.service';
 import { Observable, Subject } from 'rxjs/Rx';
 import { User } from './user';
-import { arrToObj, objToArr } from '../common/utils';
+import { objToArr } from '../common/utils';
 import * as moment from 'moment';
 
 export const UserStatus = {
@@ -40,10 +40,10 @@ export class UserService {
 		let dataToSave = {};
 		dataToSave[`users/${uid}`] = userToSave;
 		let name = user.firstName + ' ' + user.lastName;
-		for (let i=0;i<name.length;i++) {
-			for (let j=i+1;j<name.length+1;j++) {
-				if (name.substring(i,j) !== ' ') {
-					dataToSave[`userNameIndex/${name.substring(i,j)}/${uid}`] = true;
+		for (let i = 0; i < name.length; i++) {
+			for (let j = i + 1; j < name.length + 1; j++) {
+				if (name.substring(i, j) !== ' ') {
+					dataToSave[`userNameIndex/${name.substring(i, j)}/${uid}`] = true;
 				}
 			}
 		}
@@ -68,7 +68,7 @@ export class UserService {
 	}
 
 	uploadPfp(pfp: File): Observable<any> {
-		if (!this.uid) return Observable.throw('rip no login info');
+		if (!this.uid) {return Observable.throw('rip no login info'); }
 		return this.promiseToObservable(this.sdkStorage.child(`userPfps/${this.uid}/`).put(pfp))
 			.flatMap((snap: any) => {
 				let userToSave = Object.assign({}, {pfp: snap.metadata.downloadURLs[0]});
@@ -90,8 +90,8 @@ export class UserService {
 	}
 
 	getFreeTimes(): Observable<FreeTimes> {
-		return this.auth.auth$.flatMap(val => {
-			if (val) {
+		return this.auth.auth$.flatMap(state => {
+			if (state) {
 				return this.db.object(`freeTimesByUsers/${this.uid}/`)
 					.map(freeTimes => {
 						let temp = Object.assign({}, freeTimes);

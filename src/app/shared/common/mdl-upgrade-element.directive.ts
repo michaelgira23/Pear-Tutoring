@@ -2,7 +2,7 @@ import {Directive, AfterViewChecked} from '@angular/core';
 declare var componentHandler: any;
 
 @Directive({
-	selector: '[mdl]'
+	selector: '[appMdl]'
 })
 export class MDLUpgradeElementDirective implements AfterViewChecked {
 	ngAfterViewChecked() {

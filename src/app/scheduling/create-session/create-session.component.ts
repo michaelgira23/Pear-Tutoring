@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { Validators, FormGroup, FormBuilder, FormControl } from '@angular/forms';
+import { Validators, FormGroup, FormBuilder } from '@angular/forms';
 import { Router } from '@angular/router';
 import { SessionService, AllowedSubjects } from '../../shared/model/session.service';
 import { Session } from '../../shared/model/session';
@@ -92,13 +92,19 @@ export class CreateSessionComponent implements OnInit, OnChanges {
 	createSession() {
 		let sessionToCreate = Object.assign({}, this.createSessionForm.value);
 		console.log(sessionToCreate.tutees.map(val => val.$key));
-		sessionToCreate.start = moment(sessionToCreate.date, 'YYYY-MM-DD').add(moment(sessionToCreate.startTime, 'HH:mm').hours(), 'hours').add(moment(sessionToCreate.startTime, 'HH:mm').minutes(), 'minutes');
-		sessionToCreate.end = moment(sessionToCreate.date, 'YYYY-MM-DD').add(moment(sessionToCreate.endTime, 'HH:mm').hours(), 'hours').add(moment(sessionToCreate.endTime, 'HH:mm').minutes(), 'minutes');
+		sessionToCreate.start = moment(sessionToCreate.date, 'YYYY-MM-DD')
+								.add(moment(sessionToCreate.startTime, 'HH:mm').hours(), 'hours')
+								.add(moment(sessionToCreate.startTime, 'HH:mm').minutes(), 'minutes');
+		sessionToCreate.end = moment(sessionToCreate.date, 'YYYY-MM-DD')
+								.add(moment(sessionToCreate.endTime, 'HH:mm').hours(), 'hours')
+								.add(moment(sessionToCreate.endTime, 'HH:mm').minutes(), 'minutes');
 		sessionToCreate.tags = sessionToCreate.tags.split(',').map(val => val.trim());
 		sessionToCreate.tutees = sessionToCreate.tutees.map(val => val.$key);
 		sessionToCreate.tutor = this.userService.uid;
 		delete sessionToCreate.wbBackground;
-		delete sessionToCreate.date, delete sessionToCreate.startTime, delete sessionToCreate.endTime;
+		delete sessionToCreate.date;
+		delete sessionToCreate.startTime;
+		delete sessionToCreate.endTime;
 		if (!this.sessionId && !this.sessionInfo) {
 			this.sessionService.createSession(sessionToCreate).subscribe(
 				val => this.router.navigate(['scheduling']),

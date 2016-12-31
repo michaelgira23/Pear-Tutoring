@@ -5,9 +5,9 @@ import { UserService } from '../../shared/model/user.service';
 import { User } from '../../shared/model/user';
 
 @Component({
-  selector: 'app-user-auto-complete',
-  templateUrl: './user-auto-complete.component.html',
-  styleUrls: ['./user-auto-complete.component.scss'],
+	selector: 'app-user-auto-complete',
+	templateUrl: './user-auto-complete.component.html',
+	styleUrls: ['./user-auto-complete.component.scss'],
 	providers: [{
 		provide: NG_VALUE_ACCESSOR,
 		useExisting: forwardRef(() => UserAutoCompleteComponent),
@@ -34,15 +34,15 @@ export class UserAutoCompleteComponent implements OnInit, ControlValueAccessor {
 
 	onChangeCallback: any;
 
-  constructor(private userService: UserService) {
+	constructor(private userService: UserService) {
 	}
 
 	ngOnInit() {
 		this.onSearchStr$.debounceTime(150).subscribe(str => {
 			this.userService.searchUsersByName(str).subscribe(users => {
 				this.userResults = users;
-			}, console.log)
-		}, console.log)
+			}, console.log);
+		}, console.log);
 	}
 
 	onSearchKeyup(str: string) {

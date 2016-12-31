@@ -8,7 +8,7 @@ import { Validators, FormGroup, FormBuilder } from '@angular/forms';
 	templateUrl: './scheduling.component.html',
 	styleUrls: ['./scheduling.component.scss']
 })
-export class SchedulingComponent implements OnInit {
+export class SchedulingComponent implements OnInit, OnDestroy {
 
 	publicSessions: Session[] = [];
 	searchByTagForm: FormGroup;

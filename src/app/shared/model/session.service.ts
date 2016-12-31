@@ -6,7 +6,6 @@ import { UserService, UserStatus, FreeTimes } from './user.service';
 import { ChatService } from './chat.service';
 import { AuthService } from '../security/auth.service';
 import { WhiteboardService, defaultWhiteboardOptions } from './whiteboard.service';
-import { WhiteboardOptions } from './whiteboard';
 import * as moment from 'moment';
 import { objToArr, arrToObj } from '../common/utils';
 
@@ -25,7 +24,7 @@ export class SessionService {
 		this.sdkDb = fb.database().ref();
 		auth.auth$.subscribe(val => {
 			this.uid = val ? val.uid : null;
-		})
+		});
 	}
 
 	private promiseToObservable(promise): Observable<any> {
@@ -97,7 +96,7 @@ export class SessionService {
 					if (typeof session.tutor !== 'string') {
 						return this.userService.findUser(session.tutor.$key);
 					}
-					return this.userService.findUser(session.tutor)
+					return this.userService.findUser(session.tutor);
 				})
 			);
 		})
@@ -118,13 +117,13 @@ export class SessionService {
 						return this.userService.findUser(tutee);
 					})
 				))
-			)
+			);
 		}).map((val: any[][]) => {
 			sessionsWithUser.forEach((session, sessionIndex) => {
 				sessionsWithUser[sessionIndex].tutees = objToArr(session.tutees).map((tutee, tuteeIndex) => val[sessionIndex][tuteeIndex]);
 			});
 			return sessionsWithUser;
-		})
+		});
 	}
 
 	combineWithWb(sessionQuery: Observable<any>): Observable<Session[]> {
@@ -187,21 +186,21 @@ export class SessionService {
 		return this.checkAndCombine([
 			this.auth.auth$.flatMap(state => {
 				if (!state) {
-					return []
+					return [];
 				}
 				return this.combineArrWithUser(this.combineArrWithWb(this.db.list(`/users/${state.uid}/tutorSessions`)
-																				.flatMap(ids => this.checkAndCombine(ids.map(id => this.db.object('sessions/' + id.$key))))))
+																				.flatMap(ids => this.checkAndCombine(ids.map(id => this.db.object('sessions/' + id.$key))))));
 			}).map(Session.fromJsonArray),
 			this.auth.auth$.flatMap(state => {
 				if (!state) {
-					return []
+					return [];
 				}
 				return this.combineArrWithUser(this.combineArrWithWb(this.db.list(`/users/${state.uid}/tuteeSessions`)
-																				.flatMap(ids => this.checkAndCombine(ids.map(id => this.db.object('sessions/' + id.$key))))))
+																				.flatMap(ids => this.checkAndCombine(ids.map(id => this.db.object('sessions/' + id.$key))))));
 			}).map(Session.fromJsonArray)
 		]);
 	};
-	
+
 
 	// Find all of the sessions where the listed field is true.
 	findPublicSessions(): Observable<Session[]> {
@@ -243,7 +242,7 @@ export class SessionService {
 		let queryList: Observable<any>[] = [];
 		let secFromMdn = function(m: moment.Moment) {
 			return m.startOf('day').diff(m);
-		}
+		};
 		for (let day in timesInDay) {
 			if (timesInDay[day]) {
 				// this gets the day in week from the free times, and try to find a match in the same day in week next week
@@ -259,10 +258,10 @@ export class SessionService {
 							if (secFromMdn(moment(session.start, 'X')) < secFromMdn(time.from) && secFromMdn(moment(session.end, 'X')) > secFromMdn(time.to)) {
 								sessionsList.push(session);
 							}
-						})
-					})
+						});
+					});
 					return sessions;
-				}))
+				}));
 			}
 		}
 		return this.checkAndCombine(queryList);
