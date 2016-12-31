@@ -46,6 +46,7 @@ import { SessionCalendarComponent } from './scheduling/session-calendar/session-
 import { DisplayUserComponent } from './scheduling/display-user/display-user.component';
 import { SessionService } from './shared/model/session.service';
 import { TestComponent } from './test/test.component';
+import { NamePipe } from './shared/model/name.pipe';
 
 @NgModule({
 	declarations: [
@@ -68,7 +69,8 @@ import { TestComponent } from './test/test.component';
 		DisplayUserComponent,
 		CreateChatComponent,
 		ViewChatComponent,
-		TestComponent
+		TestComponent,
+		NamePipe
 	],
 	imports: [
 		BrowserModule,

@@ -18,5 +18,5 @@ import 'core-js/es6/reflect';
 import 'core-js/es7/reflect';
 import 'zone.js/dist/zone';
 
-// added by Nick
+// Added for `Array.prototype.includes` support
 import 'core-js/es7/array';
