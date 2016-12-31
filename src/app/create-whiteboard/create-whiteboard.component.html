@@ -1,10 +1,6 @@
 <h1>Create a Whiteboard</h1>
 <form (submit)="create()" autocomplete="off" novalidate>
-	<!-- <label>
-		<input type="checkbox" name="anyoneWrite" formControlName="anyoneWrite" value="true">
-		Allow anyone to write
-	</label> -->
-	<!-- <input name="background" formControlName="background" placeholder="Background Color (Any CSS value)"> -->
+	<input [(ngModel)]="options.name" name="name" placeholder="Whiteboard Name">
 	<label>
 		Background Color
 		<button type="button" class="color"

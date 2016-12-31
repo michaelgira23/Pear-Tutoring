@@ -5,6 +5,13 @@ $sophisticated-white: #eee;
 	display: inline-block;
 }
 
+.whiteboard-name {
+	position: absolute;
+	top: 0;
+	right: 0;
+	font-size: 2em;
+}
+
 .toolbar {
 	position: absolute;;
 	top: 2.5rem;
@@ -17,22 +24,39 @@ $sophisticated-white: #eee;
 	justify-content: flex-start;
 	align-items: center;
 
+	background-color: rgba(0, 0, 0, 0.8);
+	text-align: center;
+	border-radius: 0.25rem;
+
+	button {
+		color: $sophisticated-white;
+	}
+}
+
+.tool-toolbar {
+	position: absolute;
+	top: 2.5rem;
+	left: 2.5rem + 5rem + 2.5rem;
+
+	display: flex;
+	padding: 0.5rem;
+
 	color: $sophisticated-white;
 	background-color: rgba(0, 0, 0, 0.8);
 	border-radius: 0.25rem;
 
-	label {
+	.option {
 		display: flex;
 		flex-direction: column;
-		justify-content: center;
+		justify-content: space-between;;
 		align-items: center;
 
-		padding: 0.5rem 0;
+		padding: 0 0.5rem;
 
-		border-bottom: 1px solid rgba($sophisticated-white, 0.5);
+		border-left: 1px solid rgba($sophisticated-white, 0.5);
 
-		&:last-child {
-			border-bottom: none;
+		&:first-child {
+			border-left: none;
 		}
 
 		.color {
@@ -48,20 +72,26 @@ $sophisticated-white: #eee;
 			margin: 0;
 			padding: 0;
 		}
+
+		.number {
+			max-width: 2.5rem;
+			margin-left: 0.5rem;
+		}
 	}
 }
 
 canvas {
 	position: relative;
 	top: 0;
-	left: 0;
 	right: 0;
 	bottom: 0;
+	left: 0;
 	height: 100%;
 	width: 100%;
 }
 
-.invalid-key {
+.invalid-key,
+.taking-snapshot {
 	position: absolute;
 	top: 0;
 	left: 0;

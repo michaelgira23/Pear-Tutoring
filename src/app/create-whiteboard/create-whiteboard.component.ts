@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { WhiteboardService, WhiteboardOptions, defaultWhiteboardOptions } from '../shared/model/whiteboard.service';
+import { WhiteboardService, defaultWhiteboardOptions } from '../shared/model/whiteboard.service';
 
 @Component({
 	selector: 'app-create-whiteboard',
@@ -10,7 +10,7 @@ import { WhiteboardService, WhiteboardOptions, defaultWhiteboardOptions } from '
 })
 export class CreateWhiteboardComponent implements OnInit {
 
-	options: WhiteboardOptions = defaultWhiteboardOptions;
+	options = defaultWhiteboardOptions;
 
 	constructor(private router: Router, private whiteboardService: WhiteboardService) { }
 
