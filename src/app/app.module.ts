@@ -51,6 +51,7 @@ import { TimePickerComponent } from './settings/time-picker/time-picker.componen
 import { MyScheduleComponent } from './scheduling/my-schedule/my-schedule.component';
 import { PfpUploadComponent } from './settings/pfp-upload/pfp-upload.component';
 import { UserAutoCompleteComponent } from './scheduling/user-auto-complete/user-auto-complete.component';
+import { NamePipe } from './shared/model/name.pipe';
 
 @NgModule({
 	declarations: [
@@ -78,7 +79,8 @@ import { UserAutoCompleteComponent } from './scheduling/user-auto-complete/user-
 		MyScheduleComponent,
 		PfpUploadComponent,
 		UserAutoCompleteComponent,
-		MDLUpgradeElementDirective
+		MDLUpgradeElementDirective,
+		NamePipe
 	],
 	imports: [
 		BrowserModule,
