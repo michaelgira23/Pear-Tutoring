@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { SessionService } from '../shared/model/session.service';
 import { AuthService } from '../shared/security/auth.service';
 import { Session } from '../shared/model/session';
@@ -10,16 +10,13 @@ import { Validators, FormGroup, FormBuilder } from '@angular/forms';
 })
 export class SchedulingComponent implements OnInit {
 
-	tutorSessions: Session[] = [];
-	tuteeSessions: Session[] = [];
 	publicSessions: Session[] = [];
 	searchByTagForm: FormGroup;
 	searchBySubjectForm: FormGroup;
 	sessionsByTags: Session[] = [];
 	sessionsBySubject: Session[] = [];
-	get mySessions(): Session[] {
-		return this.tutorSessions.concat(this.tuteeSessions);
-	};
+
+	publicSessions$: any;
 
 	constructor(
 		private sessionService: SessionService,
@@ -36,24 +33,15 @@ export class SchedulingComponent implements OnInit {
 			subject: ['', Validators.required]
 		});
 
-		this.auth.auth$.subscribe(val => {
-			this.sessionService.findMySessions().tutorSessions
-			.subscribe(
-				val1 => {this.tutorSessions = val1, console.log(val1);},
-				err => console.log(err)
-			);
-			this.sessionService.findMySessions().tuteeSessions
-			.subscribe(
-				val2 => this.tuteeSessions = val2,
-				err => console.log(err)
-			);
+		this.publicSessions$ = this.sessionService.findPublicSessions()
+		.subscribe(
+			val3 => this.publicSessions = val3,
+			err => console.log(err)
+		);
+	}
 
-			this.sessionService.findPublicSessions()
-			.subscribe(
-				val3 => this.publicSessions = val3,
-				err => console.log(err)
-			);
-		});
+	ngOnDestroy() {
+		this.publicSessions$.unsubscribe();
 	}
 
 	findSessionsByTags() {

@@ -25,7 +25,6 @@ export class CreateSessionComponent implements OnInit, OnChanges {
 				title: ['', [Validators.required]],
 				desc: ['', Validators.required],
 				tutees: [[], Validators.required],
-				wbBackground: [''],
 				tags: ['']
 			});
 	allUsers: User[];
@@ -85,7 +84,6 @@ export class CreateSessionComponent implements OnInit, OnChanges {
 				title: [this.sessionInfo.title, [Validators.required]],
 				desc: [this.sessionInfo.desc, Validators.required],
 				tutees: [this.sessionInfo.tutees, Validators.required],
-				wbBackground: [''],
 				tags: [this.sessionInfo.tags ? this.sessionInfo.tags.join(', ') : '']
 			});
 		}
@@ -101,11 +99,8 @@ export class CreateSessionComponent implements OnInit, OnChanges {
 		sessionToCreate.tutor = this.userService.uid;
 		delete sessionToCreate.wbBackground;
 		delete sessionToCreate.date, delete sessionToCreate.startTime, delete sessionToCreate.endTime;
-		let wbOpt = {
-			background: this.createSessionForm.value.wbBackground
-		};
 		if (!this.sessionId && !this.sessionInfo) {
-			this.sessionService.createSession(sessionToCreate, wbOpt).subscribe(
+			this.sessionService.createSession(sessionToCreate).subscribe(
 				val => this.router.navigate(['scheduling']),
 				err => console.log(err)
 			);

@@ -22,6 +22,8 @@ import { AuthService } from './shared/security/auth.service';
 import { NotificationsService } from './shared/model/notifications.service';
 import { UserService } from './shared/model/user.service';
 
+import { MDLUpgradeElementDirective } from './shared/common/mdl-upgrade-element.directive';
+
 // Whiteboard components and services
 import { WhiteboardComponent } from './whiteboard/whiteboard.component';
 import { CreateWhiteboardComponent } from './create-whiteboard/create-whiteboard.component';
@@ -76,6 +78,7 @@ import { UserAutoCompleteComponent } from './scheduling/user-auto-complete/user-
 		MyScheduleComponent,
 		PfpUploadComponent,
 		UserAutoCompleteComponent,
+		MDLUpgradeElementDirective
 	],
 	imports: [
 		BrowserModule,

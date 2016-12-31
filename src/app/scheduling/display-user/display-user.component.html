@@ -1,12 +1,6 @@
-<div *ngIf="user" class="card">
-
-  <img class="img-fluid" [src]="user.pfp">
-
-  <div class="card-block user-name">
-    <div class="card-title">{{ user.name }}</div>
-  </div>
-  
-  <div class="card-block user-status">
-    <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="10" [attr.fill]="statusColor"/></svg>
-  <div>
-</div>
+<span *ngIf="user" class="mdl-chip mdl-chip--contact mdl-chip--deletable">
+    <img *ngIf="user.pfp" class="mdl-chip__contact" [src]="user.pfp">
+    <span *ngIf="!user.pfp" class="mdl-chip__contact mdl-color--teal mdl-color-text--white">{{ user.name[0] }}</span>
+    <span class="mdl-chip__text username">{{ user.name }}</span>
+    <a href="#" class="mdl-chip__action" [style.color]="statusColor"><i class="material-icons">radio_button_unchecked</i></a>
+</span>

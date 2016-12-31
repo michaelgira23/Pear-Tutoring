@@ -1,3 +1,31 @@
-<p>
-  my-schedule works!
-</p>
+<h1>My Schedule</h1>
+<div>
+  {{ user | json }}
+</div>
+<div>
+  {{ freeTimes | json}}
+</div>
+<div class="mdl-tabs mdl-js-tabs mdl-js-ripple-effect">
+	<div class="mdl-tabs__tab-bar">
+		<a class="mdl-tabs__tab is-active" href="#my-sessions">My Sessions</a>
+		<a class="mdl-tabs__tab" href="#my-calendar">Calendar View</a>
+	</div>
+	<div class="mdl-tabs__panel is-active" id="my-sessions">
+		<h2> Sessions I'm tutoring </h2>
+		<div class="session-display">
+			<div class="session-display"> 
+				<app-display-session *ngFor="let session of tutorSessions" [session]="session"></app-display-session>
+			</div>
+		</div>
+
+		<h2> Sessions I'm in </h2>
+		<div class="session-display">
+			<div class="session-display">
+				<app-display-session *ngFor="let session of tuteeSessions" [session]="session"></app-display-session>
+			</div>
+		</div>
+	</div>
+	<div class="mdl-tabs__panel" id="my-calendar">
+		<app-session-calendar [sessions]="mySessions"></app-session-calendar>
+	</div>
+</div>

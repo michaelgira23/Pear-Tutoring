@@ -2,10 +2,10 @@ import { Injectable, Inject } from '@angular/core';
 import { Observable, Subject } from 'rxjs/Rx';
 import { AngularFireDatabase, FirebaseRef } from 'angularfire2';
 import { Session } from './session';
-import { UserService, userStatus, FreeTimes } from './user.service';
+import { UserService, UserStatus, FreeTimes } from './user.service';
 import { ChatService } from './chat.service';
 import { AuthService } from '../security/auth.service';
-import { WhiteboardService } from './whiteboard.service';
+import { WhiteboardService, defaultWhiteboardOptions } from './whiteboard.service';
 import { WhiteboardOptions } from './whiteboard';
 import * as moment from 'moment';
 import { objToArr, arrToObj } from '../common/utils';
@@ -23,9 +23,9 @@ export class SessionService {
 				private auth: AuthService,
 				private chatService: ChatService) {
 		this.sdkDb = fb.database().ref();
-		this.auth.auth$.subscribe(val => {
-			if (val) { this.uid = val.uid; };
-		});
+		auth.auth$.subscribe(val => {
+			this.uid = val ? val.uid : null;
+		})
 	}
 
 	private promiseToObservable(promise): Observable<any> {
@@ -49,6 +49,13 @@ export class SessionService {
 		return this.promiseToObservable(this.sdkDb.update(dataToSave));
 	}
 
+	checkAndCombine(arr: Observable<any>[]): Observable<any> {
+		if (arr.length > 0) {
+			return Observable.combineLatest(arr);
+		}
+		return Observable.of([]);
+	}
+
 	// Take a firebase query for a single session and insert a user object into the tutor and tutee fields.
 	// Wrap this function around a firebase query to a session i can get the session object with the users
 	combineWithUser(sessionQuery: Observable<any>): Observable<Session> {
@@ -67,7 +74,7 @@ export class SessionService {
 		// Then query the tutees, note the session is stored temporarily in sessionsWithUser, and used later to combine with the users info.
 		.flatMap(val => {
 			sessionWithUser = val;
-			return Observable.combineLatest(objToArr(val.tutees).map(tutee => {
+			return this.checkAndCombine(objToArr(val.tutees).map(tutee => {
 				if (typeof tutee !== 'string') {
 					return this.userService.findUser(tutee.$key);
 				}
@@ -85,7 +92,7 @@ export class SessionService {
 		// First fill in the tutor field of each session
 		return sessionQuery.flatMap((val: any[]) => {
 			sessionsWithUser = val;
-			return Observable.combineLatest(
+			return this.checkAndCombine(
 				val.map((session) => {
 					if (typeof session.tutor !== 'string') {
 						return this.userService.findUser(session.tutor.$key);
@@ -102,8 +109,8 @@ export class SessionService {
 		// an empty tutees array in the session will cause a silent error
 		.flatMap((val: any[]) => {
 			sessionsWithUser = val;
-			return Observable.combineLatest(
-				val.map((session) => Observable.combineLatest(
+			return this.checkAndCombine(
+				val.map((session) => this.checkAndCombine(
 					objToArr(session.tutees).map(tutee => {
 						if (typeof tutee !== 'string') {
 							return this.userService.findUser(tutee.$key);
@@ -128,7 +135,7 @@ export class SessionService {
 		})
 		// returns a list of whiteboard key that belongs to the session
 		.flatMap(wbKeys => {
-			return Observable.combineLatest(wbKeys.map(wbKey => {
+			return this.checkAndCombine(wbKeys.map(wbKey => {
 				return this.db.object('whiteboards/' + wbKey.$key);
 			}));
 		})
@@ -144,14 +151,14 @@ export class SessionService {
 		// Fill in the whiteboard field of each session with the whiteboard info
 		return sessionQuery.flatMap((val: any[]) => {
 			sessionsWithWb = val;
-			return Observable.combineLatest(
+			return this.checkAndCombine(
 				val.map((session) => this.db.list('whiteboardsBySessions/' + session.$key))
 			);
 		})
 		// this step returns an array of array of whiteboard keys for each session in the list
 		.flatMap(val => {
-			return Observable.combineLatest(val.map(wbKeys => {
-				return Observable.combineLatest(wbKeys.map(key => {
+			return this.checkAndCombine(val.map(wbKeys => {
+				return this.checkAndCombine(wbKeys.map(key => {
 					return this.db.object('whiteboards/' + key.$key);
 				}));
 			}));
@@ -176,17 +183,25 @@ export class SessionService {
 	}
 
 	// Find the session ids where the user is a tutor or a tutee. Note the info in stored in the user object.
-	findMySessions(): {tutorSessions: Observable<Session[]>, tuteeSessions: Observable<Session[]>} {
-		if (!this.uid) { return {tutorSessions: Observable.throw('Rip no login info'), tuteeSessions: Observable.throw('Rip no login info')}; };
-		return {
-			tutorSessions: this.combineArrWithUser(this.combineArrWithWb(this.db.list(`/users/${this.uid}/tutorSessions`)
-																			.flatMap(ids => Observable.combineLatest(ids.map(id => this.db.object('sessions/' + id.$key))))))
-				.map(Session.fromJsonArray),
-			tuteeSessions: this.combineArrWithUser(this.combineArrWithWb(this.db.list(`/users/${this.uid}/tuteeSessions`)
-																			.flatMap(ids => Observable.combineLatest(ids.map(id => this.db.object('sessions/' + id.$key))))))
-				.map(Session.fromJsonArray)
-		};
-	}
+	findMySessions(): Observable<Session[][]> {
+		return this.checkAndCombine([
+			this.auth.auth$.flatMap(state => {
+				if (!state) {
+					return []
+				}
+				return this.combineArrWithUser(this.combineArrWithWb(this.db.list(`/users/${state.uid}/tutorSessions`)
+																				.flatMap(ids => this.checkAndCombine(ids.map(id => this.db.object('sessions/' + id.$key))))))
+			}).map(Session.fromJsonArray),
+			this.auth.auth$.flatMap(state => {
+				if (!state) {
+					return []
+				}
+				return this.combineArrWithUser(this.combineArrWithWb(this.db.list(`/users/${state.uid}/tuteeSessions`)
+																				.flatMap(ids => this.checkAndCombine(ids.map(id => this.db.object('sessions/' + id.$key))))))
+			}).map(Session.fromJsonArray)
+		]);
+	};
+	
 
 	// Find all of the sessions where the listed field is true.
 	findPublicSessions(): Observable<Session[]> {
@@ -205,10 +220,10 @@ export class SessionService {
 	// Find session by tags, sessions are already stored in sessionsByTags node in firebase
 	findSessionsByTags(tags: string[]): Observable<Session[]> {
 		return Observable.of(tags.map(tag => this.db.list('sessionsByTags/' + tag)))
-			.flatMap(tags$arr => Observable.combineLatest(tags$arr))
+			.flatMap(tags$arr => this.checkAndCombine(tags$arr))
 			.map(sessionsByTag => {sessionsByTag = sessionsByTag.reduce((a, b) => a.concat(b));
 				return sessionsByTag.map(session => this.findSession(session.$key)); })
-			.flatMap(session$arr => Observable.combineLatest(session$arr))
+			.flatMap(session$arr => this.checkAndCombine(session$arr))
 			.map(Session.fromJsonArray);
 	}
 
@@ -217,7 +232,7 @@ export class SessionService {
 			this.combineArrWithWb(
 				this.db.list('sessionsBySubject/' + subject)
 					// List of session ids --> list of session objects without user inserted
-					.flatMap(ids => Observable.combineLatest(ids.map(id => this.db.object('sessions/' + id.$key))))
+					.flatMap(ids => this.checkAndCombine(ids.map(id => this.db.object('sessions/' + id.$key))))
 			)
 		).map(Session.fromJsonArray);
 	}
@@ -233,7 +248,6 @@ export class SessionService {
 			if (timesInDay[day]) {
 				// this gets the day in week from the free times, and try to find a match in the same day in week next week
 				let dayInNextWeek = moment().add(1, 'week').day(day);
-				console.log(dayInNextWeek.format('YYYY-WW-E'))
 				queryList.push(this.db.list('sessions/', {
 					query: {
 						orderByChild: 'ywd',
@@ -251,7 +265,7 @@ export class SessionService {
 				}))
 			}
 		}
-		return Observable.combineLatest(queryList);
+		return this.checkAndCombine(queryList);
 	}
 
 	// Update the information of a session
@@ -293,10 +307,10 @@ export class SessionService {
 	}
 
 	// Use the update function to create a session, and create a starting whiteboard and chat
-	createSession(session: SessionOptions, wbOpt?: WhiteboardOptions): Observable<any> {
+	createSession(session: SessionOptions): Observable<any> {
 		let wbId;
 		let chatId;
-		return this.whiteboardService.createWhiteboard(wbOpt)
+		return this.whiteboardService.createWhiteboard(defaultWhiteboardOptions)
 		.flatMap(wb => {
 			wbId = wb.key;
 			return this.chatService.createChat();
@@ -337,11 +351,12 @@ export class SessionService {
 	joinSession(sessionId: String): Observable<any> {
 		if (!this.uid) { return Observable.throw('Rip no login info'); }
 
-		// this.sdkDb.child(`/usersInSession/${sessionId}/${this.uid}`).onDisconnect().set(false);
+		// in case the user closes the tab
+		this.sdkDb.child(`/usersInSession/${sessionId}/${this.uid}`).onDisconnect().set(false);
 
 		let dataToSave = {};
 		dataToSave[`/usersInSession/${sessionId}/${this.uid}`] = true;
-		this.userService.changeStatus(userStatus.IN_SESSION);
+		this.userService.changeStatus(UserStatus.IN_SESSION);
 		return this.firebaseUpdate(dataToSave);
 	}
 
@@ -349,7 +364,7 @@ export class SessionService {
 	leaveSession(sessionId: string): Observable<any> {
 		let dataToSave = {};
 		dataToSave[`/usersInSession/${sessionId}/${this.uid}`] = false;
-		this.userService.changeStatus(userStatus.ONLINE);
+		this.userService.changeStatus(UserStatus.ONLINE);
 		return this.firebaseUpdate(dataToSave);
 	}
 
@@ -359,7 +374,7 @@ export class SessionService {
 	}
 
 	addWb(sessionId: string): Observable<any> {
-		return this.whiteboardService.createWhiteboard().flatMap(wb => {
+		return this.whiteboardService.createWhiteboard(defaultWhiteboardOptions).flatMap(wb => {
 			let pushVal = {};
 			pushVal[wb.key] = true;
 			return this.promiseToObservable(this.db.list('whiteboardsBySessions/').update(sessionId, pushVal));

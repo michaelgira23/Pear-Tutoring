@@ -1,8 +1,10 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input} from '@angular/core';
 import { Router } from '@angular/router';
 import { Session } from '../../shared/model/session';
-import { UserService } from '../../shared/model/user.service';
 import { SessionService } from '../../shared/model/session.service';
+import { UUID } from 'angular2-uuid';
+
+declare const componentHandler;
 
 @Component({
 	selector: 'app-display-session',
@@ -10,6 +12,8 @@ import { SessionService } from '../../shared/model/session.service';
 	styleUrls: ['./display-session.component.scss']
 })
 export class DisplaySessionComponent implements OnInit {
+
+	menuId: string = UUID.UUID();
 
 	@Input()
 	session: Session;
@@ -23,7 +27,10 @@ export class DisplaySessionComponent implements OnInit {
 		return this.session.subject.toLowerCase();
 	}
 
-	constructor(private router: Router, private user: UserService, private sessionService: SessionService) { }
+	sideOpen: boolean;
+
+	constructor(private router: Router, private sessionService: SessionService) {
+	}
 
 	ngOnInit() {
 	}
