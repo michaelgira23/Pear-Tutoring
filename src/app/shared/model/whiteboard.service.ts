@@ -3,6 +3,7 @@ import { AngularFire, FirebaseAuthState, FirebaseListObservable, FirebaseObjectO
 import { Observable, Subject } from 'rxjs/Rx';
 
 import { AuthService } from '../security/auth.service';
+import { styles, colors } from '../../whiteboard/utils/serialization';
 import { Whiteboard, WhiteboardOptions,
 	WhiteboardMarking, WhiteboardMarkingOptions,
 	WhiteboardText, WhiteboardTextOptions,
@@ -91,7 +92,7 @@ export class WhiteboardService {
 			created: Date.now(),
 			createdBy: this.authInfo ? this.authInfo.uid : null,
 			name: options.name,
-			background: options.background
+			background: colors.serialize(options.background)
 		};
 		return this.observableToPromise(this.whiteboards.push(whiteboard));
 	}
@@ -176,7 +177,7 @@ export class WhiteboardService {
 		const marking: WhiteboardMarking = {
 			created: Date.now(),
 			createdBy: this.authInfo ? this.authInfo.uid : null,
-			style: options.style,
+			style: styles.serializeOptions(options.style),
 			started: options.started,
 			path: options.path
 		};
@@ -206,7 +207,7 @@ export class WhiteboardService {
 		const text: WhiteboardText = {
 			created: Date.now(),
 			createdBy: this.authInfo ? this.authInfo.uid : null,
-			style: options.style,
+			style: styles.serializeOptions(options.style),
 			rotation: options.rotation,
 			bounds: options.bounds,
 			content: options.content,

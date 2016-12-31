@@ -1,7 +1,7 @@
 import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy, ViewChild, HostListener } from '@angular/core';
-import { segments, rectangles, styles, font } from './utils/serialization';
+import { segments, rectangles, styles, font, colors } from './utils/serialization';
 import { removeRedundant } from './utils/diff';
-import { Whiteboard, WhiteboardMarking, WhiteboardText, WhiteboardShapeType } from '../shared/model/whiteboard';
+import { Whiteboard, WhiteboardMarking, WhiteboardText, WhiteboardShapeType, Color } from '../shared/model/whiteboard';
 import { WhiteboardService, defaultStyleOptions, defaultFontOptions } from '../shared/model/whiteboard.service';
 
 // Whiteboard tools
@@ -328,7 +328,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	 * Background functions
 	 */
 
-	setBackgroundColor(color: string) {
+	setBackgroundColor(color: Color | string) {
 		// If there is currently a background, remove it
 		if (this.background) {
 			this.background.remove();
@@ -343,7 +343,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 
 		// Send the canvas to the back
 		this.background.sendToBack();
-		this.background.fillColor = color;
+		this.background.fillColor = colors.deserialize(color);
 	}
 
 	/**
@@ -502,7 +502,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 
 								console.log('new segments', newSegments);
 								console.log('new styles', newStyles);
-								//
+
 								// console.log('=====["Unit Tests"]=====');
 								// console.log('Test 1:', removeRedundant(
 								// 	{ a: 'same', b: 'different', c: { d: 4, e: 2, f: 0 }, f: { g: 6, e: 9 } },

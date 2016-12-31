@@ -39,7 +39,7 @@ export function removeRedundant(oldObject: any, newObject: any): any {
 
 		// If new key doesn't exist in old object, immediately add
 		if (typeof oldObject[newObjectKey] === 'undefined') {
-			// console.log(oldObject[newObjectKey], 'and', newObject[newObjectKey], ' (first should be undefined)');
+			console.log(oldObject[newObjectKey], 'and', newObject[newObjectKey], ' (first should be undefined)');
 			changedObject[newObjectKey] = newObjectValue;
 			continue;
 		}
@@ -48,7 +48,7 @@ export function removeRedundant(oldObject: any, newObject: any): any {
 		if (typeof oldObject[newObjectKey] === 'object' && typeof newObject[newObjectKey] === 'object') {
 			const changed = removeRedundant(oldObject[newObjectKey], newObject[newObjectKey]);
 			if (changed !== null) {
-				// console.log(oldObject[newObjectKey], 'and', newObject[newObjectKey], 'should not be same');
+				console.log(oldObject[newObjectKey], 'and', newObject[newObjectKey], 'should not be same');
 				changedObject[newObjectKey] = changed;
 			}
 			continue;
@@ -56,7 +56,7 @@ export function removeRedundant(oldObject: any, newObject: any): any {
 
 		// This means oldObject property and newObject property are different, but only one of them is an object.
 		// Since object !== anything that isn't an object, we can set this new property to changedObject
-		// console.log(oldObject[newObjectKey], 'and', newObject[newObjectKey], 'should not be same');
+		console.log(oldObject[newObjectKey], 'and', newObject[newObjectKey], 'should not be same');
 		changedObject[newObjectKey] = newObjectValue;
 	}
 

@@ -4,7 +4,7 @@
 
 export interface Whiteboard extends Metadata {
 	name: string;
-	background: string;
+	background: Color;
 }
 
 export interface WhiteboardOptions {
@@ -51,7 +51,7 @@ export interface WhiteboardTextOptions extends WhiteboardItemOptions {
  */
 
 export interface WhiteboardItem extends Metadata {
-	style: StyleOptions;
+	style: Style;
 	erased?: number;
 }
 
@@ -78,13 +78,30 @@ export interface Edits {
  * Styling
  */
 
-export interface StyleOptions {
+export interface Style {
 	stroke: Stroke;
 	fill: Fill;
 	shadow: Shadow;
 }
 
+export interface StyleOptions {
+	stroke: StrokeOptions;
+	fill: FillOptions;
+	shadow: ShadowOptions;
+}
+
 export interface Stroke {
+	color: Color;
+	width: number;
+	cap: string;
+	join: string;
+	dashOffset: number;
+	scaling: boolean;
+	dashArray: number[];
+	miterLimit: number;
+}
+
+export interface StrokeOptions {
 	color: string;
 	width: number;
 	cap: string;
@@ -96,10 +113,20 @@ export interface Stroke {
 }
 
 export interface Fill {
+	color: Color;
+}
+
+export interface FillOptions {
 	color: string;
 }
 
 export interface Shadow {
+	color: Color;
+	blur: number;
+	offset: Point;
+}
+
+export interface ShadowOptions {
 	color: string;
 	blur: number;
 	offset: Point;
@@ -126,6 +153,13 @@ export interface Rectangle {
 	y: number;
 	width: number;
 	height: number;
+}
+
+export interface Color {
+	red: number;
+	green: number;
+	blue: number;
+	alpha: number;
 }
 
 export interface Size {
