@@ -2,8 +2,6 @@
 	<div class="mdl-layout__header-row">
 		<!-- Title -->
 		<span class="mdl-layout-title">Pear Tutoring</span>
-		<!-- Add spacer, to align navigation to the right -->
-		<div class="mdl-layout-spacer"></div>
 		<!-- Navigation. We hide it in small screens. -->
 		<nav class="mdl-navigation mdl-layout--large-screen-only">
 			<a class="mdl-navigation__link" routerLink="home">Home</a>
@@ -11,6 +9,30 @@
 			<a class="mdl-navigation__link" routerLink="scheduling">Scheduling</a>
 			<a class="mdl-navigation__link" routerLink="chat">Chat</a>
 			<a class="mdl-navigation__link" routerLink="settings">Settings</a>
+		</nav>
+
+		<!-- Add spacer, to align navigation to the right -->
+		<div class="mdl-layout-spacer"></div>
+
+		<nav class="mdl-navigation mdl-layout--large-screen-only">
+			<ng-container *ngIf="!authInfo">
+				<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect"
+					routerLink="login">
+					Login
+				</button>
+				<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect"
+					routerLink="register">
+					Register
+				</button>
+			</ng-container>
+
+			<ng-container *ngIf="authInfo">
+				<p class="mdl-navigation__link">Signed in as {{ authInfo.auth.email }}</p>
+				<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect"
+					(click)="logout()">
+					Logout
+				</button>
+			</ng-container>
 		</nav>
 	</div>
 </header>
