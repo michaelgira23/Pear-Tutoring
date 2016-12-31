@@ -7,7 +7,7 @@ import { User } from './user';
 export class NamePipe implements PipeTransform {
 
 	transform(user: User, capitalize?: boolean): string {
-		if(user.name) {
+		if (user.name) {
 			return user.name;
 		} else if (user.email) {
 			return user.email;
