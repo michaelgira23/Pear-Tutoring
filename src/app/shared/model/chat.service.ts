@@ -128,20 +128,22 @@ export class ChatService {
 
 }
 
+
+// We have to add `any` here because of the Firebase `TIMESTAMP`.
 export interface Chat {
-	created: number;
-	createdBy: string;
+	created: number | any;
+	createdBy: string | any;
 }
 
 export interface Message {
 	text: string;
 	from: string | any;
-	time: number;
+	time: number | any;
 }
 
 export interface Status {
 	type: StatusOptions;
-	time: number;
+	time: number | any;
 	user: string | any;
 }
 
