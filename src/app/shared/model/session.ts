@@ -2,7 +2,7 @@
 // Maybe store the start and end values internally in this class as a moment object for use?
 // In database, must be stored as int because of Firebase
 import { User } from './user';
-import prisma from 'prisma';
+declare const prisma: any;
 
 export class Session {
 	static fromJson({ $key, start, end, subject, tutor, tutees, max, listed, whiteboard, chat, title, desc, canceled}): Session {
