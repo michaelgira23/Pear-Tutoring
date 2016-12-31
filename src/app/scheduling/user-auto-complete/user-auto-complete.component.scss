@@ -1,0 +1,10 @@
+.drop-down {
+    display: flex;
+    flex-direction: column;
+    .drop-down-items {
+        cursor: pointer;
+        &:hover {
+            background: grey;
+        }
+    }
+}

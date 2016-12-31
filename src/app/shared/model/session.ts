@@ -2,12 +2,28 @@
 // Maybe store the start and end values internally in this class as a moment object for use?
 // In database, must be stored as int because of Firebase
 import { User } from './user';
-declare const prisma: any;
+import { Whiteboard } from './whiteboard';
+import { objToArr } from '../common/utils';
+import * as moment from 'moment';
+
+export const SessionColors = {
+	Math: '#05999B',
+	Art: '#FF5C5C',
+	English: '#86F243'
+};
 
 export class Session {
-	static fromJson({ $key, start, end, subject, tutor, tutees, max, listed, whiteboard, chat, title, desc, canceled}): Session {
-		let color = subject ? prisma(subject).hex : '#000' ;
-		return new Session($key, start, end, subject, color, tutor, tutees, max, listed, whiteboard, chat, title, desc, canceled);
+	static fromJson({ $key, start, end, subject, tutor, tutees, max, listed, whiteboards, chat, title, desc, canceled, tags}): Session {
+		let color = subject ? SessionColors[subject] : '#000' ;
+		if (!Array.isArray(tutees)) {
+			tutees = objToArr(tutees);
+		}
+		if (!Array.isArray(tags)) {
+			tags = objToArr(tags);
+		}
+		start = moment(start, 'X');
+		end = moment(end, 'X');
+		return new Session($key, start, end, subject, color, tutor, tutees, max, listed, whiteboards, chat, title, desc, canceled, tags);
 	}
 
 	static fromJsonArray(json: any[]): Session[] {
@@ -16,18 +32,19 @@ export class Session {
 
 	constructor (
 		public $key: string,
-		public start: number,
-		public end: number,
+		public start: moment.Moment,
+		public end: moment.Moment,
 		public subject: string,
 		public color: string,
 		public tutor: User,
 		public tutees: User[],
 		public max: number,
 		public listed: boolean,
-		public whiteboard: string,
+		public whiteboards: Whiteboard[],
 		public chat: string,
 		public title: string,
 		public desc: string,
-		public canceled: boolean
+		public canceled: boolean,
+		public tags: string[]
 	) { }
 }
