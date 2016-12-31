@@ -69,7 +69,9 @@ export interface Metadata {
 
 // Key should be timestamp, value should be any property changed
 export interface Edits {
-	[timestamp: number]: any;
+	[timestamp: number]: {
+		[property: string]: any;
+	};
 }
 
 /**

@@ -166,6 +166,10 @@ export class Cursor {
 	mouseup(event) {
 		if (this.whiteboard.allowWrite) {
 			console.log('writing');
+
+			// Edit all items that are selected
+			this.whiteboard.editItems(this.whiteboard.selectedItems());
+
 			if (this.resizing) {
 				this.resizing = false;
 
@@ -209,8 +213,8 @@ export class Cursor {
 	}
 
 	/**
-	* Helper functions
-	*/
+	 * Helper functions
+	 */
 
 	// distance formula
 	distance(x1: number, y1: number, x2: number, y2: number): number {

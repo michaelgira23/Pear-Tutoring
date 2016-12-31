@@ -9,6 +9,18 @@ import { Whiteboard, WhiteboardOptions,
 	StyleOptions,
 	Font } from './whiteboard';
 
+// Declare the `Array.prototype.includes` because we use a Polyfill
+declare global {
+	interface Array<T> {
+		includes(searchElement: T): boolean;
+	}
+}
+
+const editableMarkingProperties = [
+	'style',
+	'path'
+];
+
 export const defaultWhiteboardOptions: WhiteboardOptions = {
 	name: 'Unnamed Whiteboard',
 	background: '#fff'
@@ -48,7 +60,11 @@ export class WhiteboardService {
 	whiteboards: FirebaseListObservable<Whiteboard[]>;
 	sdkStorage: any;
 
-	constructor(private af: AngularFire, private authService: AuthService, @Inject(FirebaseRef) fb) {
+	constructor(
+		private af: AngularFire,
+		@Inject(FirebaseRef) fb,
+		private authService: AuthService
+	) {
 		this.sdkStorage = fb.storage().ref();
 		this.whiteboards = this.af.database.list('whiteboards');
 
@@ -66,8 +82,8 @@ export class WhiteboardService {
 	 * Whiteboard
 	 */
 
-	getWhiteboard(key: string): FirebaseObjectObservable<Whiteboard> {
-		return this.af.database.object('whiteboards/' + key);
+	getWhiteboard(whiteboardKey: string): FirebaseObjectObservable<Whiteboard> {
+		return this.af.database.object(`whiteboards/${whiteboardKey}`);
 	}
 
 	createWhiteboard(options: WhiteboardOptions): Observable<any> {
@@ -88,8 +104,73 @@ export class WhiteboardService {
 	 * Whiteboard Markings
 	 */
 
-	getMarkings(key: string): FirebaseListObservable<WhiteboardMarking[]> {
-		return this.af.database.list('whiteboardMarkings/' + key);
+	getMarkings(whiteboardKey: string): FirebaseListObservable<WhiteboardMarking[]> {
+		return this.af.database.list(`whiteboardMarkings/${whiteboardKey}`);
+	}
+
+	getFormattedMarkings(whiteboardKey: string): Observable<WhiteboardMarking[]> {
+		return this.getMarkings(whiteboardKey)
+			.map(markings => { return markings.map(this.currentMarking); });
+	}
+
+	getMarking(whiteboardKey: string, markingKey: string): FirebaseObjectObservable<WhiteboardMarking> {
+		return this.af.database.object(`whiteboardMarkings/${whiteboardKey}/${markingKey}`);
+	}
+
+	getFormattedMarking(whiteboardKey: string, markingKey: string): Observable<WhiteboardMarking> {
+		console.log('get formatted marking from', whiteboardKey, 'with key', markingKey);
+		return this.getMarking(whiteboardKey, markingKey)
+			.map(this.currentMarking);
+	}
+
+	// Compiles the edits in a marking object to the most up-to-date properties of the total marking
+	currentMarking(marking: WhiteboardMarking): WhiteboardMarking {
+
+		// If marking doesn't exist, return null
+		if (!marking.$exists()) {
+			return null;
+		}
+
+		// If no edits, then initial values are the most up-to-date
+		if (typeof marking.edits !== 'object') {
+			// Delete marking edits property just in case it was something dumb like a boolean
+			// Yeah. Booleans are pretty dumb.
+			delete marking.edits;
+			return marking;
+		}
+
+		const editTimestamps = Object.keys(marking.edits);
+		editTimestamps.sort();
+
+		// Go through edit timestamps and update respective values
+		editTimestamps.forEach(editTimestamp => {
+			// Go through edit properties and make sure they're editable
+			const editProperties = Object.keys(marking.edits[editTimestamp]);
+			for (let i = 0; i < editProperties.length; i++) {
+				const editProperty = editProperties[i];
+
+				// If property isn't editable, ignore
+				if (!editableMarkingProperties.includes(editProperty)) {
+					continue;
+				}
+
+				// New value to edit in the marking object
+				let newValue = marking.edits[editTimestamp][editProperty];
+
+				// If editting style, merge with the current styles
+				if (typeof newValue === 'object' && editProperty === 'style') {
+					// Merge new edits with current object
+					newValue = Object.assign(marking[editProperty], newValue);
+				}
+
+				// Edit value
+				marking[editProperty] = newValue;
+			}
+		});
+
+		// Delete edits and return
+		delete marking.edits;
+		return marking;
 	}
 
 	createMarking(key: string, options: WhiteboardMarkingOptions): Observable<any> {
@@ -104,9 +185,13 @@ export class WhiteboardService {
 		return this.observableToPromise(whiteboardMarkings.push(marking));
 	}
 
+	editMarking(whiteboardKey: string, markingKey: string, options: any): Observable<any> {
+		return this.getFormattedMarking(whiteboardKey, markingKey);
+	}
+
 	eraseMarking(whiteboardKey: string, markingKey: string): Observable<WhiteboardMarking> {
 		return this.observableToPromise(
-			this.af.database.object('whiteboardMarkings/' + whiteboardKey + '/' + markingKey)
+			this.af.database.object(`whiteboardMarkings/${whiteboardKey}/${markingKey}`)
 				.update({ erased: Date.now() }));
 	}
 
@@ -114,8 +199,8 @@ export class WhiteboardService {
 	 * Whiteboard Text
 	 */
 
-	getTexts(key: string): FirebaseListObservable<WhiteboardText[]> {
-		return this.af.database.list('whiteboardText/' + key);
+	getTexts(whiteboardKey: string): FirebaseListObservable<WhiteboardText[]> {
+		return this.af.database.list(`whiteboardText/${whiteboardKey}`);
 	}
 
 	createText(key: string, options: WhiteboardTextOptions): Observable<WhiteboardText> {
@@ -135,7 +220,7 @@ export class WhiteboardService {
 
 	eraseText(whiteboardKey: string, textKey: string): Observable<WhiteboardText> {
 		return this.observableToPromise(
-			this.af.database.object('whiteboardText/' + whiteboardKey + '/' + textKey)
+			this.af.database.object(`whiteboardText/${whiteboardKey}/${textKey}`)
 				.update({ erased: Date.now() }));
 	}
 
@@ -152,12 +237,12 @@ export class WhiteboardService {
 	 * Snapshot
 	 */
 
-	storeSnapshot(key: string, snapshot: Blob | File): Observable<any> {
+	storeSnapshot(whiteboardKey: string, snapshot: Blob | File): Observable<any> {
 		// Upload file
-		return this.observableToPromise(this.sdkStorage.child('wbSnapShots/' + key).put(snapshot))
+		return this.observableToPromise(this.sdkStorage.child(`wbSnapShots/${whiteboardKey}`).put(snapshot))
 			.map((snap: any) => {
 				// Store 'snapshot' property in the whiteboard object
-				return this.af.database.object('whiteboards/' + key).update({ snapshot: snap.metadata.downloadURLs[0] });
+				return this.af.database.object(`whiteboards/${whiteboardKey}`).update({ snapshot: snap.metadata.downloadURLs[0] });
 			});
 	}
 

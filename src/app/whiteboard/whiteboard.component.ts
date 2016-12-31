@@ -184,7 +184,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 			);
 
 			// Subscribe to markings on whiteboard
-			this.markingsSubscription = this.whiteboardService.getMarkings(this.key).subscribe(
+			this.markingsSubscription = this.whiteboardService.getFormattedMarkings(this.key).subscribe(
 				data => {
 					this.markings = data;
 
@@ -338,7 +338,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		const bottomRight = new paper.Point(this.canvasEl.width, this.canvasEl.height);
 
 		// Create a new rectangle that spans the whole canvas
-		this.background = new paper.Path.Rectangle(topLeft, bottomRight);
+		this.background = new paper.Shape.Rectangle(topLeft, bottomRight);
 
 		// Send the canvas to the back
 		this.background.sendToBack();
@@ -387,6 +387,17 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		}
 	}
 
+	markingIdToPushKey(id) {
+		const markingKeys = Object.keys(this.canvasMarkings);
+		for (let i = 0; i < markingKeys.length; i++) {
+			const marking = this.canvasMarkings[markingKeys[i]];
+			if (marking.id === id) {
+				return markingKeys[i];
+			}
+		}
+		return null;
+	}
+
 	/**
 	 * Text functions
 	 */
@@ -432,6 +443,17 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		}
 	}
 
+	textIdToPushKey(id) {
+		const textKeys = Object.keys(this.canvasText);
+		for (let i = 0; i < textKeys.length; i++) {
+			const text = this.canvasText[textKeys[i]];
+			if (text.id === id) {
+				return textKeys[i];
+			}
+		}
+		return null;
+	}
+
 	/**
 	 * Selection functions
 	 */
@@ -451,6 +473,30 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 
 	deselectAllItems() {
 		this.selectedItems().forEach(item => item.selected = false);
+	}
+
+	editItems(items: any[]) {
+		// Edit selected items into the database
+		items.forEach(item => {
+			const markingKey = this.markingIdToPushKey(item.id);
+			const textKey = this.textIdToPushKey(item.id);
+			if (markingKey) {
+				console.log('edit marking');
+				this.whiteboardService.getFormattedMarking(this.key, markingKey)
+					.subscribe(
+						marking => {
+							console.log('finall formatted marking', marking);
+						},
+						err => {
+							console.log('edit items whiteboard component error getting formatted marking', err);
+						}
+					);
+			} else if (textKey) {
+				console.log('edit text');
+			} else {
+				console.log('unrecognized item!');
+			}
+		});
 	}
 
 	/**
