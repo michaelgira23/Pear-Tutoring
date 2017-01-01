@@ -2,9 +2,11 @@ import { Injectable, Inject } from '@angular/core';
 import * as firebase from 'firebase';
 import { AngularFire, FirebaseAuthState, FirebaseListObservable, FirebaseObjectObservable, FirebaseRef } from 'angularfire2';
 import { Observable, Subject } from 'rxjs/Rx';
+import _ from 'lodash';
 
 import { AuthService } from '../security/auth.service';
 import { styles, colors } from '../../whiteboard/utils/serialization';
+import { removeRedundant } from '../../whiteboard/utils/diff';
 import { Whiteboard, WhiteboardOptions,
 	WhiteboardMarking, WhiteboardMarkingOptions,
 	WhiteboardText, WhiteboardTextOptions,
@@ -140,13 +142,22 @@ export class WhiteboardService {
 			return marking;
 		}
 
-		const editTimestamps = Object.keys(marking.edits);
-		editTimestamps.sort();
+		// Convert edits to arrays. We don't care about push keys.
+		let edits = [];
+		const editKeys = Object.keys(marking.edits);
+		editKeys.forEach(editKey => {
+			edits.push(marking.edits[editKey]);
+		});
+
+		// Sort edits in chronological order
+		edits.sort((a, b) => {
+			return a.edited - b.edited;
+		});
 
 		// Go through edit timestamps and update respective values
-		editTimestamps.forEach(editTimestamp => {
+		edits.forEach(edit => {
 			// Go through edit properties and make sure they're editable
-			const editProperties = Object.keys(marking.edits[editTimestamp]);
+			const editProperties = Object.keys(edit);
 			for (let i = 0; i < editProperties.length; i++) {
 				const editProperty = editProperties[i];
 
@@ -156,7 +167,7 @@ export class WhiteboardService {
 				}
 
 				// New value to edit in the marking object
-				let newValue = marking.edits[editTimestamp][editProperty];
+				let newValue = edits[editProperty];
 
 				// If editting style, merge with the current styles
 				if (typeof newValue === 'object' && editProperty === 'style') {
@@ -187,7 +198,48 @@ export class WhiteboardService {
 	}
 
 	editMarking(whiteboardKey: string, markingKey: string, options: any): Observable<any> {
-		return this.getFormattedMarking(whiteboardKey, markingKey);
+		// Get current marking
+		return this.getFormattedMarking(whiteboardKey, markingKey)
+			.first()
+			.map(marking => {
+				let edits = {};
+				// Go through options and make sure they're editable
+				const editProperties = Object.keys(options);
+				for (let i = 0; i < editProperties.length; i++) {
+					const editProperty = editProperties[i];
+
+					// If property isn't editable, ignore
+					if (!editableMarkingProperties.includes(editProperty)) {
+						continue;
+					}
+
+					let newValue = null;
+
+					// If new edit properties aren't the same as existing properties, add
+					if (!_.isEqual(options[editProperty], marking[editProperty])) {
+						// Totally reassign properties, unless it's style
+						// We can get rid of redundant styles because style objects have a fixed length
+						if (editProperty === 'style') {
+							newValue = removeRedundant(marking[editProperty], options[editProperty]);
+						} else {
+							newValue = options[editProperty];
+						}
+					}
+
+					// If newValue doesn't equal null, then let's edit the property!
+					if (newValue !== null) {
+						edits[editProperty] = newValue;
+					}
+				}
+
+				return this.af.database.list(`whiteboardMarkings/${whiteboardKey}/${markingKey}/edits`)
+					.push({
+						edited: firebase.database['ServerValue']['TIMESTAMP'],
+						edits
+					});
+
+			});
+
 	}
 
 	eraseMarking(whiteboardKey: string, markingKey: string): Observable<WhiteboardMarking> {

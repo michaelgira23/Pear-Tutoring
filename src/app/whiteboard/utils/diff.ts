@@ -1,3 +1,5 @@
+import _ from 'lodash';
+
 /**
  * Takes two objects and returns an object with properties that have been added or updated.
  * This is used so we don't store redundant properties in the database when we edit things
@@ -13,8 +15,7 @@
  *
  */
 
-// Oh boy, this is going to be FUN to do
-export function removeRedundant(oldObject: any, newObject: any): any {
+export function removeRedundant(oldObject: any, newObject: any, oldUndefinedEqualsNewEmptyArray = true): any {
 	// Make sure both parameters are objects.
 	if (typeof newObject !== 'object' || typeof oldObject !== 'object') {
 		// This means one of the values must be a string, number, boolean, or function.
@@ -33,13 +34,17 @@ export function removeRedundant(oldObject: any, newObject: any): any {
 		const newObjectValue = newObject[newObjectKey];
 
 		// If new object keys are exactly the same, we don't need to add
-		if (JSON.stringify(oldObject[newObjectKey]) === JSON.stringify(newObject[newObjectKey])) {
+		if (_.isEqual(oldObject[newObjectKey], newObject[newObjectKey])) {
 			continue;
 		}
 
 		// If new key doesn't exist in old object, immediately add
 		if (typeof oldObject[newObjectKey] === 'undefined') {
-			console.log(oldObject[newObjectKey], 'and', newObject[newObjectKey], ' (first should be undefined)');
+			// If old value is undefined and new value is an empty array, skip they are the same
+			// (but only if oldUndefinedEqualsNewEmptyArray)
+			if (oldUndefinedEqualsNewEmptyArray && newObjectValue.length === 0) {
+				continue;
+			}
 			changedObject[newObjectKey] = newObjectValue;
 			continue;
 		}
@@ -48,7 +53,6 @@ export function removeRedundant(oldObject: any, newObject: any): any {
 		if (typeof oldObject[newObjectKey] === 'object' && typeof newObject[newObjectKey] === 'object') {
 			const changed = removeRedundant(oldObject[newObjectKey], newObject[newObjectKey]);
 			if (changed !== null) {
-				console.log(oldObject[newObjectKey], 'and', newObject[newObjectKey], 'should not be same');
 				changedObject[newObjectKey] = changed;
 			}
 			continue;
@@ -56,7 +60,6 @@ export function removeRedundant(oldObject: any, newObject: any): any {
 
 		// This means oldObject property and newObject property are different, but only one of them is an object.
 		// Since object !== anything that isn't an object, we can set this new property to changedObject
-		console.log(oldObject[newObjectKey], 'and', newObject[newObjectKey], 'should not be same');
 		changedObject[newObjectKey] = newObjectValue;
 	}
 

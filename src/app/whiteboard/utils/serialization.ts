@@ -1,4 +1,4 @@
-import * as parseColor from 'parse-color';
+import parseColor from 'parse-color';
 import { Style, StyleOptions, Segment, Rectangle, Font, Color } from '../../shared/model/whiteboard';
 declare const paper: any;
 
@@ -112,6 +112,7 @@ function paperObjectToStyleOptions(paperObject: any, clearFill = false): StyleOp
 	return styleObject;
 }
 
+// Serialize of style options for database (serialize colors)
 function styleOptionsToStyleObject(styleOptions: StyleOptions): Style {
 	return {
 		stroke: {
