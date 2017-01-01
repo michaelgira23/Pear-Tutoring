@@ -9,6 +9,8 @@ import { UserService } from '../model/user.service';
 @Injectable()
 export class ChatService {
 
+	// We use the bracket notation here to get around those tricky typings
+	timestamp: any = firebase.database['ServerValue']['TIMESTAMP'];
 	sdkDb: any;
 	authInfo: FirebaseAuthState;
 	queue: { key: string, chatKey: string, status: StatusOptions, time: number }[] = [];
@@ -72,7 +74,7 @@ export class ChatService {
 	createChat(): Observable<any> {
 		const chats = this.af.database.list('chats');
 		const chatObj: Chat = {
-			created: firebase.database['ServerValue']['TIMESTAMP'],
+			created: this.timestamp,
 			createdBy: this.authInfo ? this.authInfo.uid : null
 		};
 
@@ -84,7 +86,7 @@ export class ChatService {
 		const message: Message = {
 			text: msgText,
 			from: this.authInfo ? this.authInfo.uid : null,
-			time: firebase.database['ServerValue']['TIMESTAMP'],
+			time: this.timestamp,
 		};
 		return this.observableToPromise(chatMessages.push(message));
 	}
@@ -92,7 +94,7 @@ export class ChatService {
 	sendStatus(statusType: StatusOptions, chatKey: string, time?: number): Observable<any> {
 		const status: Status = {
 			type: statusType,
-			time: time || firebase.database['ServerValue']['TIMESTAMP'],
+			time: time || Date.now(),
 			user: this.authInfo ? this.authInfo.uid : null,
 		};
 		const key = this.sdkDb.push().key;
@@ -143,7 +145,7 @@ export interface Message {
 
 export interface Status {
 	type: StatusOptions;
-	time: number | any;
+	time: number;
 	user: string | any;
 }
 
