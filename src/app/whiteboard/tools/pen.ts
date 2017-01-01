@@ -47,7 +47,7 @@ export class Pen {
 
 			// Insert path into database
 			const markingOptions: WhiteboardMarkingOptions = {
-				started: this.currentPathStarted,
+				drawTime: Date.now() - this.currentPathStarted,
 				path: segments.serialize(this.currentPath.segments),
 				style: styles.serialize(this.currentPath, true)
 			};

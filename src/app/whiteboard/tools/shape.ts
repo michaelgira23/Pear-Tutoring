@@ -151,7 +151,7 @@ export class Shape {
 
 			// Save shape
 			const markingOptions: WhiteboardMarkingOptions = {
-				started: this.currentShapeStarted,
+				drawTime: Date.now() - this.currentShapeStarted,
 				path: segments.serialize(this.currentShape.segments),
 				style: this.whiteboard.styleOptions
 			};

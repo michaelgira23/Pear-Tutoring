@@ -17,12 +17,12 @@ export interface WhiteboardOptions {
  */
 
 export interface WhiteboardMarking extends WhiteboardItem {
-	started: number;
+	drawTime: number;
 	path: Segment[];
 }
 
 export interface WhiteboardMarkingOptions extends WhiteboardItemOptions {
-	started: number;
+	drawTime: number;
 	path: Segment[];
 }
 
@@ -62,7 +62,7 @@ export interface WhiteboardItemOptions {
 export interface Metadata {
 	$key?: string;
 	$exists?: () => boolean;
-	created: number;
+	created: number | any; // `any` for firebase.database.ServerValue.TIMESTAMP
 	createdBy: string;
 	edits?: Edits;
 }

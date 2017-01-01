@@ -1,4 +1,5 @@
 import { Injectable, Inject } from '@angular/core';
+import * as firebase from 'firebase';
 import { AngularFire, FirebaseAuthState, FirebaseListObservable, FirebaseObjectObservable, FirebaseRef } from 'angularfire2';
 import { Observable, Subject } from 'rxjs/Rx';
 
@@ -89,7 +90,7 @@ export class WhiteboardService {
 
 	createWhiteboard(options: WhiteboardOptions): Observable<any> {
 		const whiteboard: Whiteboard = {
-			created: Date.now(),
+			created: firebase.database['ServerValue']['TIMESTAMP'],
 			createdBy: this.authInfo ? this.authInfo.uid : null,
 			name: options.name,
 			background: colors.serialize(options.background)
@@ -175,10 +176,10 @@ export class WhiteboardService {
 
 	createMarking(key: string, options: WhiteboardMarkingOptions): Observable<any> {
 		const marking: WhiteboardMarking = {
-			created: Date.now(),
+			created: firebase.database['ServerValue']['TIMESTAMP'],
 			createdBy: this.authInfo ? this.authInfo.uid : null,
 			style: styles.serializeOptions(options.style),
-			started: options.started,
+			drawTime: options.drawTime,
 			path: options.path
 		};
 		const whiteboardMarkings = this.getMarkings(key);
@@ -192,7 +193,7 @@ export class WhiteboardService {
 	eraseMarking(whiteboardKey: string, markingKey: string): Observable<WhiteboardMarking> {
 		return this.observableToPromise(
 			this.af.database.object(`whiteboardMarkings/${whiteboardKey}/${markingKey}`)
-				.update({ erased: Date.now() }));
+				.update({ erased: firebase.database['ServerValue']['TIMESTAMP'] }));
 	}
 
 	/**
@@ -205,7 +206,7 @@ export class WhiteboardService {
 
 	createText(key: string, options: WhiteboardTextOptions): Observable<WhiteboardText> {
 		const text: WhiteboardText = {
-			created: Date.now(),
+			created: firebase.database['ServerValue']['TIMESTAMP'],
 			createdBy: this.authInfo ? this.authInfo.uid : null,
 			style: styles.serializeOptions(options.style),
 			rotation: options.rotation,
@@ -221,7 +222,7 @@ export class WhiteboardService {
 	eraseText(whiteboardKey: string, textKey: string): Observable<WhiteboardText> {
 		return this.observableToPromise(
 			this.af.database.object(`whiteboardText/${whiteboardKey}/${textKey}`)
-				.update({ erased: Date.now() }));
+				.update({ erased: firebase.database['ServerValue']['TIMESTAMP'] }));
 	}
 
 	/**
