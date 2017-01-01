@@ -23,6 +23,8 @@ import { NotificationsService } from './shared/model/notifications.service';
 import { PermissionsService }  from './shared/security/permissions.service';
 import { UserService } from './shared/model/user.service';
 
+import { MDLUpgradeElementDirective } from './shared/common/mdl-upgrade-element.directive';
+
 // Whiteboard components and services
 import { WhiteboardComponent } from './whiteboard/whiteboard.component';
 import { CreateWhiteboardComponent } from './create-whiteboard/create-whiteboard.component';
@@ -46,6 +48,11 @@ import { SessionCalendarComponent } from './scheduling/session-calendar/session-
 import { DisplayUserComponent } from './scheduling/display-user/display-user.component';
 import { SessionService } from './shared/model/session.service';
 import { TestComponent } from './test/test.component';
+import { UpdateSessionComponent } from './scheduling/update-session/update-session.component';
+import { TimePickerComponent } from './settings/time-picker/time-picker.component';
+import { MyScheduleComponent } from './scheduling/my-schedule/my-schedule.component';
+import { PfpUploadComponent } from './settings/pfp-upload/pfp-upload.component';
+import { UserAutoCompleteComponent } from './scheduling/user-auto-complete/user-auto-complete.component';
 import { NamePipe } from './shared/model/name.pipe';
 
 @NgModule({
@@ -70,6 +77,12 @@ import { NamePipe } from './shared/model/name.pipe';
 		CreateChatComponent,
 		ViewChatComponent,
 		TestComponent,
+		UpdateSessionComponent,
+		TimePickerComponent,
+		MyScheduleComponent,
+		PfpUploadComponent,
+		UserAutoCompleteComponent,
+		MDLUpgradeElementDirective,
 		NamePipe
 	],
 	imports: [

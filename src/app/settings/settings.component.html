@@ -1,7 +1,8 @@
 <h1>Settings</h1>
-<form [formGroup]="form" (ngSubmit)="saveSettings()">
-  <h2>Profile picture</h2>
-  <input type="file" (change)="onPfpChange($event)">
-  <button>submit</button>
-</form>
+<div class="mdl-shadow--5dp">
+  <app-pfp-upload></app-pfp-upload>
+</div>
+<div class="mdl-shadow--5dp">
+  <app-time-picker></app-time-picker>
+</div>
 <h2 *ngIf="finished">changes saved</h2>
