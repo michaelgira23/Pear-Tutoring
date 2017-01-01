@@ -139,9 +139,7 @@ export class Cursor {
 				if (selectionBox.height > 0 && selectionBox.width > 0) {
 					// creates a selection path if there isn't one
 					if (!this.selectionPath) {
-						this.selectionPath = new paper.Path.Rectangle(selectionBox);
-						this.selectionPath.strokeColor = '#08f';
-						this.selectionPath.dashArray = [10, 5];
+						this.selectionPath = new paper.Shape.Rectangle(selectionBox);
 					}
 					// updates selection path
 					this.selectionPath.bounds = selectionBox;
@@ -150,8 +148,8 @@ export class Cursor {
 					let allItems = paper.project.getItems({
 						overlapping: selectionBox,
 						match: result => {
-							return result.id !== this.whiteboard.background.id &&
-									result.id !== paper.project.activeLayer.id;
+							return result.id !== this.whiteboard.background.id
+								&& result.id !== paper.project.activeLayer.id;
 						}
 					});
 					allItems.forEach(function(item) {
@@ -166,10 +164,10 @@ export class Cursor {
 	mouseup(event) {
 		if (this.whiteboard.allowWrite) {
 
-			const editItems = this.whiteboard.selectedItems();
-
-			// Edit all items that are selected
-			this.whiteboard.editItems(editItems);
+			if (!this.selecting) {
+				// Edit all items that are selected
+				this.whiteboard.editItems(this.whiteboard.selectedItems());
+			}
 
 			// Clean everything up
 			this.resizing = false;

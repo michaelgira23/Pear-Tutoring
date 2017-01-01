@@ -157,7 +157,7 @@ export class WhiteboardService {
 		// Go through edit timestamps and update respective values
 		edits.forEach(edit => {
 			// Go through edit properties and make sure they're editable
-			const editProperties = Object.keys(edit);
+			const editProperties = Object.keys(edit.edits);
 			for (let i = 0; i < editProperties.length; i++) {
 				const editProperty = editProperties[i];
 
@@ -167,10 +167,10 @@ export class WhiteboardService {
 				}
 
 				// New value to edit in the marking object
-				let newValue = edits[editProperty];
+				let newValue = edit.edits[editProperty];
 
 				// If editting style, merge with the current styles
-				if (typeof newValue === 'object' && editProperty === 'style') {
+				if (editProperty === 'style') {
 					// Merge new edits with current object
 					newValue = Object.assign(marking[editProperty], newValue);
 				}
@@ -230,6 +230,10 @@ export class WhiteboardService {
 					if (newValue !== null) {
 						edits[editProperty] = newValue;
 					}
+				}
+
+				if (_.isEmpty(edits)) {
+					return Observable.of(null);
 				}
 
 				return this.af.database.list(`whiteboardMarkings/${whiteboardKey}/${markingKey}/edits`)

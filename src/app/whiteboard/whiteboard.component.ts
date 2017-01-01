@@ -466,8 +466,8 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	getAllItems() {
 		return paper.project.getItems({
 			match: item => {
-				return item.id !== this.background.id &&
-						item.id !== paper.project.activeLayer.id;
+				return item.id !== this.background.id
+					&& item.id !== paper.project.activeLayer.id;
 			}
 		});
 	}
@@ -481,7 +481,8 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	}
 
 	editItems(items: any[]) {
-		// Edit selected items into the database
+		// Add items to edit in an array
+		let editMarkings = [];
 		items.forEach(item => {
 
 			// Get key from marking and text
@@ -490,29 +491,39 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 
 			if (markingKey) {
 				// If marking key exists, it's a marking
-
-				// Serialize paths and styles to see what's different
-				const serializedSegments = segments.serialize(item.segments);
-				const serializedStyles = styles.serializeOptions(styles.serialize(item));
-
-				this.whiteboardService.editMarking(this.key, markingKey, {
-					path: serializedSegments,
-					style: serializedStyles
-				})
-					.subscribe(
-						data => {
-							console.log('successfully edited marking!', data);
-						},
-						err => {
-							console.log('error while editing marking!', err);
-						}
-					);
+				editMarkings.push({
+					key: markingKey,
+					item
+				});
 			} else if (textKey) {
 				// If text key exists, it's text
 				console.log('edit text');
 			} else {
-				console.log('unrecognized item!');
+				console.log('unrecognized item to edit!');
 			}
+		});
+
+		// Add edited properties to database
+		// We must do this in a separate step because
+		// changing the database would cause paper.js to redraw everything,
+		// which would assign all items new ids and mess up everything
+		editMarkings.forEach(marking => {
+			// Serialize paths and styles to see what's different
+			const serializedSegments = segments.serialize(marking.item.segments);
+			const serializedStyles = styles.serializeOptions(styles.serialize(marking.item));
+
+			this.whiteboardService.editMarking(this.key, marking.key, {
+				path: serializedSegments,
+				style: serializedStyles
+			})
+				.subscribe(
+					data => {
+						console.log('successfully edited marking!', data);
+					},
+					err => {
+						console.log('error while editing marking!', err);
+					}
+				);
 		});
 	}
 
