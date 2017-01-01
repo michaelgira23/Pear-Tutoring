@@ -1,17 +1,3 @@
-<h2> Sessions I'm tutoring </h2>
-<div class="session-display">
-	<div *ngFor="let session of tutorSessions" class="session-display"> 
-	<app-display-session [session]="session"></app-display-session>
-	</div>
-</div>
-
-<h2> Sessions I'm in </h2>
-<div class="session-display">
-	<div *ngFor="let session of tuteeSessions" class="session-display">
-		<app-display-session [session]="session"></app-display-session>
-	</div>
-</div>
-
 <h2> Public Sessions </h2>
 <div class="session-display">
 	<div *ngFor="let session of publicSessions">
@@ -21,19 +7,34 @@
 
 <h2> Session By tag </h2>
 <div>
-	<input #findTagsInput ><button (click)="findSessionsByTags(findTagsInput.value)">Find</button>
+	<form [formGroup]="searchByTagForm">
+		<fieldset>
+			<input formControlName="tags">
+			<button (click)="findSessionsByTags()">Find</button>
+		</fieldset>
+	</form>
 	<div class="session-display">
 		<div *ngFor="let session of sessionsByTags">
 			<app-display-session [session]="session"></app-display-session>
 		</div>
 	</div>
 </div>
-<br><br>
-<form [formGroup]="joinSessionForm" (ngSubmit)="joinSession()">
-	<input formControlName="sessionId" required>
-	<button>Join Session</button>
-</form>
+
+<h2> Session By Subject </h2>
+<div>
+	<form [formGroup]="searchBySubjectForm">
+		<fieldset>
+			<input formControlName="subject">
+			<button (click)="findSessionsBySubject()">Find</button>
+		</fieldset>
+	</form>
+	<div class="session-display">
+		<div *ngFor="let session of sessionsBySubject">
+			<app-display-session [session]="session"></app-display-session>
+		</div>
+	</div>
+</div>
+<br>
 
 <a routerLink="create">Create a Session</a>
-
-<app-session-calendar [sessions]="mySessions"></app-session-calendar>
+<a routerLink="my-schedule">Go to my scheudle</a>

@@ -1,14 +1,69 @@
-<div class="card">
-  <div class="view overlay hm-white-slight">
-    <img class="img-fluid" [src]="session.tutor.pfp">
-    <a (click)="joinSession()">
-      <div class="mask"></div>
-    </a>
+<div class="session-container" [ngClass]="subject">
+  <div class="mdl-card mdl-shadow--5dp">
+    <div class="mdl-card_media">
+      <div class="session-thumbnails">
+        <div class="row">
+          <img *ngIf="session.whiteboards[0] && session.whiteboards[0].snapshot" [src]="session.whiteboards[0].snapshot" [style.width]="session.whiteboards[1] && session.whiteboards[1].snapshot ? '50%' : '100%'">
+          <img *ngIf="session.whiteboards[1] && session.whiteboards[1].snapshot" [src]="session.whiteboards[1].snapshot">
+        </div>
+        <div class="row">
+          <img *ngIf="session.whiteboards[2] && session.whiteboards[2].snapshot" [src]="session.whiteboards[2].snapshot">
+          <img *ngIf="session.whiteboards[3] && session.whiteboards[3].snapshot" [src]="session.whiteboards[3].snapshot">
+        </div>
+      </div>
+    </div>
+
+    <div class="mdl-card__title session-title">
+      <h2 class="mdl-card__title-text">{{ session.title }}</h2>
+    </div>
+
+    <div class="mdl-card__title">
+      <div class="mdl-card__subtitle-text">
+        {{ startTime }} ~ {{ endTime }}
+      </div>
+    </div>
+
+    <div class="mdl-card__supporting-text">
+      <div *ngFor="let tag of session.tags" class="chip-container">
+        <div class="mdl-chip"><span class="mdl-chip__text">{{ tag }}</span></div>
+      </div>
+    </div>
+
+    <div class="mdl-card__actions mdl-card--border">
+      <button (click)="joinSession()" class="join-session mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">Join Session</button>
+    </div>
+
+    <div class="mdl-card__menu" *ngIf="session.tutor.$key === sessionService.uid">
+      <button [id]="menuId" class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab session-admin">
+        <i class="material-icons">more_vert</i>
+      </button>
+      <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" [attr.for]="menuId">
+        <li class="mdl-menu__item update-session" (click)="updateSession()">Update</li>
+        <li class="mdl-menu__item delete-session" (click)="deleteSession()">Delete</li>
+      </ul>
+    </div>
+
+    <div class="side-toggle" (click)="sideOpen = true">
+      <button class="mdl-button mdl-js-button mdl-button--icon session-admin">
+        <i class="material-icons">expand_less</i>
+      </button>
+    </div>
   </div>
-  <div class="card-block">
-    <h4 class="card-title">{{ session.title }}</h4>
-    <p class="card-text">{{ session.desc }}</p>
-    <p class="card-text">{{ startTime }} ~ {{ endTime }}</p>
-    <button (click)="joinSession()" class="btn btn-primary">Join Session</button>
+
+  <div class="mdl-card mdl-shadow--5dp side" [class.open]="sideOpen">
+      <div class="mdl-card__supporting-text">
+        {{ session.desc }}
+      </div>
+
+      <div class="mdl-card__supporting-text">
+        Tutor: 
+        <app-display-user [user]="session.tutor"></app-display-user>
+      </div>
+
+      <div class="mdl-card__menu">
+        <button class="mdl-button mdl-js-button mdl-button--icon session-admin" (click)="sideOpen = false">
+          <i class="material-icons">close</i>
+        </button>
+      </div>
   </div>
 </div>
