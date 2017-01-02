@@ -1,27 +1,34 @@
 <div class="container-fluid">
-  <h2>
-    Session Info
-  </h2>
-  <div class="session-info">
-    {{ sessionInfo | json }}
-    <h3>Tutor</h3>
-    <div>
-      <app-display-user [user]="sessionInfo?.tutor"></app-display-user>
+  <app-sidebar>
+    <button appSidebarControl class="toggle-button mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored">
+      <i class="material-icons">more</i>
+    </button>
+    <div appSidebarContent>
+      <h2>
+        Session Info
+      </h2>
+      <div class="session-info">
+        <h3>Tutor</h3>
+        <div>
+          <app-display-user [user]="sessionInfo?.tutor"></app-display-user>
+        </div>
+        <h3>Tutees</h3>
+        <div class="tutees-display">
+          <app-user-auto-complete [ngModel]="sessionInfo?.tutees" (onAddUser)="addTutee($event)" (onRemoveUser)="removeTutee($event)"></app-user-auto-complete>
+        </div>
+      </div>
+      <div *ngIf="!sessionExist">
+        Session does not exist
+      </div>
+      <h2>
+        online users
+      </h2>
+      <div class="online-users-display">
+        <app-display-user *ngFor="let user of onlineUsers" [user]="user"></app-display-user>
+      </div>
     </div>
-    <h3>Tutees:</h3>
-    <div class="tutees-display">
-      <app-display-user *ngFor="let tutee of sessionInfo?.tutees" [user]="tutee"></app-display-user>
-    </div>
-  </div>
-  <div *ngIf="!sessionExist">
-    Session does not exist
-  </div>
-  <h2>
-    online users
-  </h2>
-  <div class="online-users-display">
-    <app-display-user *ngFor="let user of onlineUsers" [user]="user"></app-display-user>
-  </div>
+  </app-sidebar>
+
   <div class="whiteboard-container"  *ngIf="sessionExist">
     <div class="btn-group">
       <button (click)="addWb()" class="btn btn-default">Add Whiteboard</button>
