@@ -1,4 +1,56 @@
-<div appMdl>
-    <app-navbar></app-navbar>
-    <router-outlet></router-outlet>
+<!-- Always shows a header, even in smaller screens. -->
+<div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+	<header class="mdl-layout__header">
+		<div class="mdl-layout__header-row">
+			<!-- Title -->
+			<span class="mdl-layout-title">Pear Tutoring</span>
+			<!-- Navigation. We hide it in small screens. -->
+			<nav class="mdl-navigation mdl-layout--large-screen-only">
+				<a class="mdl-navigation__link" routerLink="home">Home</a>
+				<a class="mdl-navigation__link" routerLink="whiteboard">Whiteboard</a>
+				<a class="mdl-navigation__link" routerLink="scheduling">Scheduling</a>
+				<a class="mdl-navigation__link" routerLink="chat">Chat</a>
+				<a class="mdl-navigation__link" routerLink="settings">Settings</a>
+			</nav>
+
+			<!-- Add spacer, to align navigation to the right -->
+			<div class="mdl-layout-spacer"></div>
+
+			<nav class="mdl-navigation">
+				<ng-container *ngIf="!authInfo">
+					<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect"
+						routerLink="login">
+						Login
+					</button>
+					<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect"
+						routerLink="register">
+						Register
+					</button>
+				</ng-container>
+
+				<ng-container *ngIf="authInfo">
+					<p class="mdl-navigation__link">Signed in as {{ authInfo.auth.email }}</p>
+					<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect"
+						(click)="logout()">
+						Logout
+					</button>
+				</ng-container>
+			</nav>
+		</div>
+	</header>
+	<div class="mdl-layout__drawer mdl-layout--small-screen-only">
+		<span class="mdl-layout-title">Pear Tutoring</span>
+		<nav class="mdl-navigation">
+			<a class="mdl-navigation__link" routerLink="home">Home</a>
+			<a class="mdl-navigation__link" routerLink="whiteboard">Whiteboard</a>
+			<a class="mdl-navigation__link" routerLink="scheduling">Scheduling</a>
+			<a class="mdl-navigation__link" routerLink="chat">Chat</a>
+			<a class="mdl-navigation__link" routerLink="settings">Settings</a>
+		</nav>
+	</div>
+	<main class="mdl-layout__content">
+		<div class="page-content">
+			<router-outlet></router-outlet>
+		</div>
+	</main>
 </div>
