@@ -80,7 +80,6 @@ function rectangleToPaperObject(rect: Rectangle): any {
 
 // Serialization of styles
 function paperObjectToStyleOptions(paperObject: any, clearFill = false): StyleOptions {
-	console.log('serialize stroke color', paperObject.strokeColor.toCSS());
 	let styleObject: StyleOptions = {
 		stroke: {
 			color     : paperObject.strokeColor.toCSS(),
@@ -190,9 +189,7 @@ function fontObjectToPaperObject(fontOptions: Font): any {
 
 // Serialization of color
 function stringToColorObject(string: string): Color {
-	// console.log('serialize color', string);
 	const color = parseColor(string);
-	console.log('serialize color', color.rgba);
 	return {
 		red  : color.rgba[0],
 		green: color.rgba[1],
@@ -203,11 +200,10 @@ function stringToColorObject(string: string): Color {
 
 // Deserialization of color
 function colorObjectToString(color: Color | string): string {
-	// console.log('deserialize color', color);
 
 	// If color is already a string, return
-	if (typeof color === 'string') {
-		return <string>color;
+	if (typeof color !== 'object') {
+		return String(color);
 	}
 
 	return `rgba(${color.red}, ${color.green}, ${color.blue}, ${color.alpha})`;

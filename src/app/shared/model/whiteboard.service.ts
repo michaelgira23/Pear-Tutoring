@@ -3,6 +3,7 @@ import * as firebase from 'firebase';
 import { AngularFire, FirebaseAuthState, FirebaseListObservable, FirebaseObjectObservable, FirebaseRef } from 'angularfire2';
 import { Observable, Subject } from 'rxjs/Rx';
 import _ from 'lodash';
+import deepAssign from 'deep-assign';
 
 import { AuthService } from '../security/auth.service';
 import { styles, colors } from '../../whiteboard/utils/serialization';
@@ -300,7 +301,8 @@ export class WhiteboardService {
 				// If editting style, merge with the current styles
 				if (fixedLengthProperties.includes(editProperty)) {
 					// Merge new edits with current object
-					newValue = Object.assign(item[editProperty], newValue);
+					newValue = deepAssign(item[editProperty], newValue);
+					console.log('getting current item', editProperty, 'has fixed bounds so new value is', newValue);
 				}
 
 				// Edit value
