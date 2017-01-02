@@ -106,6 +106,7 @@ export class WhiteboardService {
 
 	authInfo: FirebaseAuthState;
 	whiteboards: FirebaseListObservable<Whiteboard[]>;
+	sdkDb: any;
 	sdkStorage: any;
 
 	constructor(
@@ -113,6 +114,7 @@ export class WhiteboardService {
 		@Inject(FirebaseRef) fb,
 		private authService: AuthService
 	) {
+		this.sdkDb = fb.database().ref();
 		this.sdkStorage = fb.storage().ref();
 		this.whiteboards = this.af.database.list('whiteboards');
 
@@ -357,8 +359,10 @@ export class WhiteboardService {
 					pathURL = `${this.typeToThings[itemType].node}/${whiteboardKey}/${itemKey}/edits`;
 				}
 
-				return this.af.database.list(pathURL)
-					.push({
+				const pushKey = this.sdkDb.push().key;
+
+				return this.af.database.object(`${pathURL}/${pushKey}`)
+					.update({
 						edited: firebase.database['ServerValue']['TIMESTAMP'],
 						edits
 					});

@@ -120,32 +120,47 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	};
 
 	constructor(public whiteboardService: WhiteboardService) {
-		// // Attach custom setters on options
-		// // When options change, update options on all selected items
-		// const styleOptionsKeys = Object.keys(this.styleOptions);
-		// styleOptionsKeys.forEach(key => {
-		// 	this.styleOptions[key] = new Proxy(this.styleOptions[key], {
-		// 		set: (obj, prop, value) => {
-		// 			obj[prop] = value;
-		//
-		// 			// Set new styles to all markings and text
-		// 			const newStyles = styles.deserialize(this.styleOptions);
-		//
-		// 			this.getSelectedMarkings().forEach(item => Object.assign(item, newStyles));
-		// 			this.getSelectedText().forEach(item => Object.assign(item, newStyles));
-		//
-		// 			return true;
-		// 		}
-		// 	});
-		// });
-		//
-		// // We can attach the proxy onto the root of fontOptions because, unlike the style options, fontOptions is only one layer deep.
-		// this.fontOptions = new Proxy(this.fontOptions, {
-		// 	set: (obj, prop, value) => {
-		// 		obj[prop] = value;
-		// 		return true;
-		// 	}
-		// });
+		// Attach custom setters on options
+		// When options change, update options on all selected items
+		const styleOptionsKeys = Object.keys(this.styleOptions);
+		styleOptionsKeys.forEach(styleKey => {
+			this.styleOptions[styleKey] = new Proxy(this.styleOptions[styleKey], {
+				set: (obj, prop, value) => {
+					// Check that value is actually changing
+					if (this.styleOptions[styleKey][prop] === value) {
+						return;
+					}
+					console.log('set', styleKey, prop, value);
+
+					// Set like normal
+					obj[prop] = value;
+
+					this.getSelectedMarkings().concat(this.getSelectedText()).forEach(item => {
+						// Serialize styles
+						let serializedStyles = styles.serialize(item);
+						// Replace new changed style
+						serializedStyles[styleKey][prop] = value;
+						// Re-deserialize styles with this new changed style
+						const newStyles = styles.deserialize(serializedStyles);
+
+						Object.assign(item, newStyles);
+					});
+
+					// Edit items
+					this.editItems(this.selectedItems());
+
+					return true;
+				}
+			});
+		});
+
+		// We can attach the proxy onto the root of fontOptions because, unlike the style options, fontOptions is only one layer deep.
+		this.fontOptions = new Proxy(this.fontOptions, {
+			set: (obj, prop, value) => {
+				obj[prop] = value;
+				return true;
+			}
+		});
 	}
 
 	/**
