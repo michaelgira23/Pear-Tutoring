@@ -387,10 +387,23 @@ export class SessionService {
 			});
 	}
 
-	addTutee(sessionId: string, tuteeId: string) {
+	addTutees(sessionId: string, tuteeIds: string[]) {
 		let dataToSave = {};
-		dataToSave[`sessions/${sessionId}/tutees/${tuteeId}`] = true;
-		dataToSave[`users/${tuteeId}/tuteeSessions/${sessionId}`] = true;
+		for (let i = 0; i < tuteeIds.length; i++) {
+			dataToSave[`sessions/${sessionId}/tutees/${tuteeIds[i]}`] = true;
+			dataToSave[`users/${tuteeIds[i]}/tuteeSessions/${sessionId}`] = true;
+			dataToSave[`usersInSession/${sessionId}/${tuteeIds[i]}`] = false;
+		}
+		return this.firebaseUpdate(dataToSave);
+	}
+
+	removeTutees(sessionId: string, tuteeIds: string[]) {
+		let dataToSave = {};
+		for (let i = 0; i < tuteeIds.length; i++) {
+			dataToSave[`sessions/${sessionId}/tutees/${tuteeIds[i]}`] = null;
+			dataToSave[`users/${tuteeIds[i]}/tuteeSessions/${sessionId}`] = null;
+			dataToSave[`usersInSession/${sessionId}/${tuteeIds[i]}`] = null;
+		}
 		return this.firebaseUpdate(dataToSave);
 	}
 }

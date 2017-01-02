@@ -1,11 +1,13 @@
 .container-fluid {
-    .tutees-display {
-        display: flex;
+    display: relative;
+    app-sidebar {
+        .tutees-display {
+            display: flex;
+        }
+        .online-users-display {
+            display: flex;
+        }
     }
-    .online-users-display {
-        display: flex;
-    }
-
     .whiteboard-container {
         app-whiteboard{
             width: 100%;

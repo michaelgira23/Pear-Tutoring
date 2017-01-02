@@ -76,4 +76,16 @@ export class SessionComponent implements OnInit, OnDestroy {
 			}, console.log);
 		}
 	}
+
+	addTutee(user: User) {
+		this.sessionService.addTutees(this.sessionId, [user.$key]).subscribe(val => {
+			console.log('added tutees');
+		}, console.log);
+	}
+
+	removeTutee(user: User) {
+		this.sessionService.removeTutees(this.sessionId, [user.$key]).subscribe(val => {
+			console.log('removed tutee');
+		}, console.log);
+	}
 }
