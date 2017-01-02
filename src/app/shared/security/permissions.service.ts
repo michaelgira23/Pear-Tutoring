@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { AngularFire, FirebaseAuthState, FirebaseListObservable } from 'angularfire2';
+import { AngularFire, FirebaseAuthState, FirebaseObjectObservable } from 'angularfire2';
 import { Observable, Subject } from 'rxjs/Rx';
 
 import { AuthService } from './auth.service';
@@ -26,17 +26,26 @@ export class PermissionsService {
 		);
 	}
 
-	// TODO: Restrict the `permission` property to only contain the scopes of its specific type.
-	createPermission($key: string, type: PermissionsType, permission: Permission): Observable<any> {
-		const permissions = this.af.database.object(`${type}Permissions/${$key}`);
-		const permObj = {};
-		permObj[$key] = permission;
+	createPermission($key: string, type: PermissionsType, permission: PermissionParameter): Observable<any> {
+		let newPerm: Permission = {};
 
-		return this.promiseToObservable(permissions.set(permObj));
+		for (let group of Object.keys(permission)) {
+			if (group === 'user') {
+				for (let $uid of Object.keys(permission.user)) {
+					newPerm.user[$uid] = permission.user[$uid].scopes;
+				}
+			} else {
+				newPerm[group] = permission[group].scopes;
+			}
+		}
+
+		const permissions = this.af.database.object(`${type}Permissions/${$key}`);
+
+		return this.promiseToObservable(permissions.set(newPerm));
 	}
 
-	getPermission($key: string, type: PermissionsType): FirebaseListObservable<any> {
-		return this.af.database.list(`${type}Permissions/${$key}`);
+	getPermission($key: string, type: PermissionsType): FirebaseObjectObservable<any> {
+		return this.af.database.object(`${type}Permissions/${$key}`);
 	}
 
 	getUserPermission($key: string, type: PermissionsType): Observable<any> {
@@ -44,24 +53,23 @@ export class PermissionsService {
 
 		this.getPermission($key, type).subscribe(
 			data => {
-				console.log(data);
 				// Check if there are any permissions defined for this object
-				if (data.length > 0) {
+				if (data !== {}) {
 					// Check if auth service is initialized
 					if (typeof this.authInfo !== 'undefined') {
 						// Check if logged in anonymously
 						if (this.authInfo === null) {
-							subject.next(data.anonymous);
+							subject.next(data.anonymous ? data.anonymous : {});
 							subject.complete();
 						} else {
-							// Check if the `user` group contains special permissions for the current user
-							if (this.authInfo.uid in data.user) {
+							// Check if a `user` permission actually exists and it contains special permissions for the current user
+							if (data.user && this.authInfo.uid in data.user) {
 								// If so, return those permissions
 								subject.next(data.user[this.authInfo.uid]);
 								subject.complete();
 							} else {
 								// If not, return the generic `loggedIn` permissions
-								subject.next(data.loggedIn);
+								subject.next(data.loggedIn ? data.loggedIn : {});
 								subject.complete();
 							}
 						}
@@ -245,5 +253,13 @@ export interface Permission {
 	loggedIn?: Object;
 	user?: {
 		[$uid: string]: Object;
+	};
+}
+
+export interface PermissionParameter {
+	anonymous?: PermissionsScopes;
+	loggedIn?: PermissionsScopes;
+	user?: {
+		[$uid: string]: PermissionsScopes;
 	};
 }

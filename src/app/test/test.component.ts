@@ -18,18 +18,18 @@ export class TestComponent implements OnInit {
 			}
 		);
 
-		let scopes = {
-			read: true,
-			write: false,
-			shouldBeDeleted: true
+		let permission = {
+			loggedIn: new PermissionsChatScopes({
+				read: true
+			}),
 		};
 
-		this.permissionsService.addScope('-KZzCW_RP3Fkz0Kp6KpV', 'chat', new PermissionsChatScopes(scopes), 'anonymous').subscribe(
+		this.permissionsService.createPermission('-K_ReQRXExIGcsHj7O4e', 'chat', permission).subscribe(
 			data => {
-				console.log('Successfully added scope!');
+				console.log(`Successfully created permission ${permission}`);
 			},
 			err => {
-				console.log(`Error adding scope: ${err}`);
+				console.log(`Error creating permission ${permission}: ${err}`);
 			}
 		);
 	}

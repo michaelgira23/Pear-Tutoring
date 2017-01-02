@@ -3,6 +3,7 @@ import { Component, HostListener, OnInit, OnChanges, OnDestroy, SimpleChanges, I
 import { ChatService, Message, Status } from '../shared/model/chat.service';
 import { NamePipe } from '../shared/model/name.pipe';
 import { NotificationsService } from '../shared/model/notifications.service';
+import { PermissionsService } from '../shared/security/permissions.service';
 import { UserService } from '../shared/model/user.service';
 
 declare global {
@@ -23,13 +24,28 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 
 	messageSubscription: any;
 	statusSubscription: any;
+	permissionsSubscription: any;
 
 	messageKeys: string[] = [];
 	allMessages: Message[] = [];
 	allStatuses: Status[] = [];
 	allEntries: (Message|Status)[] = [];
 
-	constructor(private chatService: ChatService, private notificationsService: NotificationsService, private userService: UserService) { }
+	// Default values before permissions arrive
+	currentPerms: Object = {
+		read: true
+	};
+	readable: boolean = 'read' in this.currentPerms;
+	writable: boolean = 'write' in this.currentPerms;
+	// TODO: functionality for moderators
+	moderator: boolean = 'moderator' in this.currentPerms;
+
+	constructor(
+		private chatService: ChatService,
+		private notificationsService: NotificationsService,
+		private permissionsService: PermissionsService,
+		private userService: UserService
+	) {	}
 
 	ngOnInit() {
 		this.chatService.sendStatus('join', this.key).subscribe(
@@ -38,6 +54,7 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 				console.log(`Sending 'join' status error: ${err}`);
 			}
 		);
+		console.log(this);
 	}
 
 	ngOnChanges(changes: SimpleChanges) {
@@ -52,6 +69,10 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 				this.statusSubscription.unsubscribe();
 				this.statusSubscription = null;
 			}
+			if (this.permissionsSubscription) {
+				this.permissionsSubscription.unsubscribe();
+				this.permissionsSubscription = null;
+			}
 
 			this.messageSubscription = this.chatService.getAllMessages(this.key).subscribe(
 				data => {
@@ -59,7 +80,7 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 						for (let msg of data) {
 							// We have to use a type assertion here because the `Message` interface doesn't have a `$key` field.
 							// However, the object returned by Firebase actually *does*.
-							if (!this.messageKeys.includes((msg as any).$key)) {
+							if (!this.messageKeys.includes((<any>msg).$key)) {
 								this.notificationsService.send(
 									'New message',
 									this.notificationFormat(msg)
@@ -72,7 +93,7 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 
 					for (let msg of data) {
 						// See line 61.
-						this.messageKeys.push((msg as any).$key);
+						this.messageKeys.push((<any>msg).$key);
 					}
 
 					this.allMessages = data;
@@ -90,6 +111,19 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 				},
 				err => {
 					console.log(`Getting chat statuses error: ${err}`);
+				}
+			);
+
+			this.permissionsSubscription = this.permissionsService.getUserPermission(this.key, 'chat').subscribe(
+				data => {
+					this.currentPerms = data;
+					this.readable = 'read' in this.currentPerms;
+					this.writable = 'write' in this.currentPerms;
+					this.moderator = 'moderator' in this.currentPerms;
+					console.log(data);
+				},
+				err => {
+					console.log(`Error getting current permission state: ${err}`);
 				}
 			);
 		}
