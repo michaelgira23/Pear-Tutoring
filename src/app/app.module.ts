@@ -12,7 +12,6 @@ import { firebaseConfig, authConfig } from '../environments/environment';
 
 // General components and services
 import { AppComponent } from './app.component';
-import { NavbarComponent } from './navbar/navbar.component';
 import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
 import { HomeComponent } from './home/home.component';
@@ -56,7 +55,6 @@ import { NamePipe } from './shared/model/name.pipe';
 @NgModule({
 	declarations: [
 		AppComponent,
-		NavbarComponent,
 		HomeComponent,
 		WhiteboardComponent,
 		CreateWhiteboardComponent,
