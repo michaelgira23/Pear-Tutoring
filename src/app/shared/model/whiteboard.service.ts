@@ -20,10 +20,32 @@ declare global {
 	}
 }
 
+const editableWhiteboardProperties = [
+	'name',
+	'background'
+];
+
 const editableMarkingProperties = [
 	'style',
 	'path'
 ];
+
+const editableTextProperties = [
+	'style',
+	'rotation',
+	'bounds',
+	'content',
+	'font'
+];
+
+const fixedLengthProperties = [
+	'style',
+	'bounds',
+	'font'
+];
+
+type Item = Whiteboard | WhiteboardMarking | WhiteboardText;
+type ItemType = 'whiteboard' | 'marking' | 'text';
 
 export const defaultWhiteboardOptions: WhiteboardOptions = {
 	name: 'Unnamed Whiteboard',
@@ -60,6 +82,28 @@ export const defaultFontOptions: Font = {
 @Injectable()
 export class WhiteboardService {
 
+	// Map different whiteboard items to their methods and nodes in the db
+	typeToThings: { [type: string]: any } = {
+		whiteboard: {
+			editableProperties: editableWhiteboardProperties,
+			getFormatted: this.getFormattedWhiteboard.bind(this),
+			node: 'whiteboards',
+			editsInRootNode: true
+		},
+		marking: {
+			editableProperties: editableMarkingProperties,
+			getFormatted: this.getFormattedMarking.bind(this),
+			node: 'whiteboardMarkings',
+			editsInRootNode: false
+		},
+		text: {
+			editableProperties: editableTextProperties,
+			getFormatted: this.getFormattedText.bind(this),
+			node: 'whiteboardText',
+			editsInRootNode: false
+		}
+	};
+
 	authInfo: FirebaseAuthState;
 	whiteboards: FirebaseListObservable<Whiteboard[]>;
 	sdkStorage: any;
@@ -90,6 +134,11 @@ export class WhiteboardService {
 		return this.af.database.object(`whiteboards/${whiteboardKey}`);
 	}
 
+	getFormattedWhiteboard(whiteboardKey: string): Observable<Whiteboard> {
+		return <Observable<Whiteboard>>this.getWhiteboard(whiteboardKey)
+			.map(whiteboard => this.currentItem('whiteboard', whiteboard));
+	}
+
 	createWhiteboard(options: WhiteboardOptions): Observable<any> {
 		const whiteboard: Whiteboard = {
 			created: firebase.database['ServerValue']['TIMESTAMP'],
@@ -100,8 +149,8 @@ export class WhiteboardService {
 		return this.observableToPromise(this.whiteboards.push(whiteboard));
 	}
 
-	changeName(key: string, name: string): Observable<Whiteboard> {
-		return this.observableToPromise(this.af.database.object('whiteboards/' + key).update({name}));
+	editWhiteboard(whiteboardKey: string, options: any): Observable<Whiteboard> {
+		return this.editItem(whiteboardKey, 'whiteboard', whiteboardKey, options);
 	}
 
 	/**
@@ -114,7 +163,9 @@ export class WhiteboardService {
 
 	getFormattedMarkings(whiteboardKey: string): Observable<WhiteboardMarking[]> {
 		return this.getMarkings(whiteboardKey)
-			.map(markings => { return markings.map(this.currentMarking); });
+			.map(markings => {
+				return <WhiteboardMarking[]>markings.map(marking => this.currentItem('marking', marking));
+			});
 	}
 
 	getMarking(whiteboardKey: string, markingKey: string): FirebaseObjectObservable<WhiteboardMarking> {
@@ -122,67 +173,8 @@ export class WhiteboardService {
 	}
 
 	getFormattedMarking(whiteboardKey: string, markingKey: string): Observable<WhiteboardMarking> {
-		return this.getMarking(whiteboardKey, markingKey)
-			.map(this.currentMarking);
-	}
-
-	// Compiles the edits in a marking object to the most up-to-date properties of the total marking
-	currentMarking(marking: WhiteboardMarking): WhiteboardMarking {
-
-		// If marking doesn't exist, return null
-		if (!marking.$exists()) {
-			return null;
-		}
-
-		// If no edits, then initial values are the most up-to-date
-		if (typeof marking.edits !== 'object') {
-			// Delete marking edits property just in case it was something dumb like a boolean
-			// Yeah. Booleans are pretty dumb.
-			delete marking.edits;
-			return marking;
-		}
-
-		// Convert edits to arrays. We don't care about push keys.
-		let edits = [];
-		const editKeys = Object.keys(marking.edits);
-		editKeys.forEach(editKey => {
-			edits.push(marking.edits[editKey]);
-		});
-
-		// Sort edits in chronological order
-		edits.sort((a, b) => {
-			return a.edited - b.edited;
-		});
-
-		// Go through edit timestamps and update respective values
-		edits.forEach(edit => {
-			// Go through edit properties and make sure they're editable
-			const editProperties = Object.keys(edit.edits);
-			for (let i = 0; i < editProperties.length; i++) {
-				const editProperty = editProperties[i];
-
-				// If property isn't editable, ignore
-				if (!editableMarkingProperties.includes(editProperty)) {
-					continue;
-				}
-
-				// New value to edit in the marking object
-				let newValue = edit.edits[editProperty];
-
-				// If editting style, merge with the current styles
-				if (editProperty === 'style') {
-					// Merge new edits with current object
-					newValue = Object.assign(marking[editProperty], newValue);
-				}
-
-				// Edit value
-				marking[editProperty] = newValue;
-			}
-		});
-
-		// Delete edits and return
-		delete marking.edits;
-		return marking;
+		return <Observable<WhiteboardMarking>>this.getMarking(whiteboardKey, markingKey)
+			.map(marking => this.currentItem('marking', marking));
 	}
 
 	createMarking(key: string, options: WhiteboardMarkingOptions): Observable<any> {
@@ -197,53 +189,8 @@ export class WhiteboardService {
 		return this.observableToPromise(whiteboardMarkings.push(marking));
 	}
 
-	editMarking(whiteboardKey: string, markingKey: string, options: any): Observable<any> {
-		// Get current marking
-		return this.getFormattedMarking(whiteboardKey, markingKey)
-			.first()
-			.map(marking => {
-				let edits = {};
-				// Go through options and make sure they're editable
-				const editProperties = Object.keys(options);
-				for (let i = 0; i < editProperties.length; i++) {
-					const editProperty = editProperties[i];
-
-					// If property isn't editable, ignore
-					if (!editableMarkingProperties.includes(editProperty)) {
-						continue;
-					}
-
-					let newValue = null;
-
-					// If new edit properties aren't the same as existing properties, add
-					if (!_.isEqual(options[editProperty], marking[editProperty])) {
-						// Totally reassign properties, unless it's style
-						// We can get rid of redundant styles because style objects have a fixed length
-						if (editProperty === 'style') {
-							newValue = removeRedundant(marking[editProperty], options[editProperty]);
-						} else {
-							newValue = options[editProperty];
-						}
-					}
-
-					// If newValue doesn't equal null, then let's edit the property!
-					if (newValue !== null) {
-						edits[editProperty] = newValue;
-					}
-				}
-
-				if (_.isEmpty(edits)) {
-					return Observable.of(null);
-				}
-
-				return this.af.database.list(`whiteboardMarkings/${whiteboardKey}/${markingKey}/edits`)
-					.push({
-						edited: firebase.database['ServerValue']['TIMESTAMP'],
-						edits
-					});
-
-			});
-
+	editMarking(whiteboardKey: string, markingKey: string, options: any): Observable<WhiteboardMarking> {
+		return this.editItem(whiteboardKey, 'marking', markingKey, options);
 	}
 
 	eraseMarking(whiteboardKey: string, markingKey: string): Observable<WhiteboardMarking> {
@@ -258,6 +205,22 @@ export class WhiteboardService {
 
 	getTexts(whiteboardKey: string): FirebaseListObservable<WhiteboardText[]> {
 		return this.af.database.list(`whiteboardText/${whiteboardKey}`);
+	}
+
+	getFormattedTexts(whiteboardKey: string): Observable<WhiteboardText[]> {
+		return this.getTexts(whiteboardKey)
+			.map(texts => {
+				return <WhiteboardText[]>texts.map(text => this.currentItem('text', text));
+			});
+	}
+
+	getText(whiteboardKey: string, textKey: string): FirebaseObjectObservable<WhiteboardText> {
+		return this.af.database.object(`whiteboardText/${whiteboardKey}/${textKey}`);
+	}
+
+	getFormattedText(whiteboardKey: string, textKey: string): Observable<WhiteboardText> {
+		return <Observable<WhiteboardText>>this.getText(whiteboardKey, textKey)
+			.map(text => this.currentItem('text', text));
 	}
 
 	createText(key: string, options: WhiteboardTextOptions): Observable<WhiteboardText> {
@@ -275,10 +238,133 @@ export class WhiteboardService {
 		return this.observableToPromise(whiteboardText.push(text));
 	}
 
+	editText(whiteboardKey: string, textKey: string, options: any): Observable<WhiteboardText> {
+		return this.editItem(whiteboardKey, 'text', textKey, options);
+	}
+
 	eraseText(whiteboardKey: string, textKey: string): Observable<WhiteboardText> {
 		return this.observableToPromise(
 			this.af.database.object(`whiteboardText/${whiteboardKey}/${textKey}`)
 				.update({ erased: firebase.database['ServerValue']['TIMESTAMP'] }));
+	}
+
+	/**
+	 * Edit Items
+	 */
+
+	// Compiles the edits in a item object to the most up-to-date properties of the total item
+	private currentItem(itemType: ItemType, item: Item): Item {
+
+		// If item doesn't exist, return null
+		if (!item.$exists()) {
+			return null;
+		}
+
+		// If no edits, then initial values are the most up-to-date
+		if (typeof item.edits !== 'object') {
+			// Delete item edits property just in case it was something dumb like a boolean
+			// Yeah. Booleans are pretty dumb.
+			delete item.edits;
+			return item;
+		}
+
+		// Convert edits to arrays. We don't care about push keys.
+		let edits = [];
+		const editKeys = Object.keys(item.edits);
+		editKeys.forEach(editKey => {
+			edits.push(item.edits[editKey]);
+		});
+
+		// Sort edits in chronological order
+		edits.sort((a, b) => {
+			return a.edited - b.edited;
+		});
+
+		// Go through edit timestamps and update respective values
+		edits.forEach(edit => {
+			// Go through edit properties and make sure they're editable
+			const editProperties = Object.keys(edit.edits);
+			for (let i = 0; i < editProperties.length; i++) {
+				const editProperty = editProperties[i];
+
+				// If property isn't editable, ignore
+				if (!this.typeToThings[itemType].editableProperties.includes(editProperty)) {
+					continue;
+				}
+
+				// New value to edit in the item object
+				let newValue = edit.edits[editProperty];
+
+				// If editting style, merge with the current styles
+				if (fixedLengthProperties.includes(editProperty)) {
+					// Merge new edits with current object
+					newValue = Object.assign(item[editProperty], newValue);
+				}
+
+				// Edit value
+				item[editProperty] = newValue;
+			}
+		});
+
+		// Delete edits and return
+		delete item.edits;
+		return item;
+	}
+
+	private editItem(whiteboardKey: string, itemType: ItemType, itemKey: string, options: any): Observable<any> {
+		// Get current marking
+		return this.typeToThings[itemType].getFormatted(whiteboardKey, itemKey)
+			.first()
+			.map(item => {
+				let edits = {};
+				// Go through options and make sure they're editable
+				const editProperties = Object.keys(options);
+				for (let i = 0; i < editProperties.length; i++) {
+					const editProperty = editProperties[i];
+
+					// If property isn't editable, ignore
+					if (!this.typeToThings[itemType].editableProperties.includes(editProperty)) {
+						continue;
+					}
+
+					let newValue = null;
+
+					// If new edit properties aren't the same as existing properties, add
+					if (!_.isEqual(options[editProperty], item[editProperty])) {
+						// Totally reassign properties, unless it's style
+						// We can get rid of redundant styles because style objects have a fixed length
+						if (fixedLengthProperties.includes(editProperty)) {
+							newValue = removeRedundant(item[editProperty], options[editProperty]);
+						} else {
+							newValue = options[editProperty];
+						}
+					}
+
+					// If newValue doesn't equal null, then let's edit the property!
+					if (newValue !== null) {
+						edits[editProperty] = newValue;
+					}
+				}
+
+				if (_.isEmpty(edits)) {
+					return Observable.of(null);
+				}
+
+				let pathURL = null;
+				if (this.typeToThings[itemType].editsInRootNode) {
+					pathURL = `${this.typeToThings[itemType].node}/${whiteboardKey}/edits`;
+				} else {
+					pathURL = `${this.typeToThings[itemType].node}/${whiteboardKey}/${itemKey}/edits`;
+				}
+
+				return this.af.database.list(pathURL)
+					.push({
+						edited: firebase.database['ServerValue']['TIMESTAMP'],
+						edits
+					});
+
+			});
+
 	}
 
 	/**

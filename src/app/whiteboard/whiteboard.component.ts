@@ -29,17 +29,6 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	// Whether or not whiteboard with key exists
 	validKey: boolean = true;
 
-	// Name of the whiteboard
-	get wbName(): string {
-		if (this.whiteboard) {
-			return this.whiteboard.name;
-		}
-		return '';
-	};
-	set wbName(name: string) {
-		this.wbName = name;
-	}
-
 	// Whiteboard <canvas>
 	@ViewChild('whiteboard') canvas;
 	// Actual canvas DOM reference
@@ -49,6 +38,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	whiteboardSubscription: any;
 	// Latest value of whiteboard object from database
 	whiteboard: Whiteboard;
+	whiteboardName: string;
 
 	// Markings subscription
 	markingsSubscription: any;
@@ -162,7 +152,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 			this.cleanUp();
 
 			// Subscribe to whiteboard metadata
-			this.whiteboardSubscription = this.whiteboardService.getWhiteboard(this.key).subscribe(
+			this.whiteboardSubscription = this.whiteboardService.getFormattedWhiteboard(this.key).subscribe(
 				data => {
 					// Check if whiteboard exists
 					if (data.$exists()) {
@@ -177,6 +167,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 					}
 
 					this.whiteboard = data;
+					this.whiteboardName = this.whiteboard.name;
 
 					// Only update background if whiteboard canvas is initialized
 					if (this.canvasEl) {
@@ -204,7 +195,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 			);
 
 			// Subscribe to text on whiteboard
-			this.textSubscription = this.whiteboardService.getTexts(this.key).subscribe(
+			this.textSubscription = this.whiteboardService.getFormattedTexts(this.key).subscribe(
 				data => {
 					this.text = data;
 
@@ -302,14 +293,6 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		this.triggerToolEvent(this.tool, 'modifierKey', event);
 	}
 
-	changeWbName(name: string): void {
-		if (name !== this.wbName) {
-			this.whiteboardService.changeName(this.key, name).subscribe(val => {
-				console.log('name changed');
-			}, console.log);
-		}
-	}
-
 	/**
 	 * General functions
 	 */
@@ -326,6 +309,22 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	clearCanvas() {
 		this.clearMarkings();
 		this.clearText();
+	}
+
+	/**
+	 * Whiteboard functions
+	 */
+
+	changeWhiteboardName(name: string) {
+		this.whiteboardService.editWhiteboard(this.key, { name })
+			.subscribe(
+				data => {
+					console.log('successfully changed whiteboard name!', data);
+				},
+				err => {
+					console.log('error while changing whiteboard name', err);
+				}
+			);
 	}
 
 	/**
@@ -483,6 +482,8 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	editItems(items: any[]) {
 		// Add items to edit in an array
 		let editMarkings = [];
+		let editText = [];
+
 		items.forEach(item => {
 
 			// Get key from marking and text
@@ -491,13 +492,34 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 
 			if (markingKey) {
 				// If marking key exists, it's a marking
+
+				const serializedStyles = styles.serializeOptions(styles.serialize(item));
+				const serializedSegments = segments.serialize(item.segments);
+
 				editMarkings.push({
 					key: markingKey,
-					item
+					options: {
+						style: serializedStyles,
+						path: serializedSegments
+					}
 				});
 			} else if (textKey) {
 				// If text key exists, it's text
-				console.log('edit text');
+
+				const serializedStyles = styles.serializeOptions(styles.serialize(item));
+				const serializedBounds = rectangles.serialize(item.bounds);
+				const serializedFont = font.serialize(item);
+
+				editText.push({
+					key: textKey,
+					options: {
+						style: serializedStyles,
+						rotation: item.rotation,
+						bounds: serializedBounds,
+						content: item.content,
+						font: serializedFont
+					}
+				});
 			} else {
 				console.log('unrecognized item to edit!');
 			}
@@ -508,20 +530,25 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		// changing the database would cause paper.js to redraw everything,
 		// which would assign all items new ids and mess up everything
 		editMarkings.forEach(marking => {
-			// Serialize paths and styles to see what's different
-			const serializedSegments = segments.serialize(marking.item.segments);
-			const serializedStyles = styles.serializeOptions(styles.serialize(marking.item));
-
-			this.whiteboardService.editMarking(this.key, marking.key, {
-				path: serializedSegments,
-				style: serializedStyles
-			})
+			this.whiteboardService.editMarking(this.key, marking.key, marking.options)
 				.subscribe(
 					data => {
 						console.log('successfully edited marking!', data);
 					},
 					err => {
 						console.log('error while editing marking!', err);
+					}
+				);
+		});
+
+		editText.forEach(text => {
+			this.whiteboardService.editText(this.key, text.key, text.options)
+				.subscribe(
+					data => {
+						console.log('successfully edited text!', data);
+					},
+					err => {
+						console.log('error while editing text!', err);
 					}
 				);
 		});
