@@ -1,4 +1,5 @@
-import { StyleOptions, Segment, Rectangle, Font } from '../../shared/model/whiteboard';
+import parseColor from 'parse-color';
+import { Style, StyleOptions, Segment, Rectangle, Font, Color } from '../../shared/model/whiteboard';
 declare const paper: any;
 
 /**
@@ -16,13 +17,19 @@ export const rectangles = {
 };
 
 export const styles = {
-	serialize: paperObjectToStyleObject,
+	serialize: paperObjectToStyleOptions,
+	serializeOptions: styleOptionsToStyleObject,
 	deserialize: styleObjectToPaperObject
 };
 
 export const font = {
 	serialize: paperObjectToFontObject,
 	deserialize: fontObjectToPaperObject
+};
+
+export const colors = {
+	serialize: stringToColorObject,
+	deserialize: colorObjectToString
 };
 
 // Serialization of segments
@@ -72,7 +79,7 @@ function rectangleToPaperObject(rect: Rectangle): any {
 }
 
 // Serialization of styles
-function paperObjectToStyleObject(paperObject: any, clearFill = false): StyleOptions {
+function paperObjectToStyleOptions(paperObject: any, clearFill = false): StyleOptions {
 	let styleObject: StyleOptions = {
 		stroke: {
 			color     : paperObject.strokeColor.toCSS(),
@@ -102,18 +109,43 @@ function paperObjectToStyleObject(paperObject: any, clearFill = false): StyleOpt
 		styleObject.fill.color = 'rgba(0, 0, 0, 0)';
 	}
 
-	console.log('serialize styles', styleObject);
-
 	return styleObject;
 }
 
+// Serialize of style options for database (serialize colors)
+function styleOptionsToStyleObject(styleOptions: StyleOptions): Style {
+	return {
+		stroke: {
+			color     : colors.serialize(styleOptions.stroke.color),
+			width     : styleOptions.stroke.width,
+			cap       : styleOptions.stroke.cap,
+			join      : styleOptions.stroke.join,
+			dashOffset: styleOptions.stroke.dashOffset,
+			scaling   : styleOptions.stroke.scaling,
+			dashArray : styleOptions.stroke.dashArray,
+			miterLimit: styleOptions.stroke.miterLimit
+		},
+		fill: {
+			color: colors.serialize(styleOptions.fill.color)
+		},
+		shadow: {
+			color: colors.serialize(styleOptions.shadow.color),
+			blur : styleOptions.shadow.blur,
+			offset: {
+				x: styleOptions.shadow.offset.x,
+				y: styleOptions.shadow.offset.y
+			}
+		}
+	};
+}
+
 // Deserialization of styles
-function styleObjectToPaperObject(styleOptions: StyleOptions, clearFill = false): any {
+function styleObjectToPaperObject(styleOptions: Style | StyleOptions, clearFill = false): any {
 	// Create point from shadow offset
 	const shadowOffsetPoint = new paper.Point(styleOptions.shadow.offset.x, styleOptions.shadow.offset.y);
-	let paperOptions = {
+	let paperOptions: any = {
 		// Stroke Style
-		strokeColor  : styleOptions.stroke.color,
+		strokeColor  : colors.deserialize(styleOptions.stroke.color),
 		strokeWidth  : styleOptions.stroke.width,
 		strokeCap    : styleOptions.stroke.cap,
 		strokeJoin   : styleOptions.stroke.join,
@@ -122,9 +154,9 @@ function styleObjectToPaperObject(styleOptions: StyleOptions, clearFill = false)
 		dashArray    : styleOptions.stroke.dashArray,
 		miterLimit   : styleOptions.stroke.miterLimit,
 		// Fill Style
-		fillColor    : styleOptions.fill.color,
+		fillColor    : colors.deserialize(styleOptions.fill.color),
 		// Shadow Style
-		shadowColor  : styleOptions.shadow.color,
+		shadowColor  : colors.deserialize(styleOptions.shadow.color),
 		shadowBlur   : styleOptions.shadow.blur,
 		shadowOffset : shadowOffsetPoint,
 	};
@@ -153,4 +185,26 @@ function fontObjectToPaperObject(fontOptions: Font): any {
 		fontWeight: fontOptions.weight,
 		fontSize  : fontOptions.size
 	};
+}
+
+// Serialization of color
+function stringToColorObject(string: string): Color {
+	const color = parseColor(string);
+	return {
+		red  : color.rgba[0],
+		green: color.rgba[1],
+		blue : color.rgba[2],
+		alpha: typeof color.rgba[3] === 'number' ? color.rgba[3] : 1
+	};
+}
+
+// Deserialization of color
+function colorObjectToString(color: Color | string): string {
+
+	// If color is already a string, return
+	if (typeof color !== 'object') {
+		return String(color);
+	}
+
+	return `rgba(${color.red}, ${color.green}, ${color.blue}, ${color.alpha})`;
 }

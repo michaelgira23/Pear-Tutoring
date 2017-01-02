@@ -1,6 +1,6 @@
 import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy, ViewChild, HostListener } from '@angular/core';
-import { segments, rectangles, styles, font } from './utils/serialization';
-import { Whiteboard, WhiteboardMarking, WhiteboardText, WhiteboardShapeType } from '../shared/model/whiteboard';
+import { segments, rectangles, styles, font, colors } from './utils/serialization';
+import { Whiteboard, WhiteboardMarking, WhiteboardText, WhiteboardShapeType, Color } from '../shared/model/whiteboard';
 import { WhiteboardService, defaultStyleOptions, defaultFontOptions } from '../shared/model/whiteboard.service';
 
 // Whiteboard tools
@@ -29,26 +29,20 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	// Whether or not whiteboard with key exists
 	validKey: boolean = true;
 
-	// Name of the whiteboard
-	get wbName(): string {
-		if (this.whiteboard) {
-			return this.whiteboard.name;
-		}
-		return '';
-	};
-	set wbName(name: string) {
-		this.wbName = name;
-	}
-
 	// Whiteboard <canvas>
 	@ViewChild('whiteboard') canvas;
 	// Actual canvas DOM reference
 	canvasEl: HTMLCanvasElement;
 
+	/**
+	 * Model variables
+	 */
+
 	// Whiteboard subscription
 	whiteboardSubscription: any;
 	// Latest value of whiteboard object from database
 	whiteboard: Whiteboard;
+	whiteboardName: string;
 
 	// Markings subscription
 	markingsSubscription: any;
@@ -64,6 +58,10 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	// paper.js point text objects on the whiteboard
 	canvasText: any = {};
 
+	/**
+	 * Snapshot variables
+	 */
+
 	// Whether or not taking a snapshot
 	takingSnapshot: boolean = false;
 	snapshotDimensions = {
@@ -71,12 +69,27 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		height: 125
 	};
 
-	// Whether or not to show toolbar
-	@Input()
-	showToolbar: boolean = true;
+	/**
+	 * Miscellaneous variables
+	 */
+
 	// Whether or not user can make changes to whiteboard
 	@Input()
 	allowWrite: boolean = false;
+
+	// Rectangle path on canvas to set background
+	background: any;
+
+	// Whether anything is selected
+	anythingSelected: boolean;
+	// Whether a marking is selected
+	markingSelected: boolean;
+	// Whether text is selected
+	textSelected: boolean;
+
+	/**
+	 * Tool variables
+	 */
 
 	// For detecting if certain keys are pressed
 	mouseDown: boolean = false;
@@ -84,42 +97,17 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	metaKey: boolean = false;
 	shiftKey: boolean = false;
 
-	/**
-	 * Background variables
-	 */
-
-	// Rectangle path on canvas to set background
-	background: any;
-	// If resizing background when triggered by window resize
-	resizingBackground: boolean = false;
-
-	/**
-	* Selected entities
-	*/
-	selectedPoints = [];
-
-	/**
-	 * Tool variables
-	 */
-
 	// What tool is selected in the whiteboard toolbar
-	@Input()
 	tool: string = 'cursor';
 
 	// Options when creating things
-	@Input()
 	styleOptions = defaultStyleOptions;
-	@Input()
 	fontOptions = defaultFontOptions;
 
 	// Shape tool
-	@Input()
 	shapeType: WhiteboardShapeType = 'polygon';
-	@Input()
 	polygonSides: any = 4;
-	@Input()
 	starPoints: any = 5;
-	@Input()
 	starRadiusPercentage: any = 50;
 
 	// Tools
@@ -131,7 +119,65 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		shape : new Shape(this)
 	};
 
-	constructor(public whiteboardService: WhiteboardService) { }
+	constructor(public whiteboardService: WhiteboardService) {
+		// Attach custom setters on options
+		// When options change, update options on all selected items
+		const styleOptionsKeys = Object.keys(this.styleOptions);
+		styleOptionsKeys.forEach(styleKey => {
+			this.styleOptions[styleKey] = new Proxy(this.styleOptions[styleKey], {
+				set: (obj, prop, value) => {
+					// Check that value is actually changing
+					if (this.styleOptions[styleKey][prop] === value) {
+						return;
+					}
+					console.log('edit style options', styleKey, prop, value);
+
+					// Set like normal
+					obj[prop] = value;
+
+					this.getSelectedMarkings().concat(this.getSelectedText()).forEach(item => {
+						// Serialize styles
+						let serializedStyles = styles.serialize(item);
+						// Replace new changed style
+						serializedStyles[styleKey][prop] = value;
+						// Re-deserialize styles with this new changed style
+						const newStyles = styles.deserialize(serializedStyles);
+
+						Object.assign(item, newStyles);
+					});
+
+					return true;
+				}
+			});
+		});
+
+		// We can attach the proxy onto the root of fontOptions because, unlike the style options, fontOptions is only one layer deep.
+		this.fontOptions = new Proxy(this.fontOptions, {
+			set: (obj, prop, value) => {
+				// Check that value is actually changing
+				if (this.fontOptions[prop] === value) {
+					return;
+				}
+				console.log('edit font options', prop, value);
+
+				// Set like normal
+				obj[prop] = value;
+
+				this.getSelectedText().forEach(item => {
+					// Serialize font
+					let serializedFont = font.serialize(item);
+					// Replace new font property
+					serializedFont[prop] = value;
+					// Re-deserialize font with this new changed property
+					const newFont = font.deserialize(serializedFont);
+
+					Object.assign(item, newFont);
+				});
+
+				return true;
+			}
+		});
+	}
 
 	/**
 	 * Angular Lifecycle Hooks
@@ -162,10 +208,10 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 			this.cleanUp();
 
 			// Subscribe to whiteboard metadata
-			this.whiteboardSubscription = this.whiteboardService.getWhiteboard(this.key).subscribe(
-				data => {
+			this.whiteboardSubscription = this.whiteboardService.getFormattedWhiteboard(this.key).subscribe(
+				whiteboard => {
 					// Check if whiteboard exists
-					if (data.$exists()) {
+					if (whiteboard && whiteboard.$exists()) {
 						this.validKey = true;
 						this.allowWrite = true;
 					} else {
@@ -176,52 +222,45 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 						return;
 					}
 
-					this.whiteboard = data;
+					this.whiteboard = whiteboard;
+					this.whiteboardName = this.whiteboard.name;
 
 					// Only update background if whiteboard canvas is initialized
 					if (this.canvasEl) {
 						this.setBackgroundColor(this.whiteboard.background);
 					}
+
+					// Subscribe to markings on whiteboard
+					this.markingsSubscription = this.whiteboardService.getFormattedMarkings(this.key).subscribe(
+						markings => {
+							this.markings = markings;
+
+							// Only update markings if whiteboard canvas is initialized
+							if (this.canvasEl) {
+								this.markingsToCanvas(this.markings);
+							}
+						},
+						err => {
+							console.log('whiteboard markings error!', err);
+						}
+					);
+
+					// Subscribe to text on whiteboard
+					this.textSubscription = this.whiteboardService.getFormattedTexts(this.key).subscribe(
+						text => {
+							this.text = text;
+
+							// Only update text if whiteboard canvas is initialized
+							if (this.canvasEl) {
+								this.textsToCanvas(this.text);
+							}
+						}
+					);
 				},
 				err => {
 					console.log('create whiteboard error!', err);
 				}
 			);
-
-			// Subscribe to markings on whiteboard
-			this.markingsSubscription = this.whiteboardService.getMarkings(this.key).subscribe(
-				data => {
-					this.markings = data;
-
-					// Only update markings if whiteboard canvas is initialized
-					if (this.canvasEl) {
-						this.markingsToCanvas(this.markings);
-					}
-				},
-				err => {
-					console.log('whiteboard markings error!', err);
-				}
-			);
-
-			// Subscribe to text on whiteboard
-			this.textSubscription = this.whiteboardService.getTexts(this.key).subscribe(
-				data => {
-					this.text = data;
-
-					// Only update text if whiteboard canvas is initialized
-					if (this.canvasEl) {
-						this.textsToCanvas(this.text);
-					}
-				}
-			);
-		}
-
-		// Also check if the tool changed
-		if (changes['tool'] && changes['tool'].currentValue !== changes['tool'].previousValue) {
-			// Trigger change event for previous tool
-			this.triggerToolEvent(changes['tool'].previousValue, 'changetool', changes['tool'].currentValue);
-			// Trigger change event for the next tool
-			this.triggerToolEvent(changes['tool'].currentValue, 'selecttool', changes['tool'].previousValue);
 		}
 	}
 
@@ -247,15 +286,43 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	}
 
 	/**
-	 * Trigger Event Handlers
+	 * For triggering the neat little custom event system for each tool
+	 *
+	 * List of custom events:
+	 * - mousedown - When any mouse button is pressed (regular mousedown behavior)
+	 * - mousemove - When the mouse is moved (regular mousemove behavior)
+	 * - mouseup - When the mouse is unpressed (regular mouseup behavior)
+	 * - keyup - When any key on the keyboard is unpressed (regular keyup behavior)
+	 * - changetool - Triggered when a tool is deselected
+	 * - selecttool - Triggered when a tool is selected
 	 */
 
-	// For triggering the neat little event system for each tool
 	triggerToolEvent(tool: string, eventName: string, event: any) {
+		// Trigger possible event handler in specified tool
 		if (this.tools[tool] && typeof this.tools[tool][eventName] === 'function') {
 			this.tools[tool][eventName](event);
 		}
+		// Trigger possible event handler in this component
+		if (this[eventName]) {
+			this[eventName](event);
+		}
 	}
+
+	/**
+	 * Custom event handlers
+	 * (put all events to prevent naming conflicts)
+	 */
+
+	mousedown () {}
+	mousemove () {}
+	mouseup   () {}
+	keyup     () {}
+	changetool() {}
+	selecttool() {}
+
+	/**
+	 * Trigger Event Handlers
+	 */
 
 	onMouseDown(event) {
 		this.mouseDown = true;
@@ -299,15 +366,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		this.ctrlKey = event.ctrlKey;
 		this.metaKey = event.metaKey;
 		this.shiftKey = event.shiftKey;
-		this.triggerToolEvent(this.tool, 'modifierKey', event);
-	}
-
-	changeWbName(name: string): void {
-		if (name !== this.wbName) {
-			this.whiteboardService.changeName(this.key, name).subscribe(val => {
-				console.log('name changed');
-			}, console.log);
-		}
+		this.triggerToolEvent(this.tool, 'keyup', event);
 	}
 
 	/**
@@ -329,10 +388,35 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	}
 
 	/**
+	 * Whiteboard functions
+	 */
+
+	changeTool(newTool: string) {
+		// Trigger change event for previous tool
+		this.triggerToolEvent(this.tool, 'changetool', newTool);
+		// Trigger change event for the next tool
+		this.triggerToolEvent(newTool, 'selecttool', this.tool);
+
+		this.tool = newTool;
+	}
+
+	changeWhiteboardName(name: string) {
+		this.whiteboardService.editWhiteboard(this.key, { name })
+			.subscribe(
+				data => {
+					console.log('successfully changed whiteboard name!', data);
+				},
+				err => {
+					console.log('error while changing whiteboard name', err);
+				}
+			);
+	}
+
+	/**
 	 * Background functions
 	 */
 
-	setBackgroundColor(color: string) {
+	setBackgroundColor(color: Color | string) {
 		// If there is currently a background, remove it
 		if (this.background) {
 			this.background.remove();
@@ -343,28 +427,55 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		const bottomRight = new paper.Point(this.canvasEl.width, this.canvasEl.height);
 
 		// Create a new rectangle that spans the whole canvas
-		this.background = new paper.Path.Rectangle(topLeft, bottomRight);
+		this.background = new paper.Shape.Rectangle(topLeft, bottomRight);
 
 		// Send the canvas to the back
 		this.background.sendToBack();
-		this.background.fillColor = color;
+		this.background.fillColor = colors.deserialize(color);
 	}
 
 	/**
 	 * Marking functions
 	 */
 
-	markingsToCanvas(canvasMarkings: WhiteboardMarking[]) {
-		this.clearMarkings();
+	markingsToCanvas(markings: WhiteboardMarking[]) {
+		// Keep track of which markings we deal with
+		let newMarkingKeys = [];
 
 		// Loop through markings and add to canvas
-		canvasMarkings.forEach(marking => {
+		for (let i = 0; i < markings.length; i++) {
+			const marking = markings[i];
+			newMarkingKeys.push(marking.$key);
 
-			// Make sure marking isn't erased
-			if (!marking.erased) {
-				let paperOptions = styles.deserialize(marking.style);
-				paperOptions.segments = segments.deserialize(marking.path);
+			// Get options for current marking
+			let paperOptions = styles.deserialize(marking.style);
+			paperOptions.segments = segments.deserialize(marking.path);
+
+			// Check if marking already exists on whiteboard
+			if (this.canvasMarkings[marking.$key]) {
+				// Marking already exists on whiteboard
+
+				// Check if marking should be erased
+				if (marking.erased) {
+					this.canvasMarkings[marking.$key].remove();
+					continue;
+				}
+
+				// Update options onto existing marking on canvas
+				Object.assign(this.canvasMarkings[marking.$key], paperOptions);
+			} else if (!marking.erased) {
+				// Create new marking on whiteboard
 				this.canvasMarkings[marking.$key] = new paper.Path(paperOptions);
+			}
+		}
+
+		// Now let's delete all markings that are still on canvas, but we haven't recieved from markings parameter
+		const canvasMarkingKeys = Object.keys(this.canvasMarkings);
+		canvasMarkingKeys.forEach(key => {
+			// If key isn't in the markings we've dealt with, delete
+			if (!newMarkingKeys.includes(key)) {
+				this.canvasMarkings[key].remove();
+				delete this.canvasMarkings[key];
 			}
 		});
 	}
@@ -392,30 +503,69 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		}
 	}
 
+	markingIdToPushKey(id) {
+		const markingKeys = Object.keys(this.canvasMarkings);
+		for (let i = 0; i < markingKeys.length; i++) {
+			const marking = this.canvasMarkings[markingKeys[i]];
+			if (marking.id === id) {
+				return markingKeys[i];
+			}
+		}
+		return null;
+	}
+
 	/**
 	 * Text functions
 	 */
 
-	textsToCanvas(canvasText: WhiteboardText[]) {
-		this.clearText();
+	textsToCanvas(texts: WhiteboardText[]) {
+		// Keep track of which texts we deal with
+		let newTextKeys = [];
 
 		// Loop through texts and add to canvas
-		canvasText.forEach(text => {
+		for (let i = 0; i < texts.length; i++) {
+			const text = texts[i];
+			newTextKeys.push(text.$key);
 
-			// Make sure text isn't erased
-			if (!text.erased) {
-				let paperOptions = styles.deserialize(text.style);
-				paperOptions.point = [0, 0];
-				paperOptions.rotation = text.rotation;
-				paperOptions.content = text.content;
+			// Get options for current text
+			let paperOptions = styles.deserialize(text.style);
+			paperOptions.point = [0, 0];
+			paperOptions.rotation = text.rotation;
+			paperOptions.content = text.content;
 
-				// Combine paperOptions and fontOptions
-				const fontOptions = font.deserialize(text.font);
-				paperOptions = Object.assign(paperOptions, fontOptions);
+			// Combine paperOptions and fontOptions
+			const fontOptions = font.deserialize(text.font);
+			paperOptions = Object.assign(paperOptions, fontOptions);
 
+			// Check if text already exists on whiteboard
+			if (this.canvasText[text.$key]) {
+				// Marking already exists on whiteboard
+
+				// Check if text should be erased
+				if (text.erased) {
+					this.canvasText[text.$key].remove();
+					continue;
+				}
+
+				// Update options onto existing marking on canvas
+				Object.assign(this.canvasText[text.$key], paperOptions);
+				// Set bounds here because it doesn't work in object init for some reason
+				this.canvasText[text.$key].bounds = rectangles.deserialize(text.bounds);
+			} else if (!text.erased) {
+				// Create new marking on whiteboard
 				this.canvasText[text.$key] = new paper.PointText(paperOptions);
 				// Set bounds here because it doesn't work in object init for some reason
 				this.canvasText[text.$key].bounds = rectangles.deserialize(text.bounds);
+			}
+		}
+
+		// Now let's delete all markings that are still on canvas, but we haven't recieved from markings parameter
+		const canvasTextKeys = Object.keys(this.canvasText);
+		canvasTextKeys.forEach(key => {
+			// If key isn't in the markings we've dealt with, delete
+			if (!newTextKeys.includes(key)) {
+				this.canvasText[key].remove();
+				delete this.canvasText[key];
 			}
 		});
 	}
@@ -437,25 +587,156 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		}
 	}
 
+	textIdToPushKey(id) {
+		const textKeys = Object.keys(this.canvasText);
+		for (let i = 0; i < textKeys.length; i++) {
+			const text = this.canvasText[textKeys[i]];
+			if (text.id === id) {
+				return textKeys[i];
+			}
+		}
+		return null;
+	}
+
 	/**
 	 * Selection functions
 	 */
 
-	getAllItems() {
+	getAllItems(): any[] {
 		return paper.project.getItems({
 			match: item => {
-				return item.id !== this.background.id &&
-						item.id !== paper.project.activeLayer.id;
+				return item.id !== this.background.id
+					&& item.id !== paper.project.activeLayer.id;
 			}
 		});
 	}
 
-	selectedItems() {
+	selectedItems(): any[] {
 		return this.getAllItems().filter(item => item.selected);
 	}
 
 	deselectAllItems() {
 		this.selectedItems().forEach(item => item.selected = false);
+	}
+
+	// For updating variables determining what is selected
+	updateSelectedValues() {
+		this.markingSelected = this.isMarkingSelected();
+		this.textSelected = this.isTextSelected();
+		this.anythingSelected = this.markingSelected || this.textSelected;
+	}
+
+	getSelectedMarkings(): any[] {
+		return this.selectedItems().filter(item => this.markingIdToPushKey(item.id));
+	}
+
+	isMarkingSelected(): boolean {
+		const items = this.selectedItems();
+		for (let i = 0; i < items.length; i++) {
+			if (this.markingIdToPushKey(items[i].id)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	getSelectedText(): any[] {
+		return this.selectedItems().filter(item => this.textIdToPushKey(item.id));
+	}
+
+	isTextSelected(): boolean {
+		const items = this.selectedItems();
+		for (let i = 0; i < items.length; i++) {
+			if (this.textIdToPushKey(items[i].id)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Edit functions
+	 */
+
+ 	// Triggers on mouseup of toolbar
+	onToolbarOptionsChange() {
+		// Edit items
+		this.editItems(this.selectedItems());
+	}
+
+	editItems(items: any[]) {
+		// Add items to edit in an array
+		let editMarkings = [];
+		let editText = [];
+
+		items.forEach(item => {
+
+			// Get key from marking and text
+			const markingKey = this.markingIdToPushKey(item.id);
+			const textKey = this.textIdToPushKey(item.id);
+
+			if (markingKey) {
+				// If marking key exists, it's a marking
+
+				const serializedStyles = styles.serializeOptions(styles.serialize(item));
+				const serializedSegments = segments.serialize(item.segments);
+
+				editMarkings.push({
+					key: markingKey,
+					options: {
+						style: serializedStyles,
+						path: serializedSegments
+					}
+				});
+			} else if (textKey) {
+				// If text key exists, it's text
+
+				const serializedStyles = styles.serializeOptions(styles.serialize(item));
+				const serializedBounds = rectangles.serialize(item.bounds);
+				const serializedFont = font.serialize(item);
+
+				editText.push({
+					key: textKey,
+					options: {
+						style: serializedStyles,
+						rotation: item.rotation,
+						bounds: serializedBounds,
+						content: item.content,
+						font: serializedFont
+					}
+				});
+			} else {
+				console.log('unrecognized item to edit!');
+			}
+		});
+
+		// Add edited properties to database
+		// We must do this in a separate step because
+		// changing the database would cause paper.js to redraw everything,
+		// which would assign all items new ids and mess up everything
+		editMarkings.forEach(marking => {
+			this.whiteboardService.editMarking(this.key, marking.key, marking.options)
+				.subscribe(
+					data => {
+						console.log('successfully edited marking!', data);
+					},
+					err => {
+						console.log('error while editing marking!', err);
+					}
+				);
+		});
+
+		editText.forEach(text => {
+			this.whiteboardService.editText(this.key, text.key, text.options)
+				.subscribe(
+					data => {
+						console.log('successfully edited text!', data);
+					},
+					err => {
+						console.log('error while editing text!', err);
+					}
+				);
+		});
 	}
 
 	/**

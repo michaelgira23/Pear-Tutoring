@@ -6,6 +6,9 @@ declare const paper;
 
 export class Pen {
 
+	// For toolbar
+	toolbarShowStyles = true;
+
 	currentPath: any;
 	currentPathStarted: number;
 	currentPathFinished: boolean = true;
@@ -47,7 +50,7 @@ export class Pen {
 
 			// Insert path into database
 			const markingOptions: WhiteboardMarkingOptions = {
-				started: this.currentPathStarted,
+				drawTime: Date.now() - this.currentPathStarted,
 				path: segments.serialize(this.currentPath.segments),
 				style: styles.serialize(this.currentPath, true)
 			};
