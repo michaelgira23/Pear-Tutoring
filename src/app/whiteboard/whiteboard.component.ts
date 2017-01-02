@@ -438,17 +438,44 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	 * Marking functions
 	 */
 
-	markingsToCanvas(canvasMarkings: WhiteboardMarking[]) {
-		this.clearMarkings();
+	markingsToCanvas(markings: WhiteboardMarking[]) {
+		// Keep track of which markings we deal with
+		let newMarkingKeys = [];
 
 		// Loop through markings and add to canvas
-		canvasMarkings.forEach(marking => {
+		for (let i = 0; i < markings.length; i++) {
+			const marking = markings[i];
+			newMarkingKeys.push(marking.$key);
 
-			// Make sure marking isn't erased
-			if (!marking.erased) {
-				let paperOptions = styles.deserialize(marking.style);
-				paperOptions.segments = segments.deserialize(marking.path);
+			// Get options for current marking
+			let paperOptions = styles.deserialize(marking.style);
+			paperOptions.segments = segments.deserialize(marking.path);
+
+			// Check if marking already exists on whiteboard
+			if (this.canvasMarkings[marking.$key]) {
+				// Marking already exists on whiteboard
+
+				// Check if marking should be erased
+				if (marking.erased) {
+					this.canvasMarkings[marking.$key].remove();
+					continue;
+				}
+
+				// Update options onto existing marking on canvas
+				Object.assign(this.canvasMarkings[marking.$key], paperOptions);
+			} else if (!marking.erased) {
+				// Create new marking on whiteboard
 				this.canvasMarkings[marking.$key] = new paper.Path(paperOptions);
+			}
+		}
+
+		// Now let's delete all markings that are still on canvas, but we haven't recieved from markings parameter
+		const canvasMarkingKeys = Object.keys(this.canvasMarkings);
+		canvasMarkingKeys.forEach(key => {
+			// If key isn't in the markings we've dealt with, delete
+			if (!newMarkingKeys.includes(key)) {
+				this.canvasMarkings[key].remove();
+				delete this.canvasMarkings[key];
 			}
 		});
 	}
@@ -491,26 +518,54 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	 * Text functions
 	 */
 
-	textsToCanvas(canvasText: WhiteboardText[]) {
-		this.clearText();
+	textsToCanvas(texts: WhiteboardText[]) {
+		// Keep track of which texts we deal with
+		let newTextKeys = [];
 
 		// Loop through texts and add to canvas
-		canvasText.forEach(text => {
+		for (let i = 0; i < texts.length; i++) {
+			const text = texts[i];
+			newTextKeys.push(text.$key);
 
-			// Make sure text isn't erased
-			if (!text.erased) {
-				let paperOptions = styles.deserialize(text.style);
-				paperOptions.point = [0, 0];
-				paperOptions.rotation = text.rotation;
-				paperOptions.content = text.content;
+			// Get options for current text
+			let paperOptions = styles.deserialize(text.style);
+			paperOptions.point = [0, 0];
+			paperOptions.rotation = text.rotation;
+			paperOptions.content = text.content;
 
-				// Combine paperOptions and fontOptions
-				const fontOptions = font.deserialize(text.font);
-				paperOptions = Object.assign(paperOptions, fontOptions);
+			// Combine paperOptions and fontOptions
+			const fontOptions = font.deserialize(text.font);
+			paperOptions = Object.assign(paperOptions, fontOptions);
 
+			// Check if text already exists on whiteboard
+			if (this.canvasText[text.$key]) {
+				// Marking already exists on whiteboard
+
+				// Check if text should be erased
+				if (text.erased) {
+					this.canvasText[text.$key].remove();
+					continue;
+				}
+
+				// Update options onto existing marking on canvas
+				Object.assign(this.canvasText[text.$key], paperOptions);
+				// Set bounds here because it doesn't work in object init for some reason
+				this.canvasText[text.$key].bounds = rectangles.deserialize(text.bounds);
+			} else if (!text.erased) {
+				// Create new marking on whiteboard
 				this.canvasText[text.$key] = new paper.PointText(paperOptions);
 				// Set bounds here because it doesn't work in object init for some reason
 				this.canvasText[text.$key].bounds = rectangles.deserialize(text.bounds);
+			}
+		}
+
+		// Now let's delete all markings that are still on canvas, but we haven't recieved from markings parameter
+		const canvasTextKeys = Object.keys(this.canvasText);
+		canvasTextKeys.forEach(key => {
+			// If key isn't in the markings we've dealt with, delete
+			if (!newTextKeys.includes(key)) {
+				this.canvasText[key].remove();
+				delete this.canvasText[key];
 			}
 		});
 	}
