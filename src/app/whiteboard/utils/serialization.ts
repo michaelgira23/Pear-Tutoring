@@ -18,8 +18,8 @@ export const rectangles = {
 
 export const styles = {
 	serialize: paperObjectToStyleOptions,
-	deserialize: styleObjectToPaperObject,
-	serializeOptions: styleOptionsToStyleObject
+	serializeOptions: styleOptionsToStyleObject,
+	deserialize: styleObjectToPaperObject
 };
 
 export const font = {

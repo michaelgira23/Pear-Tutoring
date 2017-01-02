@@ -119,7 +119,34 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		shape : new Shape(this)
 	};
 
-	constructor(public whiteboardService: WhiteboardService) { }
+	constructor(public whiteboardService: WhiteboardService) {
+		// // Attach custom setters on options
+		// // When options change, update options on all selected items
+		// const styleOptionsKeys = Object.keys(this.styleOptions);
+		// styleOptionsKeys.forEach(key => {
+		// 	this.styleOptions[key] = new Proxy(this.styleOptions[key], {
+		// 		set: (obj, prop, value) => {
+		// 			obj[prop] = value;
+		//
+		// 			// Set new styles to all markings and text
+		// 			const newStyles = styles.deserialize(this.styleOptions);
+		//
+		// 			this.getSelectedMarkings().forEach(item => Object.assign(item, newStyles));
+		// 			this.getSelectedText().forEach(item => Object.assign(item, newStyles));
+		//
+		// 			return true;
+		// 		}
+		// 	});
+		// });
+		//
+		// // We can attach the proxy onto the root of fontOptions because, unlike the style options, fontOptions is only one layer deep.
+		// this.fontOptions = new Proxy(this.fontOptions, {
+		// 	set: (obj, prop, value) => {
+		// 		obj[prop] = value;
+		// 		return true;
+		// 	}
+		// });
+	}
 
 	/**
 	 * Angular Lifecycle Hooks
@@ -203,18 +230,6 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 					console.log('create whiteboard error!', err);
 				}
 			);
-		}
-
-		if (changes['styleOptions'] && changes['styleOptions'].currentValue !== changes['styleOptions'].previousValue) {
-			console.log('style optiuosn chagned');
-		}
-
-		// Also check if the tool changed
-		if (changes['tool'] && changes['tool'].currentValue !== changes['tool'].previousValue) {
-			// Trigger change event for previous tool
-			this.triggerToolEvent(changes['tool'].previousValue, 'changetool', changes['tool'].currentValue);
-			// Trigger change event for the next tool
-			this.triggerToolEvent(changes['tool'].currentValue, 'selecttool', changes['tool'].previousValue);
 		}
 	}
 
@@ -344,6 +359,15 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	/**
 	 * Whiteboard functions
 	 */
+
+	changeTool(newTool: string) {
+		// Trigger change event for previous tool
+		this.triggerToolEvent(this.tool, 'changetool', newTool);
+		// Trigger change event for the next tool
+		this.triggerToolEvent(newTool, 'selecttool', this.tool);
+
+		this.tool = newTool;
+	}
 
 	changeWhiteboardName(name: string) {
 		this.whiteboardService.editWhiteboard(this.key, { name })
@@ -516,6 +540,10 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		this.anythingSelected = this.markingSelected || this.textSelected;
 	}
 
+	getSelectedMarkings(): any[] {
+		return this.selectedItems().filter(item => this.markingIdToPushKey(item.id));
+	}
+
 	isMarkingSelected(): boolean {
 		const items = this.selectedItems();
 		for (let i = 0; i < items.length; i++) {
@@ -524,6 +552,10 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 			}
 		}
 		return false;
+	}
+
+	getSelectedText(): any[] {
+		return this.selectedItems().filter(item => this.textIdToPushKey(item.id));
 	}
 
 	isTextSelected(): boolean {

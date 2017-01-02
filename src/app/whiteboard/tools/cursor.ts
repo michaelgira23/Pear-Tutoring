@@ -181,6 +181,10 @@ export class Cursor {
 		}
 	}
 
+	changetool() {
+		this.whiteboard.deselectAllItems();
+	}
+
 	/**
 	 * Helper functions
 	 */
