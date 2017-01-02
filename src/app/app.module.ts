@@ -12,7 +12,6 @@ import { firebaseConfig, authConfig } from '../environments/environment';
 
 // General components and services
 import { AppComponent } from './app.component';
-import { NavbarComponent } from './navbar/navbar.component';
 import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
 import { HomeComponent } from './home/home.component';
@@ -59,7 +58,6 @@ import { SidebarContentDirective } from './shared/common/sidebar/sidebar-content
 @NgModule({
 	declarations: [
 		AppComponent,
-		NavbarComponent,
 		HomeComponent,
 		WhiteboardComponent,
 		CreateWhiteboardComponent,
