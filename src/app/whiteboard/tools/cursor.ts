@@ -139,9 +139,7 @@ export class Cursor {
 				if (selectionBox.height > 0 && selectionBox.width > 0) {
 					// creates a selection path if there isn't one
 					if (!this.selectionPath) {
-						this.selectionPath = new paper.Path.Rectangle(selectionBox);
-						this.selectionPath.strokeColor = '#08f';
-						this.selectionPath.dashArray = [10, 5];
+						this.selectionPath = new paper.Shape.Rectangle(selectionBox);
 					}
 					// updates selection path
 					this.selectionPath.bounds = selectionBox;
@@ -150,8 +148,8 @@ export class Cursor {
 					let allItems = paper.project.getItems({
 						overlapping: selectionBox,
 						match: result => {
-							return result.id !== this.whiteboard.background.id &&
-									result.id !== paper.project.activeLayer.id;
+							return result.id !== this.whiteboard.background.id
+								&& result.id !== paper.project.activeLayer.id;
 						}
 					});
 					allItems.forEach(function(item) {
@@ -165,57 +163,35 @@ export class Cursor {
 
 	mouseup(event) {
 		if (this.whiteboard.allowWrite) {
-			console.log('writing');
-			if (this.resizing) {
-				this.resizing = false;
 
-				// write to database
-				// some reference code:
+			if (!this.selecting) {
+				// Edit all items that are selected
+				this.whiteboard.editItems(this.whiteboard.selectedItems());
+			}
 
-				// this.whiteboard.whiteboardService.editText(
-				// 	this.whiteboard.key, pushKey, this.selectedText.content, this.whiteboard.textOptions, position)
-				// 	.subscribe(
-				// 		data => {
-				// 			console.log('successfully editted text', data);
-				// 		},
-				// 		err => {
-				// 			console.log('edit text error', err);
-				// 		}
-				// 	);
+			// Clean everything up
+			this.resizing = false;
+			this.moving = false;
+			this.selecting = false;
 
-				// editText(
-				// 	whiteboardKey: string,
-				// 	textKey: string,
-				// 	content: string,
-				// 	options: WhiteboardTextOptions,
-				// 	position: Position): Observable<any> {
-				// 	const textObject = this.af.database.object(`whiteboardText/${whiteboardKey}/${textKey}`);
-				// 	return Observable.from([textObject.update({
-				// 		content,
-				// 		options,
-				// 		position
-				// 	})]);
-				// }
-			} else if (this.moving) {
-				this.moving = false;
-			} else if (this.selecting) {
-				this.selecting = false;
-				if (this.selectionPath) {
-					this.selectionPath.remove();
-					this.selectionPath = null;
-				}
+			if (this.selectionPath) {
+				this.selectionPath.remove();
+				this.selectionPath = null;
 			}
 		}
 	}
 
+	changetool() {
+		this.whiteboard.deselectAllItems();
+	}
+
 	/**
-	* Helper functions
-	*/
+	 * Helper functions
+	 */
 
 	// distance formula
 	distance(x1: number, y1: number, x2: number, y2: number): number {
 		return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
 	}
-
 
 }
