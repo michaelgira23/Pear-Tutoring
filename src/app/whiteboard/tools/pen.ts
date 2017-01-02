@@ -6,6 +6,9 @@ declare const paper;
 
 export class Pen {
 
+	// For toolbar
+	toolbarShowStyles = true;
+
 	currentPath: any;
 	currentPathStarted: number;
 	currentPathFinished: boolean = true;

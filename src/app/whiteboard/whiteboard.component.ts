@@ -34,6 +34,10 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	// Actual canvas DOM reference
 	canvasEl: HTMLCanvasElement;
 
+	/**
+	 * Model variables
+	 */
+
 	// Whiteboard subscription
 	whiteboardSubscription: any;
 	// Latest value of whiteboard object from database
@@ -54,6 +58,10 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	// paper.js point text objects on the whiteboard
 	canvasText: any = {};
 
+	/**
+	 * Snapshot variables
+	 */
+
 	// Whether or not taking a snapshot
 	takingSnapshot: boolean = false;
 	snapshotDimensions = {
@@ -61,12 +69,27 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		height: 125
 	};
 
-	// Whether or not to show toolbar
-	@Input()
-	showToolbar: boolean = true;
+	/**
+	 * Miscellaneous variables
+	 */
+
 	// Whether or not user can make changes to whiteboard
 	@Input()
 	allowWrite: boolean = false;
+
+	// Rectangle path on canvas to set background
+	background: any;
+
+	// Whether anything is selected
+	anythingSelected: boolean;
+	// Whether a marking is selected
+	markingSelected: boolean;
+	// Whether text is selected
+	textSelected: boolean;
+
+	/**
+	 * Tool variables
+	 */
 
 	// For detecting if certain keys are pressed
 	mouseDown: boolean = false;
@@ -74,42 +97,17 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	metaKey: boolean = false;
 	shiftKey: boolean = false;
 
-	/**
-	 * Background variables
-	 */
-
-	// Rectangle path on canvas to set background
-	background: any;
-	// If resizing background when triggered by window resize
-	resizingBackground: boolean = false;
-
-	/**
-	* Selected entities
-	*/
-	selectedPoints = [];
-
-	/**
-	 * Tool variables
-	 */
-
 	// What tool is selected in the whiteboard toolbar
-	@Input()
 	tool: string = 'cursor';
 
 	// Options when creating things
-	@Input()
 	styleOptions = defaultStyleOptions;
-	@Input()
 	fontOptions = defaultFontOptions;
 
 	// Shape tool
-	@Input()
 	shapeType: WhiteboardShapeType = 'polygon';
-	@Input()
 	polygonSides: any = 4;
-	@Input()
 	starPoints: any = 5;
-	@Input()
 	starRadiusPercentage: any = 50;
 
 	// Tools
@@ -153,9 +151,9 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 
 			// Subscribe to whiteboard metadata
 			this.whiteboardSubscription = this.whiteboardService.getFormattedWhiteboard(this.key).subscribe(
-				data => {
+				whiteboard => {
 					// Check if whiteboard exists
-					if (data.$exists()) {
+					if (whiteboard && whiteboard.$exists()) {
 						this.validKey = true;
 						this.allowWrite = true;
 					} else {
@@ -166,45 +164,49 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 						return;
 					}
 
-					this.whiteboard = data;
+					this.whiteboard = whiteboard;
 					this.whiteboardName = this.whiteboard.name;
 
 					// Only update background if whiteboard canvas is initialized
 					if (this.canvasEl) {
 						this.setBackgroundColor(this.whiteboard.background);
 					}
+
+					// Subscribe to markings on whiteboard
+					this.markingsSubscription = this.whiteboardService.getFormattedMarkings(this.key).subscribe(
+						markings => {
+							this.markings = markings;
+
+							// Only update markings if whiteboard canvas is initialized
+							if (this.canvasEl) {
+								this.markingsToCanvas(this.markings);
+							}
+						},
+						err => {
+							console.log('whiteboard markings error!', err);
+						}
+					);
+
+					// Subscribe to text on whiteboard
+					this.textSubscription = this.whiteboardService.getFormattedTexts(this.key).subscribe(
+						text => {
+							this.text = text;
+
+							// Only update text if whiteboard canvas is initialized
+							if (this.canvasEl) {
+								this.textsToCanvas(this.text);
+							}
+						}
+					);
 				},
 				err => {
 					console.log('create whiteboard error!', err);
 				}
 			);
+		}
 
-			// Subscribe to markings on whiteboard
-			this.markingsSubscription = this.whiteboardService.getFormattedMarkings(this.key).subscribe(
-				data => {
-					this.markings = data;
-
-					// Only update markings if whiteboard canvas is initialized
-					if (this.canvasEl) {
-						this.markingsToCanvas(this.markings);
-					}
-				},
-				err => {
-					console.log('whiteboard markings error!', err);
-				}
-			);
-
-			// Subscribe to text on whiteboard
-			this.textSubscription = this.whiteboardService.getFormattedTexts(this.key).subscribe(
-				data => {
-					this.text = data;
-
-					// Only update text if whiteboard canvas is initialized
-					if (this.canvasEl) {
-						this.textsToCanvas(this.text);
-					}
-				}
-			);
+		if (changes['styleOptions'] && changes['styleOptions'].currentValue !== changes['styleOptions'].previousValue) {
+			console.log('style optiuosn chagned');
 		}
 
 		// Also check if the tool changed
@@ -238,15 +240,43 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	}
 
 	/**
-	 * Trigger Event Handlers
+	 * For triggering the neat little custom event system for each tool
+	 *
+	 * List of custom events:
+	 * - mousedown - When any mouse button is pressed (regular mousedown behavior)
+	 * - mousemove - When the mouse is moved (regular mousemove behavior)
+	 * - mouseup - When the mouse is unpressed (regular mouseup behavior)
+	 * - keyup - When any key on the keyboard is unpressed (regular keyup behavior)
+	 * - changetool - Triggered when a tool is deselected
+	 * - selecttool - Triggered when a tool is selected
 	 */
 
-	// For triggering the neat little event system for each tool
 	triggerToolEvent(tool: string, eventName: string, event: any) {
+		// Trigger possible event handler in specified tool
 		if (this.tools[tool] && typeof this.tools[tool][eventName] === 'function') {
 			this.tools[tool][eventName](event);
 		}
+		// Trigger possible event handler in this component
+		if (this[eventName]) {
+			this[eventName](event);
+		}
 	}
+
+	/**
+	 * Custom event handlers
+	 * (put all events to prevent naming conflicts)
+	 */
+
+	mousedown () {}
+	mousemove () {}
+	mouseup   () {}
+	keyup     () {}
+	changetool() {}
+	selecttool() {}
+
+	/**
+	 * Trigger Event Handlers
+	 */
 
 	onMouseDown(event) {
 		this.mouseDown = true;
@@ -290,7 +320,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		this.ctrlKey = event.ctrlKey;
 		this.metaKey = event.metaKey;
 		this.shiftKey = event.shiftKey;
-		this.triggerToolEvent(this.tool, 'modifierKey', event);
+		this.triggerToolEvent(this.tool, 'keyup', event);
 	}
 
 	/**
@@ -462,7 +492,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	 * Selection functions
 	 */
 
-	getAllItems() {
+	getAllItems(): any[] {
 		return paper.project.getItems({
 			match: item => {
 				return item.id !== this.background.id
@@ -471,12 +501,39 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		});
 	}
 
-	selectedItems() {
+	selectedItems(): any[] {
 		return this.getAllItems().filter(item => item.selected);
 	}
 
 	deselectAllItems() {
 		this.selectedItems().forEach(item => item.selected = false);
+	}
+
+	// For updating variables determining what is selected
+	updateSelectedValues() {
+		this.markingSelected = this.isMarkingSelected();
+		this.textSelected = this.isTextSelected();
+		this.anythingSelected = this.markingSelected || this.textSelected;
+	}
+
+	isMarkingSelected(): boolean {
+		const items = this.selectedItems();
+		for (let i = 0; i < items.length; i++) {
+			if (this.markingIdToPushKey(items[i].id)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	isTextSelected(): boolean {
+		const items = this.selectedItems();
+		for (let i = 0; i < items.length; i++) {
+			if (this.textIdToPushKey(items[i].id)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	editItems(items: any[]) {

@@ -5,6 +5,10 @@ declare const paper;
 
 export class Shape {
 
+	// For toolbar
+	toolbarShowStyles = true;
+	toolbarShowShapes = true;
+
 	currentShape: any;
 	currentShapeType: WhiteboardShapeType;
 	currentShapeStarted: number;
@@ -167,7 +171,7 @@ export class Shape {
 		}
 	}
 
-	modifierKey(event: KeyboardEvent) {
+	keyup(event: KeyboardEvent) {
 		if (!this.currentShapeFinished) {
 			this.resizeCurrentShape(this.currentPoint);
 		}

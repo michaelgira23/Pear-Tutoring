@@ -6,6 +6,10 @@ declare const paper;
 
 export class Text {
 
+	// For toolbar
+	toolbarShowStyles = true;
+	toolbarShowText = true;
+
 	currentText: any;
 	currentTextFinished: boolean = true;
 
