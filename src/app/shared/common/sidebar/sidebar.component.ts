@@ -1,12 +1,11 @@
-import { Component, ContentChild, ViewEncapsulation, AfterContentInit, HostListener, ElementRef } from '@angular/core';
+import { Component, ContentChild, AfterContentInit, HostListener, ElementRef, Input} from '@angular/core';
 import { SidebarControlDirective } from './sidebar-control.directive';
 import { SidebarContentDirective } from './sidebar-content.directive';
 
 @Component({
 	selector: 'app-sidebar',
 	templateUrl: './sidebar.component.html',
-	styleUrls: ['./sidebar.component.scss'],
-	encapsulation: ViewEncapsulation.None
+	styleUrls: ['./sidebar.component.scss']
 })
 export class SidebarComponent implements AfterContentInit {
 
@@ -14,12 +13,14 @@ export class SidebarComponent implements AfterContentInit {
 
 	@ContentChild(SidebarControlDirective) control: SidebarControlDirective;
 
+	@Input() orientation: string;
+
 	open() {
-		this.content.el.nativeElement.classList.add('open');
+		this.content.open = true;
 	};
 
 	close() {
-		this.content.el.nativeElement.classList.remove('open');
+		this.content.open = false;
 	};
 
 	constructor(private _elementRef: ElementRef) { }

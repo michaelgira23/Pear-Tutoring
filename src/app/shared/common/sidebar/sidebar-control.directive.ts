@@ -7,7 +7,7 @@ import { BehaviorSubject } from 'rxjs/Rx';
 export class SidebarControlDirective {
 
 	open: boolean;
-	open$ = new BehaviorSubject<boolean>(true);
+	open$ = new BehaviorSubject<boolean>(false);
 
 	constructor() { }
 

@@ -32,6 +32,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 			this.findSession$ = this.sessionService.findSession(this.sessionId).subscribe(session => {
 				this.sessionExist = true;
 				this.sessionInfo = session;
+				console.log(this.sessionInfo)
 				this.sessionService.joinSession(this.sessionId).subscribe(data => {}, console.error,
 				() => {
 					this.sessionService.getOnlineUsers(this.sessionId).subscribe(userIds => {
