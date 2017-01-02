@@ -67,8 +67,9 @@ export class UserAutoCompleteComponent implements OnInit, ControlValueAccessor, 
 		if (str) {
 			this.searchStr = str;
 			this.onSearchStr$.next(str);
-		} else {
-			this.searchStr = '';
+		}
+		if (str === '') {
+			this.userResults = [];
 		}
 	}
 
