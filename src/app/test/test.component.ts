@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AngularFire } from 'angularfire2';
-import { PermissionsService, PermissionsChatScopes } from '../shared/security/permissions.service';
+import { PermissionsService, PermissionsWhiteboardScopes } from '../shared/security/permissions.service';
 
 @Component({
 	selector: 'app-test',
@@ -19,7 +19,7 @@ export class TestComponent implements OnInit {
 		);
 
 		let permission = {
-			loggedIn: new PermissionsChatScopes({
+			anonymous: new PermissionsWhiteboardScopes({
 				read: true
 			}),
 		};

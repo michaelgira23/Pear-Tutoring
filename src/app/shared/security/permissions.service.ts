@@ -28,20 +28,38 @@ export class PermissionsService {
 
 	createPermission($key: string, type: PermissionsType, permission: PermissionParameter): Observable<any> {
 		let newPerm: Permission = {};
+		let scopeTypesMatch = true;
+		const typeToClass: Object = {
+			'chat': PermissionsChatScopes,
+			'session': PermissionsSessionScopes,
+			'whiteboard': PermissionsWhiteboardScopes
+		};
 
 		for (let group of Object.keys(permission)) {
 			if (group === 'user') {
 				for (let $uid of Object.keys(permission.user)) {
-					newPerm.user[$uid] = permission.user[$uid].scopes;
+					if (permission.user[$uid] instanceof typeToClass[type]) {
+						newPerm.user[$uid] = permission.user[$uid].scopes;
+					} else {
+						scopeTypesMatch = false;
+					}
 				}
 			} else {
-				newPerm[group] = permission[group].scopes;
+				if (permission[group] instanceof typeToClass[type]) {
+					newPerm[group] = permission[group].scopes;
+				} else {
+					scopeTypesMatch = false;
+				}
 			}
 		}
 
 		const permissions = this.af.database.object(`${type}Permissions/${$key}`);
 
-		return this.promiseToObservable(permissions.set(newPerm));
+		if (scopeTypesMatch) {
+			return this.promiseToObservable(permissions.set(newPerm));
+		} else {
+			return Observable.throw(`\`PermissionScope\` objects provided are not of type ${type}.`);
+		}
 	}
 
 	getPermission($key: string, type: PermissionsType): FirebaseObjectObservable<any> {
@@ -93,12 +111,10 @@ export class PermissionsService {
 	addScope(
 		$key: string,
 		type: PermissionsType,
-		_scopeObj: PermissionsScopes, // This gets all the different scope classes.
+		scopes: PermissionsScopes, // This gets all the different scope classes.
 		group: PermissionsGroup,
 		$uid?: string
 	): Observable<any> {
-		const scopes = _scopeObj.scopes;
-
 		const permission = this.af.database.object(`${type}Permissions/${$key}`);
 		const subject = new Subject<any>();
 
@@ -120,7 +136,7 @@ export class PermissionsService {
 					subject.complete();
 				}
 			} else {
-				let newPerm: Permission = {};
+				let newPerm: PermissionParameter = {};
 
 				if (group === 'user') {
 					newPerm['user'][$uid] = scopes;
