@@ -13,7 +13,7 @@ export class ChatService {
 	timestamp: any = firebase.database['ServerValue']['TIMESTAMP'];
 	sdkDb: any;
 	authInfo: FirebaseAuthState;
-	queue: { key: string, chatKey: string, status: StatusOptions, time: number }[] = [];
+	queue: { chatKey: string, statusKey: string, status: StatusOptions }[] = [];
 
 	constructor(private af: AngularFire, @Inject(FirebaseRef) fb, private authService: AuthService, private userService: UserService) {
 		this.sdkDb = fb.database().ref();
@@ -26,7 +26,7 @@ export class ChatService {
 				if (typeof this.authInfo !== 'undefined' && this.queue.length > 0) {
 					console.log('handle queue of length', this.queue.length, this.authInfo);
 					this.queue.forEach(value => {
-						this.sendStatus(value.status, value.chatKey, value.time)
+						this.sendStatus(value.status, value.chatKey, value.statusKey)
 							.subscribe(
 								key => {
 									console.log('set status success', key);
@@ -91,13 +91,12 @@ export class ChatService {
 		return this.observableToPromise(chatMessages.push(message));
 	}
 
-	sendStatus(statusType: StatusOptions, chatKey: string, time?: number): Observable<any> {
+	sendStatus(statusType: StatusOptions, chatKey: string, key: string = this.sdkDb.push().key): Observable<any> {
 		const status: Status = {
 			type: statusType,
-			time: time || Date.now(),
+			time: firebase.database['ServerValue']['TIMESTAMP'],
 			user: this.authInfo ? this.authInfo.uid : null,
 		};
-		const key = this.sdkDb.push().key;
 
 		if (typeof this.authInfo !== 'undefined') {
 			// Insert status into database like normal
@@ -106,7 +105,7 @@ export class ChatService {
 				.map(() => key);
 		} else {
 			// Add status into queue until authInfo is initialized
-			this.queue.push({ key, chatKey, status: statusType, time: status.time });
+			this.queue.push({ status: statusType, chatKey: chatKey, statusKey: key });
 			return Observable.of(key);
 		}
 	}
@@ -145,7 +144,7 @@ export interface Message {
 
 export interface Status {
 	type: StatusOptions;
-	time: number;
+	time: number | any;
 	user: string | any;
 }
 
