@@ -130,7 +130,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 					if (this.styleOptions[styleKey][prop] === value) {
 						return;
 					}
-					console.log('set', styleKey, prop, value);
+					console.log('edit style options', styleKey, prop, value);
 
 					// Set like normal
 					obj[prop] = value;
@@ -146,9 +146,6 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 						Object.assign(item, newStyles);
 					});
 
-					// Edit items
-					this.editItems(this.selectedItems());
-
 					return true;
 				}
 			});
@@ -157,7 +154,26 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		// We can attach the proxy onto the root of fontOptions because, unlike the style options, fontOptions is only one layer deep.
 		this.fontOptions = new Proxy(this.fontOptions, {
 			set: (obj, prop, value) => {
+				// Check that value is actually changing
+				if (this.fontOptions[prop] === value) {
+					return;
+				}
+				console.log('edit font options', prop, value);
+
+				// Set like normal
 				obj[prop] = value;
+
+				this.getSelectedText().forEach(item => {
+					// Serialize font
+					let serializedFont = font.serialize(item);
+					// Replace new font property
+					serializedFont[prop] = value;
+					// Re-deserialize font with this new changed property
+					const newFont = font.deserialize(serializedFont);
+
+					Object.assign(item, newFont);
+				});
+
 				return true;
 			}
 		});
@@ -581,6 +597,16 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Edit functions
+	 */
+
+ 	// Triggers on mouseup of toolbar
+	onToolbarOptionsChange() {
+		// Edit items
+		this.editItems(this.selectedItems());
 	}
 
 	editItems(items: any[]) {
