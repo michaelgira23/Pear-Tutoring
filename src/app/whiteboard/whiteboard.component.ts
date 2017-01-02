@@ -153,6 +153,11 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		// Check if the key has changed
 		if (changes['key'] && changes['key'].currentValue !== changes['key'].previousValue) {
 
+			// take a snapshot before clean up
+			if (this.whiteboard) {
+				this.takeSnapshot();
+			}
+
 			// If we are changing the key, clean up any previous observables
 			this.cleanUp();
 
