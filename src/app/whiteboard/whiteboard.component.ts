@@ -383,7 +383,9 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	}
 
 	clearCanvas() {
+		this.clearCurrentMarkings();
 		this.clearMarkings();
+		this.clearCurrentText();
 		this.clearText();
 	}
 
@@ -439,6 +441,8 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	 */
 
 	markingsToCanvas(markings: WhiteboardMarking[]) {
+		this.clearCurrentMarkings();
+
 		// Keep track of which markings we deal with
 		let newMarkingKeys = [];
 
@@ -458,6 +462,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 				// Check if marking should be erased
 				if (marking.erased) {
 					this.canvasMarkings[marking.$key].remove();
+					delete this.canvasMarkings[marking.$key];
 					continue;
 				}
 
@@ -489,7 +494,9 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 				delete this.canvasMarkings[key];
 			});
 		}
+	}
 
+	clearCurrentMarkings() {
 		// Erase current path in pen tool if it isn't in the proccess of being drawn
 		if (this.tools.pen.currentPath && this.tools.pen.currentPathFinished) {
 			this.tools.pen.currentPath.remove();
@@ -519,6 +526,8 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	 */
 
 	textsToCanvas(texts: WhiteboardText[]) {
+		this.clearCurrentText();
+
 		// Keep track of which texts we deal with
 		let newTextKeys = [];
 
@@ -544,6 +553,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 				// Check if text should be erased
 				if (text.erased) {
 					this.canvasText[text.$key].remove();
+					delete this.canvasText[text.$key];
 					continue;
 				}
 
@@ -579,7 +589,9 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 				delete this.canvasText[key];
 			});
 		}
+	}
 
+	clearCurrentText() {
 		// Erase current text too if it isn't in the process of being created
 		if (this.tools.text.currentText && this.tools.text.currentTextFinished) {
 			this.tools.text.currentText.remove();
