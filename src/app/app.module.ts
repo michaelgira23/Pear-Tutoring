@@ -54,6 +54,7 @@ import { NamePipe } from './shared/model/name.pipe';
 import { SidebarComponent } from './shared/common/sidebar/sidebar.component';
 import { SidebarControlDirective } from './shared/common/sidebar/sidebar-control.directive';
 import { SidebarContentDirective } from './shared/common/sidebar/sidebar-content.directive';
+import { WhiteboardSelectComponent } from './session/whiteboard-select/whiteboard-select.component';
 
 @NgModule({
 	declarations: [
@@ -84,7 +85,8 @@ import { SidebarContentDirective } from './shared/common/sidebar/sidebar-content
 		NamePipe,
 		SidebarComponent,
 		SidebarControlDirective,
-		SidebarContentDirective
+		SidebarContentDirective,
+		WhiteboardSelectComponent
 	],
 	imports: [
 		BrowserModule,

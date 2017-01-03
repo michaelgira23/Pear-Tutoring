@@ -1,0 +1,6 @@
+<div class="wb-select-container" *ngIf="whiteboards">
+  <div class="wb-item mdl-shadow--4dp" *ngFor="let wb of whiteboards; let i = index" (click)="selectWb(i)">
+    <img class="wb-img" [src]="wb.snapshot" *ngIf="wb.snapshot">
+    <h3 class="wb-img" *ngIf="!wb.snapshot">No preview</h3>
+  </div>
+</div>

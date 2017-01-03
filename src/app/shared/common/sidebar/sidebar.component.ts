@@ -17,10 +17,12 @@ export class SidebarComponent implements AfterContentInit {
 
 	open() {
 		this.content.open = true;
+		this.control.open = true;
 	};
 
 	close() {
 		this.content.open = false;
+		this.control.open = false;
 	};
 
 	constructor(private _elementRef: ElementRef) { }

@@ -46,14 +46,11 @@
     <div appSidebarContent>
       <div class="whiteboard-select" *ngIf="sessionExist">
         <div class="btn-group">
-          <button (click)="addWb()" class="btn btn-default">Add Whiteboard</button>
-          <button (click)="deleteWb()" class="btn btn-default">Delete Whiteboard</button>
+          <button (click)="addWb()" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">Add Whiteboard</button>
+          <button (click)="deleteWb()" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">Delete Whiteboard</button>
         </div>
-        <div class="whiteboard-select">
-          <select [(ngModel)]="selectedWbIndex">
-            <option *ngFor="let wb of sessionInfo.whiteboards; let i = index" [value]="i">{{ wb.name }}</option>
-          </select>
-        </div>
+        <app-whiteboard-select (onSelect)="onSelectWb($event)" [whiteboards]="sessionInfo.whiteboards">
+        </app-whiteboard-select>
       </div>
     </div>
   </app-sidebar>
