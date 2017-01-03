@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AngularFire } from 'angularfire2';
-import { PermissionsService, PermissionsWhiteboardScopes } from '../shared/security/permissions.service';
+import { PermissionsService } from '../shared/security/permissions.service';
 
 @Component({
 	selector: 'app-test',
@@ -12,24 +12,12 @@ export class TestComponent implements OnInit {
 	constructor(private af: AngularFire, private permissionsService: PermissionsService) { }
 
 	ngOnInit() {
-		this.permissionsService.getPermission('-KZzCW_RP3Fkz0Kp6KpV', 'chat').subscribe(
+		this.permissionsService.getUserPermission('-K_ReQRXExIGcsHj7O4e', 'chat').subscribe(
 			data => {
-				console.log(data);
-			}
-		);
-
-		let permission = {
-			anonymous: new PermissionsWhiteboardScopes({
-				read: true
-			}),
-		};
-
-		this.permissionsService.createPermission('-K_ReQRXExIGcsHj7O4e', 'chat', permission).subscribe(
-			data => {
-				console.log(`Successfully created permission ${permission}`);
+				console.log('Successfully got user permission', data);
 			},
 			err => {
-				console.log(`Error creating permission ${permission}: ${err}`);
+				console.log(`Error getting current user permission: ${err}`);
 			}
 		);
 	}

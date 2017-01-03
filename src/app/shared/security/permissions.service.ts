@@ -67,44 +67,29 @@ export class PermissionsService {
 	}
 
 	getUserPermission($key: string, type: PermissionsType): Observable<any> {
-		const subject = new Subject<any>();
+		return this.getPermission($key, type)
+			.map(data => {
 
-		this.getPermission($key, type).subscribe(
-			data => {
-				// Check if there are any permissions defined for this object
-				if (data !== {}) {
-					// Check if auth service is initialized
-					if (typeof this.authInfo !== 'undefined') {
-						// Check if logged in anonymously
-						if (this.authInfo === null) {
-							subject.next(data.anonymous ? data.anonymous : {});
-							subject.complete();
-						} else {
-							// Check if a `user` permission actually exists and it contains special permissions for the current user
-							if (data.user && this.authInfo.uid in data.user) {
-								// If so, return those permissions
-								subject.next(data.user[this.authInfo.uid]);
-								subject.complete();
-							} else {
-								// If not, return the generic `loggedIn` permissions
-								subject.next(data.loggedIn ? data.loggedIn : {});
-								subject.complete();
-							}
-						}
-					}
-				} else {
-					// If not, just send this empty array
-					subject.next(data);
-					subject.complete();
+				// Check if there are any permissions defined for this object or if auth state is still being queried
+				if (typeof data !== 'object' || typeof this.authInfo === 'undefined') {
+					return {};
 				}
-			},
-			err => {
-				subject.error(err);
-				subject.complete();
-			}
-		);
 
-		return subject.asObservable();
+				// If user isn't logged in, return anonymous permissions
+				if (this.authInfo === null) {
+					return data.anonymous ? data.anonymous : {};
+				}
+
+				// Check if custom user permissions
+				if (data.user && data.user[this.authInfo.uid]) {
+					return data.user[this.authInfo.uid];
+				} else if (data.loggedIn) {
+					// Fallback to generic logged in
+					return data.loggedIn;
+				}
+
+				return {};
+			});
 	}
 
 	// We have to ask for the $key and type again since that's how we organize permissions.
