@@ -5,6 +5,10 @@ declare const paper;
 
 export class Shape {
 
+	// For toolbar
+	toolbarShowStyles = true;
+	toolbarShowShapes = true;
+
 	currentShape: any;
 	currentShapeType: WhiteboardShapeType;
 	currentShapeStarted: number;
@@ -151,7 +155,7 @@ export class Shape {
 
 			// Save shape
 			const markingOptions: WhiteboardMarkingOptions = {
-				started: this.currentShapeStarted,
+				drawTime: Date.now() - this.currentShapeStarted,
 				path: segments.serialize(this.currentShape.segments),
 				style: this.whiteboard.styleOptions
 			};
@@ -167,7 +171,7 @@ export class Shape {
 		}
 	}
 
-	modifierKey(event: KeyboardEvent) {
+	keyup(event: KeyboardEvent) {
 		if (!this.currentShapeFinished) {
 			this.resizeCurrentShape(this.currentPoint);
 		}
