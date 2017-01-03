@@ -15,6 +15,12 @@ export class PermissionsService {
 
 	authInfo: FirebaseAuthState;
 
+	private typeToClass: Object = {
+		'chat': PermissionsChatScopes,
+		'session': PermissionsSessionScopes,
+		'whiteboard': PermissionsWhiteboardScopes
+	};
+
 	constructor(private af: AngularFire, private authService: AuthService) {
 		this.authService.auth$.subscribe(
 			data => {
@@ -29,23 +35,18 @@ export class PermissionsService {
 	createPermission($key: string, type: PermissionsType, permission: PermissionParameter): Observable<any> {
 		let newPerm: Permission = {};
 		let scopeTypesMatch = true;
-		const typeToClass: Object = {
-			'chat': PermissionsChatScopes,
-			'session': PermissionsSessionScopes,
-			'whiteboard': PermissionsWhiteboardScopes
-		};
 
 		for (let group of Object.keys(permission)) {
 			if (group === 'user') {
 				for (let $uid of Object.keys(permission.user)) {
-					if (permission.user[$uid] instanceof typeToClass[type]) {
+					if (permission.user[$uid] instanceof this.typeToClass[type]) {
 						newPerm.user[$uid] = permission.user[$uid].scopes;
 					} else {
 						scopeTypesMatch = false;
 					}
 				}
 			} else {
-				if (permission[group] instanceof typeToClass[type]) {
+				if (permission[group] instanceof this.typeToClass[type]) {
 					newPerm[group] = permission[group].scopes;
 				} else {
 					scopeTypesMatch = false;
@@ -53,13 +54,13 @@ export class PermissionsService {
 			}
 		}
 
-		const permissions = this.af.database.object(`${type}Permissions/${$key}`);
-
-		if (scopeTypesMatch) {
-			return this.promiseToObservable(permissions.set(newPerm));
-		} else {
+		if (!scopeTypesMatch) {
 			return Observable.throw(`\`PermissionScope\` objects provided are not of type ${type}.`);
 		}
+
+		const permissions = this.af.database.object(`${type}Permissions/${$key}`);
+
+		return this.promiseToObservable(permissions.set(newPerm));
 	}
 
 	getPermission($key: string, type: PermissionsType): FirebaseObjectObservable<any> {
@@ -96,52 +97,26 @@ export class PermissionsService {
 	addScope(
 		$key: string,
 		type: PermissionsType,
-		scopes: PermissionsScopes, // This gets all the different scope classes.
+		_scopeObj: PermissionsScopes, // This gets all the different scope classes.
 		group: PermissionsGroup,
 		$uid?: string
 	): Observable<any> {
-		const permission = this.af.database.object(`${type}Permissions/${$key}`);
-		const subject = new Subject<any>();
+		if (!(_scopeObj instanceof this.typeToClass[type])) {
+			return Observable.throw(`\`PermissionScope\` objects provided are not of type ${type}.`);
+		}
 
-		permission.subscribe(permObj => {
-			if (permObj.$exists()) {
-				if (group === 'user') {
-					const users = this.af.database.object(`${type}Permissions/${$key}/user`);
-					const scopeObj = {};
-					scopeObj[$uid] = scopes;
+		const scopes = _scopeObj.scopes;
 
-					subject.next(this.promiseToObservable(users.update(scopeObj)));
-					subject.complete();
-				} else {
-					const permissions = this.af.database.object(`${type}Permissions/${$key}`);
-					const scopeObj = {};
-					scopeObj[group] = scopes;
+		let permissions = this.af.database.object(`${type}Permissions/${$key}`);
 
-					subject.next(this.promiseToObservable(permissions.update(scopeObj)));
-					subject.complete();
-				}
-			} else {
-				let newPerm: PermissionParameter = {};
+		if (group === 'user') {
+			permissions = this.af.database.object(`${type}Permissions/${$key}/user`);
+		}
 
-				if (group === 'user') {
-					newPerm['user'][$uid] = scopes;
-				} else {
-					newPerm[group] = scopes;
-				}
+		const scopeObj = {};
+		scopeObj[group] = scopes;
 
-				this.createPermission($key, type, newPerm).subscribe(
-					data => {
-						subject.next(data);
-					},
-					err => {
-						subject.error(err);
-						subject.complete();
-					}
-				);
-			}
-		});
-
-		return subject.asObservable();
+		return this.promiseToObservable(permissions.update(scopeObj));
 	}
 
 	// See line 29
@@ -151,37 +126,25 @@ export class PermissionsService {
 		_scopeObj: PermissionsScopes, // This gets all the different scope classes.
 		group: PermissionsGroup,
 		$uid?: string
-	) {
+	): Observable<any> {
+		if (!(_scopeObj instanceof this.typeToClass[type])) {
+			return Observable.throw(`\`PermissionScope\` objects provided are not of type ${type}.`);
+		}
+
 		const scopes = _scopeObj.scopes;
 
-		const permission = this.af.database.object(`${type}Permissions/${$key}`);
-		const subject = new Subject<any>();
+		let permissions = this.af.database.object(`${type}Permissions/${$key}/${group}`);
 
-		permission.subscribe(permObj => {
-			if (permObj.$exists()) {
-				if (group === 'user') {
-					const userPermissions = this.af.database.object(`${type}Permissions/${$key}/user/${$uid}`);
-					const scopeObj = {};
-					for (let scope of Object.keys(scopes)) {
-						scopeObj[scope] = null;
-					}
+		if (group === 'user') {
+			permissions = this.af.database.object(`${type}Permissions/${$key}/user/${$uid}`);
+		}
 
-					subject.next(this.promiseToObservable(userPermissions.update(scopeObj)));
-					subject.complete();
-				} else {
-					const groupPermissions = this.af.database.object(`${type}Permissions/${$key}/${group}`);
-					const scopeObj = {};
-					for (let scope of Object.keys(scopes)) {
-						scopeObj[scope] = null;
-					}
+		const scopeObj = {};
+		for (let scope of Object.keys(scopes)) {
+			scopeObj[scope] = null;
+		}
 
-					subject.next(this.promiseToObservable(groupPermissions.update(scopeObj)));
-					subject.complete();
-				}
-			}
-		});
-
-		return subject.asObservable();
+		return this.promiseToObservable(permissions.update(scopeObj));
 	}
 
 	private promiseToObservable(promise): Observable<any> {

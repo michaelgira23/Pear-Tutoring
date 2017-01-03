@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AngularFire } from 'angularfire2';
-import { PermissionsService } from '../shared/security/permissions.service';
+import { PermissionsService, PermissionsChatScopes, PermissionsWhiteboardScopes } from '../shared/security/permissions.service';
 
 @Component({
 	selector: 'app-test',
@@ -18,6 +18,30 @@ export class TestComponent implements OnInit {
 			},
 			err => {
 				console.log(`Error getting current user permission: ${err}`);
+			}
+		);
+
+		let scopes = {
+			read: true,
+			write: false,
+			testingIsFun: true
+		};
+
+		this.permissionsService.addScope('-K_ReQRXExIGcsHj7O4e', 'chat', new PermissionsChatScopes(scopes), 'anonymous').subscribe(
+			data => {
+				console.log('Successfully added scope');
+			},
+			err => {
+				console.log(`Error adding scope: ${err}`);
+			}
+		);
+
+		this.permissionsService.removeScope('-K_ReQRXExIGcsHj7O4e', 'chat', new PermissionsWhiteboardScopes(scopes), 'anonymous').subscribe(
+			data => {
+				console.log('Successfully added scope');
+			},
+			err => {
+				console.log(`Error adding scope: ${err}`);
 			}
 		);
 	}
