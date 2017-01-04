@@ -199,9 +199,9 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		// Check if the key has changed
 		if (changes['key'] && changes['key'].currentValue !== changes['key'].previousValue) {
 
-			// take a snapshot before clean up
-			if (this.whiteboard) {
-				this.takeSnapshot();
+			// Take a snapshot we're switching from a previous whiteboard
+			if (this.whiteboard && this.validKey) {
+				this.takeSnapshot(changes['key'].previousValue);
 			}
 
 			// If we are changing the key, clean up any previous observables
@@ -265,8 +265,11 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	}
 
 	ngOnDestroy() {
+		// Take a screenshot if valid key
+		if (this.validKey) {
+			this.takeSnapshot();
+		}
 		this.cleanUp();
-		this.takeSnapshot();
 	}
 
 	cleanUp() {
@@ -383,6 +386,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	}
 
 	clearCanvas() {
+		this.setBackgroundColor('#fff');
 		this.clearCurrentMarkings();
 		this.clearMarkings();
 		this.clearCurrentText();
@@ -755,44 +759,46 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	 * Snapshot functions
 	 */
 
-	takeSnapshot() {
+	takeSnapshot(key = this.key) {
 		// Make it's a valid whiteboard first
-		if (this.key && this.validKey) {
-			// Calculate scale required to make canvas the snapshot dimensions
-			const canvasWidth = this.canvasEl.width / paper.project.view.pixelRatio;
-			const scaleWidth = this.snapshotDimensions.width / canvasWidth;
-			const canvasHeight = this.canvasEl.height / paper.project.view.pixelRatio;
-			const scaleHeight = this.snapshotDimensions.height / canvasHeight;
-
-			const originalViewSize = paper.project.view.viewSize;
-
-			// Scale the image down so it doesn't take up as much bandwidth to download
-			this.takingSnapshot = true;
-			paper.project.view.viewSize = new paper.Size(this.snapshotDimensions.width, this.snapshotDimensions.height);
-			paper.project.view.scale(scaleWidth, scaleHeight, new paper.Point(0, 0));
-
-			// Wait for changes to take place
-			setTimeout(() => {
-				// Save canvas as an image
-				this.canvasEl.toBlob((imgBlob: Blob) => {
-					// Revert whiteboard to original size
-					paper.project.view.scale(1 / scaleWidth, 1 / scaleHeight, new paper.Point(0, 0));
-					paper.project.view.viewSize = originalViewSize;
-					this.takingSnapshot = false;
-					this.setBackgroundColor(this.whiteboard.background);
-
-					// Upload image to Firebase
-					this.whiteboardService.storeSnapshot(this.key, imgBlob).subscribe(
-						data => {
-							console.log('whiteboard snapshot is saved', data);
-						},
-						err => {
-							console.log('error when saving whiteboard snapshot', err);
-						}
-					);
-				});
-			}, 15);
+		if (typeof key !== 'string') {
+			return;
 		}
+
+		// Calculate scale required to make canvas the snapshot dimensions
+		const canvasWidth = this.canvasEl.width / paper.project.view.pixelRatio;
+		const scaleWidth = this.snapshotDimensions.width / canvasWidth;
+		const canvasHeight = this.canvasEl.height / paper.project.view.pixelRatio;
+		const scaleHeight = this.snapshotDimensions.height / canvasHeight;
+
+		const originalViewSize = paper.project.view.viewSize;
+
+		// Scale the image down so it doesn't take up as much bandwidth to download
+		this.takingSnapshot = true;
+		paper.project.view.viewSize = new paper.Size(this.snapshotDimensions.width, this.snapshotDimensions.height);
+		paper.project.view.scale(scaleWidth, scaleHeight, new paper.Point(0, 0));
+
+		// Wait for changes to take place
+		setTimeout(() => {
+			// Save canvas as an image
+			this.canvasEl.toBlob((imgBlob: Blob) => {
+				// Revert whiteboard to original size
+				paper.project.view.scale(1 / scaleWidth, 1 / scaleHeight, new paper.Point(0, 0));
+				paper.project.view.viewSize = originalViewSize;
+				this.takingSnapshot = false;
+				this.setBackgroundColor(this.whiteboard.background);
+
+				// Upload image to Firebase
+				this.whiteboardService.storeSnapshot(key, imgBlob).subscribe(
+					data => {
+						console.log('whiteboard snapshot is saved', data);
+					},
+					err => {
+						console.log('error when saving whiteboard snapshot', err);
+					}
+				);
+			});
+		}, 15);
 	}
 
 }
