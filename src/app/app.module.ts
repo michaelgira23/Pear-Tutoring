@@ -23,6 +23,8 @@ import { UserService } from './shared/model/user.service';
 
 import { MDLUpgradeElementDirective } from './shared/common/mdl-upgrade-element.directive';
 
+import { SafeHtmlPipe, SafeScriptPipe, SafeStylePipe, SafeUrlPipe, SafeResourceUrlPipe } from './shared/security/safe.pipe';
+
 // Whiteboard components and services
 import { WhiteboardComponent } from './whiteboard/whiteboard.component';
 import { CreateWhiteboardComponent } from './create-whiteboard/create-whiteboard.component';
@@ -51,10 +53,6 @@ import { MyScheduleComponent } from './scheduling/my-schedule/my-schedule.compon
 import { PfpUploadComponent } from './settings/pfp-upload/pfp-upload.component';
 import { UserAutoCompleteComponent } from './scheduling/user-auto-complete/user-auto-complete.component';
 import { NamePipe } from './shared/model/name.pipe';
-import { SidebarComponent } from './shared/common/sidebar/sidebar.component';
-import { SidebarControlDirective } from './shared/common/sidebar/sidebar-control.directive';
-import { SidebarContentDirective } from './shared/common/sidebar/sidebar-content.directive';
-import { WhiteboardSelectComponent } from './session/whiteboard-select/whiteboard-select.component';
 
 @NgModule({
 	declarations: [
@@ -88,10 +86,6 @@ import { WhiteboardSelectComponent } from './session/whiteboard-select/whiteboar
 		SafeStylePipe,
 		SafeUrlPipe,
 		SafeResourceUrlPipe,
-		SidebarComponent,
-		SidebarControlDirective,
-		SidebarContentDirective,
-		WhiteboardSelectComponent
 	],
 	imports: [
 		BrowserModule,

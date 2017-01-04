@@ -69,10 +69,21 @@ export class Text {
 		if (this.currentText && this.whiteboard.allowWrite) {
 			this.currentTextFinished = true;
 
+			let promptMessage = '';
 			if (!this.editingCurrentText) {
-				this.currentText.content = prompt('Enter text here:', this.currentText.content);
+				promptMessage = 'Enter text here:';
 			} else {
-				this.currentText.content = prompt('Edit text here:', this.currentText.content);
+				promptMessage = 'Edit text here:';
+			}
+
+			// Prompt user for text
+			const content = prompt(promptMessage, this.currentText.content);
+
+			// If user cancelled prompt, delete
+			if (content === null) {
+				this.currentText.remove();
+				this.currentText = null;
+				return;
 			}
 
 			// Save text
