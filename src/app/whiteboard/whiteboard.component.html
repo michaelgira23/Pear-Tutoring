@@ -3,6 +3,7 @@
 	(mousedown)="onMouseDown($event)"
 	(mousemove)="onMouseMove($event)"
 	(mouseup)="onMouseUp($event)"
+	[style.cursor]="'url(assets/whiteboard-cursors/' + tool + '.png) 0 ' + (tool === 'cursor' ? 0 : 20) + ', auto' | safeStyle"
 	[style.height]="takingSnapshot ? snapshotDimensions.height + 'px' : 'inherit'"
 	[style.width]="takingSnapshot ?  snapshotDimensions.width + 'px' : 'inherit'"></canvas>
 

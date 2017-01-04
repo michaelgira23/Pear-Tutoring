@@ -23,6 +23,8 @@ import { UserService } from './shared/model/user.service';
 
 import { MDLUpgradeElementDirective } from './shared/common/mdl-upgrade-element.directive';
 
+import { SafeHtmlPipe, SafeScriptPipe, SafeStylePipe, SafeUrlPipe, SafeResourceUrlPipe } from './shared/security/safe.pipe';
+
 // Whiteboard components and services
 import { WhiteboardComponent } from './whiteboard/whiteboard.component';
 import { CreateWhiteboardComponent } from './create-whiteboard/create-whiteboard.component';
@@ -78,7 +80,12 @@ import { NamePipe } from './shared/model/name.pipe';
 		PfpUploadComponent,
 		UserAutoCompleteComponent,
 		MDLUpgradeElementDirective,
-		NamePipe
+		NamePipe,
+		SafeHtmlPipe,
+		SafeScriptPipe,
+		SafeStylePipe,
+		SafeUrlPipe,
+		SafeResourceUrlPipe,
 	],
 	imports: [
 		BrowserModule,
