@@ -10,10 +10,6 @@ export class ViewWhiteboardComponent implements OnInit {
 
 	key: string;
 	allowWrite: boolean = true;
-	permissions: any = {
-		read: true,
-		write: true
-	};
 
 	constructor(private route: ActivatedRoute) { }
 
