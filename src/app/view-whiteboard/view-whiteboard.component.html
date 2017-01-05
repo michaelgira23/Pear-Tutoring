@@ -5,5 +5,13 @@
 		<input type="checkbox" [(ngModel)]="allowWrite">
 		Allow Write
 	</label>
+	<label>
+		<input type="checkbox" [(ngModel)]="permissions.read">
+		Permissions.Read
+	</label>
+	<label>
+		<input type="checkbox" [(ngModel)]="permissions.write">
+		Permissions.Write
+	</label>
 </div>
-<app-whiteboard [key]="key" [allowWrite]="allowWrite"></app-whiteboard>
+<app-whiteboard [key]="key" [allowWrite]="allowWrite" [permissions]="permissions"></app-whiteboard>

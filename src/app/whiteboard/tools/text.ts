@@ -22,6 +22,12 @@ export class Text {
 	 */
 
 	mousedown(event) {
+		// If no permissions, delete current text
+		if (!this.whiteboard.shouldWrite) {
+			this.clearCurrentText();
+			return;
+		}
+
 		const point = this.whiteboard.cursorPoint(event);
 
 		if (this.currentTextFinished) {
@@ -59,6 +65,12 @@ export class Text {
 	}
 
 	mousemove(event) {
+		// If no permissions, delete current text
+		if (!this.whiteboard.shouldWrite) {
+			this.clearCurrentText();
+			return;
+		}
+
 		if (this.currentText && !this.currentTextFinished) {
 			const point = this.whiteboard.cursorPoint(event);
 			this.currentText.point = point;
@@ -66,6 +78,12 @@ export class Text {
 	}
 
 	mouseup(event) {
+		// If no permissions, delete current text
+		if (!this.whiteboard.shouldWrite) {
+			this.clearCurrentText();
+			return;
+		}
+
 		if (this.currentText && this.whiteboard.allowWrite) {
 			this.currentTextFinished = true;
 
@@ -120,6 +138,18 @@ export class Text {
 					);
 			}
 		}
+	}
+
+	/**
+	 * Helper functions
+	 */
+
+	clearCurrentText() {
+		this.currentTextFinished = true;
+		if (this.currentText) {
+			this.currentText.remove();
+		}
+		this.currentText = null;
 	}
 
 }

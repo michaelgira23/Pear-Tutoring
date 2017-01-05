@@ -35,6 +35,12 @@ export class Shape {
 	 */
 
 	mousedown(event) {
+		// If no permissions, delete current shape
+		if (!this.whiteboard.shouldWrite) {
+			this.clearCurrentShape();
+			return;
+		}
+
 		if (this.currentShapeFinished) {
 			this.currentShapeFinished = false;
 			this.currentShapeStarted = Date.now();
@@ -94,6 +100,12 @@ export class Shape {
 	}
 
 	mouseup(event) {
+		// If no permissions, delete current shape
+		if (!this.whiteboard.shouldWrite) {
+			this.clearCurrentShape();
+			return;
+		}
+
 		if ((this.currentShape && !this.currentShapeFinished
 			// Creaction rectangle must have moved. If it's a custom shape, it's alright as long as there's more than one segment
 			&& ((this.creationRect.width > 0 && this.creationRect.height > 0)
@@ -183,6 +195,12 @@ export class Shape {
 
 	// Simulates mouse movement while drawing a shape
 	resizeCurrentShape(point) {
+		// If no permissions, delete current shape
+		if (!this.whiteboard.shouldWrite) {
+			this.clearCurrentShape();
+			return;
+		}
+
 		if (this.currentShape && !this.currentShapeFinished) {
 
 			// If custom shape, just add segment to path
@@ -399,4 +417,13 @@ export class Shape {
 			this.visualRect = null;
 		}
 	}
+
+	clearCurrentShape() {
+		this.currentShapeFinished = true;
+		if (this.currentShape) {
+			this.currentShape.remove();
+		}
+		this.currentShape = null;
+	}
+
 }

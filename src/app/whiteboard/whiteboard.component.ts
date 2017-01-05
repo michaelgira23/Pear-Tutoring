@@ -44,6 +44,31 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	whiteboard: Whiteboard;
 	whiteboardName: string;
 
+	// Future permissions subscription
+	permissionsSubscription: any;
+	// Scopes of permissions
+	@Input()
+	permissions: any = {
+		read: true,
+		write: true
+	};
+
+	// Whether or not user can make changes to whiteboard.
+	// While behavior is the same for permissions.write, this is controlled by client ans is for display purposes only.
+	// It is independent of whether the user actually has read/write permissions.
+	@Input()
+	allowWrite: boolean = false;
+
+	// Hook shouldRead directly to read permissions
+	get shouldRead() {
+		return this.permissions.read;
+	}
+
+	// Only write to the whiteboard if 1) User has permissions and 2) Components want user to write
+	get shouldWrite() {
+		return this.permissions.write && this.allowWrite;
+	}
+
 	// Markings subscription
 	markingsSubscription: any;
 	// Serialized markings returned from database
@@ -72,10 +97,6 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	/**
 	 * Miscellaneous variables
 	 */
-
-	// Whether or not user can make changes to whiteboard
-	@Input()
-	allowWrite: boolean = false;
 
 	// Rectangle path on canvas to set background
 	background: any;
@@ -632,7 +653,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	}
 
 	deselectAllItems() {
-		this.selectedItems().forEach(item => item.selected = false);
+		this.getAllItems().forEach(item => item.selected = false);
 	}
 
 	// For updating variables determining what is selected

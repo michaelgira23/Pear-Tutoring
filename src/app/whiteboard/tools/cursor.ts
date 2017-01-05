@@ -51,6 +51,12 @@ export class Cursor {
 	 */
 
 	mousedown(event) {
+		// If no permissions, deselect all items
+		if (!this.whiteboard.shouldWrite) {
+			this.whiteboard.deselectAllItems();
+			return;
+		}
+
 		const point = this.whiteboard.cursorPoint(event);
 		// set start point to current mouse position
 		this.startPoint = point;
@@ -90,6 +96,12 @@ export class Cursor {
 	}
 
 	mousemove(event) {
+		// If no permissions, deselect all items
+		if (!this.whiteboard.shouldWrite) {
+			this.whiteboard.deselectAllItems();
+			return;
+		}
+
 		// if mouse is dragged
 		if (this.whiteboard.mouseDown) {
 			const point = this.whiteboard.cursorPoint(event);
@@ -162,22 +174,25 @@ export class Cursor {
 	}
 
 	mouseup(event) {
-		if (this.whiteboard.allowWrite) {
+		// If no permissions, deselect all items
+		if (!this.whiteboard.shouldWrite) {
+			this.whiteboard.deselectAllItems();
+			return;
+		}
 
-			if (!this.selecting) {
-				// Edit all items that are selected
-				this.whiteboard.editItems(this.whiteboard.selectedItems());
-			}
+		if (!this.selecting) {
+			// Edit all items that are selected
+			this.whiteboard.editItems(this.whiteboard.selectedItems());
+		}
 
-			// Clean everything up
-			this.resizing = false;
-			this.moving = false;
-			this.selecting = false;
+		// Clean everything up
+		this.resizing = false;
+		this.moving = false;
+		this.selecting = false;
 
-			if (this.selectionPath) {
-				this.selectionPath.remove();
-				this.selectionPath = null;
-			}
+		if (this.selectionPath) {
+			this.selectionPath.remove();
+			this.selectionPath = null;
 		}
 	}
 
