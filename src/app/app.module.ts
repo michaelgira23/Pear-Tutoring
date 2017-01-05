@@ -46,7 +46,6 @@ import { DisplaySessionComponent } from './scheduling/display-session/display-se
 import { SessionCalendarComponent } from './scheduling/session-calendar/session-calendar.component';
 import { DisplayUserComponent } from './scheduling/display-user/display-user.component';
 import { SessionService } from './shared/model/session.service';
-import { TestComponent } from './test/test.component';
 import { UpdateSessionComponent } from './scheduling/update-session/update-session.component';
 import { TimePickerComponent } from './settings/time-picker/time-picker.component';
 import { MyScheduleComponent } from './scheduling/my-schedule/my-schedule.component';
@@ -74,7 +73,6 @@ import { NamePipe } from './shared/model/name.pipe';
 		DisplayUserComponent,
 		CreateChatComponent,
 		ViewChatComponent,
-		TestComponent,
 		UpdateSessionComponent,
 		TimePickerComponent,
 		MyScheduleComponent,

@@ -70,7 +70,6 @@ export class PermissionsService {
 	getUserPermission($key: string, type: PermissionsType): Observable<any> {
 		return this.getPermission($key, type)
 			.map(data => {
-
 				// Check if there are any permissions defined for this object or if auth state is still being queried
 				if (typeof data !== 'object' || typeof this.authInfo === 'undefined') {
 					return {};

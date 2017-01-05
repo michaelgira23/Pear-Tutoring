@@ -54,7 +54,6 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 				console.log(`Sending 'join' status error: ${err}`);
 			}
 		);
-		console.log(this);
 	}
 
 	ngOnChanges(changes: SimpleChanges) {
@@ -120,7 +119,6 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 					this.readable = 'read' in this.currentPerms;
 					this.writable = 'write' in this.currentPerms;
 					this.moderator = 'moderator' in this.currentPerms;
-					console.log(data);
 				},
 				err => {
 					console.log(`Error getting current permission state: ${err}`);
