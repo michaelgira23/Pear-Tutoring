@@ -53,6 +53,10 @@ import { MyScheduleComponent } from './scheduling/my-schedule/my-schedule.compon
 import { PfpUploadComponent } from './settings/pfp-upload/pfp-upload.component';
 import { UserAutoCompleteComponent } from './scheduling/user-auto-complete/user-auto-complete.component';
 import { NamePipe } from './shared/model/name.pipe';
+import { SidebarComponent } from './shared/common/sidebar/sidebar.component';
+import { SidebarControlDirective } from './shared/common/sidebar/sidebar-control.directive';
+import { SidebarContentDirective } from './shared/common/sidebar/sidebar-content.directive';
+import { WhiteboardSelectComponent } from './session/whiteboard-select/whiteboard-select.component';
 
 @NgModule({
 	declarations: [
@@ -86,6 +90,10 @@ import { NamePipe } from './shared/model/name.pipe';
 		SafeStylePipe,
 		SafeUrlPipe,
 		SafeResourceUrlPipe,
+		SidebarComponent,
+		SidebarControlDirective,
+		SidebarContentDirective,
+		WhiteboardSelectComponent
 	],
 	imports: [
 		BrowserModule,
