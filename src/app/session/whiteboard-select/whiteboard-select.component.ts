@@ -14,7 +14,7 @@ export class WhiteboardSelectComponent implements OnInit {
 
 	@Input() whiteboards: Whiteboard[];
 
-	@Output() onSelect  = new EventEmitter<number>()
+	@Output() onSelect  = new EventEmitter<number>();
 
 	constructor() { }
 
