@@ -1,40 +1,60 @@
 <div class="container-fluid">
-  <h2>
-    Session Info
-  </h2>
-  <div class="session-info">
-    {{ sessionInfo | json }}
-    <h3>Tutor</h3>
-    <div>
-      <app-display-user [user]="sessionInfo?.tutor"></app-display-user>
+  <app-sidebar orientation="left">
+    <button appSidebarControl class="toggle-button mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored">
+      <i class="material-icons">info</i>
+    </button>
+    <div appSidebarContent>
+      <h2>
+        Session Info
+      </h2>
+      <div class="session-info">
+        <h3>Tutor</h3>
+        <div>
+          <app-display-user [user]="sessionInfo?.tutor"></app-display-user>
+        </div>
+        <h3>Tutees</h3>
+        <div class="tutees-display">
+          <app-user-auto-complete [ngModel]="sessionInfo?.tutees" (onAddUser)="addTutee($event)" (onRemoveUser)="removeTutee($event)"></app-user-auto-complete>
+        </div>
+      </div>
+      <div *ngIf="!sessionExist">
+        Session does not exist
+      </div>
+      <h2>
+        online users
+      </h2>
+      <div class="online-users-display">
+        <app-display-user *ngFor="let user of onlineUsers" [user]="user"></app-display-user>
+      </div>
     </div>
-    <h3>Tutees:</h3>
-    <div class="tutees-display">
-      <app-display-user *ngFor="let tutee of sessionInfo?.tutees" [user]="tutee"></app-display-user>
+  </app-sidebar>
+  <app-sidebar orientation="right">
+    <button appSidebarControl class="toggle-button mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored">
+      <i class="material-icons">chat</i>
+    </button>
+    <div appSidebarContent>
+      <div class="chat-container" *ngIf="sessionExist">
+        <app-chat [key]="sessionInfo.chat"></app-chat>
+      </div>
     </div>
-  </div>
-  <div *ngIf="!sessionExist">
-    Session does not exist
-  </div>
-  <h2>
-    online users
-  </h2>
-  <div class="online-users-display">
-    <app-display-user *ngFor="let user of onlineUsers" [user]="user"></app-display-user>
-  </div>
-  <div class="whiteboard-container"  *ngIf="sessionExist">
-    <div class="btn-group">
-      <button (click)="addWb()" class="btn btn-default">Add Whiteboard</button>
-      <button (click)="deleteWb()" class="btn btn-default">Delete Whiteboard</button>
+  </app-sidebar>
+
+  <app-sidebar orientation="top">
+    <button appSidebarControl class="toggle-button mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised mdl-button--accent">
+      View Whiteboards
+    </button>
+    <div appSidebarContent>
+      <div class="whiteboard-select" *ngIf="sessionExist">
+        <div class="btn-group">
+          <button (click)="addWb()" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">Add Whiteboard</button>
+          <button (click)="deleteWb()" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">Delete Whiteboard</button>
+        </div>
+        <app-whiteboard-select (onSelect)="onSelectWb($event)" [whiteboards]="sessionInfo.whiteboards">
+        </app-whiteboard-select>
+      </div>
     </div>
-    <div class="whiteboard-select">
-      <select [(ngModel)]="selectedWbIndex">
-        <option *ngFor="let wb of sessionInfo.whiteboards; let i = index" [value]="i">{{ wb.name }}</option>
-      </select>
-    </div>
+  </app-sidebar>
+  <div class="whiteboard-container" *ngIf="sessionExist">
     <app-whiteboard  [key]="selectedWb?.$key"></app-whiteboard>
-  </div>
-  <div class="chat-container" *ngIf="sessionExist">
-    <app-chat [key]="sessionInfo.chat"></app-chat>
   </div>
 </div>

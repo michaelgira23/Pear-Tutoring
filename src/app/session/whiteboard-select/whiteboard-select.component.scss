@@ -1,0 +1,26 @@
+.wb-select-container {
+    height: 100%;
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: scroll;
+    padding: 1em;
+    .wb-item {
+        border: 1px solid lightgrey;
+        border-radius: 5px;
+        width: 16em;
+        height: 9em;
+        margin: 1em;
+        &:hover {
+            border: 5px solid rgb(33,150,243);
+            margin: calc(1em - 4px);
+            cursor: pointer;
+        }
+        .wb-img {
+            height: 100%;
+            width: 100%;
+            line-height: 3.5em;
+            text-align: center;
+            margin: 0;
+        }
+    }
+}
