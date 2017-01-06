@@ -138,6 +138,12 @@ export class Text {
 					);
 			}
 		}
+
+		// If we don't have permission to read, erase text.
+		// Otherwise, it will be erased when the database responds with new data.
+		if (!this.whiteboard.permissions.read) {
+			this.clearCurrentText();
+		}
 	}
 
 	/**

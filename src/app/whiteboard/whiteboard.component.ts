@@ -293,10 +293,14 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 			this.tuneWhiteboard(this.key);
 		} else {
 			// Clear canvas
-			console.log('clear canvas');
 			// clearCanva() must come before cleanUp() because otherwise we wouldn't know what stuff to delete
 			this.clearCanvas();
 			this.cleanUp();
+		}
+
+		if (!permissions.write) {
+			// If we don't have write permissions, hide toolbar and select cursor tool
+			this.changeTool('cursor');
 		}
 	}
 
@@ -393,6 +397,9 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		this.clearMarkings();
 		this.clearCurrentText();
 		this.clearText();
+
+		// Fallback to just manually deleting everything
+		this.getAllItems().forEach(item => item.remove());
 	}
 
 	/**

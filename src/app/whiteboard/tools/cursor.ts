@@ -190,19 +190,29 @@ export class Cursor {
 		this.moving = false;
 		this.selecting = false;
 
-		if (this.selectionPath) {
-			this.selectionPath.remove();
-			this.selectionPath = null;
-		}
+		this.clearSelectionPath();
 	}
 
 	changetool() {
 		this.whiteboard.deselectAllItems();
 	}
 
+	changepermissions(permissions) {
+		if (!permissions.write) {
+			this.clearSelectionPath();
+		}
+	}
+
 	/**
 	 * Helper functions
 	 */
+
+	clearSelectionPath() {
+		if (this.selectionPath) {
+			this.selectionPath.remove();
+			this.selectionPath = null;
+		}
+	}
 
 	// distance formula
 	distance(x1: number, y1: number, x2: number, y2: number): number {
