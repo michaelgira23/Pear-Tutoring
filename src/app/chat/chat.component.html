@@ -1,5 +1,5 @@
 <ol class="chat-block">
-	<div *ngIf="readable">
+	<div *ngIf="currentPerms.read">
 		<div class="chat-list" *ngFor="let entry of allEntries">
 			<div *ngIf="isMessage(entry)">
 				<li class="message">From {{ entry.from | name }}: {{ entry.text }}</li>
@@ -9,11 +9,11 @@
 			</div>
 		</div>
 	</div>
-	<div class="chat-error" *ngIf="!readable">
+	<div class="chat-error" *ngIf="!currentPerms.read">
 		You are not authorized to read this chat room!
 	</div>
 </ol>
 <form #msgForm (submit)="send(msgBox.value); msgForm.reset()">
 	<input #msgBox placeholder="type your message here!" required>
-	<button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised mdl-button--colored" [disabled]="!writable">Send</button>
+	<button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised mdl-button--colored" [disabled]="!currentPerms.write">Send</button>
 </form>

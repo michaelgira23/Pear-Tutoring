@@ -19,7 +19,8 @@ declare global {
 })
 export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 
-	@Input() key: string = 'anonymous';
+	@Input()
+	key: string = 'anonymous';
 	keyChanged: boolean;
 
 	messageSubscription: any;
@@ -35,10 +36,6 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 	currentPerms: Object = {
 		read: true
 	};
-	readable: boolean = 'read' in this.currentPerms;
-	writable: boolean = 'write' in this.currentPerms;
-	// TODO: functionality for moderators
-	moderator: boolean = 'moderator' in this.currentPerms;
 
 	constructor(
 		private chatService: ChatService,
@@ -116,9 +113,6 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 			this.permissionsSubscription = this.permissionsService.getUserPermission(this.key, 'chat').subscribe(
 				data => {
 					this.currentPerms = data;
-					this.readable = 'read' in this.currentPerms;
-					this.writable = 'write' in this.currentPerms;
-					this.moderator = 'moderator' in this.currentPerms;
 				},
 				err => {
 					console.log(`Error getting current permission state: ${err}`);
@@ -127,7 +121,8 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 		}
 	}
 
-	@HostListener('window:unload') ngOnDestroy() {
+	@HostListener('window:unload')
+	ngOnDestroy() {
 		this.chatService.sendStatus('leave', this.key).subscribe(
 			data => {},
 			err => {
