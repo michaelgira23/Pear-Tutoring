@@ -7,15 +7,20 @@ export function arrToObj(arr: string[]): {[key: string]: true} {
 	return objTmp;
 }
 
-// Helper function that does the reverse to the above one
-export function objToArr(obj: {[key: string]: true}): any[] {
+// Helper function that takes the properties of an object and combine them into an array
+export function objToArr(obj: {[key: string]: any}, filter?: (prop) => boolean): any[] {
 	if (Array.isArray(obj)) {
 		return obj;
 	}
+	if (!filter) {
+		filter = (x) => true;
+	}
 	let arrTemp = [];
 	for (let prop in obj) {
-		if (obj[prop]) {
-			arrTemp.push(prop);
+		if (obj[prop] !== undefined) {
+			if (filter(obj[prop])) {
+				arrTemp.push(prop);
+			}
 		}
 	}
 	return arrTemp;

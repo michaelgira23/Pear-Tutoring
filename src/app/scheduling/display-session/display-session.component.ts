@@ -4,8 +4,6 @@ import { Session } from '../../shared/model/session';
 import { SessionService } from '../../shared/model/session.service';
 import { UUID } from 'angular2-uuid';
 
-declare const componentHandler;
-
 @Component({
 	selector: 'app-display-session',
 	templateUrl: './display-session.component.html',
@@ -18,10 +16,10 @@ export class DisplaySessionComponent implements OnInit {
 	@Input()
 	session: Session;
 	get startTime(): string {
-		return this.session.start.format('M/D/Y');
+		return this.session.start.format('ddd, M/D/Y h:mm:ss');
 	};
 	get endTime(): string {
-		return this.session.end.format('M/D/Y');
+		return this.session.end.format('h:mm:ss');
 	}
 	get subject(): string {
 		return this.session.subject.toLowerCase();

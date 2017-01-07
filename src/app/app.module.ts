@@ -58,6 +58,7 @@ import { SidebarComponent } from './shared/common/sidebar/sidebar.component';
 import { SidebarControlDirective } from './shared/common/sidebar/sidebar-control.directive';
 import { SidebarContentDirective } from './shared/common/sidebar/sidebar-content.directive';
 import { WhiteboardSelectComponent } from './session/whiteboard-select/whiteboard-select.component';
+import { SessionsWithFilterComponent } from './scheduling/sessions-with-filter/sessions-with-filter.component';
 
 @NgModule({
 	declarations: [
@@ -94,7 +95,8 @@ import { WhiteboardSelectComponent } from './session/whiteboard-select/whiteboar
 		SidebarComponent,
 		SidebarControlDirective,
 		SidebarContentDirective,
-		WhiteboardSelectComponent
+		WhiteboardSelectComponent,
+		SessionsWithFilterComponent
 	],
 	imports: [
 		BrowserModule,

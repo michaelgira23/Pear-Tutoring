@@ -1,0 +1,11 @@
+<div class="weekday-select">
+  <label *ngFor="let day of weekdays" class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" [attr.for]="day">
+    <input [(ngModel)]="weekdaysModel[day]" type="checkbox" [id]="day" class="mdl-checkbox__input">
+    <span class="mdl-checkbox__label">{{ day }}</span>
+  </label>
+</div>
+<div class="session-display">
+  <div class="session-display-item" *ngFor="let session of results">
+    <app-display-session [session]="session"></app-display-session>
+  </div>
+</div>

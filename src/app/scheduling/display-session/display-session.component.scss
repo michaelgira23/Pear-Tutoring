@@ -20,6 +20,9 @@
 				top: 0px;
 				z-index: 200;
 			}
+			.mdl-card__supporting-text:nth-child(1) {
+				margin-top: 2em;
+			}
 		}
 
 		.mdl-card__title {
@@ -43,6 +46,10 @@
 				flex-wrap: nowrap;
 				img {
 					width: 50%;
+					height: 150px;
+				}
+				.img-placeholder {
+					height: 150px;
 				}
 			}
 			&::after {

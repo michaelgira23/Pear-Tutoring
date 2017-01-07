@@ -91,7 +91,6 @@ export class CreateSessionComponent implements OnInit, OnChanges {
 
 	createSession() {
 		let sessionToCreate = Object.assign({}, this.createSessionForm.value);
-		console.log(sessionToCreate.tutees.map(val => val.$key));
 		sessionToCreate.start = moment(sessionToCreate.date, 'YYYY-MM-DD')
 								.add(moment(sessionToCreate.startTime, 'HH:mm').hours(), 'hours')
 								.add(moment(sessionToCreate.startTime, 'HH:mm').minutes(), 'minutes');

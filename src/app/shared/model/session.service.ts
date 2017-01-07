@@ -237,14 +237,14 @@ export class SessionService {
 	}
 
 	// Find sessions that fits the free times of the user. 
-	findSessionsByFreeTime(timesInDay: FreeTimes): Observable<Session[]> {
+	findSessionsByFreeTime(timesInDay: FreeTimes): Observable<Session[][]> {
 		let sessionsList: Session[] = [];
 		let queryList: Observable<any>[] = [];
-		let secFromMdn = function(m: moment.Moment) {
+		let secFromMdn = function(m: moment.Moment): number {
 			return m.startOf('day').diff(m);
 		};
 		for (let day in timesInDay) {
-			if (timesInDay[day]) {
+			if (timesInDay[day] !== undefined) {
 				// this gets the day in week from the free times, and try to find a match in the same day in week next week
 				let dayInNextWeek = moment().add(1, 'week').day(day);
 				queryList.push(this.db.list('sessions/', {
@@ -255,7 +255,7 @@ export class SessionService {
 				}).map(sessions => {
 					sessions.forEach(session => {
 						timesInDay[day].forEach(time => {
-							if (secFromMdn(moment(session.start, 'X')) < secFromMdn(time.from) && secFromMdn(moment(session.end, 'X')) > secFromMdn(time.to)) {
+							if (secFromMdn(moment(session.start, 'X')) <= secFromMdn(time.from) && secFromMdn(moment(session.end, 'X')) >= secFromMdn(time.to)) {
 								sessionsList.push(session);
 							}
 						});
@@ -264,7 +264,11 @@ export class SessionService {
 				}));
 			}
 		}
-		return this.checkAndCombine(queryList);
+		return this.checkAndCombine(queryList).flatMap(sessionListByDay => {
+			return Observable.combineLatest(sessionListByDay.map(sessionList => {
+				return this.combineArrWithUser(this.combineArrWithWb(Observable.of(sessionList))).map(Session.fromJsonArray);
+			}));
+		});
 	}
 
 	// Update the information of a session

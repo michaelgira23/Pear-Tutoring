@@ -16,7 +16,6 @@
   <fieldset>
     add tutees: <br/>
     <app-user-auto-complete *ngIf="customCtrlReady" formControlName="tutees"></app-user-auto-complete>
-    <div>{{this.createSessionForm.value.tutees | json}}</div>
   </fieldset>
   <button *ngIf="!sessionId && !sessionInfo" class="btn btn-primary">Create</button>
   <button *ngIf="sessionId || sessionInfo" class="btn btn-primary" type="button" (click)="createSession()">Update</button>

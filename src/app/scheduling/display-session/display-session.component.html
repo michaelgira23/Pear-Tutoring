@@ -3,6 +3,7 @@
     <div class="mdl-card_media">
       <div class="session-thumbnails">
         <div class="row">
+          <div class="img-placeholder" *ngIf="!(session.whiteboards[0].snapshot || session.whiteboards[1] || session.whiteboards[2] || session.whiteboards[3])"></div>
           <img *ngIf="session.whiteboards[0] && session.whiteboards[0].snapshot" [src]="session.whiteboards[0].snapshot" [style.width]="session.whiteboards[1] && session.whiteboards[1].snapshot ? '50%' : '100%'">
           <img *ngIf="session.whiteboards[1] && session.whiteboards[1].snapshot" [src]="session.whiteboards[1].snapshot">
         </div>
