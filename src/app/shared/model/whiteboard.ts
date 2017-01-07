@@ -47,6 +47,17 @@ export interface WhiteboardTextOptions extends WhiteboardItemOptions {
 }
 
 /**
+ * Whiteboard Image
+ */
+
+export interface WhiteboardImage extends Metadata {
+	rotation: number;
+	bounds: Rectangle;
+	url: string;
+	erased?: number;
+}
+
+/**
  * General Types
  */
 

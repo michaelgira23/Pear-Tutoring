@@ -95,7 +95,8 @@ canvas {
 }
 
 .invalid-key,
-.taking-snapshot {
+.taking-snapshot,
+.upload-file {
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -124,5 +125,20 @@ canvas {
 
 	h1 {
 		color: $sophisticated-white;
+	}
+}
+
+.upload-file {
+	.upload-file-square {
+		padding: 2.5rem;
+		border: 2px $sophisticated-white dashed;
+	}
+
+	input {
+		position: absolute;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
 	}
 }

@@ -160,6 +160,9 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	starPoints: any = 5;
 	starRadiusPercentage: any = 50;
 
+	// Image upload
+	draggingFile: boolean = false;
+
 	// Tools
 	tools = {
 		cursor: new Cursor(this),
@@ -347,6 +350,35 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	onMouseUp(event) {
 		this.mouseDown = false;
 		this.triggerToolEvent(this.tool, 'mouseup', event);
+	}
+
+	onDrag(event) {
+		event.preventDefault();
+		event.stopPropagation();
+	}
+
+	onDragOn(event) {
+		this.draggingFile = true;
+	}
+
+	onDragOff(event) {
+		this.draggingFile = false;
+	}
+
+	onDrop(event) {
+		if (event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]) {
+			const uploadFile = event.dataTransfer.files[0];
+			console.log('file', uploadFile);
+			this.whiteboardService.uploadImage(this.key, uploadFile)
+				.subscribe(
+					data => {
+						console.log('uploaded image', data);
+					},
+					err => {
+						console.log('error uploading image', err);
+					}
+				);
+		}
 	}
 
 	// When the window resizes, reset the background
@@ -915,7 +947,6 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 				paper.project.view.scale(1 / scaleWidth, 1 / scaleHeight, new paper.Point(0, 0));
 				paper.project.view.viewSize = originalViewSize;
 				this.takingSnapshot = false;
-				this.setBackgroundColor(this.whiteboard.background);
 
 				// Upload image to Firebase
 				this.whiteboardService.storeSnapshot(key, imgBlob).subscribe(

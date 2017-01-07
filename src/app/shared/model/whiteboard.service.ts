@@ -11,6 +11,7 @@ import { removeRedundant } from '../../whiteboard/utils/diff';
 import { Whiteboard, WhiteboardOptions,
 	WhiteboardMarking, WhiteboardMarkingOptions,
 	WhiteboardText, WhiteboardTextOptions,
+	WhiteboardImage,
 	StyleOptions,
 	Font } from './whiteboard';
 
@@ -252,6 +253,36 @@ export class WhiteboardService {
 	}
 
 	/**
+	 * File upload
+	 */
+
+	getImages(whiteboardKey: string): FirebaseListObservable<WhiteboardImage[]> {
+		return this.af.database.list(`whiteboardImages/${whiteboardKey}`);
+	}
+
+	uploadImage(whiteboardKey: string, file: Blob | File): Observable<any> {
+		// Upload file
+		return this.observableToPromise(this.sdkStorage.child(`whiteboardFiles/${whiteboardKey}`).put(file))
+			.switchMap((uploadedImage: any) => {
+				// Add image object to the whiteboard
+				// return this.af.database.object(`whiteboards/${whiteboardKey}`).update({ snapshot: uploadedImage.metadata.downloadURLs[0] });
+				console.log('uplaod image', uploadedImage);
+				const image: WhiteboardImage = {
+					created: firebase.database['ServerValue']['TIMESTAMP'],
+					createdBy: this.authInfo ? this.authInfo.uid : null,
+					rotation: 0,
+					bounds: {
+
+					},
+					url: uploadedImage.metadata.downloadURLs[0]
+				};
+
+				const whiteboardImages = this.getImages(whiteboardKey);
+				return this.observableToPromise(whiteboardImages.push(image));
+			});
+	}
+
+	/**
 	 * Edit Items
 	 */
 
@@ -379,9 +410,12 @@ export class WhiteboardService {
 	storeSnapshot(whiteboardKey: string, snapshot: Blob | File): Observable<any> {
 		// Upload file
 		return this.observableToPromise(this.sdkStorage.child(`wbSnapShots/${whiteboardKey}`).put(snapshot))
-			.map((snap: any) => {
+			.switchMap((snap: any) => {
 				// Store 'snapshot' property in the whiteboard object
-				return this.af.database.object(`whiteboards/${whiteboardKey}`).update({ snapshot: snap.metadata.downloadURLs[0] });
+				return this.observableToPromise(
+					this.af.database.object(`whiteboards/${whiteboardKey}`)
+						.update({ snapshot: snap.metadata.downloadURLs[0] })
+				);
 			});
 	}
 
