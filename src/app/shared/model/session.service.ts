@@ -226,10 +226,15 @@ export class SessionService {
 			.map(Session.fromJsonArray);
 	}
 
-	findSessionsBySubject(subject: string) {
+	findSessionsByProperty(prop: string, searchStr: string): Observable<Session[]> {
+		console.log(prop);
+		if (Session.prototype[prop] === undefined) {
+			return Observable.throw('property is not defined in session');
+		}
+		let fbNode = 'sessionsBy' + prop[0].toUpperCase + prop.slice(1, prop.length) + '/';
 		return this.combineArrWithUser(
 			this.combineArrWithWb(
-				this.db.list('sessionsBySubject/' + subject)
+				this.db.list(fbNode + searchStr)
 					// List of session ids --> list of session objects without user inserted
 					.flatMap(ids => this.checkAndCombine(ids.map(id => this.db.object('sessions/' + id.$key))))
 			)
@@ -296,6 +301,10 @@ export class SessionService {
 			if (AllowedSubjects.find((val) => session.subject === val)) {
 				dataToSave[`sessionsBySubject/${session.subject}/${sessionId}`] = true;
 			}
+			if (session.grade > 0 && session.grade <= 12) {
+				dataToSave[`sessionsByGrade/${session.grade}/${sessionId}`] = true;
+			}
+			dataToSave[`sessionByClassStr/${session.classStr}/${sessionId}}`] = true;
 		}
 		// Transform the arrays in the object to firebase-friendly objects
 		sessionToSave.start = session.start.unix();
@@ -416,6 +425,8 @@ export interface SessionOptions {
 	start: moment.Moment;
 	end: moment.Moment;
 	tutor: string;
+	grade: number;
+	classStr: string;
 	subject: string;
 	max: number;
 	listed: boolean;

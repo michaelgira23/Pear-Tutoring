@@ -1,40 +1,28 @@
-<h2> Public Sessions </h2>
+<h2> Sort By </h2>
 <div class="session-display">
 	<div *ngFor="let session of publicSessions">
 		<app-display-session [session]="session"></app-display-session>
 	</div>
 </div>
 
-<h2> Session By tag </h2>
-<div>
-	<form [formGroup]="searchByTagForm">
-		<fieldset>
-			<input formControlName="tags">
-			<button (click)="findSessionsByTags()">Find</button>
-		</fieldset>
-	</form>
-	<div class="session-display">
-		<div *ngFor="let session of sessionsByTags">
-			<app-display-session [session]="session"></app-display-session>
-		</div>
+<div class="search-bar">
+	<div class="search-input" *ngIf="searchOpt !== 'all'">
+		<form (submit)="findSessionsByProperty(searchOpt)">
+			<fieldset>
+				<input name="searchStr" [(ngModel)]="searchStr">
+				<button type="submit">Find</button>
+			</fieldset>
+		</form>
 	</div>
+
+	<button class="mdl-button mdl-js-button mdl-js-ripple-effect" (click)="searchOpt = 'all'">All</button>
+	<button class="mdl-button mdl-js-button mdl-js-ripple-effect" (click)="searchOpt = 'tags'">Tag</button>
+	<button class="mdl-button mdl-js-button mdl-js-ripple-effect" (click)="searchOpt = 'subject'">Subject</button>
+	<button class="mdl-button mdl-js-button mdl-js-ripple-effect" (click)="searchOpt = 'classStr'">Class name</button>
+	<button class="mdl-button mdl-js-button mdl-js-ripple-effect" (click)="searchOpt = 'grade'">Grade</button>
 </div>
 
-<h2> Session By Subject </h2>
-<div>
-	<form [formGroup]="searchBySubjectForm">
-		<fieldset>
-			<input formControlName="subject">
-			<button (click)="findSessionsBySubject()">Find</button>
-		</fieldset>
-	</form>
-	<div class="session-display">
-		<div *ngFor="let session of sessionsBySubject">
-			<app-display-session [session]="session"></app-display-session>
-		</div>
-	</div>
-</div>
-<br>
+<app-sessions-with-filter [sessions]="searchResults"></app-sessions-with-filter>
 
 <a routerLink="create">Create a Session</a>
 <a routerLink="my-schedule">Go to my scheudle</a>

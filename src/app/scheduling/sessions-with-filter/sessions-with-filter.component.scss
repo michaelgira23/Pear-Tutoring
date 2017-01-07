@@ -4,7 +4,9 @@
 }
 
 .session-display {
+    display: flex;
     padding: 1em;
+    overflow: hidden;
     .session-display-item {
         margin: 1em;
     }

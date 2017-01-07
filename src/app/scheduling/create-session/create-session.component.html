@@ -3,10 +3,12 @@
     date: <input formControlName="date" required type="date">
     start: <input formControlName="startTime" required type="time">
     end: <input formControlName="endTime" required type="time"> <br/>
+    Grade Level: <input formControlName="grade" required type="number"><br/>
     Subject: 
     <select formControlName="subject">
       <option *ngFor="let option of allowedSubjects" [value]="option">{{ option }}</option>
     </select><br/>
+    Class: <input formControlName="classStr" required type="text"><br/>
     max: <input formControlName="max" required type="number"><br/>
     listed: <input type="checkbox" formControlName="listed" required><br/>
     title: <input formControlName="title" required><br/>

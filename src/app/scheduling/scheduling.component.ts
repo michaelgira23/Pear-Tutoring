@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { SessionService } from '../shared/model/session.service';
 import { AuthService } from '../shared/security/auth.service';
 import { Session } from '../shared/model/session';
-import { Validators, FormGroup, FormBuilder } from '@angular/forms';
+
 @Component({
 	selector: 'app-scheduling',
 	templateUrl: './scheduling.component.html',
@@ -10,32 +10,23 @@ import { Validators, FormGroup, FormBuilder } from '@angular/forms';
 })
 export class SchedulingComponent implements OnInit, OnDestroy {
 
-	publicSessions: Session[] = [];
-	searchByTagForm: FormGroup;
-	searchBySubjectForm: FormGroup;
-	sessionsByTags: Session[] = [];
-	sessionsBySubject: Session[] = [];
+	searchStr: string;
+	searchOpt: string = 'all';
+	searchResults: Session[] = [];
 
 	publicSessions$: any;
+	tagsSessions$: any;
+	propertySessions$: any;
 
 	constructor(
 		private sessionService: SessionService,
-		private fb: FormBuilder,
 		private auth: AuthService
 	) { }
 
 	ngOnInit() {
-		this.searchByTagForm = this.fb.group({
-			tags: ['', Validators.required]
-		});
-
-		this.searchBySubjectForm = this.fb.group({
-			subject: ['', Validators.required]
-		});
-
 		this.publicSessions$ = this.sessionService.findPublicSessions()
 		.subscribe(
-			val3 => this.publicSessions = val3,
+			val3 => this.searchResults = val3,
 			err => console.log(err)
 		);
 	}
@@ -44,18 +35,18 @@ export class SchedulingComponent implements OnInit, OnDestroy {
 		this.publicSessions$.unsubscribe();
 	}
 
-	findSessionsByTags() {
-		let tags = this.searchByTagForm.value.tags.split(',').map(tag => tag.trim());
-		this.sessionService.findSessionsByTags(tags).subscribe(val => {
-			this.sessionsByTags = val;
-		}, console.log);
-	}
-
-	findSessionsBySubject() {
-		let subject = this.searchBySubjectForm.value.subject;
-		this.sessionService.findSessionsBySubject(subject).subscribe(val => {
-			console.log(val);
-			this.sessionsBySubject = val;
+	findSessionsByProperty(prop: string) {
+		if (this.tagsSessions$) { this.tagsSessions$.unsubscribe(); }
+		if (this.propertySessions$) { this.propertySessions$.unsubscribe(); }
+		if (prop === 'tags') {
+			let tags = this.searchStr.split(',').map(tag => tag.trim());
+			this.tagsSessions$ = this.sessionService.findSessionsByTags(tags).subscribe(val => {
+				this.searchResults = val;
+			}, console.log);
+			return;
+		}
+		this.propertySessions$ = this.sessionService.findSessionsByProperty(prop, this.searchStr).subscribe(val => {
+			this.searchResults = val;
 		}, console.log);
 	}
 }
