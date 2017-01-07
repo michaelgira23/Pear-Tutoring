@@ -2,6 +2,7 @@ import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy, ViewChil
 import { segments, rectangles, styles, font, colors } from './utils/serialization';
 import { Whiteboard, WhiteboardMarking, WhiteboardText, WhiteboardShapeType, Color } from '../shared/model/whiteboard';
 import { WhiteboardService, defaultStyleOptions, defaultFontOptions } from '../shared/model/whiteboard.service';
+import { PermissionsService } from '../shared/security/permissions.service';
 
 // Whiteboard tools
 import { Cursor } from './tools/cursor';
@@ -47,10 +48,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	// Future permissions subscription
 	permissionsSubscription: any;
 	// Scopes of permissions
-	permissions: any = {
-		read: false,
-		write: false
-	};
+	permissions: any = {};
 
 	// Whether or not user can make changes to whiteboard.
 	// While behavior is the same for permissions.write, this is controlled by client ans is for display purposes only.
@@ -139,16 +137,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		shape : new Shape(this)
 	};
 
-	constructor(public whiteboardService: WhiteboardService) {
-		// If permissions change, emit a 'changepermissions' event
-		this.permissions = new Proxy(this.permissions, {
-			set: (obj, prop, value) => {
-				obj[prop] = value;
-				this.triggerToolEvent(this.tool, 'changepermissions', obj);
-				return true;
-			}
-		});
-
+	constructor(private permissionsService: PermissionsService, public whiteboardService: WhiteboardService) {
 		// Attach custom setters on options
 		// When options change, update options on all selected items
 		const styleOptionsKeys = Object.keys(this.styleOptions);
@@ -244,7 +233,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 
 	ngOnDestroy() {
 		// Take a screenshot if valid key
-		if (this.validKey) {
+		if (this.whiteboard && this.validKey) {
 			this.takeSnapshot();
 		}
 		this.cleanUp();
@@ -263,14 +252,14 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	 * - changepermissions - Triggered when permissions change
 	 */
 
-	triggerToolEvent(tool: string, eventName: string, event: any = null) {
+	triggerToolEvent(tool: string, eventName: string, ...data: any[]) {
 		// Trigger possible event handler in specified tool
 		if (this.tools[tool] && typeof this.tools[tool][eventName] === 'function') {
-			this.tools[tool][eventName](event);
+			this.tools[tool][eventName].apply(this.tools[tool], data);
 		}
 		// Trigger possible event handler in this component
 		if (this[eventName]) {
-			this[eventName](event);
+			this[eventName].apply(this, data);
 		}
 	}
 
@@ -285,20 +274,26 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	keyup            () {}
 	changetool       () {}
 	selecttool       () {}
-	changepermissions(permissions) {
-		// Check what read permissions are
-		console.log('new permissions', permissions);
-		if (permissions.read) {
-			// Initialize whiteboard with key
-			this.tuneWhiteboard(this.key);
-		} else {
-			// Clear canvas
-			// clearCanva() must come before cleanUp() because otherwise we wouldn't know what stuff to delete
-			this.clearCanvas();
-			this.cleanUp();
+	changepermissions(oldPermissions) {
+
+		// Check if permissions changed
+		const readChanged = this.permissions.read !== oldPermissions.read;
+		const writeChanged = this.permissions.write !== oldPermissions.write;
+
+		console.log('new permissions', this.permissions);
+		if (readChanged) {
+			if (this.permissions.read) {
+				// Initialize whiteboard with key
+				this.tuneWhiteboard(this.key);
+			} else {
+				// Clear canvas
+				// clearCanva() must come before cleanUp() because otherwise we wouldn't know what stuff to delete
+				this.clearCanvas();
+				this.cleanUp();
+			}
 		}
 
-		if (!permissions.write) {
+		if (writeChanged && !this.permissions.write) {
 			// If we don't have write permissions, hide toolbar and select cursor tool
 			this.changeTool('cursor');
 		}
@@ -413,7 +408,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		this.cleanUp();
 
 		// Check if we have read permissions or if there's even a valid key
-		if (!this.key || !this.shouldRead) {
+		if (!this.key) {
 			console.log('actually don\'t tune whiteboard');
 			return;
 		}
@@ -439,6 +434,15 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 				if (this.canvasEl) {
 					this.setBackgroundColor(this.whiteboard.background);
 				}
+
+				// Subscribe to permissions
+				this.permissionsSubscription = this.permissionsService.getUserPermission(this.key, 'whiteboard')
+						.subscribe(permissions => {
+							// Emit old permissions first
+							const oldPermissions = JSON.parse(JSON.stringify(this.permissions));
+							this.permissions = permissions;
+							this.triggerToolEvent(this.tool, 'changepermissions', oldPermissions);
+						});
 
 				// Subscribe to markings on whiteboard
 				this.markingsSubscription = this.whiteboardService.getFormattedMarkings(this.key).subscribe(
@@ -483,15 +487,17 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	}
 
 	changeWhiteboardName(name: string) {
-		this.whiteboardService.editWhiteboard(this.key, { name })
-			.subscribe(
-				data => {
-					console.log('successfully changed whiteboard name!', data);
-				},
-				err => {
-					console.log('error while changing whiteboard name', err);
-				}
-			);
+		if (this.shouldWrite) {
+			this.whiteboardService.editWhiteboard(this.key, { name })
+				.subscribe(
+					data => {
+						console.log('successfully changed whiteboard name!', data);
+					},
+					err => {
+						console.log('error while changing whiteboard name', err);
+					}
+				);
+		}
 	}
 
 	/**

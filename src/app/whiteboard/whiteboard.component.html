@@ -1,11 +1,4 @@
-<label>
-	<input type="checkbox" [(ngModel)]="permissions.read">
-	Permissions.Read
-</label>
-<label>
-	<input type="checkbox" [(ngModel)]="permissions.write">
-	Permissions.Write
-</label>
+{{ permissions | json }}
 
 <!-- Canvas for paper.js -->
 <canvas #whiteboard resize
@@ -23,7 +16,8 @@
 			class="mdl-textfield__input"
 			name="whiteboard-name"
 			[(ngModel)]="whiteboardName"
-			(blur)="changeWhiteboardName(whiteboardName)">
+			(blur)="changeWhiteboardName(whiteboardName)"
+			[disabled]="!shouldWrite">
 		<!-- <label class="mdl-textfield__label" for="whiteboard-name">Whiteboard Name</label> -->
 	</div>
 </form>
