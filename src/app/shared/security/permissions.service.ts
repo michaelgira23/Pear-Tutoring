@@ -32,35 +32,24 @@ export class PermissionsService {
 		);
 	}
 
-	createPermission($key: string, type: PermissionsType, permission: PermissionParameter): Observable<any> {
-		let newPerm: Permission = {};
-		let scopeTypesMatch = true;
+	createPermission($key: string, type: PermissionsType, permission: Permission): Observable<any> {
+		let correctedPerm: Permission = {};
 
 		for (let group of Object.keys(permission)) {
 			if (group === 'user') {
 				for (let $uid of Object.keys(permission.user)) {
-					if (permission.user[$uid] instanceof this.typeToClass[type]) {
-						newPerm.user[$uid] = permission.user[$uid].scopes;
-					} else {
-						scopeTypesMatch = false;
-					}
+					let scopeObj: PermissionsScopes = new (this.typeToClass[type])(permission.user[$uid]);
+					correctedPerm.user[$uid] = scopeObj.scopes;
 				}
 			} else {
-				if (permission[group] instanceof this.typeToClass[type]) {
-					newPerm[group] = permission[group].scopes;
-				} else {
-					scopeTypesMatch = false;
-				}
+				let scopeObj: PermissionsScopes = new (this.typeToClass[type])(permission[group]);
+				correctedPerm[group] = scopeObj.scopes;
 			}
-		}
-
-		if (!scopeTypesMatch) {
-			return Observable.throw(`\`PermissionScope\` objects provided are not of type ${type}.`);
 		}
 
 		const permissions = this.af.database.object(`${type}Permissions/${$key}`);
 
-		return this.promiseToObservable(permissions.set(newPerm));
+		return this.promiseToObservable(permissions.set(correctedPerm));
 	}
 
 	getPermission($key: string, type: PermissionsType): FirebaseObjectObservable<any> {
@@ -96,14 +85,11 @@ export class PermissionsService {
 	addScope(
 		$key: string,
 		type: PermissionsType,
-		_scopeObj: PermissionsScopes, // This gets all the different scope classes.
+		_scopes: Object,
 		group: PermissionsGroup,
 		$uid?: string
 	): Observable<any> {
-		if (!(_scopeObj instanceof this.typeToClass[type])) {
-			return Observable.throw(`\`PermissionScope\` objects provided are not of type ${type}.`);
-		}
-
+		const _scopeObj: PermissionsScopes = new (this.typeToClass[type])(_scopes);
 		const scopes = _scopeObj.scopes;
 
 		let permissions = this.af.database.object(`${type}Permissions/${$key}`);
@@ -122,15 +108,13 @@ export class PermissionsService {
 	removeScope(
 		$key: string,
 		type: PermissionsType,
-		_scopeObj: PermissionsScopes, // This gets all the different scope classes.
+		_scopes: Object,
 		group: PermissionsGroup,
 		$uid?: string
 	): Observable<any> {
-		if (!(_scopeObj instanceof this.typeToClass[type])) {
-			return Observable.throw(`\`PermissionScope\` objects provided are not of type ${type}.`);
-		}
-
+		const _scopeObj: PermissionsScopes = new (this.typeToClass[type])(_scopes);
 		const scopes = _scopeObj.scopes;
+
 
 		let permissions = this.af.database.object(`${type}Permissions/${$key}/${group}`);
 
@@ -172,35 +156,34 @@ class PermissionsScopes {
 	scopes: Object = {};
 
 	constructor(newScopes: Object) {
-		for (let scope of Object.keys(newScopes)) {
+		this.scopes = Object.assign({}, newScopes);
+		for (let scope of Object.keys(this.scopes)) {
 			// Remove every scope that is false.
-			if (!newScopes[scope]) {
-				delete newScopes[scope];
+			if (!this.scopes[scope]) {
+				delete this.scopes[scope];
 			}
 
 			// Remove every scope that is not in the component scopes.
 			if (!(<any>this.constructor).componentScopes.includes(scope)) {
-				delete newScopes[scope];
+				delete this.scopes[scope];
 			}
 		}
-
-		this.scopes = newScopes;
 	}
 }
 
-export class PermissionsChatScopes extends PermissionsScopes {
+class PermissionsChatScopes extends PermissionsScopes {
 	static componentScopes = ['read', 'write', 'moderator'];
 
 	constructor(newScopes: Object) { super(newScopes); }
 }
 
-export class PermissionsSessionScopes extends PermissionsScopes {
+class PermissionsSessionScopes extends PermissionsScopes {
 	static componentScopes = ['read', 'write', 'moderator'];
 
 	constructor(newScopes: Object) { super(newScopes); }
 }
 
-export class PermissionsWhiteboardScopes extends PermissionsScopes {
+class PermissionsWhiteboardScopes extends PermissionsScopes {
 	static componentScopes = ['read', 'write', 'moderator'];
 
 	constructor(newScopes: Object) { super(newScopes); }
@@ -216,13 +199,5 @@ export interface Permission {
 	loggedIn?: Object;
 	user?: {
 		[$uid: string]: Object;
-	};
-}
-
-export interface PermissionParameter {
-	anonymous?: PermissionsScopes;
-	loggedIn?: PermissionsScopes;
-	user?: {
-		[$uid: string]: PermissionsScopes;
 	};
 }
