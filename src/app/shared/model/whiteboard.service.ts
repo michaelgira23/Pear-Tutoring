@@ -302,7 +302,6 @@ export class WhiteboardService {
 				if (fixedLengthProperties.includes(editProperty)) {
 					// Merge new edits with current object
 					newValue = deepAssign(item[editProperty], newValue);
-					console.log('getting current item', editProperty, 'has fixed bounds so new value is', newValue);
 				}
 
 				// Edit value

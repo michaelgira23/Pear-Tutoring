@@ -118,6 +118,38 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	// What tool is selected in the whiteboard toolbar
 	tool: string = 'cursor';
 
+	// For mapping of cursor for tools
+	toolCursor: any = {
+		pen: {
+			url: 'assets/whiteboard-cursors/pen.png',
+			offset: {
+				x: 0,
+				y: 20
+			}
+		},
+		eraser: {
+			url: 'assets/whiteboard-cursors/eraser.png',
+			offset: {
+				x: 0,
+				y: 20
+			}
+		},
+		text: {
+			url: 'assets/whiteboard-cursors/text.png',
+			offset: {
+				x: 0,
+				y: 20
+			}
+		},
+		shape: {
+			url: 'assets/whiteboard-cursors/shape.png',
+			offset: {
+				x: 0,
+				y: 20
+			}
+		}
+	};
+
 	// Options when creating things
 	styleOptions = defaultStyleOptions;
 	fontOptions = defaultFontOptions;

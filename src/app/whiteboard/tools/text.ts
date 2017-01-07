@@ -84,7 +84,7 @@ export class Text {
 			return;
 		}
 
-		if (this.currentText && this.whiteboard.allowWrite) {
+		if (this.currentText && !this.currentTextFinished) {
 			this.currentTextFinished = true;
 
 			let promptMessage = '';
@@ -99,10 +99,11 @@ export class Text {
 
 			// If user cancelled prompt, delete
 			if (content === null) {
-				this.currentText.remove();
-				this.currentText = null;
+				this.clearCurrentText();
 				return;
 			}
+
+			this.currentText.content = content;
 
 			// Save text
 			const textOptions: WhiteboardTextOptions = {
