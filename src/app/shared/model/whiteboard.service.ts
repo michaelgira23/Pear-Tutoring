@@ -40,14 +40,19 @@ const editableTextProperties = [
 	'font'
 ];
 
+const editableImageProperties = [
+	'rotation',
+	'bounds'
+];
+
 const fixedLengthProperties = [
 	'style',
 	'bounds',
 	'font'
 ];
 
-type Item = Whiteboard | WhiteboardMarking | WhiteboardText;
-type ItemType = 'whiteboard' | 'marking' | 'text';
+type Item = Whiteboard | WhiteboardMarking | WhiteboardText | WhiteboardImage;
+type ItemType = 'whiteboard' | 'marking' | 'text' | 'image';
 
 export const defaultWhiteboardOptions: WhiteboardOptions = {
 	name: 'Unnamed Whiteboard',
@@ -102,6 +107,12 @@ export class WhiteboardService {
 			editableProperties: editableTextProperties,
 			getFormatted: this.getFormattedText.bind(this),
 			node: 'whiteboardText',
+			editsInRootNode: false
+		},
+		image: {
+			editableProperties: editableImageProperties,
+			getFormatted: this.getFormattedImage.bind(this),
+			node: 'whiteboardImages',
 			editsInRootNode: false
 		}
 	};
@@ -260,26 +271,84 @@ export class WhiteboardService {
 		return this.af.database.list(`whiteboardImages/${whiteboardKey}`);
 	}
 
-	uploadImage(whiteboardKey: string, file: Blob | File): Observable<any> {
-		// Upload file
-		return this.observableToPromise(this.sdkStorage.child(`whiteboardFiles/${whiteboardKey}`).put(file))
-			.switchMap((uploadedImage: any) => {
-				// Add image object to the whiteboard
-				// return this.af.database.object(`whiteboards/${whiteboardKey}`).update({ snapshot: uploadedImage.metadata.downloadURLs[0] });
-				console.log('uplaod image', uploadedImage);
-				const image: WhiteboardImage = {
-					created: firebase.database['ServerValue']['TIMESTAMP'],
-					createdBy: this.authInfo ? this.authInfo.uid : null,
-					rotation: 0,
-					bounds: {
-
-					},
-					url: uploadedImage.metadata.downloadURLs[0]
-				};
-
-				const whiteboardImages = this.getImages(whiteboardKey);
-				return this.observableToPromise(whiteboardImages.push(image));
+	getFormattedImages(whiteboardKey: string): Observable<WhiteboardImage[]> {
+		return this.getImages(whiteboardKey)
+			.map(images => {
+				return <WhiteboardImage[]>images.map(image => this.currentItem('image', image));
 			});
+	}
+
+	getImage(whiteboardKey: string, imageKey: string): FirebaseObjectObservable<WhiteboardImage> {
+		return this.af.database.object(`whiteboardText/${whiteboardKey}/${imageKey}`);
+	}
+
+	getFormattedImage(whiteboardKey: string, imageKey: string): Observable<WhiteboardImage> {
+		return <Observable<WhiteboardImage>>this.getImage(whiteboardKey, imageKey)
+			.map(image => this.currentItem('image', image));
+	}
+
+	uploadImage(whiteboardKey: string, file: File): Observable<any> {
+		const subject = new Subject<any>();
+		const pushKey = this.sdkDb.push().key;
+
+		// Initialize file reader
+		const reader = new FileReader();
+		reader.readAsDataURL(file);
+
+		reader.onload = () => {
+
+			// Read image to get dimensions
+			const image = new Image();
+			image.src = reader.result;
+
+			image.onload = () => {
+				// Upload file
+				this.observableToPromise(this.sdkStorage.child(`whiteboardFiles/${whiteboardKey}/${pushKey}`).put(file))
+					.subscribe((uploadedImage: any) => {
+						// Add image object to the whiteboard
+						// return this.af.database.object(`whiteboards/${whiteboardKey}`).update({ snapshot: uploadedImage.metadata.downloadURLs[0] });
+						console.log('uplaod image', uploadedImage);
+						const whiteboardImage: WhiteboardImage = {
+							created: firebase.database['ServerValue']['TIMESTAMP'],
+							createdBy: this.authInfo ? this.authInfo.uid : null,
+							rotation: 0,
+							bounds: {
+								x: 10,
+								y: 10,
+								width: image.width,
+								height: image.height
+							},
+							name: file.name,
+							url: uploadedImage.metadata.downloadURLs[0]
+						};
+
+						const whiteboardImages = this.af.database.object(`whiteboardImages/${whiteboardKey}/${pushKey}`);
+						this.observableToPromise(whiteboardImages.set(whiteboardImage))
+							.subscribe(
+								data => {
+									subject.next(data);
+									subject.complete();
+								},
+								err => {
+									subject.error(err);
+									subject.complete();
+								}
+							);
+					});
+			};
+		};
+
+		return subject.asObservable();
+	}
+
+	editImage(whiteboardKey: string, imageKey: string, options: any): Observable<WhiteboardImage> {
+		return this.editItem(whiteboardKey, 'image', imageKey, options);
+	}
+
+	eraseImage(whiteboardKey: string, imageKey: string): Observable<WhiteboardImage> {
+		return this.observableToPromise(
+			this.af.database.object(`whiteboardText/${whiteboardKey}/${imageKey}`)
+				.update({ erased: firebase.database['ServerValue']['TIMESTAMP'] }));
 	}
 
 	/**

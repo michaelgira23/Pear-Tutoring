@@ -53,6 +53,7 @@ export interface WhiteboardTextOptions extends WhiteboardItemOptions {
 export interface WhiteboardImage extends Metadata {
 	rotation: number;
 	bounds: Rectangle;
+	name: string;
 	url: string;
 	erased?: number;
 }
