@@ -17,7 +17,7 @@ export class SessionsWithFilterComponent implements OnInit {
 		Sunday: true,
 		Monday: true,
 		Tuesday: true,
-		Wednsday: true,
+		Wednesday: true,
 		Thursday: true,
 		Friday: true,
 		Saturday: true
@@ -32,7 +32,9 @@ export class SessionsWithFilterComponent implements OnInit {
 	get results(): Session[] {
 		return this.sessions.filter(session => {
 			let day = moment(session.ywd, 'YYYY-WW-E').format('dddd');
-			return !!this.selectedDays.find(sessionDay => day === sessionDay);
+			return !!this.selectedDays.find(sessionDay => {
+				return day === sessionDay;
+			});
 		});
 	}
 

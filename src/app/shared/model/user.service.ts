@@ -15,6 +15,8 @@ export const UserStatus = {
 @Injectable()
 export class UserService {
 
+	currentUser: User;
+
 	sdkDb: any;
 	sdkStorage: any;
 	uid: string;
@@ -23,6 +25,13 @@ export class UserService {
 	constructor(@Inject(FirebaseRef) fb, private db: AngularFireDatabase, private auth: AuthService) {
 		this.sdkDb = fb.database().ref();
 		this.sdkStorage = fb.storage().ref();
+		this.auth.auth$.subscribe(state => {
+			if (state) {
+				this.findUser(state.uid).subscribe(user => {
+					this.currentUser = user;
+				});
+			}
+		})
 	}
 
 	register(regOpt: RegisterOptions): Observable<any> {

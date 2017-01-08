@@ -26,7 +26,9 @@ export class SchedulingComponent implements OnInit, OnDestroy {
 	ngOnInit() {
 		this.publicSessions$ = this.sessionService.findPublicSessions()
 		.subscribe(
-			val3 => this.searchResults = val3,
+			val3 => {
+				this.searchResults = val3;
+			},
 			err => console.log(err)
 		);
 	}

@@ -1,7 +1,7 @@
 <div class="session-container" [ngClass]="subject">
   <div class="mdl-card mdl-shadow--8dp">
     <div class="mdl-card_media">
-      <div class="session-thumbnails">
+      <div class="session-thumbnails" *ngIf="session.whiteboards">
         <div class="row">
           <div class="img-placeholder" *ngIf="!(session.whiteboards[0].snapshot || session.whiteboards[1] || session.whiteboards[2] || session.whiteboards[3])"></div>
           <img *ngIf="session.whiteboards[0] && session.whiteboards[0].snapshot" [src]="session.whiteboards[0].snapshot" [style.width]="session.whiteboards[1] && session.whiteboards[1].snapshot ? '50%' : '100%'">
@@ -17,6 +17,11 @@
     <div class="mdl-card__title session-title">
       <h2 class="mdl-card__title-text">{{ session.title }}</h2>
     </div>
+
+  <div class="mdl-card__supporting-text">
+    Grade {{ session.grade }} {{ session.subject }}
+    {{ session.classStr }}
+  </div>
 
     <div class="mdl-card__title">
       <div class="mdl-card__subtitle-text">

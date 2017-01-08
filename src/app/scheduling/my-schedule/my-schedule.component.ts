@@ -40,7 +40,11 @@ export class MyScheduleComponent implements OnInit, OnDestroy {
 			}, console.log);
 		}, console.log);
 		this.mySessions$ = this.sessionService.findMySessions().subscribe(
-			val => {this.tutorSessions = val[0]; this.tuteeSessions = val[1]; this.mySessions = val[0].concat(val[1]); },
+			val => {
+				this.tutorSessions = val[0];
+				this.tuteeSessions = val[1];
+				this.mySessions = val[0].concat(val[1]);
+			},
 			err => console.log(err)
 		);
 	}

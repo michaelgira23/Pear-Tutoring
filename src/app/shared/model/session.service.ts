@@ -48,7 +48,7 @@ export class SessionService {
 		return this.promiseToObservable(this.sdkDb.update(dataToSave));
 	}
 
-	checkAndCombine(arr: Observable<any>[]): Observable<any> {
+	checkAndCombine(arr: Observable<any>[]): Observable<any[]> {
 		if (arr.length > 0) {
 			return Observable.combineLatest(arr);
 		}
@@ -189,14 +189,14 @@ export class SessionService {
 					return [];
 				}
 				return this.combineArrWithUser(this.combineArrWithWb(this.db.list(`/users/${state.uid}/tutorSessions`)
-																				.flatMap(ids => this.checkAndCombine(ids.map(id => this.db.object('sessions/' + id.$key))))));
+																		.flatMap(ids => this.checkAndCombine(ids.map(id => this.db.object('sessions/' + id.$key))))));
 			}).map(Session.fromJsonArray),
 			this.auth.auth$.flatMap(state => {
 				if (!state) {
 					return [];
 				}
 				return this.combineArrWithUser(this.combineArrWithWb(this.db.list(`/users/${state.uid}/tuteeSessions`)
-																				.flatMap(ids => this.checkAndCombine(ids.map(id => this.db.object('sessions/' + id.$key))))));
+																		.flatMap(ids => this.checkAndCombine(ids.map(id => this.db.object('sessions/' + id.$key))))));
 			}).map(Session.fromJsonArray)
 		]);
 	};
@@ -227,10 +227,9 @@ export class SessionService {
 	}
 
 	findSessionsByProperty(prop: string, searchStr: string): Observable<Session[]> {
-		console.log(prop);
-		if (Session.prototype[prop] === undefined) {
-			return Observable.throw('property is not defined in session');
-		}
+		// if (Session.prototype[prop] === undefined) {
+		// 	return Observable.throw('property is not defined in session');
+		// }
 		let fbNode = 'sessionsBy' + prop[0].toUpperCase + prop.slice(1, prop.length) + '/';
 		return this.combineArrWithUser(
 			this.combineArrWithWb(
@@ -243,7 +242,6 @@ export class SessionService {
 
 	// Find sessions that fits the free times of the user. 
 	findSessionsByFreeTime(timesInDay: FreeTimes): Observable<Session[][]> {
-		let sessionsList: Session[] = [];
 		let queryList: Observable<any>[] = [];
 		let secFromMdn = function(m: moment.Moment): number {
 			return m.startOf('day').diff(m);
@@ -251,29 +249,29 @@ export class SessionService {
 		for (let day in timesInDay) {
 			if (timesInDay[day] !== undefined) {
 				// this gets the day in week from the free times, and try to find a match in the same day in week next week
-				let dayInNextWeek = moment().add(1, 'week').day(day);
-				queryList.push(this.db.list('sessions/', {
+				let dayInNextWeek = moment().day(day);
+				queryList.push(this.combineArrWithUser(this.combineArrWithWb(this.db.list('sessions/', {
 					query: {
 						orderByChild: 'ywd',
 						equalTo: dayInNextWeek.format('YYYY-WW-E')
 					}
-				}).map(sessions => {
+				}))).map(sessions => {
+					let sessionsList: Session[] = [];
 					sessions.forEach(session => {
-						timesInDay[day].forEach(time => {
-							if (secFromMdn(moment(session.start, 'X')) <= secFromMdn(time.from) && secFromMdn(moment(session.end, 'X')) >= secFromMdn(time.to)) {
-								sessionsList.push(session);
-							}
-						});
+						if (session.grade === this.userService.currentUser.grade) {
+							timesInDay[day].forEach(time => {
+								if (secFromMdn(moment(session.start, 'X')) <= secFromMdn(time.from)
+									&& secFromMdn(moment(session.end, 'X')) >= secFromMdn(time.to)) {
+									sessionsList.push(session);
+								}
+							});
+						}
 					});
-					return sessions;
-				}));
+					return sessionsList;
+				}).map(Session.fromJsonArray));
 			}
 		}
-		return this.checkAndCombine(queryList).flatMap(sessionListByDay => {
-			return Observable.combineLatest(sessionListByDay.map(sessionList => {
-				return this.combineArrWithUser(this.combineArrWithWb(Observable.of(sessionList))).map(Session.fromJsonArray);
-			}));
-		});
+		return this.checkAndCombine(queryList);
 	}
 
 	// Update the information of a session
@@ -294,7 +292,9 @@ export class SessionService {
 		dataToSave['usersInSession/' + sessionId] = uidsToSave;
 		dataToSave[`users/${this.uid}/tutorSessions/${sessionId}`] = true;
 		session.tutees.forEach(uid => dataToSave[`users/${uid}/tuteeSessions/${sessionId}`] = true);
-		dataToSave[`whiteboardsBySessions/${sessionId}/${session.whiteboard}`] = true;
+		if (session.whiteboard) {
+			dataToSave[`whiteboardsBySessions/${sessionId}/${session.whiteboard}`] = true;
+		}
 		// below are only for the public sessions, because we want the private sessions to be unsearchable in the catalogs
 		if (session.listed) {
 			session.tags.forEach(tag => dataToSave[`sessionsByTags/${tag}/${sessionId}`] = true);
@@ -304,7 +304,7 @@ export class SessionService {
 			if (session.grade > 0 && session.grade <= 12) {
 				dataToSave[`sessionsByGrade/${session.grade}/${sessionId}`] = true;
 			}
-			dataToSave[`sessionByClassStr/${session.classStr}/${sessionId}}`] = true;
+			dataToSave[`sessionsByClassStr/${session.classStr}/${sessionId}}`] = true;
 		}
 		// Transform the arrays in the object to firebase-friendly objects
 		sessionToSave.start = session.start.unix();

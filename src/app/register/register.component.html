@@ -21,6 +21,10 @@
 			<input type="text" class="form-control" type="password" name="password" id="password" formControlName="password">
 			<label for="password">Password</label>
 		</div>
+		<div class="md-form col-md-4">
+			<input type="number" class="form-control" id="grade" formControlName="grade">
+			<label for="grade">Grade</label>
+		</div>
 		<button class="btn" [disabled]="!form.valid">Register</button>
 	</form>
 </div>
