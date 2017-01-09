@@ -7,9 +7,11 @@ import { ChatService } from './chat.service';
 import { AuthService } from '../security/auth.service';
 import { WhiteboardService, defaultWhiteboardOptions } from './whiteboard.service';
 import * as moment from 'moment';
-import { objToArr, arrToObj } from '../common/utils';
+import { objToArr, arrToObj, arraysEqual } from '../common/utils';
 
 export const AllowedSubjects = ['Math', 'English', 'Art'];
+
+export const PAGE_SIZE = 10;
 
 @Injectable()
 export class SessionService {
@@ -172,7 +174,7 @@ export class SessionService {
 	}
 
 	// find a single session and combine it with user data
-	findSession(id: string, query?: {}): Observable<any> {
+	findSession(id: string): Observable<any> {
 		return this.combineWithUser(
 			this.combineWithWb(
 				this.db.object('sessions/' + id)
@@ -182,58 +184,79 @@ export class SessionService {
 	}
 
 	// Find the session ids where the user is a tutor or a tutee. Note the info in stored in the user object.
-	findMySessions(): Observable<Session[][]> {
+	findMySessions(lastKey?: string | Subject<string>): Observable<Session[][]> {
 		return this.checkAndCombine([
 			this.auth.auth$.flatMap(state => {
 				if (!state) {
 					return [];
 				}
-				return this.combineArrWithUser(this.combineArrWithWb(this.db.list(`/users/${state.uid}/tutorSessions`)
-																		.flatMap(ids => this.checkAndCombine(ids.map(id => this.db.object('sessions/' + id.$key))))));
+				return this.combineArrWithUser(this.combineArrWithWb(this.db.list(`/users/${state.uid}/tutorSessions`, {query: {
+					orderByKey: true,
+					startAt: lastKey,
+					limitToFirst: PAGE_SIZE
+				}})
+				.flatMap(ids => this.checkAndCombine(ids.map(id => this.db.object('sessions/' + id.$key))))));
 			}).map(Session.fromJsonArray),
 			this.auth.auth$.flatMap(state => {
 				if (!state) {
 					return [];
 				}
-				return this.combineArrWithUser(this.combineArrWithWb(this.db.list(`/users/${state.uid}/tuteeSessions`)
-																		.flatMap(ids => this.checkAndCombine(ids.map(id => this.db.object('sessions/' + id.$key))))));
+				return this.combineArrWithUser(this.combineArrWithWb(this.db.list(`/users/${state.uid}/tuteeSessions`, {query: {
+					orderByKey: true,
+					startAt: lastKey,
+					limitToFirst: PAGE_SIZE
+				}})
+				.flatMap(ids => this.checkAndCombine(ids.map(id => this.db.object('sessions/' + id.$key))))));
 			}).map(Session.fromJsonArray)
-		]);
+		]).do(console.log);
 	};
 
 
 	// Find all of the sessions where the listed field is true.
-	findPublicSessions(): Observable<Session[]> {
-		return this.combineArrWithUser(
-			this.combineArrWithWb(
-				this.db.list('sessions', {
-					query: {
-						orderByChild: 'listed',
-						equalTo: true
-					}
-				})
-			)
-		).map(Session.fromJsonArray);
+	findPublicSessions(lastKey?: string | Subject<string>): Observable<Session[]> {
+		return this.db.list('listedSessions', {
+				query: {
+					orderByKey: true,
+					startAt: lastKey,
+					limitToFirst: PAGE_SIZE
+				}
+			})
+			.flatMap(ids => {
+			return this.checkAndCombine(ids.map(id => this.findSession(id.$key)));
+			})
+			.map(Session.fromJsonArray);
 	}
 
-	// Find session by tags, sessions are already stored in sessionsByTags node in firebase
-	findSessionsByTags(tags: string[]): Observable<Session[]> {
+	// this function is not scalable when there are a lot of sessions because it queries sessions under single tags and compare them locally
+	// Find session by tags, support multiple tags
+	findSessionsByTags(tags: string[], page: number): Observable<Session[]> {
 		return Observable.of(tags.map(tag => this.db.list('sessionsByTags/' + tag)))
 			.flatMap(tags$arr => this.checkAndCombine(tags$arr))
 			.map(sessionsByTag => {sessionsByTag = sessionsByTag.reduce((a, b) => a.concat(b));
 				return sessionsByTag.map(session => this.findSession(session.$key)); })
 			.flatMap(session$arr => this.checkAndCombine(session$arr))
-			.map(Session.fromJsonArray);
+			.map(Session.fromJsonArray)
+			.map(sessions => {
+				return sessions.filter((session, index) => {
+					// Only return sessions whose tags fully match the query
+					return arraysEqual(session.tags, tags) && index <= page * PAGE_SIZE;
+				});
+			});
 	}
 
-	findSessionsByProperty(prop: string, searchStr: string): Observable<Session[]> {
+	// Supported proprties are tags, class, subject, grade
+	findSessionsByProperty(prop: string, searchStr: string, lastKey?: string | Subject<string>): Observable<Session[]> {
 		// if (Session.prototype[prop] === undefined) {
 		// 	return Observable.throw('property is not defined in session');
 		// }
-		let fbNode = 'sessionsBy' + prop[0].toUpperCase + prop.slice(1, prop.length) + '/';
+		let fbNode = 'sessionsBy' + prop[0].toUpperCase() + prop.slice(1, prop.length) + '/';
 		return this.combineArrWithUser(
 			this.combineArrWithWb(
-				this.db.list(fbNode + searchStr)
+				this.db.list(fbNode + searchStr, {query: {
+					orderByKey: true,
+					startAt: lastKey,
+					limitToFirst: PAGE_SIZE
+				}})
 					// List of session ids --> list of session objects without user inserted
 					.flatMap(ids => this.checkAndCombine(ids.map(id => this.db.object('sessions/' + id.$key))))
 			)
@@ -241,7 +264,7 @@ export class SessionService {
 	}
 
 	// Find sessions that fits the free times of the user. 
-	findSessionsByFreeTime(timesInDay: FreeTimes): Observable<Session[][]> {
+	findSessionsByFreeTime(timesInDay: FreeTimes, lastKey?: string | Subject<string>): Observable<Session[][]> {
 		let queryList: Observable<any>[] = [];
 		let secFromMdn = function(m: moment.Moment): number {
 			return m.startOf('day').diff(m);
@@ -250,12 +273,7 @@ export class SessionService {
 			if (timesInDay[day] !== undefined) {
 				// this gets the day in week from the free times, and try to find a match in the same day in week next week
 				let dayInNextWeek = moment().day(day);
-				queryList.push(this.combineArrWithUser(this.combineArrWithWb(this.db.list('sessions/', {
-					query: {
-						orderByChild: 'ywd',
-						equalTo: dayInNextWeek.format('YYYY-WW-E')
-					}
-				}))).map(sessions => {
+				queryList.push(this.findSessionsByProperty('ywd', dayInNextWeek.format('YYYY-WW-E'), lastKey).map(sessions => {
 					let sessionsList: Session[] = [];
 					sessions.forEach(session => {
 						if (session.grade === this.userService.currentUser.grade) {
@@ -289,6 +307,7 @@ export class SessionService {
 		});
 
 		let dataToSave = {};
+		let ywd = session.start.format('YYYY-WW-E');
 		dataToSave['usersInSession/' + sessionId] = uidsToSave;
 		dataToSave[`users/${this.uid}/tutorSessions/${sessionId}`] = true;
 		session.tutees.forEach(uid => dataToSave[`users/${uid}/tuteeSessions/${sessionId}`] = true);
@@ -297,6 +316,7 @@ export class SessionService {
 		}
 		// below are only for the public sessions, because we want the private sessions to be unsearchable in the catalogs
 		if (session.listed) {
+			dataToSave[`listedSessions/${sessionId}`] = true;
 			session.tags.forEach(tag => dataToSave[`sessionsByTags/${tag}/${sessionId}`] = true);
 			if (AllowedSubjects.find((val) => session.subject === val)) {
 				dataToSave[`sessionsBySubject/${session.subject}/${sessionId}`] = true;
@@ -305,6 +325,7 @@ export class SessionService {
 				dataToSave[`sessionsByGrade/${session.grade}/${sessionId}`] = true;
 			}
 			dataToSave[`sessionsByClassStr/${session.classStr}/${sessionId}}`] = true;
+			dataToSave[`sessionsByYwd/${ywd}/${sessionId}`] = true;
 		}
 		// Transform the arrays in the object to firebase-friendly objects
 		sessionToSave.start = session.start.unix();
@@ -312,7 +333,7 @@ export class SessionService {
 		sessionToSave.tutees = arrToObj(sessionToSave.tutees);
 		sessionToSave.tags = arrToObj(sessionToSave.tags);
 		// store the date of the session in year - week in year - day in week
-		sessionToSave['ywd'] = session.end.format('YYYY-WW-E');
+		sessionToSave['ywd'] = ywd;
 		dataToSave['sessions/' + sessionId] = sessionToSave;
 
 		return this.firebaseUpdate(dataToSave);

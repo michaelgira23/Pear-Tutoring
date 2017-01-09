@@ -31,6 +31,8 @@ export class MyScheduleComponent implements OnInit, OnDestroy {
 	freeTimes$: any;
 	suggestions$: any;
 
+	page: number = 0;
+
 	constructor(private userService: UserService, private sessionService: SessionService) { }
 
 	ngOnInit() {
@@ -54,7 +56,8 @@ export class MyScheduleComponent implements OnInit, OnDestroy {
 		this.freeTimes$.unsubscribe();
 	}
 
-	disableLink() {
+	onClickTab() {
+		this.page = 0;
 		return false;
 	}
 	// clock display of the user's day, marking freetimes, and when user clicks on a freetime it shows the recommended sessions

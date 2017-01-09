@@ -13,6 +13,7 @@ export class SessionsWithFilterComponent implements OnInit {
 
 	@Input() sessions: Session[];
 
+	// The week days filter
 	weekdaysModel = {
 		Sunday: true,
 		Monday: true,

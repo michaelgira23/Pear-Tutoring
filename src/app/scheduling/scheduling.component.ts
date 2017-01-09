@@ -18,6 +18,8 @@ export class SchedulingComponent implements OnInit, OnDestroy {
 	tagsSessions$: any;
 	propertySessions$: any;
 
+	page: number = 0;
+
 	constructor(
 		private sessionService: SessionService,
 		private auth: AuthService
@@ -42,7 +44,7 @@ export class SchedulingComponent implements OnInit, OnDestroy {
 		if (this.propertySessions$) { this.propertySessions$.unsubscribe(); }
 		if (prop === 'tags') {
 			let tags = this.searchStr.split(',').map(tag => tag.trim());
-			this.tagsSessions$ = this.sessionService.findSessionsByTags(tags).subscribe(val => {
+			this.tagsSessions$ = this.sessionService.findSessionsByTags(tags, this.page).subscribe(val => {
 				this.searchResults = val;
 			}, console.log);
 			return;

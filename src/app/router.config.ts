@@ -96,5 +96,9 @@ export const routerConfig: Route[] = [
 	{
 		path: 'settings',
 		component: SettingsComponent
-	}
+	},
+	{
+		path: '**',
+		redirectTo: 'home'
+	},
 ];
