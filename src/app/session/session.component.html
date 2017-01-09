@@ -26,6 +26,7 @@
       <div class="online-users-display">
         <app-display-user *ngFor="let user of onlineUsers" [user]="user"></app-display-user>
       </div>
+      <button class="permissions-button mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" [routerLink]="['permissions']">Permissions</button>
     </div>
   </app-sidebar>
   <app-sidebar orientation="right">

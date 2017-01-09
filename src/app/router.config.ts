@@ -13,6 +13,7 @@ import { SessionComponent } from './session/session.component';
 import { SettingsComponent } from './settings/settings.component';
 import { UpdateSessionComponent } from './scheduling/update-session/update-session.component';
 import { MyScheduleComponent } from './scheduling/my-schedule/my-schedule.component';
+import { SessionPermissionsComponent } from './session/session-permissions/session-permissions.component';
 
 export const routerConfig: Route[] = [
 	{
@@ -90,8 +91,17 @@ export const routerConfig: Route[] = [
 		component: RegisterComponent
 	},
 	{
-		path: 'session/:id',
-		component: SessionComponent
+		path: 'session',
+		children: [
+			{
+				path: ':id',
+				component: SessionComponent
+			},
+			{
+				path: ':/permissions',
+				component: SessionPermissionsComponent
+			}
+		],
 	},
 	{
 		path: 'settings',

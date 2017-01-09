@@ -6,6 +6,7 @@ import { UserService, UserStatus, FreeTimes } from './user.service';
 import { ChatService } from './chat.service';
 import { AuthService } from '../security/auth.service';
 import { WhiteboardService, defaultWhiteboardOptions } from './whiteboard.service';
+import { PermissionsService, PermissionsSessionScopes, PermissionParameter } from '../security/permissions.service';
 import * as moment from 'moment';
 import { objToArr, arrToObj, arraysEqual } from '../common/utils';
 
@@ -22,7 +23,8 @@ export class SessionService {
 				private userService: UserService,
 				private whiteboardService: WhiteboardService,
 				private auth: AuthService,
-				private chatService: ChatService) {
+				private chatService: ChatService,
+				private permissionsService: PermissionsService) {
 		this.sdkDb = fb.database().ref();
 		auth.auth$.subscribe(val => {
 			this.uid = val ? val.uid : null;
@@ -55,6 +57,31 @@ export class SessionService {
 			return Observable.combineLatest(arr);
 		}
 		return Observable.of([]);
+	}
+
+	permForTutees(tutees: string[]): PermissionParameter {
+		let tuteePerm = {};
+		tutees.forEach(val => {
+			tuteePerm[val] = new PermissionsSessionScopes({
+				read: true,
+				write: true
+			});
+		});
+		return {
+			anonymous: {
+				scopes: new PermissionsSessionScopes({
+					read: false,
+					write: false
+				})
+			},
+			loggedIn: {
+				scopes: new PermissionsSessionScopes({
+					read: false,
+					write: false
+				})
+			},
+			user: tuteePerm
+		};
 	}
 
 	// Take a firebase query for a single session and insert a user object into the tutor and tutee fields.
@@ -208,7 +235,7 @@ export class SessionService {
 				}})
 				.flatMap(ids => this.checkAndCombine(ids.map(id => this.db.object('sessions/' + id.$key))))));
 			}).map(Session.fromJsonArray)
-		]).do(console.log);
+		]);
 	};
 
 
@@ -336,7 +363,10 @@ export class SessionService {
 		sessionToSave['ywd'] = ywd;
 		dataToSave['sessions/' + sessionId] = sessionToSave;
 
-		return this.firebaseUpdate(dataToSave);
+		return this.firebaseUpdate(dataToSave)
+			.flatMap(val => {
+				return this.permissionsService.createPermission(sessionId, 'session', this.permForTutees(session.tutees));
+			});
 	}
 
 	// Use the update function to create a session, and create a starting whiteboard and chat
@@ -355,6 +385,10 @@ export class SessionService {
 			session.chat = chatId;
 			session.canceled = false;
 			return this.updateSession(newSessionKey, session);
+		})
+		.flatMap(val => {
+			return Observable.forkJoin(this.permissionsService.createPermission(wbId, 'whiteboard', this.permForTutees(session.tutees)),
+										this.permissionsService.createPermission(chatId, 'chat', this.permForTutees(session.tutees)));
 		});
 	}
 
