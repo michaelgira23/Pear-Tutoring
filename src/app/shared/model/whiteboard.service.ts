@@ -279,7 +279,7 @@ export class WhiteboardService {
 	}
 
 	getImage(whiteboardKey: string, imageKey: string): FirebaseObjectObservable<WhiteboardImage> {
-		return this.af.database.object(`whiteboardText/${whiteboardKey}/${imageKey}`);
+		return this.af.database.object(`whiteboardImages/${whiteboardKey}/${imageKey}`);
 	}
 
 	getFormattedImage(whiteboardKey: string, imageKey: string): Observable<WhiteboardImage> {
@@ -419,6 +419,11 @@ export class WhiteboardService {
 		return this.typeToThings[itemType].getFormatted(whiteboardKey, itemKey)
 			.first()
 			.map(item => {
+
+				if (!item) {
+					return;
+				}
+
 				let edits = {};
 				// Go through options and make sure they're editable
 				const editProperties = Object.keys(options);

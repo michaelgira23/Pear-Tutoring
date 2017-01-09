@@ -1037,7 +1037,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		});
 
 		editImages.forEach(image => {
-			this.whiteboardService.editText(this.key, image.key, image.options)
+			this.whiteboardService.editImage(this.key, image.key, image.options)
 				.subscribe(
 					data => {
 						console.log('successfully edited image!', data);
