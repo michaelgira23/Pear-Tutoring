@@ -33,7 +33,11 @@ export class PermissionsService {
 	}
 
 	createPermission($key: string, type: PermissionsType, permission: Permission): Observable<any> {
-		let correctedPerm: Permission = {};
+		let correctedPerm: Permission = {
+			anonymous: {},
+			loggedIn: {},
+			user: {}
+		};
 
 		for (let group of Object.keys(permission)) {
 			if (group === 'user') {
