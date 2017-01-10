@@ -306,8 +306,6 @@ export class WhiteboardService {
 				this.observableToPromise(this.sdkStorage.child(`whiteboardFiles/${whiteboardKey}/${pushKey}`).put(file))
 					.subscribe((uploadedImage: any) => {
 						// Add image object to the whiteboard
-						// return this.af.database.object(`whiteboards/${whiteboardKey}`).update({ snapshot: uploadedImage.metadata.downloadURLs[0] });
-						console.log('uplaod image', uploadedImage);
 						const whiteboardImage: WhiteboardImage = {
 							created: firebase.database['ServerValue']['TIMESTAMP'],
 							createdBy: this.authInfo ? this.authInfo.uid : null,

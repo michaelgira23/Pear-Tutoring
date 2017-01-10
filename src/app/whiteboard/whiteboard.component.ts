@@ -823,7 +823,11 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 			// Get options for current image
 			let paperOptions = {
 				rotation: image.rotation,
-				source: image.url
+				source: image.url,
+				x: image.bounds.x,
+				y: image.bounds.y,
+				width: image.bounds.width,
+				height: image.bounds.height
 			};
 
 			// Check if image already exists on whiteboard
@@ -843,15 +847,9 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 				this.canvasImages[image.$key].bounds = rectangles.deserialize(image.bounds);
 			} else if (!image.erased) {
 				// Create new marking on whiteboard
-				console.log('image url', image.url);
 				this.canvasImages[image.$key] = new paper.Raster(paperOptions);
 				// Set bounds here because it doesn't work in object init for some reason
 				this.canvasImages[image.$key].bounds = rectangles.deserialize(image.bounds);
-
-				this.canvasImages[image.$key].onLoad = () => {
-					console.log('imageh has loaded', image.url);
-					console.log(this.canvasImages[image.$key]);
-				};
 			}
 		}
 
@@ -965,8 +963,6 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		let editImages = [];
 
 		items.forEach(item => {
-			console.log('ite', item);
-
 			// Get key from marking and text
 			const markingKey = this.markingIdToPushKey(item.id);
 			const textKey = this.textIdToPushKey(item.id);
