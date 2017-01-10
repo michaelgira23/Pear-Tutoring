@@ -287,7 +287,7 @@ export class WhiteboardService {
 			.map(image => this.currentItem('image', image));
 	}
 
-	uploadImage(whiteboardKey: string, file: File): Observable<any> {
+	uploadImage(whiteboardKey: string, file: File, x = 0, y = 0): Observable<any> {
 		const subject = new Subject<any>();
 		const pushKey = this.sdkDb.push().key;
 
@@ -313,8 +313,8 @@ export class WhiteboardService {
 							createdBy: this.authInfo ? this.authInfo.uid : null,
 							rotation: 0,
 							bounds: {
-								x: 10,
-								y: 10,
+								x,
+								y,
 								width: image.width,
 								height: image.height
 							},

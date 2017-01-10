@@ -373,10 +373,11 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	}
 
 	onDrop(event) {
+		const point = this.cursorPoint(event);
 		if (event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]) {
 			const uploadFile = event.dataTransfer.files[0];
 			console.log('file', uploadFile);
-			this.whiteboardService.uploadImage(this.key, uploadFile)
+			this.whiteboardService.uploadImage(this.key, uploadFile, point.x, point.y)
 				.subscribe(
 					data => {
 						console.log('successfully uploaded image', data);
@@ -822,7 +823,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 			// Get options for current image
 			let paperOptions = {
 				rotation: image.rotation,
-				bounds: rectangles.deserialize(image.bounds)
+				source: image.url
 			};
 
 			// Check if image already exists on whiteboard
@@ -838,9 +839,19 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 
 				// Update options onto existing image on canvas
 				Object.assign(this.canvasImages[image.$key], paperOptions);
+				// Set bounds here because it doesn't work in object init for some reason
+				this.canvasImages[image.$key].bounds = rectangles.deserialize(image.bounds);
 			} else if (!image.erased) {
 				// Create new marking on whiteboard
-				this.canvasImages[image.$key] = new paper.Raster(image.url, paperOptions);
+				console.log('image url', image.url);
+				this.canvasImages[image.$key] = new paper.Raster(paperOptions);
+				// Set bounds here because it doesn't work in object init for some reason
+				this.canvasImages[image.$key].bounds = rectangles.deserialize(image.bounds);
+
+				this.canvasImages[image.$key].onLoad = () => {
+					console.log('imageh has loaded', image.url);
+					console.log(this.canvasImages[image.$key]);
+				};
 			}
 		}
 
