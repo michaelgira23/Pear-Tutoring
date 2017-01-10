@@ -39,7 +39,7 @@ export class Cursor {
 			fill: true,
 			stroke: true,
 			bounds: true,
-			tolerance: 5,
+			tolerance: 10,
 			match: result => {
 				return result.item.id !== this.whiteboard.background.id;
 			}
