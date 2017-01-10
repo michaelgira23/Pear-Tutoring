@@ -345,7 +345,7 @@ export class WhiteboardService {
 
 	eraseImage(whiteboardKey: string, imageKey: string): Observable<WhiteboardImage> {
 		return this.observableToPromise(
-			this.af.database.object(`whiteboardText/${whiteboardKey}/${imageKey}`)
+			this.af.database.object(`whiteboardImages/${whiteboardKey}/${imageKey}`)
 				.update({ erased: firebase.database['ServerValue']['TIMESTAMP'] }));
 	}
 

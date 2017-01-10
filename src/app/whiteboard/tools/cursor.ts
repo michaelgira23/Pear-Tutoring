@@ -193,6 +193,69 @@ export class Cursor {
 		this.clearSelectionPath();
 	}
 
+	keyup(event: KeyboardEvent) {
+		const key = event.keyCode || event.charCode;
+		console.log('keyup', key);
+
+		if (key !== 8 && key !== 46) {
+			return;
+		}
+
+		// Erase selected markings
+		const markingKeys = Object.keys(this.whiteboard.canvasMarkings);
+		markingKeys.forEach(markingKey => {
+			// If marking is selected, erase
+			if (this.whiteboard.canvasMarkings[markingKey].selected) {
+				this.whiteboard.whiteboardService.eraseMarking(this.whiteboard.key, markingKey)
+					.subscribe(
+						data => {
+							console.log('Erased marking', data);
+						},
+						err => {
+							console.log('Erase marking error', err);
+						}
+					);
+			}
+		});
+
+		// Also erase selected text
+		const textKeys = Object.keys(this.whiteboard.canvasText);
+		textKeys.forEach(textKey => {
+			// If text is selected, erase
+			if (this.whiteboard.canvasText[textKey].selected) {
+				this.whiteboard.whiteboardService.eraseText(this.whiteboard.key, textKey)
+					.subscribe(
+						data => {
+							console.log('Erased text', data);
+						},
+						err => {
+							console.log('Erase text error', err);
+						}
+					);
+			}
+		});
+
+		// Also erase selected image
+		const imageKeys = Object.keys(this.whiteboard.canvasImages);
+		imageKeys.forEach(imageKey => {
+			// If image is selected, erase
+			if (this.whiteboard.canvasImages[imageKey].selected) {
+				this.whiteboard.whiteboardService.eraseImage(this.whiteboard.key, imageKey)
+					.subscribe(
+						data => {
+							console.log('Erased image', data);
+						},
+						err => {
+							console.log('Erase image error', err);
+						}
+					);
+			}
+		});
+
+		// Prevent backspace from going to the previous page
+		event.preventDefault();
+	}
+
 	changetool() {
 		this.whiteboard.deselectAllItems();
 	}
