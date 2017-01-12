@@ -18,12 +18,12 @@
               {{ permType }} Permission :
           </span>
           <span class="mdl-list__item-secondary-action permission-checkboxes" *ngIf="perms[permType].user">
-            <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" [attr.for]="permType + '-read-' + user.$key" ngDefaultControl [(ngModel)]="perms[permType].user[user.$key].read">
-              <input type="checkbox" [id]="permType + '-read-' + user.$key" class="mdl-checkbox__input" />
+            <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" [attr.for]="permType + '-read-' + user.$key" [class.is-checked]="perms[permType].user[user.$key].read">
+              <input type="checkbox" [id]="permType + '-read-' + user.$key" [checked]="perms[permType].user[user.$key].read" class="mdl-checkbox__input" [(ngModel)]="perms[permType].user[user.$key].read" />
               <span class="mdl-checkbox__label">Read</span>
             </label>
-            <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" [attr.for]="permType + '-write-' + user.$key" ngDefaultControl [(ngModel)]="perms[permType].user[user.$key].write">
-              <input type="checkbox" [id]="permType + '-write-' + user.$key" class="mdl-checkbox__input" />
+            <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" [attr.for]="permType + '-write-' + user.$key" [class.is-checked]="perms[permType].user[user.$key].write">
+              <input type="checkbox" [id]="permType + '-write-' + user.$key" [checked]="perms[permType].user[user.$key].write" class="mdl-checkbox__input" [(ngModel)]="perms[permType].user[user.$key].write" />
               <span class="mdl-checkbox__label">Write</span>
             </label>
           </span>
@@ -34,12 +34,12 @@
             <li class="mdl-list__item">
               <span class="mdl-list__item-primary-content">{{ sessionInfo[permType][i].name }}</span>
               <span class="mdl-list__item-secondary-action permission-checkboxes">
-                <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" [attr.for]="permType + '-read-' + user.$key + i" ngDefaultControl [(ngModel)]="perms.originalObj[permType][i].user[user.$key].read">
-                  <input type="checkbox" [id]="permType + '-read-' + user.$key + i" class="mdl-checkbox__input" />
+                <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" [attr.for]="permType + '-read-' + user.$key + i" [class.is-checked]="item.user[user.$key].read">
+                  <input type="checkbox" [id]="permType + '-read-' + user.$key + i" [checked]="item.user[user.$key].read" class="mdl-checkbox__input" [(ngModel)]="perms.originalObj[permType][i].user[user.$key].read" />
                   <span class="mdl-checkbox__label">Read</span>
                 </label>
-                <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" [attr.for]="permType + '-write-' + user.$key + i" ngDefaultControl [(ngModel)]="perms.originalObj[permType][i].user[user.$key].read">
-                  <input type="checkbox" [id]="permType + '-write-' + user.$key + i" class="mdl-checkbox__input" />
+                <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" [attr.for]="permType + '-write-' + user.$key + i" [class.is-checked]="item.user[user.$key].write">
+                  <input type="checkbox" [id]="permType + '-write-' + user.$key + i" [checked]="item.user[user.$key].write" class="mdl-checkbox__input" [(ngModel)]="perms.originalObj[permType][i].user[user.$key].write" />
                   <span class="mdl-checkbox__label">Write</span>
                 </label>
               </span>
