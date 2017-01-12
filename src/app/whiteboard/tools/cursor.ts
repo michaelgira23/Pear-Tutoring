@@ -195,7 +195,6 @@ export class Cursor {
 
 	keyup(event: KeyboardEvent) {
 		const key = event.keyCode || event.charCode;
-		console.log('keyup', key);
 
 		if (key !== 8 && key !== 46) {
 			return;

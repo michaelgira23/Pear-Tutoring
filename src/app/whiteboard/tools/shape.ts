@@ -1,4 +1,5 @@
 import { segments, styles } from '../utils/serialization';
+import * as snapRounding from '../utils/snap-rounding';
 import { WhiteboardMarkingOptions, WhiteboardShapeType } from '../../shared/model/whiteboard';
 import { WhiteboardComponent } from '../whiteboard.component';
 declare const paper;
@@ -47,7 +48,7 @@ export class Shape {
 			this.startPoint = this.whiteboard.cursorPoint(event);
 
 			// Create a rectangle for the shape bounds
-			this.creationRect = this.getRect(this.startPoint, this.startPoint, this.whiteboard.shiftKey);
+			this.creationRect = snapRounding.getRect(this.startPoint, this.startPoint, this.whiteboard.shiftKey);
 
 			// Create point from shadow offset
 			let paperOptions = styles.deserialize(this.whiteboard.styleOptions);
@@ -117,7 +118,7 @@ export class Shape {
 
 			// Check if we just finished the first part of the arc
 			if (this.currentShapeType === 'arc' && !this.arcPoint) {
-				this.arcPoint = this.getFarthestPoint(this.creationRect, this.startPoint);
+				this.arcPoint = snapRounding.getFarthestPoint(this.creationRect, this.startPoint);
 
 				// Visualize this arc point on the canvas
 				this.visualArcPoint = new paper.Shape.Circle({
@@ -215,7 +216,7 @@ export class Shape {
 				return;
 			}
 
-			this.creationRect = this.getRect(this.startPoint, point, this.whiteboard.shiftKey);
+			this.creationRect = snapRounding.getRect(this.startPoint, point, this.whiteboard.shiftKey);
 
 			// Shapes will not show up anymore if their height and width are zero
 			if (this.creationRect.width > 0 && this.creationRect.height > 0) {
@@ -224,15 +225,15 @@ export class Shape {
 					case 'arc':
 						// Check if we are on the second phase of the arc
 						if (this.arcPoint) {
-							let secondPhaseRect = this.getRect(this.arcPoint, point, this.whiteboard.shiftKey);
+							let secondPhaseRect = snapRounding.getRect(this.arcPoint, point, this.whiteboard.shiftKey);
 
 							// Calculate the third point on the arc
 							let linePoint = null;
 							if (this.whiteboard.shiftKey) {
-								linePoint = this.roundLinePoint(this.arcPoint, point);
+								linePoint = snapRounding.roundLinePoint(this.arcPoint, point);
 								secondPhaseRect = new paper.Rectangle(this.arcPoint, linePoint);
 							} else {
-								linePoint = this.getFarthestPoint(secondPhaseRect, this.arcPoint);
+								linePoint = snapRounding.getFarthestPoint(secondPhaseRect, this.arcPoint);
 							}
 
 							// Check if current point has moved from the second point of arc
@@ -264,10 +265,10 @@ export class Shape {
 						// Point to send line to
 						let linePoint = null;
 						if (this.whiteboard.shiftKey) {
-							linePoint = this.roundLinePoint(this.startPoint, point);
+							linePoint = snapRounding.roundLinePoint(this.startPoint, point);
 							this.creationRect = new paper.Rectangle(this.startPoint, linePoint);
 						} else {
-							linePoint = this.getFarthestPoint(this.creationRect, this.startPoint);
+							linePoint = snapRounding.getFarthestPoint(this.creationRect, this.startPoint);
 						}
 						this.currentShape.insert(segmentsLength - 1, linePoint);
 						this.currentShape.removeSegment(segmentsLength - 2);
@@ -281,130 +282,6 @@ export class Shape {
 				}
 			}
 		}
-	}
-
-	roundLinePoint(startPoint, currentPoint) {
-		// When holding shift, lines may also be rounded to straightly vertical or horizontal
-		const vector = new paper.Point(currentPoint.x - startPoint.x, currentPoint.y - startPoint.y);
-		const angle = vector.getAngle();
-
-		// Round angle to nearest multiple of 45
-		const roundMultiple = 45;
-		const roundedAngle = -Math.ceil((angle - (roundMultiple / 2)) / roundMultiple) * roundMultiple;
-
-		// Now find what point is along a squared rectangle with the rounded angle
-		const square = this.getRect(startPoint, currentPoint, true);
-		// Find the farthest point
-		const farthest = this.getFarthestPoint(square, startPoint);
-		// Mirror farthest point across startPoint, to get bigger rect surrounding whole startPoint
-		const oppositeX = -(farthest.x - startPoint.x) + startPoint.x;
-		const oppositeY = -(farthest.y - startPoint.y) + startPoint.y;
-		const opposite = new paper.Point(oppositeX, oppositeY);
-		// Create big rectangle that surrounds whole center
-		const bigSquare = new paper.Rectangle(farthest, opposite);
-
-		return this.edgeOfRect(bigSquare, roundedAngle);
-	}
-
-	getRect(fromPoint, toPoint, square = false) {
-		// Return a paper.js rectangle with two points.
-		// If square is true, will square off the rect using largest side
-		const rect = new paper.Rectangle(fromPoint, toPoint);
-
-		if (square) {
-			// Find dimensions of square (largest side of two)
-			const squareSide = Math.max(rect.width, rect.height);
-			// Find x and y of this square point
-			const squareX = (squareSide * Math.sign(toPoint.x - fromPoint.x)) + fromPoint.x;
-			const squareY = (squareSide * Math.sign(toPoint.y - fromPoint.y)) + fromPoint.y;
-			const squareToPoint = new paper.Point(squareX, squareY);
-
-			return new paper.Rectangle(fromPoint, squareToPoint);
-		}
-
-		return rect;
-	}
-
-	getFarthestPoint(rect, point) {
-		// Find the farthest point on a rectangle from a specific point
-		const sides = [
-			'topLeft',
-			'topRight',
-			'bottomLeft',
-			'bottomRight'
-		];
-
-		let lengths = [];
-		let farthest = null;
-
-		sides.forEach(corner => {
-			const distance = point.getDistance(rect[corner]);
-
-			// Check if distance is farthest distance so far
-			let isFarthest = true;
-			lengths.forEach(length => {
-				if (distance < length) {
-					isFarthest = false;
-				}
-			});
-			if (isFarthest) {
-				farthest = corner;
-			}
-
-			lengths.push(distance);
-		});
-
-		return rect[farthest];
-	}
-
-	edgeOfRect(rect, deg) {
-		// Gets the intersection of perimeter of rectangle, given angle from center
-		// http://stackoverflow.com/a/4062485/4594858
-		const twoPI = Math.PI * 2;
-		let theta = (deg * Math.PI) / 180;
-
-		while (theta < -Math.PI) {
-			theta += twoPI;
-		}
-
-		while (theta > Math.PI) {
-			theta -= twoPI;
-		}
-
-		const rectAtan = Math.atan2(rect.height, rect.width);
-		const tanTheta = Math.tan(theta);
-		let region;
-
-		if ((theta > -rectAtan) && (theta <= rectAtan)) {
-			region = 1;
-		} else if ((theta > rectAtan) && (theta <= (Math.PI - rectAtan))) {
-			region = 2;
-		} else if ((theta > (Math.PI - rectAtan)) || (theta <= -(Math.PI - rectAtan))) {
-			region = 3;
-		} else {
-			region = 4;
-		}
-
-		const edgePoint = rect.center.clone();
-		let xFactor = 1;
-		let yFactor = 1;
-
-		switch (region) {
-			case 1: yFactor = -1; break;
-			case 2: yFactor = -1; break;
-			case 3: xFactor = -1; break;
-			case 4: xFactor = -1; break;
-		}
-
-		if ((region === 1) || (region === 3)) {
-			edgePoint.x += xFactor * (rect.width / 2);
-			edgePoint.y += yFactor * (rect.width / 2) * tanTheta;
-		} else {
-			edgePoint.x += xFactor * (rect.height / (2 * tanTheta));
-			edgePoint.y += yFactor * (rect.height /  2);
-		}
-
-		return edgePoint;
 	}
 
 	ensureVisualRect(bounds) {
