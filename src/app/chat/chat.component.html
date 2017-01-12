@@ -2,7 +2,7 @@
 	<div *ngIf="currentPerms.read">
 		<div class="chat-list" *ngFor="let entry of allEntries">
 			<div *ngIf="isMessage(entry)">
-				<li class="message" [innerHTML]="msgFormat(entry) | safeHtml"></li>
+				<li class="message" [id]="equations[entry.$key]" [innerHTML]="msgFormat(entry) | safeHtml"></li>
 			</div>
 			<div *ngIf="isStatus(entry)">
 				<li class="status">{{ entry.user | name:true }} {{ statusVerb(entry) }} the chat room</li>

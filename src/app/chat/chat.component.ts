@@ -6,6 +6,7 @@ import { NamePipe } from '../shared/model/name.pipe';
 import { NotificationsService } from '../shared/model/notifications.service';
 import { PermissionsService } from '../shared/security/permissions.service';
 import { UserService } from '../shared/model/user.service';
+import { UUID } from 'angular2-uuid';
 
 declare global {
 	interface Array<T> {
@@ -26,6 +27,7 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 	key: string = 'anonymous';
 	keyChanged: boolean;
 
+	equations: EquationMap = {};
 	mathMode: boolean = false;
 
 	messageSubscription: any;
@@ -88,6 +90,10 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 									'New message',
 									this.notificationFormat(msg)
 								);
+
+								let eqnUuid = UUID.UUID();
+								this.equations[(<any>msg).$key] = eqnUuid;
+								this.reTypeset(eqnUuid);
 							}
 						}
 					} else {
@@ -95,13 +101,11 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 					}
 
 					for (let msg of data) {
-						// See above.
 						this.messageKeys.push((<any>msg).$key);
 					}
 
 					this.allMessages = data;
 					this.mergeEntries();
-					this.reTypeset();
 				},
 				err => {
 					console.log(`Getting chat messages error: ${err}`);
@@ -179,9 +183,9 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 		}
 	}
 
-	reTypeset() {
-		// TODO: Only re-typeset the new messages. At the moment, this re-typesets everything on the page.
-		MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
+	reTypeset(uuid?: string) {
+		console.log('retypeset called with uuid', uuid, document.getElementById(uuid), this.equations);
+		MathJax.Hub.Queue(['Typeset', MathJax.Hub, uuid]);
 	}
 
 	msgFormat(msg: Message) {
@@ -202,4 +206,8 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 		}
 		return result;
 	}
+}
+
+export interface EquationMap {
+	[msgKey: string]: string;
 }
