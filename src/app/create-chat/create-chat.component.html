@@ -2,23 +2,23 @@
 <form (submit)="create()" autocomplete="off" novalidate>
 	<fieldset>
 		<legend>Logged in Permissions</legend>
-		<label for="loggedIn-read">
-			<input type="checkbox" class="mdl-checkbox__input" name="loggedIn-read" [(ngModel)]="permissions.loggedIn.read">
+		<label class="mdl-checkbox mdl-js-checkbox" for="loggedIn-read" name="loggedIn-read" [(ngModel)]="permissions.loggedIn.read" ngDefaultControl>
+			<input type="checkbox" class="mdl-checkbox__input" id="loggedIn-read">
 			<span class="mdl-checkbox__label">Read</span>
 		</label>
-		<label for="loggedIn-write">
-			<input type="checkbox" class="mdl-checkbox__input" name="loggedIn-write" [(ngModel)]="permissions.loggedIn.write">
+		<label class="mdl-checkbox mdl-js-checkbox" for="loggedIn-write" name="loggedIn-write" [(ngModel)]="permissions.loggedIn.write" ngDefaultControl>
+			<input type="checkbox" class="mdl-checkbox__input" id="loggedIn-write">
 			<span class="mdl-checkbox__label">Write</span>
 		</label>
 	</fieldset>
 	<fieldset>
 		<legend>Anonymous Permissions (Logged out)</legend>
-		<label for="anonymous-read">
-			<input type="checkbox" class="mdl-checkbox__input" name="anonymous-read" [(ngModel)]="permissions.anonymous.read">
+		<label class="mdl-checkbox mdl-js-checkbox" for="anonymous-read" name="anonymous-read" [(ngModel)]="permissions.anonymous.read" ngDefaultControl>
+			<input type="checkbox" class="mdl-checkbox__input" id="anonymous-read">
 			<span class="mdl-checkbox__label">Read</span>
 		</label>
-		<label for="anonymous-write">
-			<input type="checkbox" class="mdl-checkbox__input" name="anonymous-write" [(ngModel)]="permissions.anonymous.write">
+		<label class="mdl-checkbox mdl-js-checkbox" for="anonymous-write" name="anonymous-write" [(ngModel)]="permissions.anonymous.write" ngDefaultControl>
+			<input type="checkbox" class="mdl-checkbox__input" id="anonymous-write">
 			<span class="mdl-checkbox__label">Write</span>
 		</label>
 	</fieldset>

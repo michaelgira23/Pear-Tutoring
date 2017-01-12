@@ -10,6 +10,8 @@ declare global {
 	interface Array<T> {
 		includes(searchElement: T): boolean;
 	}
+
+	const MathJax: any;
 }
 
 @Component({
@@ -22,6 +24,8 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 	@Input()
 	key: string = 'anonymous';
 	keyChanged: boolean;
+
+	mathMode: boolean = false;
 
 	messageSubscription: any;
 	statusSubscription: any;
@@ -51,6 +55,8 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 				console.log(`Sending 'join' status error: ${err}`);
 			}
 		);
+
+		MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
 	}
 
 	ngOnChanges(changes: SimpleChanges) {
@@ -93,6 +99,10 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 					}
 
 					this.allMessages = data;
+
+					// TODO: Only re-typeset the new messages. At the moment, this re-typesets everything on the page.
+					MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
+
 					this.mergeEntries();
 				},
 				err => {
@@ -132,7 +142,16 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 	}
 
 	send(message: string) {
-		this.chatService.sendMessage(message, this.key).subscribe(
+		console.log(this.mathMode);
+		// Escape extra backtick characters, since we don't want them to be interpreted as AsciiMath.
+		let formattedMessage = message.replace(/`/g, '&#96;');
+
+		if (this.mathMode) {
+			// If we're in math input mode, surround the message in backticks so it gets interpreted as AsciiMath.
+			formattedMessage = '`' + formattedMessage + '`';
+		}
+
+		this.chatService.sendMessage(formattedMessage, this.key).subscribe(
 			data => {},
 			err => {
 				console.log(`Sending message error: ${err}`);
