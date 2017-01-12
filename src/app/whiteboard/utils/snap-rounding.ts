@@ -69,26 +69,60 @@ export function roundLinePoint(startPoint, currentPoint, diagonalOnly = false, r
 
 export function getExpandedRect(fromPoint, toPoint, ratio = 1) {
 
-	const rect = new paper.Rectangle(fromPoint, toPoint);
+	const currentRect = new paper.Rectangle(fromPoint, toPoint);
+
+	const currentRatio = currentRect.height / currentRect.width;
+
+	// Check if current ratio is greater than target ratio
+	if (currentRatio > ratio) {
+		// Current ratio is greater than target
+		// Either height needs to decrease or width needs to increase
+		console.log('height is greater');
+		if (ratio > 1) {
+			currentRect.width = currentRect.height * ratio;
+		} else if (ratio < 1) {
+			// Also increase height
+			// console.log('also increaes height');
+			currentRect.height = currentRect.width / ratio;
+		}
+
+		// currentRect.width = currentRect.height * ratio;
+
+	} else {
+		// Increase height
+		console.log('width is greater');
+		if (ratio > 1) {
+			currentRect.width = currentRect.height * ratio;
+		} else if (ratio < 1) {
+			// Also increase height
+			// console.log('also increaes width');
+			currentRect.height = currentRect.width / ratio;
+		}
+
+		currentRect.height = currentRect.width / ratio;
+		// currentRect.width = currentRect.height / ratio;
+	}
+
+	return currentRect;
 
 	// Find dimensions of square (largest side of two)
-	const squareSide = Math.max(rect.width, rect.height);
-	rect.width = rect.height = squareSide;
+	// const squareSide = Math.max(rect.width, rect.height);
+	// rect.width = rect.height = squareSide;
 
 	// Generate two squares - One with a bigger height and one with a smaller width to match ratios
-	const ratioRect = rect.clone();
-	ratioRect.height *= ratio;
+	// const ratioRect = rect.clone();
+	// ratioRect.height *= ratio;
+	//
+	// const inverseRatioRect = rect.clone();
+	// ratioRect.width *= (1 / ratio);
 
-	const inverseRatioRect = rect.clone();
-	ratioRect.width *= (1 / ratio);
-
-	if (pointOnRectangle(ratioRect, toPoint)) {
-		console.log('ratio rect');
-		return ratioRect;
-	} else {
-		console.log('inverse rect');
-		return inverseRatioRect;
-	}
+	// if (pointOnRectangle(ratioRect, toPoint)) {
+	// 	console.log('ratio rect');
+	// 	return ratioRect;
+	// } else {
+	// 	console.log('inverse rect');
+	// 	return inverseRatioRect;
+	// }
 
 	// Find x and y of this square point
 	// const squarePointX = (squareSide * Math.sign(toPoint.x - fromPoint.x)) + fromPoint.x;
