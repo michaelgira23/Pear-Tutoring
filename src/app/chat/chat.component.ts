@@ -57,7 +57,6 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 				console.log(`Sending 'join' status error: ${err}`);
 			}
 		);
-
 		this.reTypeset();
 	}
 
@@ -96,13 +95,13 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 					}
 
 					for (let msg of data) {
-						// See line 61.
+						// See above.
 						this.messageKeys.push((<any>msg).$key);
 					}
 
 					this.allMessages = data;
-					this.reTypeset();
 					this.mergeEntries();
+					this.reTypeset();
 				},
 				err => {
 					console.log(`Getting chat messages error: ${err}`);
@@ -181,20 +180,13 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 	}
 
 	reTypeset() {
-		let containsBackticks = this.allMessages.some((msg, _, __) => {
-			return msg.text.includes('`');
-		});
-
-		if (containsBackticks) {
-			// TODO: Only re-typeset the new messages. At the moment, this re-typesets everything on the page.
-			MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
-		}
+		// TODO: Only re-typeset the new messages. At the moment, this re-typesets everything on the page.
+		MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
 	}
 
 	msgFormat(msg: Message) {
-		let name = new NamePipe().transform(msg.from, true);
-		let text = this.sanitizer.bypassSecurityTrustHtml(msg.text);
-		return `From ${name}: ${text}`;
+		let name = new NamePipe().transform(msg.from);
+		return `From ${name}: ${msg.text}`;
 	}
 
 	notificationFormat(msg: Message) {
