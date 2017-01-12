@@ -24,8 +24,9 @@ export class Session {
 		}
 		start = moment(start, 'X');
 		end = moment(end, 'X');
+		let past = moment().isSameOrAfter(end);
 		return new Session($key, start, end, subject, color, tutor, tutees, max, listed,
-							whiteboards, chat, title, desc, canceled, tags, ywd, grade, classStr);
+							whiteboards, chat, title, desc, canceled, tags, ywd, grade, classStr, past);
 	}
 
 	static fromJsonArray(json: any[]): Session[] {
@@ -50,6 +51,7 @@ export class Session {
 		public tags: string[],
 		public ywd: string,
 		public grade: number,
-		public classStr: string
+		public classStr: string,
+		public past: boolean
 	) { }
 }

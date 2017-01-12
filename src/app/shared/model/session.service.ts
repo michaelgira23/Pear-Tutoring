@@ -6,7 +6,7 @@ import { UserService, UserStatus, FreeTimes } from './user.service';
 import { ChatService } from './chat.service';
 import { AuthService } from '../security/auth.service';
 import { WhiteboardService, defaultWhiteboardOptions } from './whiteboard.service';
-import { PermissionsService, PermissionsSessionScopes, PermissionParameter } from '../security/permissions.service';
+import { PermissionsService, Permission } from '../security/permissions.service';
 import * as moment from 'moment';
 import { objToArr, arrToObj, arraysEqual } from '../common/utils';
 
@@ -59,28 +59,28 @@ export class SessionService {
 		return Observable.of([]);
 	}
 
-	permForTutees(tutees: string[]): PermissionParameter {
-		let tuteePerm = {};
-		tutees.forEach(val => {
-			tuteePerm[val] = new PermissionsSessionScopes({
+	permForUsers(users: string[]): Permission {
+		let usersPerm = {};
+		users.forEach(val => {
+			usersPerm[val] = {
 				read: true,
 				write: true
-			});
+			};
 		});
 		return {
 			anonymous: {
-				scopes: new PermissionsSessionScopes({
+				scopes: {
 					read: false,
 					write: false
-				})
+				}
 			},
 			loggedIn: {
-				scopes: new PermissionsSessionScopes({
+				scopes: {
 					read: false,
 					write: false
-				})
+				}
 			},
-			user: tuteePerm
+			user: usersPerm
 		};
 	}
 
@@ -365,7 +365,7 @@ export class SessionService {
 
 		return this.firebaseUpdate(dataToSave)
 			.flatMap(val => {
-				return this.permissionsService.createPermission(sessionId, 'session', this.permForTutees(session.tutees));
+				return this.permissionsService.createPermission(sessionId, 'session', this.permForUsers(session.tutees.concat([session.tutor])));
 			});
 	}
 
@@ -387,8 +387,9 @@ export class SessionService {
 			return this.updateSession(newSessionKey, session);
 		})
 		.flatMap(val => {
-			return Observable.forkJoin(this.permissionsService.createPermission(wbId, 'whiteboard', this.permForTutees(session.tutees)),
-										this.permissionsService.createPermission(chatId, 'chat', this.permForTutees(session.tutees)));
+			return Observable.forkJoin(
+				this.permissionsService.createPermission(wbId, 'whiteboard', this.permForUsers(session.tutees.concat([session.tutor]))),
+				this.permissionsService.createPermission(chatId, 'chat', this.permForUsers(session.tutees.concat([session.tutor]))));
 		});
 	}
 
@@ -397,20 +398,45 @@ export class SessionService {
 		return Observable.from(undefined);
 	}
 
+	toggleListed(id: string): Observable<any> {
+		return Observable.from(undefined);
+	}
+
 	// Delete a session.
 	deleteSession(sessionId: string): Observable<any> {
 		// calling update null on a location in the database will cause it to be deleted.
 		if (!this.uid) { return Observable.throw('Rip no login info'); };
-		return this.db.object('sessions/' + sessionId).flatMap(session => {
+		return this.findSession(sessionId).flatMap((session: Session) => {
 			let dataToSave = {};
-			dataToSave['sessions/' + sessionId] = null;
+			let ywd = session.start.format('YYYY-WW-E');
 			dataToSave['usersInSession/' + sessionId] = null;
 			dataToSave[`users/${this.uid}/tutorSessions/${sessionId}`] = null;
-			objToArr(session.tutees).forEach(uid => dataToSave[`users/${uid}/tuteeSessions/${sessionId}`] = null);
-			objToArr(session.tags).forEach(tag => dataToSave[`sessionsByTags/${tag}/${sessionId}`] = null);
-			dataToSave[`sessionsBySubject/${session.subject}/${sessionId}`] = null;
+			session.tutees.forEach(uid => dataToSave[`users/${uid}/tuteeSessions/${sessionId}`] = null);
+			dataToSave[`whiteboardsBySessions/${sessionId}`] = null;
+			// below are only for the public sessions, because we want the private sessions to be unsearchable in the catalogs
+			if (session.listed) {
+				dataToSave[`listedSessions/${sessionId}`] = null;
+				session.tags.forEach(tag => dataToSave[`sessionsByTags/${tag}/${sessionId}`] = null);
+				if (AllowedSubjects.find((val) => session.subject === val)) {
+					dataToSave[`sessionsBySubject/${session.subject}/${sessionId}`] = null;
+				}
+				if (session.grade > 0 && session.grade <= 12) {
+					dataToSave[`sessionsByGrade/${session.grade}/${sessionId}`] = null;
+				}
+				dataToSave[`sessionsByClassStr/${session.classStr}/${sessionId}}`] = null;
+				dataToSave[`sessionsByYwd/${ywd}/${sessionId}`] = null;
+			}
 
-			return this.firebaseUpdate(dataToSave);
+			dataToSave['sessions/' + sessionId] = null;
+
+			return this.firebaseUpdate(dataToSave)
+				.flatMap(val => {
+					return Observable.combineLatest([
+						this.permissionsService.deletePermission(sessionId, 'session'),
+						this.permissionsService.deletePermission(session.chat, 'chat'),
+						Observable.combineLatest(session.whiteboards.map(wb => this.permissionsService.deletePermission(wb.$key, 'whiteboard')))
+					])
+				});
 		});
 	}
 
@@ -441,17 +467,26 @@ export class SessionService {
 	}
 
 	addWb(sessionId: string): Observable<any> {
-		return this.whiteboardService.createWhiteboard(defaultWhiteboardOptions).flatMap(wb => {
-			let pushVal = {};
-			pushVal[wb.key] = true;
-			return this.promiseToObservable(this.db.list('whiteboardsBySessions/').update(sessionId, pushVal));
-		});
+		return this.findSession(sessionId)
+			.flatMap(session => {
+				return this.whiteboardService.createWhiteboard(defaultWhiteboardOptions).flatMap(wb => {
+					let pushVal = {};
+					pushVal[wb.key] = true;
+					return this.promiseToObservable(this.db.list('whiteboardsBySessions/').update(sessionId, pushVal))
+						.flatMap(val => {
+							return this.permissionsService.createPermission(wb.key, 'whiteboard', this.permForUsers(session.tutees.concat([session.tutor])));
+						});
+				});
+			});
 	}
 
 	deleteWb(sessionId: string, wbKey: string): Observable<any> {
 		return this.promiseToObservable(this.db.list('whiteboardsBySessions/' + sessionId).remove(wbKey))
 			.flatMap(val => {
 				return this.promiseToObservable(this.db.list('whiteboards').remove(wbKey));
+			})
+			.flatMap(val => {
+				return this.permissionsService.deletePermission(wbKey, 'whiteboard');
 			});
 	}
 

@@ -1,3 +1,5 @@
+import { Observable } from 'rxjs/Rx';
+
 // Helper function to transform array to object with properties as array's values and values as true
 export function arrToObj(arr: string[]): {[key: string]: true} {
 	let objTmp = {};
@@ -34,8 +36,61 @@ export function arraysEqual(a: Array<any>, b: Array<any>) {
 	a.sort();
 	b.sort();
 
-	for (var i = 0; i < a.length; ++i) {
+	for (let i = 0; i < a.length; ++i) {
 		if (a[i] !== b[i]) {return false; }
 	}
 	return true;
+}
+
+export function getEditDistance(a, b){
+	if(a.length === 0) {return b.length; }
+	if(b.length === 0) {return a.length; }
+
+	let matrix = [];
+
+	// increment along the first column of each row
+	let i;
+	for(i = 0; i <= b.length; i++){
+	matrix[i] = [i];
+	}
+
+	// increment each column in the first row
+	let j;
+	for(j = 0; j <= a.length; j++){
+	matrix[0][j] = j;
+	}
+
+	// Fill in the rest of the matrix
+	for (i = 1; i <= b.length; i++){
+	for (j = 1; j <= a.length; j++){
+		if (b.charAt(i - 1) === a.charAt(j - 1)){
+		matrix[i][j] = matrix[i - 1][j - 1];
+		} else {
+		matrix[i][j] = Math.min(matrix[i - 1][j - 1] + 1, // substitution
+								Math.min(matrix[i][j - 1] + 1, // insertion
+										matrix[i - 1][j] + 1)); // deletion
+		}
+	}
+	}
+
+	return matrix[b.length][a.length];
+};
+
+export function combineLatestObj(obj) {
+	let sources = [];
+	let keys = [];
+	for (var key in obj) {
+	if (obj.hasOwnProperty(key)) {
+		keys.push(key.replace(/\$$/, ''));
+		sources.push(obj[key]);
+	}
+	}
+	return Observable.combineLatest(sources, function () {
+	let argsLength = arguments.length;
+	let combination = {};
+	for (let i = argsLength - 1; i >= 0; i--) {
+		combination[keys[i]] = arguments[i];
+	}
+	return combination;
+	})
 }

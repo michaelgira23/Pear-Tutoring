@@ -60,6 +60,10 @@ export class PermissionsService {
 		return this.af.database.object(`${type}Permissions/${$key}`);
 	}
 
+	deletePermission($key: string, type: PermissionsType): Observable<any> {
+		return this.promiseToObservable(this.getPermission($key, type).remove());
+	}
+
 	getUserPermission($key: string, type: PermissionsType): Observable<any> {
 		return this.getPermission($key, type)
 			.map(data => {

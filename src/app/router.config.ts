@@ -98,7 +98,7 @@ export const routerConfig: Route[] = [
 				component: SessionComponent
 			},
 			{
-				path: ':/permissions',
+				path: ':id/permissions',
 				component: SessionPermissionsComponent
 			}
 		],
