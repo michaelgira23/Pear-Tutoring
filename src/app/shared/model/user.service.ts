@@ -66,9 +66,10 @@ export class UserService {
 		.map(User.fromJsonList)
 		.map(users => {
 			return users.filter(user => {
+				// getEditDistance(user.firstName, str) < str.length / 2 || getEditDistance(user.lastName, str) < str.length / 2
 				return getEditDistance(user.name, str) < str.length / 2;
-			})
-		})
+			});
+		});
 	}
 
 	uploadPfp(pfp: File): Observable<any> {

@@ -53,7 +53,6 @@ export class PermissionsService {
 
 		const permissions = this.af.database.object(`${type}Permissions/${$key}`);
 
-		console.log(correctedPerm);
 		return this.promiseToObservable(permissions.set(correctedPerm));
 	}
 
@@ -63,6 +62,13 @@ export class PermissionsService {
 
 	deletePermission($key: string, type: PermissionsType): Observable<any> {
 		return this.promiseToObservable(this.getPermission($key, type).remove());
+	}
+
+	updatePermission($key: string, type: PermissionsType, perm: any) {
+		let permToSave: any = Object.assign({}, perm);
+		delete permToSave.$exists;
+		delete permToSave.$key;
+		return this.promiseToObservable(this.af.database.object(`${type}Permissions/${$key}`).set(permToSave));
 	}
 
 	getUserPermission($key: string, type: PermissionsType): Observable<any> {

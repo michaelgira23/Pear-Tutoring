@@ -1,4 +1,5 @@
 <h2>Permissions for Session: {{ sessionInfo?.title }}</h2>
+<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" (click)="savePerms()">Save Changes</button>
 <ul class="mdl-list">
   <div class="list-item-container" *ngFor="let user of sessionInfo?.tutees; let index = i">
     <li class="mdl-list__item user-display">
@@ -11,7 +12,7 @@
         </button>
       </span>
     </li>
-    <ul class="mdl-list perm-dropdown mdl-shadow--6dp" [class.open]="dropdownList[user.$key]">
+    <ul class="mdl-list perm-dropdown mdl-shadow--6dp" [class.open]="dropdownList[user.$key]" *ngIf="perms.originalObj">
       <div class="list-item-container" *ngFor="let permType of permsTypes">
         <li class="mdl-list__item">
           <span class="mdl-list__item-primary-content">
@@ -32,7 +33,7 @@
         <ul class="mdl-list" *ngIf="perms.originalObj[permType].length">
           <div class="list-item-container" *ngFor="let item of perms.originalObj[permType], let i = index">
             <li class="mdl-list__item">
-              <span class="mdl-list__item-primary-content">{{ sessionInfo[permType][i].name }}</span>
+              <span class="mdl-list__item-primary-content">{{ sessionInfo.whiteboards[i].name }}</span>
               <span class="mdl-list__item-secondary-action permission-checkboxes">
                 <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" [attr.for]="permType + '-read-' + user.$key + i" [class.is-checked]="item.user[user.$key].read">
                   <input type="checkbox" [id]="permType + '-read-' + user.$key + i" [checked]="item.user[user.$key].read" class="mdl-checkbox__input" [(ngModel)]="perms.originalObj[permType][i].user[user.$key].read" />

@@ -406,12 +406,12 @@ export class SessionService {
 	deleteSession(sessionId: string): Observable<any> {
 		// calling update null on a location in the database will cause it to be deleted.
 		if (!this.uid) { return Observable.throw('Rip no login info'); };
-		return this.findSession(sessionId).flatMap((session: Session) => {
+		return this.findSession(sessionId).take(1).flatMap((session: Session) => {
 			let dataToSave = {};
 			let ywd = session.start.format('YYYY-WW-E');
 			dataToSave['usersInSession/' + sessionId] = null;
 			dataToSave[`users/${this.uid}/tutorSessions/${sessionId}`] = null;
-			session.tutees.forEach(uid => dataToSave[`users/${uid}/tuteeSessions/${sessionId}`] = null);
+			session.tutees.forEach(user => dataToSave[`users/${user.$key}/tuteeSessions/${sessionId}`] = null);
 			dataToSave[`whiteboardsBySessions/${sessionId}`] = null;
 			// below are only for the public sessions, because we want the private sessions to be unsearchable in the catalogs
 			if (session.listed) {
@@ -427,16 +427,16 @@ export class SessionService {
 				dataToSave[`sessionsByYwd/${ywd}/${sessionId}`] = null;
 			}
 
-			dataToSave['sessions/' + sessionId] = null;
+			// dataToSave['sessions/' + sessionId] = null;
 
 			return this.firebaseUpdate(dataToSave)
-				.flatMap(val => {
-					return Observable.combineLatest([
-						this.permissionsService.deletePermission(sessionId, 'session'),
-						this.permissionsService.deletePermission(session.chat, 'chat'),
-						Observable.combineLatest(session.whiteboards.map(wb => this.permissionsService.deletePermission(wb.$key, 'whiteboard')))
-					])
-				});
+				// .switchMap(val => {
+				// 	return Observable.combineLatest([
+				// 		this.permissionsService.deletePermission(sessionId, 'session'),
+				// 		this.permissionsService.deletePermission(session.chat, 'chat'),
+				// 		Observable.combineLatest(session.whiteboards.map(wb => this.permissionsService.deletePermission(wb.$key, 'whiteboard')))
+				// 	])
+				// });
 		});
 	}
 
@@ -474,7 +474,11 @@ export class SessionService {
 					pushVal[wb.key] = true;
 					return this.promiseToObservable(this.db.list('whiteboardsBySessions/').update(sessionId, pushVal))
 						.flatMap(val => {
-							return this.permissionsService.createPermission(wb.key, 'whiteboard', this.permForUsers(session.tutees.concat([session.tutor])));
+							return this.permissionsService.createPermission(
+								wb.key,
+								'whiteboard',
+								this.permForUsers(session.tutees.concat([session.tutor]).map(user => user.$key))
+							);
 						});
 				});
 			});
