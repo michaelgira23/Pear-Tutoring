@@ -1,5 +1,6 @@
+import * as snapRounding from '../utils/snap-rounding';
 import { WhiteboardComponent } from './../whiteboard.component';
-declare const paper;
+declare const paper: any;
 
 export class Cursor {
 
@@ -18,13 +19,10 @@ export class Cursor {
 	resizing: boolean;
 	// item that was clicked - resizing ignores other selected items
 	originalItem: any;
-	// are we resizing an item horizontally, vertically, or both? depends on what part of its bounding box we drag
-	// implicit in hitTop is hitBottom, since you can only get the top or bottom of a bounding rectangle
-	// so if hitTop is true, hitBottom is false, and vice versa. same with hitLeft and hitRight
-	hitTop: boolean;
-	hitBottom: boolean;
-	hitLeft: boolean;
-	hitRight: boolean;
+	// original item's corresponding serialized data
+	originalItemSerialized: any;
+	// Opposite corner of corner being resized
+	oppositeCorner: any;
 	/* MOVING */
 	moving: boolean;
 	// mouse coords after the last mousemove() function
@@ -79,12 +77,8 @@ export class Cursor {
 			if (hit.type === 'bounds') {
 				this.resizing = true;
 				this.originalItem = item;
-				// which anchor point is being dragged?
-				this.hitTop = hit.point.y === item.bounds.top;
-				this.hitBottom = hit.point.y === item.bounds.bottom;
-				this.hitLeft = hit.point.x === item.bounds.left;
-				this.hitRight = hit.point.x === item.bounds.right;
-
+				this.originalItemSerialized = this.whiteboard.paperIdToSerializedObject(item.id);
+				this.oppositeCorner = snapRounding.getFarthestPoint(item.bounds, point);
 			} else {
 				this.moving = true;
 			}
@@ -108,34 +102,22 @@ export class Cursor {
 
 			// RESIZING
 			if (this.resizing) {
-				// In order to edit the item's bounds, we must pick a point that is diagonal
-				// from where the mouse started dragging. we do this through addX and addY
-				// if mouse drags on right, we want the left side point, which means addX = 0
-				let addX = 0;
-				if (this.hitRight) {
 
-				} else if (this.hitLeft) {
-					// if mouse drags on left, we want the right side point, which means addX = width
-					addX = this.originalBounds.width;
-				} else {
-					// if mouse drags neither, we use the left side point, and set the mouse x coordinate
-					// to a constant: the originalBound's right side (so the x-scale doesn't change)
-					point.x = this.originalBounds.x + this.originalBounds.width;
-				}
-				// same with Y
-				let addY = 0;
-				if (this.hitBottom) {
+				let ratio: number | false = false;
 
-				} else if (this.hitTop) {
-					addY = this.originalBounds.height;
-				} else {
-					point.y = this.originalBounds.y + this.originalBounds.height;
+				if (this.whiteboard.shiftKey) {
+					if (this.originalItemSerialized) {
+						ratio = this.originalItemSerialized.original.bounds.height / this.originalItemSerialized.original.bounds.width;
+					} else {
+						ratio = 1;
+					}
 				}
 
-				let scalePoint = new paper.Point(this.originalBounds.x + addX, this.originalBounds.y + addY);
+				const resizeBounds = snapRounding.getRect(this.oppositeCorner, point, ratio);
+
 				// prevents shape from degenerating into a limp ass line
-				if (scalePoint.x !== point.x && scalePoint.y !== point.y) {
-					this.originalItem.bounds = new paper.Rectangle(scalePoint, point);
+				if (resizeBounds.width > 0 && resizeBounds.height > 0) {
+					this.originalItem.bounds = resizeBounds;
 				}
 
 			// MOVING

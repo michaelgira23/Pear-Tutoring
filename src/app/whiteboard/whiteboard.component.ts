@@ -424,6 +424,35 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	 * General functions
 	 */
 
+	paperIdToSerializedObject(id): any {
+		// Return corresponding serialized database object from paper id
+		const markingKey = this.markingIdToPushKey(id);
+		const textKey = this.textIdToPushKey(id);
+		const imageKey = this.imageIdToPushKey(id);
+
+		if (markingKey) {
+			for (let i = 0; i < this.markings.length; i++) {
+				if (this.markings[i].$key === markingKey) {
+					return this.markings[i];
+				}
+			}
+		} else if (textKey) {
+			for (let i = 0; i < this.text.length; i++) {
+				if (this.text[i].$key === textKey) {
+					return this.text[i];
+				}
+			}
+		} else if (imageKey) {
+			for (let i = 0; i < this.images.length; i++) {
+				if (this.images[i].$key === imageKey) {
+					return this.images[i];
+				}
+			}
+		}
+
+		return null;
+	}
+
 	cursorPoint(event) {
 		// Return a paper.js point where the mouse is at relative to the canvas
 		const canvasPos = this.canvasEl.getBoundingClientRect();

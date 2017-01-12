@@ -77,6 +77,7 @@ export interface Metadata {
 	created: number | any; // `any` for firebase.database.ServerValue.TIMESTAMP
 	createdBy: string;
 	edits?: Edits;
+	original?: any;
 }
 
 // Key should be timestamp, value should be any property changed

@@ -48,7 +48,7 @@ export class Shape {
 			this.startPoint = this.whiteboard.cursorPoint(event);
 
 			// Create a rectangle for the shape bounds
-			this.creationRect = snapRounding.getRect(this.startPoint, this.startPoint, this.whiteboard.shiftKey);
+			this.creationRect = snapRounding.getRect(this.startPoint, this.startPoint, this.whiteboard.shiftKey ? 1 : false);
 
 			// Create point from shadow offset
 			let paperOptions = styles.deserialize(this.whiteboard.styleOptions);
@@ -216,7 +216,7 @@ export class Shape {
 				return;
 			}
 
-			this.creationRect = snapRounding.getRect(this.startPoint, point, this.whiteboard.shiftKey);
+			this.creationRect = snapRounding.getRect(this.startPoint, point, this.whiteboard.shiftKey ? 1 : false);
 
 			// Shapes will not show up anymore if their height and width are zero
 			if (this.creationRect.width > 0 && this.creationRect.height > 0) {
@@ -225,7 +225,7 @@ export class Shape {
 					case 'arc':
 						// Check if we are on the second phase of the arc
 						if (this.arcPoint) {
-							let secondPhaseRect = snapRounding.getRect(this.arcPoint, point, this.whiteboard.shiftKey);
+							let secondPhaseRect = snapRounding.getRect(this.arcPoint, point, this.whiteboard.shiftKey ? 1 : false);
 
 							// Calculate the third point on the arc
 							let linePoint = null;

@@ -369,6 +369,9 @@ export class WhiteboardService {
 			return item;
 		}
 
+		// Add original properties to an `original` property
+		item.original = JSON.parse(JSON.stringify(item));
+
 		// Convert edits to arrays. We don't care about push keys.
 		let edits = [];
 		const editKeys = Object.keys(item.edits);
