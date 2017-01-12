@@ -1,4 +1,5 @@
 import { Component, HostListener, OnInit, OnChanges, OnDestroy, SimpleChanges, Input } from '@angular/core';
+import { DomSanitizer } from '@angular/platform-browser';
 
 import { ChatService, Message, Status } from '../shared/model/chat.service';
 import { NamePipe } from '../shared/model/name.pipe';
@@ -43,6 +44,7 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 
 	constructor(
 		private chatService: ChatService,
+		private sanitizer: DomSanitizer,
 		private notificationsService: NotificationsService,
 		private permissionsService: PermissionsService,
 		private userService: UserService
@@ -56,7 +58,7 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 			}
 		);
 
-		MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
+		this.reTypeset();
 	}
 
 	ngOnChanges(changes: SimpleChanges) {
@@ -99,10 +101,7 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 					}
 
 					this.allMessages = data;
-
-					// TODO: Only re-typeset the new messages. At the moment, this re-typesets everything on the page.
-					MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
-
+					this.reTypeset();
 					this.mergeEntries();
 				},
 				err => {
@@ -142,7 +141,6 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 	}
 
 	send(message: string) {
-		console.log(this.mathMode);
 		// Escape extra backtick characters, since we don't want them to be interpreted as AsciiMath.
 		let formattedMessage = message.replace(/`/g, '&#96;');
 
@@ -182,11 +180,27 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 		}
 	}
 
+	reTypeset() {
+		let containsBackticks = this.allMessages.some((msg, _, __) => {
+			return msg.text.includes('`');
+		});
+
+		if (containsBackticks) {
+			// TODO: Only re-typeset the new messages. At the moment, this re-typesets everything on the page.
+			MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
+		}
+	}
+
+	msgFormat(msg: Message) {
+		let name = new NamePipe().transform(msg.from, true);
+		let text = this.sanitizer.bypassSecurityTrustHtml(msg.text);
+		return `From ${name}: ${text}`;
+	}
+
 	notificationFormat(msg: Message) {
 		const truncateLength = 100;
 
-		let name = new NamePipe().transform(msg.from, true);
-		let notificationMsg = `From ${name}: ${msg.text}`;
+		let notificationMsg = this.msgFormat(msg);
 
 		let result = notificationMsg.substring(0, truncateLength);
 
