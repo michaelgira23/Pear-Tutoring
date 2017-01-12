@@ -157,12 +157,12 @@ export class SessionService {
 
 	combineWithWb(sessionQuery: Observable<any>): Observable<Session[]> {
 		let sessionWithWb;
-		return sessionQuery.flatMap(val => {
+		return sessionQuery.switchMap(val => {
 			sessionWithWb = val;
 			return this.db.list('whiteboardsBySessions/' + val.$key);
 		})
 		// returns a list of whiteboard key that belongs to the session
-		.flatMap(wbKeys => {
+		.switchMap(wbKeys => {
 			return this.checkAndCombine(wbKeys.map(wbKey => {
 				return this.db.object('whiteboards/' + wbKey.$key);
 			}));
@@ -467,7 +467,7 @@ export class SessionService {
 	}
 
 	addWb(sessionId: string): Observable<any> {
-		return this.findSession(sessionId)
+		return this.findSession(sessionId).take(1)
 			.flatMap(session => {
 				return this.whiteboardService.createWhiteboard(defaultWhiteboardOptions).flatMap(wb => {
 					let pushVal = {};
@@ -485,7 +485,7 @@ export class SessionService {
 			.flatMap(val => {
 				return this.promiseToObservable(this.db.list('whiteboards').remove(wbKey));
 			})
-			.flatMap(val => {
+			.switchMap(val => {
 				return this.permissionsService.deletePermission(wbKey, 'whiteboard');
 			});
 	}

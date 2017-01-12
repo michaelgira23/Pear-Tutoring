@@ -53,6 +53,7 @@ export class PermissionsService {
 
 		const permissions = this.af.database.object(`${type}Permissions/${$key}`);
 
+		console.log(correctedPerm);
 		return this.promiseToObservable(permissions.set(correctedPerm));
 	}
 

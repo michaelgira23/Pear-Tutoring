@@ -58,4 +58,5 @@
   <div class="whiteboard-container" *ngIf="sessionExist">
     <app-whiteboard  [key]="selectedWb?.$key"></app-whiteboard>
   </div>
+  {{ sessionInfo?.whiteboards | json}}
 </div>

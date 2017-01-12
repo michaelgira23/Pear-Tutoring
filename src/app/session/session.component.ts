@@ -65,15 +65,19 @@ export class SessionComponent implements OnInit, OnDestroy {
 
 	addWb() {
 		this.sessionService.addWb(this.sessionId).subscribe(val => {
-			this.selectedWbIndex = this.sessionInfo.whiteboards.length - 1;
+			if (this.selectedWbIndex > 0) {
+				this.selectedWbIndex = this.sessionInfo.whiteboards.length - 1;
+			}
 			console.log('added Whiteboard');
 		}, console.log);
 	}
 
 	deleteWb() {
-		if (this.selectedWb || this.sessionInfo.whiteboards.length > 0) {
+		if (this.selectedWb || this.sessionInfo.whiteboards.length > 1) {
 			this.sessionService.deleteWb(this.sessionId, this.selectedWb.$key).subscribe(val => {
-				this.selectedWbIndex -= 1;
+				if (this.selectedWbIndex > 0) {
+					this.selectedWbIndex -= 1;
+				}
 				console.log('deleted whiteboard');
 			}, console.log);
 		}
