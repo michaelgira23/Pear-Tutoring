@@ -6,7 +6,6 @@ import { NamePipe } from '../shared/model/name.pipe';
 import { NotificationsService } from '../shared/model/notifications.service';
 import { PermissionsService } from '../shared/security/permissions.service';
 import { UserService } from '../shared/model/user.service';
-import { UUID } from 'angular2-uuid';
 
 declare global {
 	interface Array<T> {
@@ -26,9 +25,6 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 	@Input()
 	key: string = 'anonymous';
 	keyChanged: boolean;
-
-	equations: EquationMap = {};
-	mathMode: boolean = false;
 
 	messageSubscription: any;
 	statusSubscription: any;
@@ -90,10 +86,6 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 									'New message',
 									this.notificationFormat(msg)
 								);
-
-								let eqnUuid = UUID.UUID();
-								this.equations[(<any>msg).$key] = eqnUuid;
-								this.reTypeset(eqnUuid);
 							}
 						}
 					} else {
@@ -106,6 +98,7 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 
 					this.allMessages = data;
 					this.mergeEntries();
+					this.reTypeset();
 				},
 				err => {
 					console.log(`Getting chat messages error: ${err}`);
@@ -144,15 +137,7 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 	}
 
 	send(message: string) {
-		// Escape extra backtick characters, since we don't want them to be interpreted as AsciiMath.
-		let formattedMessage = message.replace(/`/g, '&#96;');
-
-		if (this.mathMode) {
-			// If we're in math input mode, surround the message in backticks so it gets interpreted as AsciiMath.
-			formattedMessage = '`' + formattedMessage + '`';
-		}
-
-		this.chatService.sendMessage(formattedMessage, this.key).subscribe(
+		this.chatService.sendMessage(message, this.key).subscribe(
 			data => {},
 			err => {
 				console.log(`Sending message error: ${err}`);
@@ -183,20 +168,17 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 		}
 	}
 
-	reTypeset(uuid?: string) {
-		console.log('retypeset called with uuid', uuid, document.getElementById(uuid), this.equations);
-		MathJax.Hub.Queue(['Typeset', MathJax.Hub, uuid]);
-	}
-
-	msgFormat(msg: Message) {
-		let name = new NamePipe().transform(msg.from);
-		return `From ${name}: ${msg.text}`;
+	reTypeset() {
+		// README: i honestly do not care enough to have this refresh each individual item.
+		// it's a demo. not worth the effort at the moment
+		MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
 	}
 
 	notificationFormat(msg: Message) {
 		const truncateLength = 100;
 
-		let notificationMsg = this.msgFormat(msg);
+		let name = new NamePipe().transform(msg.from, true);
+		let notificationMsg = `From ${name}: ${msg.text}`;
 
 		let result = notificationMsg.substring(0, truncateLength);
 

@@ -2,7 +2,7 @@
 	<div *ngIf="currentPerms.read">
 		<div class="chat-list" *ngFor="let entry of allEntries">
 			<div *ngIf="isMessage(entry)">
-				<li class="message" [id]="equations[entry.$key]" [innerHTML]="msgFormat(entry) | safeHtml"></li>
+				<li class="message">From {{ entry.from | name }}: {{ entry.text }}</li>
 			</div>
 			<div *ngIf="isStatus(entry)">
 				<li class="status">{{ entry.user | name:true }} {{ statusVerb(entry) }} the chat room</li>
@@ -15,9 +15,5 @@
 </ol>
 <form #msgForm (submit)="send(msgBox.value); msgForm.reset()">
 	<input #msgBox placeholder="type your message here!" required>
-	<label class="mdl-icon-toggle mdl-js-icon-toggle mdl-js-ripple-effect" [class.is-checked]="mathMode" for="math-toggle">
-		<input type="checkbox" id="math-toggle" class="mdl-icon-toggle__input" name="math-toggle" [checked]="mathMode" [(ngModel)]="mathMode">
-		<i class="mdl-icon-toggle__label material-icons">equalizer</i>
-	</label>
 	<button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised mdl-button--colored" [disabled]="!currentPerms.write">Send</button>
 </form>
