@@ -78,6 +78,7 @@ export interface Metadata {
 	createdBy: string;
 	edits?: Edits;
 	original?: any;
+	resizeRatio?: number;
 }
 
 // Key should be timestamp, value should be any property changed

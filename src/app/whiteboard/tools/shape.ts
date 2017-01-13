@@ -185,7 +185,7 @@ export class Shape {
 
 		// If we don't have permission to read, erase shape.
 		// Otherwise, it will be erased when the database responds with new data.
-		if (!this.whiteboard.permissions.read) {
+		if (!this.whiteboard.shouldRead) {
 			this.clearCurrentShape();
 		}
 	}

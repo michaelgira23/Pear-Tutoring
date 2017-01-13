@@ -48,22 +48,35 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	// Future permissions subscription
 	permissionsSubscription: any;
 	// Scopes of permissions
-	permissions: any = {};
+	private _permissions: any = {};
 
 	// Whether or not user can make changes to whiteboard.
 	// While behavior is the same for permissions.write, this is controlled by client ans is for display purposes only.
 	// It is independent of whether the user actually has read/write permissions.
 	@Input()
-	allowWrite: boolean = false;
+	get allowWrite() {
+		return this._allowWrite;
+	}
+	set allowWrite(value) {
+		// Save old permissions first
+		const oldPermissions = {
+			read: this.shouldRead,
+			write: this.shouldWrite
+		};
+		this._allowWrite = value;
+		this.triggerToolEvent(this.tool, 'changepermissions', oldPermissions);
+	}
+
+	private _allowWrite: boolean = false;
 
 	// Hook shouldRead directly to read permissions
 	get shouldRead() {
-		return this.permissions.read;
+		return this._permissions.read;
 	}
 
 	// Only write to the whiteboard if 1) User has permissions and 2) Components want user to write
 	get shouldWrite() {
-		return this.permissions.write && this.allowWrite;
+		return this._permissions.write && this.allowWrite;
 	}
 
 	// Markings subscription
@@ -319,12 +332,13 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	changepermissions(oldPermissions) {
 
 		// Check if permissions changed
-		const readChanged = this.permissions.read !== oldPermissions.read;
-		const writeChanged = this.permissions.write !== oldPermissions.write;
+		const readChanged = this.shouldRead !== oldPermissions.read;
+		const writeChanged = this.shouldWrite !== oldPermissions.write;
 
-		console.log('new permissions', this.permissions);
+		console.log(`new permissions read: ${this.shouldRead}, write: ${this.shouldWrite}`);
+
 		if (readChanged) {
-			if (this.permissions.read) {
+			if (this.shouldRead) {
 				// Initialize whiteboard with key
 				this.tuneWhiteboard(this.key);
 			} else {
@@ -335,7 +349,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 			}
 		}
 
-		if (writeChanged && !this.permissions.write) {
+		if (writeChanged && !this.shouldWrite) {
 			// If we don't have write permissions, hide toolbar and select cursor tool
 			this.changeTool('cursor');
 		}
@@ -540,9 +554,12 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 				this.permissionsSubscription = this.permissionsService.getUserPermission(this.key, 'whiteboard')
 					.subscribe(
 						permissions => {
-							// Emit old permissions first
-							const oldPermissions = JSON.parse(JSON.stringify(this.permissions));
-							this.permissions = permissions;
+							// Save old permissions first
+							const oldPermissions = {
+								read: this.shouldRead,
+								write: this.shouldWrite
+							};
+							this._permissions = permissions;
 							this.triggerToolEvent(this.tool, 'changepermissions', oldPermissions);
 						},
 						err => {
@@ -777,12 +794,12 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 					continue;
 				}
 
-				// Update options onto existing marking on canvas
+				// Update options onto existing text on canvas
 				Object.assign(this.canvasText[text.$key], paperOptions);
 				// Set bounds here because it doesn't work in object init for some reason
 				this.canvasText[text.$key].bounds = rectangles.deserialize(text.bounds);
 			} else if (!text.erased) {
-				// Create new marking on whiteboard
+				// Create new text on whiteboard
 				this.canvasText[text.$key] = new paper.PointText(paperOptions);
 				// Set bounds here because it doesn't work in object init for some reason
 				this.canvasText[text.$key].bounds = rectangles.deserialize(text.bounds);
@@ -813,8 +830,13 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 
 	clearCurrentText() {
 		// Erase current text too if it isn't in the process of being created
+		console.log('clear current text');
 		if (this.tools.text.currentText && this.tools.text.currentTextFinished) {
-			this.tools.text.currentText.remove();
+			// If we are editing current text, that means it's already on whiteboard and already registered in database.
+			// We should not remove then.
+			if (!this.tools.text.editingCurrentText) {
+				this.tools.text.currentText.remove();
+			}
 			this.tools.text.currentText = null;
 		}
 	}

@@ -185,7 +185,8 @@ export class Cursor {
 	}
 
 	changepermissions(permissions) {
-		if (!permissions.write) {
+		// If not allowed to write, clear selection path so we don't select anything
+		if (!this.whiteboard.shouldWrite) {
 			this.clearSelectionPath();
 		}
 	}
@@ -210,8 +211,8 @@ export class Cursor {
 				let ratio: number | false = false;
 
 				if (this.whiteboard.shiftKey) {
-					if (this.originalItemSerialized) {
-						ratio = this.originalItemSerialized.original.bounds.height / this.originalItemSerialized.original.bounds.width;
+					if (this.originalItemSerialized && this.originalItemSerialized.resizeRatio) {
+						ratio = this.originalItemSerialized.resizeRatio;
 					} else {
 						ratio = 1;
 					}

@@ -410,7 +410,14 @@ export class WhiteboardService {
 			}
 		});
 
-		// Delete edits and return
+		// Add ratio for resizing. If image, use original height and width. If text, use current height and width.
+		if (itemType === 'image') {
+			item.resizeRatio = (<WhiteboardImage>item).original.bounds.height / (<WhiteboardImage>item).original.bounds.width;
+		} else if (itemType === 'text') {
+			item.resizeRatio = (<WhiteboardText>item).bounds.height / (<WhiteboardText>item).bounds.width;
+		}
+
+		// Delete edits
 		delete item.edits;
 		return item;
 	}

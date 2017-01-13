@@ -23,7 +23,7 @@
 	</div>
 </form>
 
-<ng-container *ngIf="permissions.write && allowWrite">
+<ng-container *ngIf="shouldWrite">
 	<!-- Tool selection -->
 	<div class="tool-selection">
 		<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect"

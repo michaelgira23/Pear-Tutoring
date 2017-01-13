@@ -97,13 +97,10 @@ export class Text {
 			// Prompt user for text
 			const content = prompt(promptMessage, this.currentText.content);
 
-			// If user cancelled prompt, delete
-			if (content === null) {
-				this.clearCurrentText();
-				return;
+			// If user cancelled prompt, don't change text
+			if (content !== null) {
+				this.currentText.content = content;
 			}
-
-			this.currentText.content = content;
 
 			// Save text
 			const textOptions: WhiteboardTextOptions = {
@@ -142,7 +139,7 @@ export class Text {
 
 		// If we don't have permission to read, erase text.
 		// Otherwise, it will be erased when the database responds with new data.
-		if (!this.whiteboard.permissions.read) {
+		if (!this.whiteboard.shouldRead) {
 			this.clearCurrentText();
 		}
 	}
@@ -153,7 +150,9 @@ export class Text {
 
 	clearCurrentText() {
 		this.currentTextFinished = true;
-		if (this.currentText) {
+		// If we are editing current text, that means it's already on whiteboard and already registered in database.
+		// We should not remove then.
+		if (this.currentText && !this.editingCurrentText) {
 			this.currentText.remove();
 		}
 		this.currentText = null;
