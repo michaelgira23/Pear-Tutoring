@@ -1,5 +1,6 @@
+import * as snapRounding from '../utils/snap-rounding';
 import { WhiteboardComponent } from './../whiteboard.component';
-declare const paper;
+declare const paper: any;
 
 export class Cursor {
 
@@ -7,6 +8,8 @@ export class Cursor {
 
 	// mouse coords at original click
 	startPoint: any;
+	// mouse coords currently at
+	currentPoint: any;
 	// original bounds at moment transform started
 	originalBounds: any;
 	// options for hit test
@@ -18,13 +21,10 @@ export class Cursor {
 	resizing: boolean;
 	// item that was clicked - resizing ignores other selected items
 	originalItem: any;
-	// are we resizing an item horizontally, vertically, or both? depends on what part of its bounding box we drag
-	// implicit in hitTop is hitBottom, since you can only get the top or bottom of a bounding rectangle
-	// so if hitTop is true, hitBottom is false, and vice versa. same with hitLeft and hitRight
-	hitTop: boolean;
-	hitBottom: boolean;
-	hitLeft: boolean;
-	hitRight: boolean;
+	// original item's corresponding serialized data
+	originalItemSerialized: any;
+	// Opposite corner of corner being resized
+	oppositeCorner: any;
 	/* MOVING */
 	moving: boolean;
 	// mouse coords after the last mousemove() function
@@ -39,7 +39,7 @@ export class Cursor {
 			fill: true,
 			stroke: true,
 			bounds: true,
-			tolerance: 5,
+			tolerance: 10,
 			match: result => {
 				return result.item.id !== this.whiteboard.background.id;
 			}
@@ -51,12 +51,18 @@ export class Cursor {
 	 */
 
 	mousedown(event) {
-		const point = this.whiteboard.cursorPoint(event);
-		// set start point to current mouse position
-		this.startPoint = point;
-		this.lastPoint = point;
+		// If no permissions, deselect all items
+		if (!this.whiteboard.shouldWrite) {
+			this.whiteboard.deselectAllItems();
+			return;
+		}
 
-		const hit = paper.project.hitTest(point, this.hitOptions);
+		this.currentPoint = this.whiteboard.cursorPoint(event);
+		// set start point to current mouse position
+		this.startPoint = this.currentPoint;
+		this.lastPoint = this.currentPoint;
+
+		const hit = paper.project.hitTest(this.currentPoint, this.hitOptions);
 
 		if (hit) {
 			let item = hit.item;
@@ -73,12 +79,8 @@ export class Cursor {
 			if (hit.type === 'bounds') {
 				this.resizing = true;
 				this.originalItem = item;
-				// which anchor point is being dragged?
-				this.hitTop = hit.point.y === item.bounds.top;
-				this.hitBottom = hit.point.y === item.bounds.bottom;
-				this.hitLeft = hit.point.x === item.bounds.left;
-				this.hitRight = hit.point.x === item.bounds.right;
-
+				this.originalItemSerialized = this.whiteboard.paperIdToSerializedObject(item.id);
+				this.oppositeCorner = snapRounding.getFarthestPoint(item.bounds, this.currentPoint);
 			} else {
 				this.moving = true;
 			}
@@ -90,40 +92,137 @@ export class Cursor {
 	}
 
 	mousemove(event) {
+		this.currentPoint = this.whiteboard.cursorPoint(event);
+		this.cursorMove(this.currentPoint);
+	}
+
+	mouseup(event) {
+		// If no permissions, deselect all items
+		if (!this.whiteboard.shouldWrite) {
+			this.whiteboard.deselectAllItems();
+			return;
+		}
+
+		if (!this.selecting) {
+			// Edit all items that are selected
+			this.whiteboard.editItems(this.whiteboard.selectedItems());
+		}
+
+		// Clean everything up
+		this.resizing = false;
+		this.moving = false;
+		this.selecting = false;
+
+		this.clearSelectionPath();
+	}
+
+	keyup(event: KeyboardEvent) {
+		const key = event.keyCode || event.charCode;
+
+		if (key !== 8 && key !== 46) {
+			// Shift key could have changed. Try resizing.
+			this.cursorMove(this.currentPoint);
+			return;
+		}
+
+		// Erase selected markings
+		const markingKeys = Object.keys(this.whiteboard.canvasMarkings);
+		markingKeys.forEach(markingKey => {
+			// If marking is selected, erase
+			if (this.whiteboard.canvasMarkings[markingKey].selected) {
+				this.whiteboard.whiteboardService.eraseMarking(this.whiteboard.key, markingKey)
+					.subscribe(
+						data => {
+							console.log('Erased marking', data);
+						},
+						err => {
+							console.log('Erase marking error', err);
+						}
+					);
+			}
+		});
+
+		// Also erase selected text
+		const textKeys = Object.keys(this.whiteboard.canvasText);
+		textKeys.forEach(textKey => {
+			// If text is selected, erase
+			if (this.whiteboard.canvasText[textKey].selected) {
+				this.whiteboard.whiteboardService.eraseText(this.whiteboard.key, textKey)
+					.subscribe(
+						data => {
+							console.log('Erased text', data);
+						},
+						err => {
+							console.log('Erase text error', err);
+						}
+					);
+			}
+		});
+
+		// Also erase selected image
+		const imageKeys = Object.keys(this.whiteboard.canvasImages);
+		imageKeys.forEach(imageKey => {
+			// If image is selected, erase
+			if (this.whiteboard.canvasImages[imageKey].selected) {
+				this.whiteboard.whiteboardService.eraseImage(this.whiteboard.key, imageKey)
+					.subscribe(
+						data => {
+							console.log('Erased image', data);
+						},
+						err => {
+							console.log('Erase image error', err);
+						}
+					);
+			}
+		});
+
+		// Prevent backspace from going to the previous page
+		event.preventDefault();
+	}
+
+	changetool() {
+		this.whiteboard.deselectAllItems();
+	}
+
+	changepermissions(permissions) {
+		// If not allowed to write, clear selection path so we don't select anything
+		if (!this.whiteboard.shouldWrite) {
+			this.clearSelectionPath();
+		}
+	}
+
+	/**
+	 * Helper functions
+	 */
+
+	cursorMove(point) {
+		// If no permissions, deselect all items
+		if (!this.whiteboard.shouldWrite) {
+			this.whiteboard.deselectAllItems();
+			return;
+		}
+
 		// if mouse is dragged
 		if (this.whiteboard.mouseDown) {
-			const point = this.whiteboard.cursorPoint(event);
 
 			// RESIZING
 			if (this.resizing) {
-				// In order to edit the item's bounds, we must pick a point that is diagonal
-				// from where the mouse started dragging. we do this through addX and addY
-				// if mouse drags on right, we want the left side point, which means addX = 0
-				let addX = 0;
-				if (this.hitRight) {
 
-				} else if (this.hitLeft) {
-					// if mouse drags on left, we want the right side point, which means addX = width
-					addX = this.originalBounds.width;
-				} else {
-					// if mouse drags neither, we use the left side point, and set the mouse x coordinate
-					// to a constant: the originalBound's right side (so the x-scale doesn't change)
-					point.x = this.originalBounds.x + this.originalBounds.width;
-				}
-				// same with Y
-				let addY = 0;
-				if (this.hitBottom) {
+				let ratio: number | false = false;
 
-				} else if (this.hitTop) {
-					addY = this.originalBounds.height;
-				} else {
-					point.y = this.originalBounds.y + this.originalBounds.height;
+				if (this.whiteboard.shiftKey) {
+					if (this.originalItemSerialized && this.originalItemSerialized.resizeRatio) {
+						ratio = this.originalItemSerialized.resizeRatio;
+					} else {
+						ratio = 1;
+					}
 				}
 
-				let scalePoint = new paper.Point(this.originalBounds.x + addX, this.originalBounds.y + addY);
+				const resizeBounds = snapRounding.getRect(this.oppositeCorner, point, ratio);
+
 				// prevents shape from degenerating into a limp ass line
-				if (scalePoint.x !== point.x && scalePoint.y !== point.y) {
-					this.originalItem.bounds = new paper.Rectangle(scalePoint, point);
+				if (resizeBounds.width > 0 && resizeBounds.height > 0) {
+					this.originalItem.bounds = resizeBounds;
 				}
 
 			// MOVING
@@ -161,33 +260,12 @@ export class Cursor {
 		}
 	}
 
-	mouseup(event) {
-		if (this.whiteboard.allowWrite) {
-
-			if (!this.selecting) {
-				// Edit all items that are selected
-				this.whiteboard.editItems(this.whiteboard.selectedItems());
-			}
-
-			// Clean everything up
-			this.resizing = false;
-			this.moving = false;
-			this.selecting = false;
-
-			if (this.selectionPath) {
-				this.selectionPath.remove();
-				this.selectionPath = null;
-			}
+	clearSelectionPath() {
+		if (this.selectionPath) {
+			this.selectionPath.remove();
+			this.selectionPath = null;
 		}
 	}
-
-	changetool() {
-		this.whiteboard.deselectAllItems();
-	}
-
-	/**
-	 * Helper functions
-	 */
 
 	// distance formula
 	distance(x1: number, y1: number, x2: number, y2: number): number {

@@ -22,6 +22,12 @@ export class Text {
 	 */
 
 	mousedown(event) {
+		// If no permissions, delete current text
+		if (!this.whiteboard.shouldWrite) {
+			this.clearCurrentText();
+			return;
+		}
+
 		const point = this.whiteboard.cursorPoint(event);
 
 		if (this.currentTextFinished) {
@@ -59,6 +65,12 @@ export class Text {
 	}
 
 	mousemove(event) {
+		// If no permissions, delete current text
+		if (!this.whiteboard.shouldWrite) {
+			this.clearCurrentText();
+			return;
+		}
+
 		if (this.currentText && !this.currentTextFinished) {
 			const point = this.whiteboard.cursorPoint(event);
 			this.currentText.point = point;
@@ -66,7 +78,13 @@ export class Text {
 	}
 
 	mouseup(event) {
-		if (this.currentText && this.whiteboard.allowWrite) {
+		// If no permissions, delete current text
+		if (!this.whiteboard.shouldWrite) {
+			this.clearCurrentText();
+			return;
+		}
+
+		if (this.currentText && !this.currentTextFinished) {
 			this.currentTextFinished = true;
 
 			let promptMessage = '';
@@ -79,11 +97,9 @@ export class Text {
 			// Prompt user for text
 			const content = prompt(promptMessage, this.currentText.content);
 
-			// If user cancelled prompt, delete
-			if (content === null) {
-				this.currentText.remove();
-				this.currentText = null;
-				return;
+			// If user cancelled prompt, don't change text
+			if (content !== null) {
+				this.currentText.content = content;
 			}
 
 			// Save text
@@ -120,6 +136,26 @@ export class Text {
 					);
 			}
 		}
+
+		// If we don't have permission to read, erase text.
+		// Otherwise, it will be erased when the database responds with new data.
+		if (!this.whiteboard.shouldRead) {
+			this.clearCurrentText();
+		}
+	}
+
+	/**
+	 * Helper functions
+	 */
+
+	clearCurrentText() {
+		this.currentTextFinished = true;
+		// If we are editing current text, that means it's already on whiteboard and already registered in database.
+		// We should not remove then.
+		if (this.currentText && !this.editingCurrentText) {
+			this.currentText.remove();
+		}
+		this.currentText = null;
 	}
 
 }

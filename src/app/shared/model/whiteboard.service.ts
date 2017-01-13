@@ -11,6 +11,7 @@ import { removeRedundant } from '../../whiteboard/utils/diff';
 import { Whiteboard, WhiteboardOptions,
 	WhiteboardMarking, WhiteboardMarkingOptions,
 	WhiteboardText, WhiteboardTextOptions,
+	WhiteboardImage,
 	StyleOptions,
 	Font } from './whiteboard';
 
@@ -39,14 +40,19 @@ const editableTextProperties = [
 	'font'
 ];
 
+const editableImageProperties = [
+	'rotation',
+	'bounds'
+];
+
 const fixedLengthProperties = [
 	'style',
 	'bounds',
 	'font'
 ];
 
-type Item = Whiteboard | WhiteboardMarking | WhiteboardText;
-type ItemType = 'whiteboard' | 'marking' | 'text';
+type Item = Whiteboard | WhiteboardMarking | WhiteboardText | WhiteboardImage;
+type ItemType = 'whiteboard' | 'marking' | 'text' | 'image';
 
 export const defaultWhiteboardOptions: WhiteboardOptions = {
 	name: 'Unnamed Whiteboard',
@@ -101,6 +107,12 @@ export class WhiteboardService {
 			editableProperties: editableTextProperties,
 			getFormatted: this.getFormattedText.bind(this),
 			node: 'whiteboardText',
+			editsInRootNode: false
+		},
+		image: {
+			editableProperties: editableImageProperties,
+			getFormatted: this.getFormattedImage.bind(this),
+			node: 'whiteboardImages',
 			editsInRootNode: false
 		}
 	};
@@ -252,6 +264,92 @@ export class WhiteboardService {
 	}
 
 	/**
+	 * File upload
+	 */
+
+	getImages(whiteboardKey: string): FirebaseListObservable<WhiteboardImage[]> {
+		return this.af.database.list(`whiteboardImages/${whiteboardKey}`);
+	}
+
+	getFormattedImages(whiteboardKey: string): Observable<WhiteboardImage[]> {
+		return this.getImages(whiteboardKey)
+			.map(images => {
+				return <WhiteboardImage[]>images.map(image => this.currentItem('image', image));
+			});
+	}
+
+	getImage(whiteboardKey: string, imageKey: string): FirebaseObjectObservable<WhiteboardImage> {
+		return this.af.database.object(`whiteboardImages/${whiteboardKey}/${imageKey}`);
+	}
+
+	getFormattedImage(whiteboardKey: string, imageKey: string): Observable<WhiteboardImage> {
+		return <Observable<WhiteboardImage>>this.getImage(whiteboardKey, imageKey)
+			.map(image => this.currentItem('image', image));
+	}
+
+	uploadImage(whiteboardKey: string, file: File, x = 0, y = 0): Observable<any> {
+		const subject = new Subject<any>();
+		const pushKey = this.sdkDb.push().key;
+
+		// Initialize file reader
+		const reader = new FileReader();
+		reader.readAsDataURL(file);
+
+		reader.onload = () => {
+
+			// Read image to get dimensions
+			const image = new Image();
+			image.src = reader.result;
+
+			image.onload = () => {
+				// Upload file
+				this.observableToPromise(this.sdkStorage.child(`whiteboardFiles/${whiteboardKey}/${pushKey}`).put(file))
+					.subscribe((uploadedImage: any) => {
+						// Add image object to the whiteboard
+						const whiteboardImage: WhiteboardImage = {
+							created: firebase.database['ServerValue']['TIMESTAMP'],
+							createdBy: this.authInfo ? this.authInfo.uid : null,
+							rotation: 0,
+							bounds: {
+								x,
+								y,
+								width: image.width,
+								height: image.height
+							},
+							name: file.name,
+							url: uploadedImage.metadata.downloadURLs[0]
+						};
+
+						const whiteboardImages = this.af.database.object(`whiteboardImages/${whiteboardKey}/${pushKey}`);
+						this.observableToPromise(whiteboardImages.set(whiteboardImage))
+							.subscribe(
+								data => {
+									subject.next(data);
+									subject.complete();
+								},
+								err => {
+									subject.error(err);
+									subject.complete();
+								}
+							);
+					});
+			};
+		};
+
+		return subject.asObservable();
+	}
+
+	editImage(whiteboardKey: string, imageKey: string, options: any): Observable<WhiteboardImage> {
+		return this.editItem(whiteboardKey, 'image', imageKey, options);
+	}
+
+	eraseImage(whiteboardKey: string, imageKey: string): Observable<WhiteboardImage> {
+		return this.observableToPromise(
+			this.af.database.object(`whiteboardImages/${whiteboardKey}/${imageKey}`)
+				.update({ erased: firebase.database['ServerValue']['TIMESTAMP'] }));
+	}
+
+	/**
 	 * Edit Items
 	 */
 
@@ -270,6 +368,9 @@ export class WhiteboardService {
 			delete item.edits;
 			return item;
 		}
+
+		// Add original properties to an `original` property
+		item.original = JSON.parse(JSON.stringify(item));
 
 		// Convert edits to arrays. We don't care about push keys.
 		let edits = [];
@@ -302,7 +403,6 @@ export class WhiteboardService {
 				if (fixedLengthProperties.includes(editProperty)) {
 					// Merge new edits with current object
 					newValue = deepAssign(item[editProperty], newValue);
-					console.log('getting current item', editProperty, 'has fixed bounds so new value is', newValue);
 				}
 
 				// Edit value
@@ -310,7 +410,14 @@ export class WhiteboardService {
 			}
 		});
 
-		// Delete edits and return
+		// Add ratio for resizing. If image, use original height and width. If text, use current height and width.
+		if (itemType === 'image') {
+			item.resizeRatio = (<WhiteboardImage>item).original.bounds.height / (<WhiteboardImage>item).original.bounds.width;
+		} else if (itemType === 'text') {
+			item.resizeRatio = (<WhiteboardText>item).bounds.height / (<WhiteboardText>item).bounds.width;
+		}
+
+		// Delete edits
 		delete item.edits;
 		return item;
 	}
@@ -320,6 +427,11 @@ export class WhiteboardService {
 		return this.typeToThings[itemType].getFormatted(whiteboardKey, itemKey)
 			.first()
 			.map(item => {
+
+				if (!item) {
+					return;
+				}
+
 				let edits = {};
 				// Go through options and make sure they're editable
 				const editProperties = Object.keys(options);
@@ -380,9 +492,12 @@ export class WhiteboardService {
 	storeSnapshot(whiteboardKey: string, snapshot: Blob | File): Observable<any> {
 		// Upload file
 		return this.observableToPromise(this.sdkStorage.child(`wbSnapShots/${whiteboardKey}`).put(snapshot))
-			.map((snap: any) => {
+			.switchMap((snap: any) => {
 				// Store 'snapshot' property in the whiteboard object
-				return this.af.database.object(`whiteboards/${whiteboardKey}`).update({ snapshot: snap.metadata.downloadURLs[0] });
+				return this.observableToPromise(
+					this.af.database.object(`whiteboards/${whiteboardKey}`)
+						.update({ snapshot: snap.metadata.downloadURLs[0] })
+				);
 			});
 	}
 

@@ -2,25 +2,28 @@
 <canvas #whiteboard resize
 	(mousedown)="onMouseDown($event)"
 	(mousemove)="onMouseMove($event)"
-	(mouseup)="onMouseUp($event)"
-	[style.cursor]="'url(assets/whiteboard-cursors/' + tool + '.png) 0 ' + (tool === 'cursor' ? 0 : 20) + ', auto' | safeStyle"
+	(mouseup)  ="onMouseUp($event)"
+	(dragover) ="onDrag($event); onDragOn($event)"
+	(dragleave)="onDrag($event); onDragOff($event)"
+	(drop)     ="onDrag($event); onDragOff($event); onDrop($event)"
+	[style.cursor]="!toolCursor[tool] ? 'inherit' : 'url(' + toolCursor[tool].url + ') ' + toolCursor[tool].offset.x + ' ' + toolCursor[tool].offset.y + ', auto' | safeStyle"
 	[style.height]="takingSnapshot ? snapshotDimensions.height + 'px' : 'inherit'"
-	[style.width]="takingSnapshot ?  snapshotDimensions.width + 'px' : 'inherit'"></canvas>
+	[style.width] ="takingSnapshot ?  snapshotDimensions.width + 'px' : 'inherit'"></canvas>
 
 <!--Whiteboard Name-->
 <form class="whiteboard-name" (submit)="changeWhiteboardName(whiteboardName)">
 	<div class="mdl-textfield mdl-js-textfield">
 		<input
-			id="whiteboard-name"
 			class="mdl-textfield__input"
 			name="whiteboard-name"
 			[(ngModel)]="whiteboardName"
-			(blur)="changeWhiteboardName(whiteboardName)">
+			(blur)="changeWhiteboardName(whiteboardName)"
+			[disabled]="!shouldWrite">
 		<!-- <label class="mdl-textfield__label" for="whiteboard-name">Whiteboard Name</label> -->
 	</div>
 </form>
 
-<ng-container *ngIf="allowWrite">
+<ng-container *ngIf="shouldWrite">
 	<!-- Tool selection -->
 	<div class="tool-selection">
 		<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect"
@@ -119,6 +122,19 @@
 		</ng-container>
 	</div>
 </ng-container>
+
+<div
+	class="upload-file"
+	[class.show]="draggingFile"
+	(dragover) ="onDrag($event); onDragOn($event)"
+	(dragleave)="onDrag($event); onDragOff($event)"
+	(drop)     ="onDrag($event); onDragOff($event); onDrop($event)">
+
+	<div class="upload-file-square">
+		<h1>Upload Image</h1>
+	</div>
+	<input type="file" name="file-upload">
+</div>
 
 <div class="taking-snapshot" [class.show]="takingSnapshot">
 	<h1>Taking Snapshot...</h1>
