@@ -21,7 +21,7 @@ export function getRect(fromPoint, toPoint, ratio: number | false = false) {
 }
 
 /**
- * Returns a paper.js which rounds the currentPoint either horizontal, vertical, or diagonal to the startPoint.
+ * Returns a paper.js point which rounds the currentPoint either horizontal, vertical, or diagonal to the startPoint.
  * Ratio should be height divided by width. (Ex. ratio = 1 means square)
  */
 
@@ -46,8 +46,6 @@ export function roundLinePoint(startPoint, currentPoint, diagonalOnly = false, r
 
 	const roundedAngle = roundClosest(roundAngles, unroundedAngle);
 
-	// console.log('out of angles', roundAngles, ', ', unroundedAngle, 'was rounded to', roundedAngle);
-
 	// Now find what point is along a squared rectangle with the rounded angle
 	const square = getExpandedRect(startPoint, currentPoint, ratio);
 
@@ -70,102 +68,43 @@ export function roundLinePoint(startPoint, currentPoint, diagonalOnly = false, r
 export function getExpandedRect(fromPoint, toPoint, ratio = 1) {
 
 	const currentRect = new paper.Rectangle(fromPoint, toPoint);
-
 	const currentRatio = currentRect.height / currentRect.width;
+
+	// Remember which corner fromPoint is. This is the anchor and this point should not move.
+	const corners = [
+		'topLeft',
+		'topRight',
+		'bottomLeft',
+		'bottomRight'
+	];
+
+	let anchorCorner = null;
+
+	for (let i = 0; i < corners.length; i++) {
+		const corner = corners[i];
+		if (currentRect[corner].equals(fromPoint)) {
+			anchorCorner = corner;
+			break;
+		}
+	}
 
 	// Check if current ratio is greater than target ratio
 	if (currentRatio > ratio) {
 		// Current ratio is greater than target
-		// Either height needs to decrease or width needs to increase
-		console.log('height is greater');
-		if (ratio > 1) {
-			currentRect.width = currentRect.height * ratio;
-		} else if (ratio < 1) {
-			// Also increase height
-			// console.log('also increaes height');
-			currentRect.height = currentRect.width / ratio;
-		}
-
-		// currentRect.width = currentRect.height * ratio;
-
-	} else {
-		// Increase height
-		console.log('width is greater');
-		if (ratio > 1) {
-			currentRect.width = currentRect.height * ratio;
-		} else if (ratio < 1) {
-			// Also increase height
-			// console.log('also increaes width');
-			currentRect.height = currentRect.width / ratio;
-		}
-
-		currentRect.height = currentRect.width / ratio;
-		// currentRect.width = currentRect.height / ratio;
+		// Width needs to change to fit ratio
+		currentRect.width = currentRect.height / ratio;
+	} else if (currentRatio < ratio) {
+		// Current ratio is less than target
+		// Height need to change to fit ratio
+		currentRect.height = currentRect.width * ratio;
 	}
 
+	// Find how much anchor moved
+	const changePos = currentRect[anchorCorner].subtract(fromPoint);
+	// Move whole rectangle however much anchor moved
+	currentRect.point = currentRect.point.subtract(changePos);
+
 	return currentRect;
-
-	// Find dimensions of square (largest side of two)
-	// const squareSide = Math.max(rect.width, rect.height);
-	// rect.width = rect.height = squareSide;
-
-	// Generate two squares - One with a bigger height and one with a smaller width to match ratios
-	// const ratioRect = rect.clone();
-	// ratioRect.height *= ratio;
-	//
-	// const inverseRatioRect = rect.clone();
-	// ratioRect.width *= (1 / ratio);
-
-	// if (pointOnRectangle(ratioRect, toPoint)) {
-	// 	console.log('ratio rect');
-	// 	return ratioRect;
-	// } else {
-	// 	console.log('inverse rect');
-	// 	return inverseRatioRect;
-	// }
-
-	// Find x and y of this square point
-	// const squarePointX = (squareSide * Math.sign(toPoint.x - fromPoint.x)) + fromPoint.x;
-	// const squarePointY = (squareSide * Math.sign(toPoint.y - fromPoint.y)) + fromPoint.y;
-	//
-	// const squareToPoint = new paper.Point(squarePointX, squarePointY);
-	// const square = new paper.Rectangle(fromPoint, squareToPoint);
-
-	// let expandedWidth = squareSide;
-	// let expandedHeight = squareSide;
-
-
-
-	// if (rect.height > rect.width) {
-	// 	// If current point is more vertical, make width bigger
-	// 	expandedWidth *= ratio;
-	// } else {
-	// 	// If current point is more horizontal, make height smaller
-	// 	expandedHeight *= (1 / ratio);
-	// }
-
-	// // Now adjust square to compensate ratio
-	// if (ratio > 1) {
-	// 	// Rect is taller than it is wider
-	// 	if (rect.height > rect.width) {
-	// 		// If current point is more vertical, make width bigger
-	// 		expandedWidth *= ratio;
-	// 	} else {
-	// 		// If current point is more horizontal, make height smaller
-	// 		expandedHeight *= (1 / ratio);
-	// 	}
-	// } else if (ratio < 1) {
-	// 	// Rect is wider than it is taller
-	// 	if (rect.height > rect.width) {
-	// 		// If current point is more vertical, make height smaller
-	// 		expandedHeight *= (1 / ratio);
-	// 	} else {
-	// 		// If current point is more horizontal, make width bigger
-	// 		expandedWidth *= ratio;
-	// 	}
-	// }
-
-	// return new paper.Rectangle(fromPoint.x, fromPoint.y, expandedWidth, expandedHeight);
 }
 
 /**

@@ -8,6 +8,8 @@ export class Cursor {
 
 	// mouse coords at original click
 	startPoint: any;
+	// mouse coords currently at
+	currentPoint: any;
 	// original bounds at moment transform started
 	originalBounds: any;
 	// options for hit test
@@ -55,12 +57,12 @@ export class Cursor {
 			return;
 		}
 
-		const point = this.whiteboard.cursorPoint(event);
+		this.currentPoint = this.whiteboard.cursorPoint(event);
 		// set start point to current mouse position
-		this.startPoint = point;
-		this.lastPoint = point;
+		this.startPoint = this.currentPoint;
+		this.lastPoint = this.currentPoint;
 
-		const hit = paper.project.hitTest(point, this.hitOptions);
+		const hit = paper.project.hitTest(this.currentPoint, this.hitOptions);
 
 		if (hit) {
 			let item = hit.item;
@@ -78,7 +80,7 @@ export class Cursor {
 				this.resizing = true;
 				this.originalItem = item;
 				this.originalItemSerialized = this.whiteboard.paperIdToSerializedObject(item.id);
-				this.oppositeCorner = snapRounding.getFarthestPoint(item.bounds, point);
+				this.oppositeCorner = snapRounding.getFarthestPoint(item.bounds, this.currentPoint);
 			} else {
 				this.moving = true;
 			}
@@ -90,69 +92,8 @@ export class Cursor {
 	}
 
 	mousemove(event) {
-		// If no permissions, deselect all items
-		if (!this.whiteboard.shouldWrite) {
-			this.whiteboard.deselectAllItems();
-			return;
-		}
-
-		// if mouse is dragged
-		if (this.whiteboard.mouseDown) {
-			const point = this.whiteboard.cursorPoint(event);
-
-			// RESIZING
-			if (this.resizing) {
-
-				let ratio: number | false = false;
-
-				if (this.whiteboard.shiftKey) {
-					if (this.originalItemSerialized) {
-						ratio = this.originalItemSerialized.original.bounds.height / this.originalItemSerialized.original.bounds.width;
-					} else {
-						ratio = 1;
-					}
-				}
-
-				const resizeBounds = snapRounding.getRect(this.oppositeCorner, point, ratio);
-
-				// prevents shape from degenerating into a limp ass line
-				if (resizeBounds.width > 0 && resizeBounds.height > 0) {
-					this.originalItem.bounds = resizeBounds;
-				}
-
-			// MOVING
-			} else if (this.moving) {
-				let offset = new paper.Point(point.x - this.lastPoint.x, point.y - this.lastPoint.y);
-				this.whiteboard.selectedItems().forEach(function(item) {
-					item.translate(offset);
-				});
-
-			// SELECTING
-			} else if (this.selecting) {
-				let selectionBox = new paper.Rectangle(this.startPoint, point);
-				if (selectionBox.height > 0 && selectionBox.width > 0) {
-					// creates a selection path if there isn't one
-					if (!this.selectionPath) {
-						this.selectionPath = new paper.Shape.Rectangle(selectionBox);
-					}
-					// updates selection path
-					this.selectionPath.bounds = selectionBox;
-
-					// selects all items intersecting the selection path
-					let allItems = paper.project.getItems({
-						overlapping: selectionBox,
-						match: result => {
-							return result.id !== this.whiteboard.background.id
-								&& result.id !== paper.project.activeLayer.id;
-						}
-					});
-					allItems.forEach(function(item) {
-						item.selected = true;
-					});
-				}
-			}
-			this.lastPoint = point;
-		}
+		this.currentPoint = this.whiteboard.cursorPoint(event);
+		this.cursorMove(this.currentPoint);
 	}
 
 	mouseup(event) {
@@ -179,6 +120,8 @@ export class Cursor {
 		const key = event.keyCode || event.charCode;
 
 		if (key !== 8 && key !== 46) {
+			// Shift key could have changed. Try resizing.
+			this.cursorMove(this.currentPoint);
 			return;
 		}
 
@@ -250,6 +193,71 @@ export class Cursor {
 	/**
 	 * Helper functions
 	 */
+
+	cursorMove(point) {
+		// If no permissions, deselect all items
+		if (!this.whiteboard.shouldWrite) {
+			this.whiteboard.deselectAllItems();
+			return;
+		}
+
+		// if mouse is dragged
+		if (this.whiteboard.mouseDown) {
+
+			// RESIZING
+			if (this.resizing) {
+
+				let ratio: number | false = false;
+
+				if (this.whiteboard.shiftKey) {
+					if (this.originalItemSerialized) {
+						ratio = this.originalItemSerialized.original.bounds.height / this.originalItemSerialized.original.bounds.width;
+					} else {
+						ratio = 1;
+					}
+				}
+
+				const resizeBounds = snapRounding.getRect(this.oppositeCorner, point, ratio);
+
+				// prevents shape from degenerating into a limp ass line
+				if (resizeBounds.width > 0 && resizeBounds.height > 0) {
+					this.originalItem.bounds = resizeBounds;
+				}
+
+			// MOVING
+			} else if (this.moving) {
+				let offset = new paper.Point(point.x - this.lastPoint.x, point.y - this.lastPoint.y);
+				this.whiteboard.selectedItems().forEach(function(item) {
+					item.translate(offset);
+				});
+
+			// SELECTING
+			} else if (this.selecting) {
+				let selectionBox = new paper.Rectangle(this.startPoint, point);
+				if (selectionBox.height > 0 && selectionBox.width > 0) {
+					// creates a selection path if there isn't one
+					if (!this.selectionPath) {
+						this.selectionPath = new paper.Shape.Rectangle(selectionBox);
+					}
+					// updates selection path
+					this.selectionPath.bounds = selectionBox;
+
+					// selects all items intersecting the selection path
+					let allItems = paper.project.getItems({
+						overlapping: selectionBox,
+						match: result => {
+							return result.id !== this.whiteboard.background.id
+								&& result.id !== paper.project.activeLayer.id;
+						}
+					});
+					allItems.forEach(function(item) {
+						item.selected = true;
+					});
+				}
+			}
+			this.lastPoint = point;
+		}
+	}
 
 	clearSelectionPath() {
 		if (this.selectionPath) {

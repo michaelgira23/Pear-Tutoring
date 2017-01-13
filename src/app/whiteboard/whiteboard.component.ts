@@ -851,12 +851,9 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 
 			// Get options for current image
 			let paperOptions = {
+				crossOrigin: 'anonymous',
 				rotation: image.rotation,
-				source: image.url,
-				x: image.bounds.x,
-				y: image.bounds.y,
-				width: image.bounds.width,
-				height: image.bounds.height
+				source: image.url
 			};
 
 			// Check if image already exists on whiteboard
@@ -872,13 +869,24 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 
 				// Update options onto existing image on canvas
 				Object.assign(this.canvasImages[image.$key], paperOptions);
-				// Set bounds here because it doesn't work in object init for some reason
-				this.canvasImages[image.$key].bounds = rectangles.deserialize(image.bounds);
+				// Set bounds after image loads
+				this.canvasImages[image.$key].onLoad = () => {
+					if (this.canvasImages[image.$key]) {
+						this.canvasImages[image.$key].bounds = rectangles.deserialize(image.bounds);
+					}
+				};
+
 			} else if (!image.erased) {
 				// Create new marking on whiteboard
-				this.canvasImages[image.$key] = new paper.Raster(paperOptions);
-				// Set bounds here because it doesn't work in object init for some reason
-				this.canvasImages[image.$key].bounds = rectangles.deserialize(image.bounds);
+				this.canvasImages[image.$key] = new paper.Raster(image.url, paperOptions);
+
+				// Set bounds after image loads
+				this.canvasImages[image.$key].onLoad = () => {
+					if (this.canvasImages[image.$key]) {
+						this.canvasImages[image.$key].bounds = rectangles.deserialize(image.bounds);
+					}
+				};
+
 			}
 		}
 
