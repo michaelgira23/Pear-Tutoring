@@ -1,0 +1,152 @@
+{
+	"rules": {
+		// Users
+		"users": {
+			".read": true,
+			".write": true
+		},
+		// Users in session
+		"usersInSession": {
+			".read": true,
+			".write": true
+		},
+		//free times by users
+		"freeTimesByUsers": {
+			".read": true,
+			".write": true
+		},
+		// Index for user name, used for user searching by name
+		"userNameIndex": {
+			".read": true,
+			".write": true
+		},
+		// Sessions
+		"sessions": {
+			".read": true,
+			".write": true,
+			".indexOn": ["listed"]
+		},
+		// Public sessions
+		"listedSessions": {
+			".read": true,
+			".write": true
+		},
+		// Sessions by year-week-day
+		"sessionsByYwd": {
+			".read": true,
+			".write": true
+		},
+		// Sessions By Grades
+		"sessionsByGrade": {
+			".read": true,
+			".write":true
+		},
+		// Sessions By Class names
+		"sessionsByClassStr": {
+			".read": true,
+			".write":true
+		},
+		// Sessions By Weeks
+		"sessionsByWeeks": {
+			".read": true,
+			".write":true
+		},
+		//SessionsByTags
+		"sessionsByTags": {
+			".read": true,
+			".write": true
+		},
+		//SessionsBySubject
+		"sessionsBySubject": {
+			".read": true,
+			".write": true
+		},
+		// Session permissions
+		"sessionPermissions": {
+			"$sessionKey": {
+				".read": true,
+				".write": true,
+				// Make sure that the session exists when writing permissions
+				".validate": "root.child('sessions/' + $sessionKey).exists()"
+			}
+		},
+		// Chats
+		"chats": {
+			".read": true,
+			".write": true
+		},
+		// Chat messages
+		"chatMessages": {
+			"$chatKey": {
+				".read": true,
+				".write": true,
+				// Make sure that the chat room exists when writing messages
+				".validate": "root.child('chats/' + $chatKey).exists()"
+			}
+		},
+		// Chat permissions
+		"chatPermissions": {
+			"$chatKey": {
+				".read": true,
+				".write": true,
+				// Make sure that the chat room exists when writing permissions
+				".validate": "root.child('chats/' + $chatKey).exists()"
+			}
+		},
+		// Status messages
+		"statusMessages": {
+			"$chatKey": {
+				".read": true,
+				".write": true,
+				// Make sure that the chat room exists when writing statuses
+				".validate": "root.child('chats/' + $chatKey).exists()"
+			}
+		},
+		// Whiteboards
+		"whiteboards": {
+			".read": true,
+			".write": true
+		},
+		// Whiteboard permissions
+		"whiteboardPermissions": {
+			"$whiteboardKey": {
+				".read": true,
+				".write": true,
+					// Make sure that the whiteboard exists when writing markings
+				".validate": "root.child('whiteboards/' + $whiteboardKey).exists()"
+			}
+		},
+		// Whiteboard markings
+		"whiteboardMarkings": {
+			"$whiteboardKey": {
+				".read": true,
+				".write": true,
+					// Make sure that the whiteboard exists when writing markings
+				".validate": "root.child('whiteboards/' + $whiteboardKey).exists()"
+			}
+		},
+		// Whiteboard text
+		"whiteboardText": {
+			"$whiteboardKey": {
+				".read": true,
+				".write": true,
+					// Make sure that the whiteboard exists when writing markings
+				".validate": "root.child('whiteboards/' + $whiteboardKey).exists()"
+			}
+		},
+		// Whiteboard images
+		"whiteboardImages": {
+			"$whiteboardKey": {
+				".read": true,
+				".write": true,
+					// Make sure that the whiteboard exists when writing markings
+				".validate": "root.child('whiteboards/' + $whiteboardKey).exists()"
+			}
+		},
+		// Whiteboards organized by the sessions it belongs to
+		"whiteboardsBySessions": {
+				".read": true,
+				".write": true
+		}
+	}
+}
