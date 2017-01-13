@@ -62,6 +62,7 @@ import { SessionsWithFilterComponent } from './scheduling/sessions-with-filter/s
 import { SessionPermissionsComponent } from './session/session-permissions/session-permissions.component';
 import { SessionRequestComponent } from './session/session-request/session-request.component';
 import { SessionGuardService } from './shared/model/session-guard.service';
+import { ModalComponent } from './shared/common/modal/modal.component';
 
 @NgModule({
 	declarations: [
@@ -101,7 +102,8 @@ import { SessionGuardService } from './shared/model/session-guard.service';
 		WhiteboardSelectComponent,
 		SessionsWithFilterComponent,
 		SessionPermissionsComponent,
-		SessionRequestComponent
+		SessionRequestComponent,
+		ModalComponent
 	],
 	imports: [
 		BrowserModule,

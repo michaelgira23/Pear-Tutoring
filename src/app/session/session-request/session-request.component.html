@@ -1,13 +1,23 @@
-<ul class="demo-list-item mdl-list" *ngIf="pendingUsers">
-  <h2 *ngIf="pendingUsers.length === 0">There is no requests.</h2>
-  <li class="mdl-list__item" *ngFor="let user of pendingUsers">
-    <span class="mdl-list__item-primary-content">
-      <app-display-user [user]="user"></app-display-user>
-    </span>
-    <span class="mdl-list__item-secondary-action">
-      <button class="mdl-button mdl-js-button mdl-button--accent" (click)="addTutee(user.$key)">
-        <i class="material-icons">done</i>
-      </button>
-    </span>
-  </li>
-</ul>
+<app-modal>
+  <div class="app-modal-header">
+    <h2>Pending</h2>
+    <button class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect" (click)="closeModal()">
+      <i class="material-icons">close</i>
+    </button>
+  </div>
+  <div class="app-modal-body">
+    <ul class="demo-list-item mdl-list" *ngIf="pendingUsers">
+      <h2 *ngIf="pendingUsers.length === 0">There is no requests.</h2>
+      <li class="mdl-list__item" *ngFor="let user of pendingUsers">
+        <span class="mdl-list__item-primary-content">
+          <app-display-user [user]="user"></app-display-user>
+        </span>
+        <span class="mdl-list__item-secondary-action">
+          <button class="mdl-button mdl-js-button mdl-button--accent" (click)="addTutee(user.$key)">
+            <i class="material-icons">done</i>
+          </button>
+        </span>
+      </li>
+    </ul>
+  </div>
+</app-modal>

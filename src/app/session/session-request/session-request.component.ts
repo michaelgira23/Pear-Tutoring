@@ -1,8 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { SessionService } from '../../shared/model/session.service';
-import { Session } from '../../shared/model/session';
-import { ActivatedRoute } from '@angular/router';
-import { Observable } from 'rxjs/Rx';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ModalComponent } from '../../shared/common/modal/modal.component';
 
 @Component({
 	selector: 'app-session-request',
@@ -11,28 +10,36 @@ import { Observable } from 'rxjs/Rx';
 })
 export class SessionRequestComponent implements OnInit {
 
+	@ViewChild(ModalComponent) modal: ModalComponent;
+
 	sessionId: string;
 
 	pendingUsers: any[];
 
-	constructor(private sessions: SessionService, private route: ActivatedRoute) { }
+	constructor(private sessions: SessionService, private route: ActivatedRoute, private router: Router) { }
 
 	ngOnInit() {
-		this.route.params.flatMap(params => {
-			if (params['id']) {
-				this.sessionId = params['id'];
-				return this.sessions.getPendingTutees(params['id']);
-			}
-			return Observable.throw('cannot find session id');
-		}).subscribe(tutees => {
-			this.pendingUsers = tutees;
-		}, console.log);
+		this.modal.show();
+		let sessionId = this.route.parent.snapshot.params['id'];
+		if (sessionId) {
+			this.sessions.getPendingTutees(sessionId)
+			.subscribe(tutees => {
+				this.pendingUsers = tutees;
+			}, console.log);
+		} else {
+			console.log('cannot find session id in the route');
+		}
 	}
 
 	addTutee(id: string) {
 		this.sessions.addTutees(this.sessionId, id).subscribe(val => {
 			console.log('enrolled pending tutee');
 		}, console.log);
+	}
+
+	closeModal() {
+		this.modal.hide();
+		this.router.navigate(['../'], {relativeTo: this.route});
 	}
 
 }

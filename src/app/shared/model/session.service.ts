@@ -499,13 +499,15 @@ export class SessionService {
 			.flatMap((session: Session) => {
 				let dataToSave = {};
 				// if (session.tutor.$key !== this.uid) {
-					if (session.pending.some(user => this.uid === tuteeId)) {
-						dataToSave[`sessions/${sessionId}/pending/${tuteeId}`] = null;
-						dataToSave[`sessions/${sessionId}/tutees/${tuteeId}`] = true;
-						dataToSave[`users/${tuteeId}/tuteeSessions/${sessionId}`] = true;
-						dataToSave[`usersInSession/${sessionId}/${tuteeId}`] = false;
-					} else {
-						dataToSave[`sessions/${sessionId}/pending/${tuteeId}`] = true;
+					if (session.tutees.length >= session.max) {
+						if (session.pending.some(user => this.uid === tuteeId)) {
+							dataToSave[`sessions/${sessionId}/pending/${tuteeId}`] = null;
+							dataToSave[`sessions/${sessionId}/tutees/${tuteeId}`] = true;
+							dataToSave[`users/${tuteeId}/tuteeSessions/${sessionId}`] = true;
+							dataToSave[`usersInSession/${sessionId}/${tuteeId}`] = false;
+						} else {
+							dataToSave[`sessions/${sessionId}/pending/${tuteeId}`] = true;
+						}
 					}
 				// }
 				return this.firebaseUpdate(dataToSave);

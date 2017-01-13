@@ -33,6 +33,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 		this.route.params.subscribe(params => {
 			this.sessionId = params['id'];
 			this.findSession$ = this.sessionService.findSession(this.sessionId).subscribe(session => {
+				console.log(session)
 				this.sessionExist = true;
 				this.sessionInfo = session;
 				this.sessionService.joinSession(this.sessionId).subscribe(data => {}, console.error,

@@ -36,7 +36,7 @@
     </div>
 
     <div class="mdl-card__actions mdl-card--border">
-      <button *ngIf="joinable && !pending" (click)="joinSession()" class="join-session mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">Join Session</button>
+      <button *ngIf="joinable" (click)="joinSession()" class="join-session mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">Join Session</button>
       <button *ngIf="!joinable && !pending" (click)="enrollSession()" class="join-session mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">Enroll</button>
       <button *ngIf="!joinable && pending" class="join-session mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" disabled>Pending</button>
     </div>

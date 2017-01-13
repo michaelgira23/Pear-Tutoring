@@ -103,11 +103,13 @@ export const routerConfig: Route[] = [
 				children: [
 					{
 						path: 'permissions',
-						component: SessionPermissionsComponent
+						component: SessionPermissionsComponent,
+						outlet: 'permissions-popup'
 					},
 					{
 						path: 'requests',
-						component: SessionRequestComponent
+						component: SessionRequestComponent,
+						outlet: 'requests-popup'
 					}
 				]
 			}

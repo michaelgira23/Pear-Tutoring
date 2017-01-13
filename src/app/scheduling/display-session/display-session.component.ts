@@ -28,7 +28,7 @@ export class DisplaySessionComponent implements OnInit {
 	sideOpen: boolean;
 
 	get joinable() {
-		return this.session.tutees.some(user => this.sessionService.uid === user.$key);
+		return this.session.tutees.some(user => this.sessionService.uid === user.$key) || this.session.tutor.$key === this.sessionService.uid;
 	}
 
 	get pending() {
@@ -58,11 +58,12 @@ export class DisplaySessionComponent implements OnInit {
 
 	enrollSession() {
 		this.sessionService.addTutees(this.session.$key, this.sessionService.uid).subscribe(val => {
-			console.log('added Tutees')
+			console.log('added Tutees');
 		}, console.log);
 	}
 
 	checkPending() {
-		this.router.navigate(['session', this.session.$key, 'requests']);
+		this.router.navigate(['session', this.session.$key, {outlets: {'permissions-popup': null}}]);
+		this.router.navigate(['session', this.session.$key, {outlets: {'requests-popup': ['requests']}}]);
 	}
 }

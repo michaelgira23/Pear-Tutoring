@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { PermissionsService, Permission, PermissionsType } from '../../shared/security/permissions.service';
 import { SessionService } from '../../shared/model/session.service';
 import { Session } from '../../shared/model/session';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs/Rx';
 import { combineLatestObj, objToArr } from '../../shared/common/utils';
+import { ModalComponent } from '../../shared/common/modal/modal.component';
 
 @Component({
 	selector: 'app-session-permissions',
@@ -12,6 +13,9 @@ import { combineLatestObj, objToArr } from '../../shared/common/utils';
 	styleUrls: ['./session-permissions.component.scss']
 })
 export class SessionPermissionsComponent implements OnInit {
+
+	@ViewChild(ModalComponent) modal: ModalComponent;
+
 	perms: {
 		// a reference to the original self when used in a proxy
 		originalObj?: Object,
@@ -26,36 +30,42 @@ export class SessionPermissionsComponent implements OnInit {
 
 	dropdownList: Object = {};
 
-	constructor(private permissionsService: PermissionsService, private route: ActivatedRoute, private sessions: SessionService) { }
+	constructor(
+		private permissionsService: PermissionsService,
+		private route: ActivatedRoute,
+		private sessions: SessionService,
+		private router: Router
+	) { }
 
 	ngOnInit() {
-		this.route.params.flatMap(params => {
-			if (params['id']) {
-				return this.sessions.findSession(params['id']);
-			}
-			return Observable.throw('cannot find session id');
-		})
-		.flatMap((session: Session) => {
-			this.sessionInfo = session;
-			return combineLatestObj({
-				session$: this.permissionsService.getPermission(session.$key, 'session'),
-				chat$: this.permissionsService.getPermission(session.chat, 'chat'),
-				whiteboard$: Observable.combineLatest(session.whiteboards.map(id => this.permissionsService.getPermission(id.$key, 'whiteboard')))
-			});
-		})
-		.subscribe(perms => {
-			this.perms = new Proxy(perms, {
-				get: (target, prop) => {
-					if (prop === 'originalObj') {
-						return target;
+		this.modal.show();
+		let sessionId = this.route.parent.snapshot.params['id'];
+		if (sessionId) {
+			this.sessions.findSession(sessionId)
+			.flatMap((session: Session) => {
+				this.sessionInfo = session;
+				return combineLatestObj({
+					session$: this.permissionsService.getPermission(session.$key, 'session'),
+					chat$: this.permissionsService.getPermission(session.chat, 'chat'),
+					whiteboard$: Observable.combineLatest(session.whiteboards.map(id => this.permissionsService.getPermission(id.$key, 'whiteboard')))
+				});
+			})
+			.subscribe(perms => {
+				this.perms = new Proxy(perms, {
+					get: (target, prop) => {
+						if (prop === 'originalObj') {
+							return target;
+						}
+						if (Array.isArray(target[prop])) {
+							return false;
+						}
+						return target[prop];
 					}
-					if (Array.isArray(target[prop])) {
-						return false;
-					}
-					return target[prop];
-				}
-			});
-		}, console.log);
+				});
+			}, console.log);
+		} else {
+			console.log('cannot find session id in the route')
+		}
 	}
 
 	togglePerm(uid: string) {
@@ -87,6 +97,11 @@ export class SessionPermissionsComponent implements OnInit {
 		Observable.combineLatest(queryList).subscribe(val => {
 			console.log('permission updated');
 		}, console.log);
+	}
+
+	closeModal() {
+		this.modal.hide();
+		this.router.navigate(['../'], {relativeTo: this.route});
 	}
 
 }
