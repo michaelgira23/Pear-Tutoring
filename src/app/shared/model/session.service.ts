@@ -494,24 +494,40 @@ export class SessionService {
 			});
 	}
 
-	addTutees(sessionId: string, tuteeIds: string[]) {
+	addTutees(sessionId: string, tuteeId: string) {
+		return this.findSession(sessionId).take(1)
+			.flatMap((session: Session) => {
+				let dataToSave = {};
+				// if (session.tutor.$key !== this.uid) {
+					if (session.pending.some(user => this.uid === tuteeId)) {
+						dataToSave[`sessions/${sessionId}/pending/${tuteeId}`] = null;
+						dataToSave[`sessions/${sessionId}/tutees/${tuteeId}`] = true;
+						dataToSave[`users/${tuteeId}/tuteeSessions/${sessionId}`] = true;
+						dataToSave[`usersInSession/${sessionId}/${tuteeId}`] = false;
+					} else {
+						dataToSave[`sessions/${sessionId}/pending/${tuteeId}`] = true;
+					}
+				// }
+				return this.firebaseUpdate(dataToSave);
+			});
+	}
+
+	removeTutees(sessionId: string, tuteeId: string) {
 		let dataToSave = {};
-		for (let i = 0; i < tuteeIds.length; i++) {
-			dataToSave[`sessions/${sessionId}/tutees/${tuteeIds[i]}`] = true;
-			dataToSave[`users/${tuteeIds[i]}/tuteeSessions/${sessionId}`] = true;
-			dataToSave[`usersInSession/${sessionId}/${tuteeIds[i]}`] = false;
-		}
+		dataToSave[`sessions/${sessionId}/pending/${tuteeId}`] = null;
+		dataToSave[`sessions/${sessionId}/tutees/${tuteeId}`] = null;
+		dataToSave[`users/${tuteeId}/tuteeSessions/${sessionId}`] = null;
+		dataToSave[`usersInSession/${sessionId}/${tuteeId}`] = null;
 		return this.firebaseUpdate(dataToSave);
 	}
 
-	removeTutees(sessionId: string, tuteeIds: string[]) {
-		let dataToSave = {};
-		for (let i = 0; i < tuteeIds.length; i++) {
-			dataToSave[`sessions/${sessionId}/tutees/${tuteeIds[i]}`] = null;
-			dataToSave[`users/${tuteeIds[i]}/tuteeSessions/${sessionId}`] = null;
-			dataToSave[`usersInSession/${sessionId}/${tuteeIds[i]}`] = null;
-		}
-		return this.firebaseUpdate(dataToSave);
+	getPendingTutees(sessionId: string): Observable<any[]> {
+		return this.findSession(sessionId)
+			.flatMap((session: Session) => {
+				return this.checkAndCombine(session.pending.map(uid => {
+					return this.userService.findUser(uid);
+				}));
+			});
 	}
 }
 

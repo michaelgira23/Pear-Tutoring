@@ -27,6 +27,14 @@ export class DisplaySessionComponent implements OnInit {
 
 	sideOpen: boolean;
 
+	get joinable() {
+		return this.session.tutees.some(user => this.sessionService.uid === user.$key);
+	}
+
+	get pending() {
+		return this.session.pending.some(uid => this.sessionService.uid === uid);
+	}
+
 	constructor(private router: Router, private sessionService: SessionService) {
 	}
 
@@ -46,5 +54,15 @@ export class DisplaySessionComponent implements OnInit {
 			val => console.log('deleted'),
 			err => console.log(err)
 		);
+	}
+
+	enrollSession() {
+		this.sessionService.addTutees(this.session.$key, this.sessionService.uid).subscribe(val => {
+			console.log('added Tutees')
+		}, console.log);
+	}
+
+	checkPending() {
+		this.router.navigate(['session', this.session.$key, 'requests']);
 	}
 }

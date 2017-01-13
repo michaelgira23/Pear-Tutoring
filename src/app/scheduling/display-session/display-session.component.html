@@ -36,7 +36,9 @@
     </div>
 
     <div class="mdl-card__actions mdl-card--border">
-      <button (click)="joinSession()" class="join-session mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">Join Session</button>
+      <button *ngIf="joinable && !pending" (click)="joinSession()" class="join-session mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">Join Session</button>
+      <button *ngIf="!joinable && !pending" (click)="enrollSession()" class="join-session mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">Enroll</button>
+      <button *ngIf="!joinable && pending" class="join-session mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" disabled>Pending</button>
     </div>
 
     <div class="mdl-card__menu" *ngIf="session.tutor.$key === sessionService.uid">
@@ -46,6 +48,7 @@
       <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" [attr.for]="menuId">
         <li class="mdl-menu__item update-session" (click)="updateSession()">Update</li>
         <li class="mdl-menu__item delete-session" (click)="deleteSession()">Delete</li>
+        <li class="mdl-menu__item" (click)="checkPending()">Pending Tutees</li>
       </ul>
     </div>
 
@@ -64,6 +67,11 @@
       <div class="mdl-card__supporting-text">
         Tutor: 
         <app-display-user [user]="session.tutor"></app-display-user>
+      </div>
+
+      <div class="mdl-card__supporting-text">
+        Tutees: 
+        <app-display-user *ngFor="let tutee of session.tutees" [user]="tutee"></app-display-user>
       </div>
 
       <div class="mdl-card__menu">

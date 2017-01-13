@@ -60,6 +60,7 @@ import { SidebarContentDirective } from './shared/common/sidebar/sidebar-content
 import { WhiteboardSelectComponent } from './session/whiteboard-select/whiteboard-select.component';
 import { SessionsWithFilterComponent } from './scheduling/sessions-with-filter/sessions-with-filter.component';
 import { SessionPermissionsComponent } from './session/session-permissions/session-permissions.component';
+import { SessionRequestComponent } from './session/session-request/session-request.component';
 
 @NgModule({
 	declarations: [
@@ -98,7 +99,8 @@ import { SessionPermissionsComponent } from './session/session-permissions/sessi
 		SidebarContentDirective,
 		WhiteboardSelectComponent,
 		SessionsWithFilterComponent,
-		SessionPermissionsComponent
+		SessionPermissionsComponent,
+		SessionRequestComponent
 	],
 	imports: [
 		BrowserModule,

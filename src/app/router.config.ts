@@ -14,6 +14,7 @@ import { SettingsComponent } from './settings/settings.component';
 import { UpdateSessionComponent } from './scheduling/update-session/update-session.component';
 import { MyScheduleComponent } from './scheduling/my-schedule/my-schedule.component';
 import { SessionPermissionsComponent } from './session/session-permissions/session-permissions.component';
+import { SessionRequestComponent } from './session/session-request/session-request.component';
 
 export const routerConfig: Route[] = [
 	{
@@ -100,6 +101,10 @@ export const routerConfig: Route[] = [
 			{
 				path: ':id/permissions',
 				component: SessionPermissionsComponent
+			},
+			{
+				path: ':id/requests',
+				component: SessionRequestComponent
 			}
 		],
 	},
