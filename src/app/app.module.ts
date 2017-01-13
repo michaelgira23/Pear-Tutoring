@@ -61,6 +61,7 @@ import { WhiteboardSelectComponent } from './session/whiteboard-select/whiteboar
 import { SessionsWithFilterComponent } from './scheduling/sessions-with-filter/sessions-with-filter.component';
 import { SessionPermissionsComponent } from './session/session-permissions/session-permissions.component';
 import { SessionRequestComponent } from './session/session-request/session-request.component';
+import { SessionGuardService } from './shared/model/session-guard.service';
 
 @NgModule({
 	declarations: [
@@ -112,7 +113,15 @@ import { SessionRequestComponent } from './session/session-request/session-reque
 		ColorPickerModule,
 		CalendarModule.forRoot()
 	],
-	providers: [AuthService, ChatService, SessionService, NotificationsService, PermissionsService, UserService, WhiteboardService],
+	providers: [
+		AuthService,
+		ChatService,
+		SessionService,
+		NotificationsService,
+		PermissionsService,
+		UserService,
+		WhiteboardService,
+		SessionGuardService],
 	bootstrap: [AppComponent]
 })
 export class AppModule { }

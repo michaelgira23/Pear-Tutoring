@@ -16,6 +16,8 @@ import { MyScheduleComponent } from './scheduling/my-schedule/my-schedule.compon
 import { SessionPermissionsComponent } from './session/session-permissions/session-permissions.component';
 import { SessionRequestComponent } from './session/session-request/session-request.component';
 
+import { SessionGuardService } from './shared/model/session-guard.service';
+
 export const routerConfig: Route[] = [
 	{
 		path: '',
@@ -93,18 +95,21 @@ export const routerConfig: Route[] = [
 	},
 	{
 		path: 'session',
+		canActivateChild: [SessionGuardService],
 		children: [
 			{
 				path: ':id',
-				component: SessionComponent
-			},
-			{
-				path: ':id/permissions',
-				component: SessionPermissionsComponent
-			},
-			{
-				path: ':id/requests',
-				component: SessionRequestComponent
+				component: SessionComponent,
+				children: [
+					{
+						path: 'permissions',
+						component: SessionPermissionsComponent
+					},
+					{
+						path: 'requests',
+						component: SessionRequestComponent
+					}
+				]
 			}
 		],
 	},
