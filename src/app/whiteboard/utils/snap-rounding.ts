@@ -197,22 +197,6 @@ export function edgeOfRect(rect, deg) {
 }
 
 /**
- * Determines if point falls on perimeter of rectangle
- */
-
-function pointOnRectangle(rect, point): boolean {
-	// Check top and bottom side
-	if ((point.y === rect.top || point.y === rect.bottom) && rect.left <= point.x && point.x <= rect.right) {
-		return true;
-	}
-	// Check left and right side
-	if ((point.x === rect.left || point.x === rect.right) && rect.top <= point.x && point.x <= rect.bottom) {
-		return true;
-	}
-	return false;
-}
-
-/**
  * Rounds a value to closest set of numbers in a predetermined array
  */
 
