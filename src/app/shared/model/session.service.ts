@@ -499,7 +499,7 @@ export class SessionService {
 			.flatMap((session: Session) => {
 				let dataToSave = {};
 				// if (session.tutor.$key !== this.uid) {
-					if (session.tutees.length >= session.max) {
+					if (session.tutees.length <= session.max) {
 						if (session.pending.some(user => this.uid === tuteeId)) {
 							dataToSave[`sessions/${sessionId}/pending/${tuteeId}`] = null;
 							dataToSave[`sessions/${sessionId}/tutees/${tuteeId}`] = true;
