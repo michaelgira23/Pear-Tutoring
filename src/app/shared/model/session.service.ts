@@ -221,7 +221,7 @@ export class SessionService {
 	// Find the session ids where the user is a tutor or a tutee. Note the info in stored in the user object.
 	findMySessions(lastKey?: string | Subject<string>): Observable<Session[][]> {
 		return this.checkAndCombine([
-			this.auth.auth$.flatMap(state => {
+			this.authService.auth$.flatMap(state => {
 				if (!state) {
 					return [];
 				}
@@ -232,7 +232,7 @@ export class SessionService {
 				}})
 				.flatMap(ids => this.checkAndCombine(ids.map(id => this.db.object('sessions/' + id.$key))))));
 			}).map(Session.fromJsonArray),
-			this.auth.auth$.flatMap(state => {
+			this.authService.auth$.flatMap(state => {
 				if (!state) {
 					return [];
 				}
