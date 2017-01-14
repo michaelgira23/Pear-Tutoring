@@ -10,7 +10,7 @@
 
 		&.side {
 			position: absolute;
-			transition: top 600ms cubic-bezier(0.215, 0.61, 0.355, 1), opacity 600ms cubic-bezier(0.215, 0.61, 0.355, 1), display 600ms step-end;
+			transition: top 400ms cubic-bezier(0.215, 0.61, 0.355, 1), opacity 400ms cubic-bezier(0.215, 0.61, 0.355, 1), z-index 400ms cubic-bezier(0.215, 0.61, 0.355, 1);
 			width: 300px;
 			top: 400px;
 			opacity: 0;
@@ -19,6 +19,9 @@
 				opacity: 1;
 				top: 0px;
 				z-index: 200;
+			}
+			.mdl-card__supporting-text:nth-child(1) {
+				margin-top: 2em;
 			}
 		}
 
@@ -43,6 +46,10 @@
 				flex-wrap: nowrap;
 				img {
 					width: 50%;
+					height: 150px;
+				}
+				.img-placeholder {
+					height: 150px;
 				}
 			}
 			&::after {
@@ -90,6 +97,6 @@
 		@include color-theme($fruity-blue);
 	}
 	&.art {
-		@include color-theme($fruity-grape);
+		@include color-theme($fruity-kiwi);
 	}
 }

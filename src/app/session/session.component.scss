@@ -14,4 +14,12 @@
             padding: 1em;
         }
     }
+    .session-actions {
+        padding: 0.5em;
+        display: flex;
+        justify-content: space-around;
+        button {
+            margin: 0.5em;
+        }
+    }
 }

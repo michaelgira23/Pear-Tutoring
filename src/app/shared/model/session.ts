@@ -13,7 +13,8 @@ export const SessionColors = {
 };
 
 export class Session {
-	static fromJson({ $key, start, end, subject, tutor, tutees, max, listed, whiteboards, chat, title, desc, canceled, tags}): Session {
+	static fromJson({ $key, start, end, subject, tutor, tutees, max, listed,
+					whiteboards, chat, title, desc, canceled, tags, ywd, grade, classStr, pending}): Session {
 		let color = subject ? SessionColors[subject] : '#000' ;
 		if (!Array.isArray(tutees)) {
 			tutees = objToArr(tutees);
@@ -21,9 +22,14 @@ export class Session {
 		if (!Array.isArray(tags)) {
 			tags = objToArr(tags);
 		}
+		if (!Array.isArray(pending)) {
+			pending = objToArr(pending);
+		}
 		start = moment(start, 'X');
 		end = moment(end, 'X');
-		return new Session($key, start, end, subject, color, tutor, tutees, max, listed, whiteboards, chat, title, desc, canceled, tags);
+		let past = moment().isSameOrAfter(end);
+		return new Session($key, start, end, subject, color, tutor, tutees, max, listed,
+							whiteboards, chat, title, desc, canceled, tags, ywd, grade, classStr, past, pending);
 	}
 
 	static fromJsonArray(json: any[]): Session[] {
@@ -45,6 +51,11 @@ export class Session {
 		public title: string,
 		public desc: string,
 		public canceled: boolean,
-		public tags: string[]
+		public tags: string[],
+		public ywd: string,
+		public grade: number,
+		public classStr: string,
+		public past: boolean,
+		public pending: string[]
 	) { }
 }

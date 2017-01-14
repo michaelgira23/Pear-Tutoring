@@ -1,4 +1,4 @@
-import { Component, OnInit, forwardRef, Output, EventEmitter, OnDestroy } from '@angular/core';
+import { Component, OnInit, forwardRef, Output, EventEmitter, OnDestroy, Input } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Subject, Subscription } from 'rxjs/Rx';
 import { UserService } from '../../shared/model/user.service';
@@ -15,6 +15,8 @@ import { User } from '../../shared/model/user';
 	}]
 })
 export class UserAutoCompleteComponent implements OnInit, ControlValueAccessor, OnDestroy {
+
+	@Input() disabled = false;
 
 	private selectedUsers: User[] = [];
 	set userValue(users: User[]) {
@@ -73,7 +75,7 @@ export class UserAutoCompleteComponent implements OnInit, ControlValueAccessor, 
 		}
 	}
 
-	addUser(e: MouseEvent, i: number) {
+	addUser(e: Event, i: number) {
 		e.stopPropagation();
 		this.onAddUser.emit(this.userResults[i]);
 		this.userValue = this.userValue.concat([this.userResults[i]]);
@@ -98,4 +100,7 @@ export class UserAutoCompleteComponent implements OnInit, ControlValueAccessor, 
 
 	registerOnTouched() {}
 
+	hitBackspace() {
+		this.searchStr = this.searchStr.substr(0, this.searchStr.length - 1);
+	}
 }

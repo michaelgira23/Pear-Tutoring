@@ -6,8 +6,6 @@ import { NotificationsService } from './shared/model/notifications.service';
 import { User } from './shared/model/user';
 import { UserService, UserStatus } from './shared/model/user.service';
 
-declare const componentHandler;
-
 @Component({
 	selector: 'app-root',
 	templateUrl: './app.component.html',
