@@ -31,9 +31,14 @@ $white: #eee;
 	.cta {
 		padding: 0 1rem;
 
-		h1 {
+		.cta-header {
 			color: $white;
+			letter-spacing: 0.03rem;
 			text-shadow: 1px 1px 2px rgba($black, 1);
+
+			.cta-writing {
+				letter-spacing: -0.02em;
+			}
 		}
 	}
 }

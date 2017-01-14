@@ -3,6 +3,7 @@ import { Route } from '@angular/router';
 import { CreateChatComponent } from './create-chat/create-chat.component';
 import { ViewChatComponent } from './view-chat/view-chat.component';
 import { HomeComponent } from './home/home.component';
+import { DashboardComponent } from './dashboard/dashboard.component';
 import { CreateWhiteboardComponent } from './create-whiteboard/create-whiteboard.component';
 import { ViewWhiteboardComponent } from './view-whiteboard/view-whiteboard.component';
 import { LoginComponent } from './login/login.component';
@@ -27,6 +28,14 @@ export const routerConfig: Route[] = [
 	{
 		path: 'home',
 		component: HomeComponent
+	},
+	{
+		path: 'dashboard',
+		component: MyScheduleComponent
+	},
+	{
+		path: 'search',
+		component: SchedulingComponent
 	},
 	{
 		path: 'whiteboard',

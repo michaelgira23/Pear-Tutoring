@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { FirebaseAuthState } from 'angularfire2';
 
 import { AuthService } from './shared/security/auth.service';
@@ -16,7 +17,19 @@ export class AppComponent implements OnInit {
 	authInfo: FirebaseAuthState;
 	user: User;
 
-	constructor (private authService: AuthService, private notificationsService: NotificationsService, private userService: UserService) { }
+	// Will hide the sidebar if the user is logged out and is in one of the following routes
+	noSidebarOnLogoutRoutes: string[] = [
+		'/home',
+		'/login',
+		'/register'
+	];
+
+	constructor (
+		private router: Router,
+		private authService: AuthService,
+		private notificationsService: NotificationsService,
+		private userService: UserService
+	) { }
 
 	ngOnInit() {
 		this.notificationsService.init();
@@ -45,6 +58,12 @@ export class AppComponent implements OnInit {
 				console.log('get custom user data error!', err);
 			}
 		);
+	}
+
+	allowSidebar() {
+		// Allow sidebar no matter what if user is logged in
+		// If user is logged out, only show sidebar if it isn't it one of the blacklisted routes
+		return this.authInfo || !this.noSidebarOnLogoutRoutes.includes(this.router.url);
 	}
 
 	logout() {
