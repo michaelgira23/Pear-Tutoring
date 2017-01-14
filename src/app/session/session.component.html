@@ -25,14 +25,12 @@
       <div *ngIf="!sessionExist">
         Session does not exist
       </div>
-      <h2>
-        online users
-      </h2>
+      <h3>Users in Session</h3>
       <div class="online-users-display">
         <app-display-user *ngFor="let user of onlineUsers" [user]="user"></app-display-user>
       </div>
+      <h3>Admin Actions</h3>
       <div class="session-actions" *ngIf="perm?.moderator">
-        <h3>Admin Actions</h3>
         <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" [routerLink]="[{ outlets: { 'permissions-popup': ['permissions'], 'requests-popup': null } }]">Permissions</button>
         <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" [routerLink]="[{ outlets: { 'requests-popup': ['requests'], 'permissions-popup': null } }]">Pending join requests</button>
       </div>
