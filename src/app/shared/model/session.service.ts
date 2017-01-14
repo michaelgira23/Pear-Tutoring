@@ -272,10 +272,16 @@ export class SessionService {
 			.flatMap(session$arr => this.checkAndCombine(session$arr))
 			.map(Session.fromJsonArray)
 			.map(sessions => {
-				return sessions.filter((session, index) => {
+				return sessions
+					// get rid of duplicates
+					.filter((session, index, arr) => {
+						let newArr = arr.splice(arr.indexOf(session), 1);
+						return newArr.includes(session);
+					})
 					// Only return sessions whose tags fully match the query
-					return arraysEqual(session.tags, tags) && index <= page * PAGE_SIZE;
-				});
+					.filter((session, index) => {
+						return arraysEqual(session.tags, tags) && index <= (page + 1) * PAGE_SIZE;
+					});
 			});
 	}
 
@@ -292,8 +298,10 @@ export class SessionService {
 					startAt: lastKey,
 					limitToFirst: PAGE_SIZE
 				}})
-					// List of session ids --> list of session objects without user inserted
-					.flatMap(ids => this.checkAndCombine(ids.map(id => this.db.object('sessions/' + id.$key))))
+				// List of session ids --> list of session objects without user inserted
+				.flatMap(ids => this.checkAndCombine(ids.map(id => {
+					return this.db.object('sessions/' + id.$key);
+				})))
 			)
 		).map(Session.fromJsonArray);
 	}
@@ -359,7 +367,7 @@ export class SessionService {
 			if (session.grade > 0 && session.grade <= 12) {
 				dataToSave[`sessionsByGrade/${session.grade}/${sessionId}`] = true;
 			}
-			dataToSave[`sessionsByClassStr/${session.classStr}/${sessionId}}`] = true;
+			dataToSave[`sessionsByClassStr/${session.classStr}/${sessionId}`] = true;
 			dataToSave[`sessionsByYwd/${ywd}/${sessionId}`] = true;
 		}
 		// Transform the arrays in the object to firebase-friendly objects
