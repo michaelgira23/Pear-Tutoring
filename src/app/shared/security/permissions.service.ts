@@ -199,7 +199,7 @@ class PermissionsSessionScopes extends PermissionsScopes {
 }
 
 class PermissionsWhiteboardScopes extends PermissionsScopes {
-	static componentScopes = ['read', 'write', 'moderator'];
+	static componentScopes = ['read', 'write'];
 
 	constructor(newScopes: Object) { super(newScopes); }
 }

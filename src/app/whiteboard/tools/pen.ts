@@ -20,6 +20,12 @@ export class Pen {
 	 */
 
 	mousedown(event) {
+		// If no permissions, delete current line
+		if (!this.whiteboard.shouldWrite) {
+			this.clearCurrentPath();
+			return;
+		}
+
 		if (this.currentPathFinished) {
 			this.currentPathFinished = false;
 			this.currentPathStarted = Date.now();
@@ -34,6 +40,12 @@ export class Pen {
 	}
 
 	mousemove(event) {
+		// If no permissions, delete current line
+		if (!this.whiteboard.shouldWrite) {
+			this.clearCurrentPath();
+			return;
+		}
+
 		// Only care if mouse is being dragged
 		if (this.currentPath && !this.currentPathFinished) {
 			// Add point to the current line
@@ -42,6 +54,12 @@ export class Pen {
 	}
 
 	mouseup(event) {
+		// If no permissions, delete current line
+		if (!this.whiteboard.shouldWrite) {
+			this.clearCurrentPath();
+			return;
+		}
+
 		if (this.currentPath && !this.currentPathFinished && this.currentPath.segments.length > 1) {
 			this.currentPathFinished = true;
 
@@ -64,6 +82,24 @@ export class Pen {
 					}
 				);
 		}
+
+		// If we don't have permission to read, erase line.
+		// Otherwise, it will be erased when the database responds with new data.
+		if (!this.whiteboard.shouldRead) {
+			this.clearCurrentPath();
+		}
+	}
+
+	/**
+	 * Helper functions
+	 */
+
+	clearCurrentPath() {
+		this.currentPathFinished = true;
+		if (this.currentPath) {
+			this.currentPath.remove();
+		}
+		this.currentPath = null;
 	}
 
 }

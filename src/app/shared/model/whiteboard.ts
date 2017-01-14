@@ -47,6 +47,18 @@ export interface WhiteboardTextOptions extends WhiteboardItemOptions {
 }
 
 /**
+ * Whiteboard Image
+ */
+
+export interface WhiteboardImage extends Metadata {
+	rotation: number;
+	bounds: Rectangle;
+	name: string;
+	url: string;
+	erased?: number;
+}
+
+/**
  * General Types
  */
 
@@ -65,6 +77,8 @@ export interface Metadata {
 	created: number | any; // `any` for firebase.database.ServerValue.TIMESTAMP
 	createdBy: string;
 	edits?: Edits;
+	original?: any;
+	resizeRatio?: number;
 }
 
 // Key should be timestamp, value should be any property changed

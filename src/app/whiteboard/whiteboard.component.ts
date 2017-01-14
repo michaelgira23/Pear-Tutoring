@@ -1,7 +1,8 @@
 import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy, ViewChild, HostListener } from '@angular/core';
 import { segments, rectangles, styles, font, colors } from './utils/serialization';
-import { Whiteboard, WhiteboardMarking, WhiteboardText, WhiteboardShapeType, Color } from '../shared/model/whiteboard';
+import { Whiteboard, WhiteboardMarking, WhiteboardShapeType, WhiteboardText, WhiteboardImage, Color } from '../shared/model/whiteboard';
 import { WhiteboardService, defaultStyleOptions, defaultFontOptions } from '../shared/model/whiteboard.service';
+import { PermissionsService } from '../shared/security/permissions.service';
 
 // Whiteboard tools
 import { Cursor } from './tools/cursor';
@@ -44,11 +45,45 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	whiteboard: Whiteboard;
 	whiteboardName: string;
 
+	// Future permissions subscription
+	permissionsSubscription: any;
+	// Scopes of permissions
+	private _permissions: any = {};
+
+	// Whether or not user can make changes to whiteboard.
+	// While behavior is the same for permissions.write, this is controlled by client ans is for display purposes only.
+	// It is independent of whether the user actually has read/write permissions.
+	@Input()
+	get allowWrite() {
+		return this._allowWrite;
+	}
+	set allowWrite(value) {
+		// Save old permissions first
+		const oldPermissions = {
+			read: this.shouldRead,
+			write: this.shouldWrite
+		};
+		this._allowWrite = value;
+		this.triggerToolEvent(this.tool, 'changepermissions', oldPermissions);
+	}
+
+	private _allowWrite: boolean = false;
+
+	// Hook shouldRead directly to read permissions
+	get shouldRead() {
+		return this._permissions.read;
+	}
+
+	// Only write to the whiteboard if 1) User has permissions and 2) Components want user to write
+	get shouldWrite() {
+		return this._permissions.write && this.allowWrite;
+	}
+
 	// Markings subscription
 	markingsSubscription: any;
 	// Serialized markings returned from database
 	markings: WhiteboardMarking[];
-	// paper.js canvasMarkings on the whiteboard canvas
+	// paper.js paths on the whiteboard canvas
 	canvasMarkings: any = {};
 
 	// Text subscription
@@ -57,6 +92,13 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	text: WhiteboardText[];
 	// paper.js point text objects on the whiteboard
 	canvasText: any = {};
+
+	// Image subscription
+	imagesSubscription: any;
+	// Serialized images returned from database
+	images: WhiteboardImage[];
+	// paper.js rasters on the whiteboard canvas
+	canvasImages: any = {};
 
 	/**
 	 * Snapshot variables
@@ -72,10 +114,6 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	/**
 	 * Miscellaneous variables
 	 */
-
-	// Whether or not user can make changes to whiteboard
-	@Input()
-	allowWrite: boolean = false;
 
 	// Rectangle path on canvas to set background
 	background: any;
@@ -100,6 +138,38 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	// What tool is selected in the whiteboard toolbar
 	tool: string = 'cursor';
 
+	// For mapping of cursor for tools
+	toolCursor: any = {
+		pen: {
+			url: 'assets/whiteboard-cursors/pen.png',
+			offset: {
+				x: 0,
+				y: 20
+			}
+		},
+		eraser: {
+			url: 'assets/whiteboard-cursors/eraser.png',
+			offset: {
+				x: 0,
+				y: 20
+			}
+		},
+		text: {
+			url: 'assets/whiteboard-cursors/text.png',
+			offset: {
+				x: 0,
+				y: 20
+			}
+		},
+		shape: {
+			url: 'assets/whiteboard-cursors/shape.png',
+			offset: {
+				x: 0,
+				y: 20
+			}
+		}
+	};
+
 	// Options when creating things
 	styleOptions = defaultStyleOptions;
 	fontOptions = defaultFontOptions;
@@ -110,6 +180,9 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	starPoints: any = 5;
 	starRadiusPercentage: any = 50;
 
+	// Image upload
+	draggingFile: boolean = false;
+
 	// Tools
 	tools = {
 		cursor: new Cursor(this),
@@ -119,7 +192,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		shape : new Shape(this)
 	};
 
-	constructor(public whiteboardService: WhiteboardService) {
+	constructor(private permissionsService: PermissionsService, public whiteboardService: WhiteboardService) {
 		// Attach custom setters on options
 		// When options change, update options on all selected items
 		const styleOptionsKeys = Object.keys(this.styleOptions);
@@ -207,85 +280,18 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 			// If we are changing the key, clean up any previous observables
 			this.cleanUp();
 
-			// Subscribe to whiteboard metadata
-			this.whiteboardSubscription = this.whiteboardService.getFormattedWhiteboard(this.key).subscribe(
-				whiteboard => {
-					// Check if whiteboard exists
-					if (whiteboard && whiteboard.$exists()) {
-						this.validKey = true;
-						this.allowWrite = true;
-					} else {
-						this.cleanUp();
-						this.clearCanvas();
-						this.validKey = false;
-						this.allowWrite = false;
-						return;
-					}
+			// Change whiteboard key
+			this.tuneWhiteboard(this.key);
 
-					this.whiteboard = whiteboard;
-					this.whiteboardName = this.whiteboard.name;
-
-					// Only update background if whiteboard canvas is initialized
-					if (this.canvasEl) {
-						this.setBackgroundColor(this.whiteboard.background);
-					}
-
-					// Subscribe to markings on whiteboard
-					this.markingsSubscription = this.whiteboardService.getFormattedMarkings(this.key).subscribe(
-						markings => {
-							this.markings = markings;
-
-							// Only update markings if whiteboard canvas is initialized
-							if (this.canvasEl) {
-								this.markingsToCanvas(this.markings);
-							}
-						},
-						err => {
-							console.log('whiteboard markings error!', err);
-						}
-					);
-
-					// Subscribe to text on whiteboard
-					this.textSubscription = this.whiteboardService.getFormattedTexts(this.key).subscribe(
-						text => {
-							this.text = text;
-
-							// Only update text if whiteboard canvas is initialized
-							if (this.canvasEl) {
-								this.textsToCanvas(this.text);
-							}
-						}
-					);
-				},
-				err => {
-					console.log('create whiteboard error!', err);
-				}
-			);
 		}
 	}
 
 	ngOnDestroy() {
 		// Take a screenshot if valid key
-		if (this.validKey) {
+		if (this.whiteboard && this.validKey) {
 			this.takeSnapshot();
 		}
 		this.cleanUp();
-	}
-
-	cleanUp() {
-		// Clean up observables and stuff when component should be reset/destroyed
-		if (this.whiteboardSubscription) {
-			this.whiteboardSubscription.unsubscribe();
-			this.whiteboardSubscription = null;
-		}
-		if (this.markingsSubscription) {
-			this.markingsSubscription.unsubscribe();
-			this.markingsSubscription = null;
-		}
-		if (this.textSubscription) {
-			this.textSubscription.unsubscribe();
-			this.textSubscription = null;
-		}
 	}
 
 	/**
@@ -298,16 +304,17 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	 * - keyup - When any key on the keyboard is unpressed (regular keyup behavior)
 	 * - changetool - Triggered when a tool is deselected
 	 * - selecttool - Triggered when a tool is selected
+	 * - changepermissions - Triggered when permissions change
 	 */
 
-	triggerToolEvent(tool: string, eventName: string, event: any) {
+	triggerToolEvent(tool: string, eventName: string, ...data: any[]) {
 		// Trigger possible event handler in specified tool
 		if (this.tools[tool] && typeof this.tools[tool][eventName] === 'function') {
-			this.tools[tool][eventName](event);
+			this.tools[tool][eventName].apply(this.tools[tool], data);
 		}
 		// Trigger possible event handler in this component
 		if (this[eventName]) {
-			this[eventName](event);
+			this[eventName].apply(this, data);
 		}
 	}
 
@@ -316,12 +323,37 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	 * (put all events to prevent naming conflicts)
 	 */
 
-	mousedown () {}
-	mousemove () {}
-	mouseup   () {}
-	keyup     () {}
-	changetool() {}
-	selecttool() {}
+	mousedown        () {}
+	mousemove        () {}
+	mouseup          () {}
+	keyup            () {}
+	changetool       () {}
+	selecttool       () {}
+	changepermissions(oldPermissions) {
+
+		// Check if permissions changed
+		const readChanged = this.shouldRead !== oldPermissions.read;
+		const writeChanged = this.shouldWrite !== oldPermissions.write;
+
+		console.log(`new permissions read: ${this.shouldRead}, write: ${this.shouldWrite}`);
+
+		if (readChanged) {
+			if (this.shouldRead) {
+				// Initialize whiteboard with key
+				this.tuneWhiteboard(this.key);
+			} else {
+				// Clear canvas
+				// clearCanva() must come before cleanUp() because otherwise we wouldn't know what stuff to delete
+				this.clearCanvas();
+				this.cleanUp();
+			}
+		}
+
+		if (writeChanged && !this.shouldWrite) {
+			// If we don't have write permissions, hide toolbar and select cursor tool
+			this.changeTool('cursor');
+		}
+	}
 
 	/**
 	 * Trigger Event Handlers
@@ -339,6 +371,36 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	onMouseUp(event) {
 		this.mouseDown = false;
 		this.triggerToolEvent(this.tool, 'mouseup', event);
+	}
+
+	onDrag(event) {
+		event.preventDefault();
+		event.stopPropagation();
+	}
+
+	onDragOn(event) {
+		this.draggingFile = true;
+	}
+
+	onDragOff(event) {
+		this.draggingFile = false;
+	}
+
+	onDrop(event) {
+		const point = this.cursorPoint(event);
+		if (event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]) {
+			const uploadFile = event.dataTransfer.files[0];
+			console.log('file', uploadFile);
+			this.whiteboardService.uploadImage(this.key, uploadFile, point.x, point.y)
+				.subscribe(
+					data => {
+						console.log('successfully uploaded image', data);
+					},
+					err => {
+						console.log('error uploading image', err);
+					}
+				);
+		}
 	}
 
 	// When the window resizes, reset the background
@@ -376,6 +438,35 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	 * General functions
 	 */
 
+	paperIdToSerializedObject(id): any {
+		// Return corresponding serialized database object from paper id
+		const markingKey = this.markingIdToPushKey(id);
+		const textKey = this.textIdToPushKey(id);
+		const imageKey = this.imageIdToPushKey(id);
+
+		if (markingKey) {
+			for (let i = 0; i < this.markings.length; i++) {
+				if (this.markings[i].$key === markingKey) {
+					return this.markings[i];
+				}
+			}
+		} else if (textKey) {
+			for (let i = 0; i < this.text.length; i++) {
+				if (this.text[i].$key === textKey) {
+					return this.text[i];
+				}
+			}
+		} else if (imageKey) {
+			for (let i = 0; i < this.images.length; i++) {
+				if (this.images[i].$key === imageKey) {
+					return this.images[i];
+				}
+			}
+		}
+
+		return null;
+	}
+
 	cursorPoint(event) {
 		// Return a paper.js point where the mouse is at relative to the canvas
 		const canvasPos = this.canvasEl.getBoundingClientRect();
@@ -385,17 +476,147 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		return new paper.Point(cursorX, cursorY);
 	}
 
+	cleanUp() {
+		// Clean up observables and stuff when component should be reset/destroyed
+		if (this.whiteboardSubscription) {
+			this.whiteboardSubscription.unsubscribe();
+			this.whiteboardSubscription = null;
+		}
+		this.whiteboard = null;
+		this.whiteboardName = null;
+
+		if (this.markingsSubscription) {
+			this.markingsSubscription.unsubscribe();
+			this.markingsSubscription = null;
+		}
+		this.markings = [];
+		this.canvasMarkings = {};
+
+		if (this.textSubscription) {
+			this.textSubscription.unsubscribe();
+			this.textSubscription = null;
+		}
+		this.text = [];
+		this.canvasText = {};
+	}
+
 	clearCanvas() {
+		console.log('clera acnaas');
 		this.setBackgroundColor('#fff');
 		this.clearCurrentMarkings();
 		this.clearMarkings();
 		this.clearCurrentText();
 		this.clearText();
+
+		// Fallback to just manually deleting everything
+		this.getAllItems().forEach(item => item.remove());
 	}
 
 	/**
 	 * Whiteboard functions
 	 */
+
+	// Listen whiteboard key in database
+	tuneWhiteboard(key: string) {
+		console.log('tune whiteboard');
+		// Unsubscribe from current subscriptions just in case
+		this.cleanUp();
+
+		// Check if we have read permissions or if there's even a valid key
+		if (!this.key) {
+			console.log('actually don\'t tune whiteboard');
+			return;
+		}
+
+		// Subscribe to whiteboard metadata
+		this.whiteboardSubscription = this.whiteboardService.getFormattedWhiteboard(this.key).subscribe(
+			whiteboard => {
+				// Check if whiteboard exists
+				if (whiteboard && whiteboard.$exists()) {
+					this.validKey = true;
+					this.allowWrite = true;
+				} else {
+					this.clearCanvas();
+					this.validKey = false;
+					this.allowWrite = false;
+					return;
+				}
+
+				this.whiteboard = whiteboard;
+				this.whiteboardName = this.whiteboard.name;
+
+				// Only update background if whiteboard canvas is initialized
+				if (this.canvasEl) {
+					this.setBackgroundColor(this.whiteboard.background);
+				}
+
+				// Subscribe to permissions
+				this.permissionsSubscription = this.permissionsService.getUserPermission(this.key, 'whiteboard')
+					.subscribe(
+						permissions => {
+							// Save old permissions first
+							const oldPermissions = {
+								read: this.shouldRead,
+								write: this.shouldWrite
+							};
+							this._permissions = permissions;
+							this.triggerToolEvent(this.tool, 'changepermissions', oldPermissions);
+						},
+						err => {
+							console.log('get whiteboard permissions error!', err);
+						}
+					);
+
+				// Subscribe to markings on whiteboard
+				this.markingsSubscription = this.whiteboardService.getFormattedMarkings(this.key)
+					.subscribe(
+						markings => {
+							this.markings = markings;
+
+							// Only update markings if whiteboard canvas is initialized
+							if (this.canvasEl) {
+								this.markingsToCanvas(this.markings);
+							}
+						},
+						err => {
+							console.log('whiteboard markings error!', err);
+						}
+					);
+
+				// Subscribe to text on whiteboard
+				this.textSubscription = this.whiteboardService.getFormattedTexts(this.key)
+					.subscribe(
+						text => {
+							this.text = text;
+
+							// Only update text if whiteboard canvas is initialized
+							if (this.canvasEl) {
+								this.textsToCanvas(this.text);
+							}
+						},
+						err => {
+							console.log('whiteboard text error!', err);
+						}
+					);
+
+				// Subscribe to images on whiteboard
+				this.imagesSubscription = this.whiteboardService.getFormattedImages(this.key)
+					.subscribe(
+						images => {
+							this.images = images;
+
+							// Only update images if whiteboard canvas is initialized
+							if (this.canvasEl) {
+								this.imagesToCanvas(this.images);
+							}
+						}
+					);
+			},
+			err => {
+				console.log('create whiteboard error!', err);
+			}
+		);
+	}
 
 	changeTool(newTool: string) {
 		// Trigger change event for previous tool
@@ -407,15 +628,17 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	}
 
 	changeWhiteboardName(name: string) {
-		this.whiteboardService.editWhiteboard(this.key, { name })
-			.subscribe(
-				data => {
-					console.log('successfully changed whiteboard name!', data);
-				},
-				err => {
-					console.log('error while changing whiteboard name', err);
-				}
-			);
+		if (this.shouldWrite) {
+			this.whiteboardService.editWhiteboard(this.key, { name })
+				.subscribe(
+					data => {
+						console.log('successfully changed whiteboard name!', data);
+					},
+					err => {
+						console.log('error while changing whiteboard name', err);
+					}
+				);
+		}
 	}
 
 	/**
@@ -446,6 +669,11 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 
 	markingsToCanvas(markings: WhiteboardMarking[]) {
 		this.clearCurrentMarkings();
+
+		// If no read permissions, simply clear at leave it at that
+		if (!this.shouldRead) {
+			return;
+		}
 
 		// Keep track of which markings we deal with
 		let newMarkingKeys = [];
@@ -532,6 +760,11 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	textsToCanvas(texts: WhiteboardText[]) {
 		this.clearCurrentText();
 
+		// If no read permissions, simply clear at leave it at that
+		if (!this.shouldRead) {
+			return;
+		}
+
 		// Keep track of which texts we deal with
 		let newTextKeys = [];
 
@@ -561,12 +794,12 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 					continue;
 				}
 
-				// Update options onto existing marking on canvas
+				// Update options onto existing text on canvas
 				Object.assign(this.canvasText[text.$key], paperOptions);
 				// Set bounds here because it doesn't work in object init for some reason
 				this.canvasText[text.$key].bounds = rectangles.deserialize(text.bounds);
 			} else if (!text.erased) {
-				// Create new marking on whiteboard
+				// Create new text on whiteboard
 				this.canvasText[text.$key] = new paper.PointText(paperOptions);
 				// Set bounds here because it doesn't work in object init for some reason
 				this.canvasText[text.$key].bounds = rectangles.deserialize(text.bounds);
@@ -597,8 +830,13 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 
 	clearCurrentText() {
 		// Erase current text too if it isn't in the process of being created
+		console.log('clear current text');
 		if (this.tools.text.currentText && this.tools.text.currentTextFinished) {
-			this.tools.text.currentText.remove();
+			// If we are editing current text, that means it's already on whiteboard and already registered in database.
+			// We should not remove then.
+			if (!this.tools.text.editingCurrentText) {
+				this.tools.text.currentText.remove();
+			}
 			this.tools.text.currentText = null;
 		}
 	}
@@ -615,14 +853,111 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	}
 
 	/**
+	 * Image functions
+	 */
+
+	imagesToCanvas(images: WhiteboardImage[]) {
+
+		// If no read permissions, simply clear at leave it at that
+		if (!this.shouldRead) {
+			return;
+		}
+
+		// Keep track of which images we deal with
+		let newImageKeys = [];
+
+		// Loop through images and add to canvas
+		for (let i = 0; i < images.length; i++) {
+			const image = images[i];
+			newImageKeys.push(image.$key);
+
+			// Get options for current image
+			let paperOptions = {
+				crossOrigin: 'anonymous',
+				rotation: image.rotation,
+				source: image.url
+			};
+
+			// Check if image already exists on whiteboard
+			if (this.canvasImages[image.$key]) {
+				// Marking already exists on whiteboard
+
+				// Check if image should be erased
+				if (image.erased) {
+					this.canvasImages[image.$key].remove();
+					delete this.canvasImages[image.$key];
+					continue;
+				}
+
+				// Update options onto existing image on canvas
+				Object.assign(this.canvasImages[image.$key], paperOptions);
+				// Set bounds after image loads
+				this.canvasImages[image.$key].onLoad = () => {
+					if (this.canvasImages[image.$key]) {
+						this.canvasImages[image.$key].bounds = rectangles.deserialize(image.bounds);
+					}
+				};
+
+			} else if (!image.erased) {
+				// Create new marking on whiteboard
+				this.canvasImages[image.$key] = new paper.Raster(image.url, paperOptions);
+
+				// Set bounds after image loads
+				this.canvasImages[image.$key].onLoad = () => {
+					if (this.canvasImages[image.$key]) {
+						this.canvasImages[image.$key].bounds = rectangles.deserialize(image.bounds);
+					}
+				};
+
+			}
+		}
+
+		// Now let's delete all markings that are still on canvas, but we haven't recieved from markings parameter
+		const canvasImageKeys = Object.keys(this.canvasImages);
+		canvasImageKeys.forEach(key => {
+			// If key isn't in the markings we've dealt with, delete
+			if (!newImageKeys.includes(key)) {
+				this.canvasImages[key].remove();
+				delete this.canvasImages[key];
+			}
+		});
+	}
+
+	clearImages() {
+		// Erase current canvas markings if they exist
+		if (this.canvasImages) {
+			const imageKeys = Object.keys(this.canvasImages);
+			imageKeys.forEach(key => {
+				this.canvasImages[key].remove();
+				delete this.canvasImages[key];
+			});
+		}
+	}
+
+	imageIdToPushKey(id) {
+		const imageKeys = Object.keys(this.canvasImages);
+		for (let i = 0; i < imageKeys.length; i++) {
+			const image = this.canvasImages[imageKeys[i]];
+			if (image.id === id) {
+				return imageKeys[i];
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * Selection functions
 	 */
 
 	getAllItems(): any[] {
+		let blacklistedIds = [paper.project.activeLayer.id];
+		if (this.background) {
+			blacklistedIds.push(this.background.id);
+		}
+
 		return paper.project.getItems({
 			match: item => {
-				return item.id !== this.background.id
-					&& item.id !== paper.project.activeLayer.id;
+				return !blacklistedIds.includes(item.id);
 			}
 		});
 	}
@@ -632,7 +967,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	}
 
 	deselectAllItems() {
-		this.selectedItems().forEach(item => item.selected = false);
+		this.getAllItems().forEach(item => item.selected = false);
 	}
 
 	// For updating variables determining what is selected
@@ -684,12 +1019,13 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		// Add items to edit in an array
 		let editMarkings = [];
 		let editText = [];
+		let editImages = [];
 
 		items.forEach(item => {
-
 			// Get key from marking and text
 			const markingKey = this.markingIdToPushKey(item.id);
 			const textKey = this.textIdToPushKey(item.id);
+			const imageKey = this.imageIdToPushKey(item.id);
 
 			if (markingKey) {
 				// If marking key exists, it's a marking
@@ -721,6 +1057,18 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 						font: serializedFont
 					}
 				});
+			} else if (imageKey) {
+				// If image key exists, it's an image
+
+				const serializedBounds = rectangles.serialize(item.bounds);
+
+				editImages.push({
+					key: imageKey,
+					options: {
+						rotation: item.rotation,
+						bounds: serializedBounds
+					}
+				});
 			} else {
 				console.log('unrecognized item to edit!');
 			}
@@ -750,6 +1098,18 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 					},
 					err => {
 						console.log('error while editing text!', err);
+					}
+				);
+		});
+
+		editImages.forEach(image => {
+			this.whiteboardService.editImage(this.key, image.key, image.options)
+				.subscribe(
+					data => {
+						console.log('successfully edited image!', data);
+					},
+					err => {
+						console.log('error while editing image!', err);
 					}
 				);
 		});
@@ -786,7 +1146,6 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 				paper.project.view.scale(1 / scaleWidth, 1 / scaleHeight, new paper.Point(0, 0));
 				paper.project.view.viewSize = originalViewSize;
 				this.takingSnapshot = false;
-				this.setBackgroundColor(this.whiteboard.background);
 
 				// Upload image to Firebase
 				this.whiteboardService.storeSnapshot(key, imgBlob).subscribe(
