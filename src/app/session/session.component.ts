@@ -102,10 +102,10 @@ export class SessionComponent implements OnInit, OnDestroy {
 		if (user.$key !== this.sessionInfo.tutor.$key) {
 			this.sessionService.addTutees(this.sessionId, user.$key).subscribe(val => {
 				console.log('request pending');
-			}, console.log);
-		} else {
-			let tutees = JSON.stringify(this.sessionInfo.tutees); this.sessionInfo.tutees = JSON.parse(tutees);
-			console.log('you cannot add the tutor as a tutee');
+			}, err => {
+				console.log(err);
+				let tutees = Object.assign([], this.sessionInfo.tutees); this.sessionInfo.tutees = tutees;
+			});
 		}
 	}
 

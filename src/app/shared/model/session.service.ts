@@ -517,7 +517,7 @@ export class SessionService {
 				let dataToSave = {};
 				// stop the tutor from adding himself
 				if (session.tutor.$key !== tuteeId) {
-					if (session.tutees.length <= session.max) {
+					if (session.tutees.length < session.max) {
 						if (session.pending.some(user => user === tuteeId)) {
 							dataToSave[`sessions/${sessionId}/pending/${tuteeId}`] = null;
 							dataToSave[`sessions/${sessionId}/tutees/${tuteeId}`] = true;
@@ -540,7 +540,7 @@ export class SessionService {
 					}
 					return Observable.throw('session is already full');
 				}
-				return Observable.throw('you are the tutor');
+				return Observable.throw('you cannot add the tutor as a tutee');
 			});
 	}
 

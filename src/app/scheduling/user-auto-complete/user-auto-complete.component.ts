@@ -1,4 +1,4 @@
-import { Component, OnInit, forwardRef, Output, EventEmitter, OnDestroy } from '@angular/core';
+import { Component, OnInit, forwardRef, Output, EventEmitter, OnDestroy, Input } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Subject, Subscription } from 'rxjs/Rx';
 import { UserService } from '../../shared/model/user.service';
@@ -15,6 +15,8 @@ import { User } from '../../shared/model/user';
 	}]
 })
 export class UserAutoCompleteComponent implements OnInit, ControlValueAccessor, OnDestroy {
+
+	@Input() disabled = false;
 
 	private selectedUsers: User[] = [];
 	set userValue(users: User[]) {

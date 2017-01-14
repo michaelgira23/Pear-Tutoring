@@ -16,4 +16,8 @@ export class ModalComponent {
 	public hide(): void {
 		this.visible = false;
 	}
+
+	public onClick(e: Event): void {
+		e.stopPropagation();
+	}
 }

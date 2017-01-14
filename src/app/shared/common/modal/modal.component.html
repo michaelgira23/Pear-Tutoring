@@ -1,5 +1,5 @@
 <div class="modal fade" tabindex="-1" [ngClass]="{'in': visibleAnimate}"
-      [ngStyle]="{'display': visible ? 'block' : 'none'}">
+      [ngStyle]="{'display': visible ? 'block' : 'none'}" (click)="onClick($event)">
   <div class="modal-dialog mdl-shadow--2dp">
     <div class="modal-content">
       <div class="modal-header">

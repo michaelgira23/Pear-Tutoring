@@ -37,7 +37,8 @@ export class SessionRequestComponent implements OnInit {
 		}, console.log);
 	}
 
-	closeModal() {
+	closeModal(e: Event) {
+		e.stopPropagation();
 		this.modal.hide();
 		this.router.navigate(['../'], {relativeTo: this.route});
 	}

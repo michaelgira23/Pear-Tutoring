@@ -17,9 +17,9 @@
         <div>
           <app-display-user [user]="sessionInfo?.tutor"></app-display-user>
         </div>
-        <h3>Tutees</h3>
+        <h3>Tutees (max: {{ sessionInfo?.max }})</h3>
         <div class="tutees-display">
-          <app-user-auto-complete *ngIf="perm?.write" [ngModel]="sessionInfo?.tutees" (onAddUser)="addTutee($event)" (onRemoveUser)="removeTutee($event)"></app-user-auto-complete>
+          <app-user-auto-complete *ngIf="perm?.write" [disabled]="sessionInfo?.max <= sessionInfo?.tutees.length" [ngModel]="sessionInfo?.tutees" (onAddUser)="addTutee($event)" (onRemoveUser)="removeTutee($event)"></app-user-auto-complete>
         </div>
       </div>
       <div *ngIf="!sessionExist">
