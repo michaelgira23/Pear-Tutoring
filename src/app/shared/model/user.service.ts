@@ -15,8 +15,6 @@ export const UserStatus = {
 @Injectable()
 export class UserService {
 
-	currentUser: User;
-
 	sdkDb: any;
 	sdkStorage: any;
 	uid: string;
