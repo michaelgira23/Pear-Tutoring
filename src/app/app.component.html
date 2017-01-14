@@ -54,7 +54,7 @@
 		</div>
 	</main>
 </div>-->
-<div appMdl class="layout mdl-layout mdl-js-layout mdl-layout--fixed-drawer mdl-layout--fixed-header">
+<div appMdl class="layout mdl-layout mdl-js-layout mdl-layout--fixed-header" [class.mdl-layout--fixed-drawer]="allowSidebar()">
 	<header class="layout-header mdl-layout__header mdl-color--grey-100 mdl-color-text--grey-600">
 		<div class="header-row mdl-layout__header-row">
 			<span class="mdl-layout-title">Pear Tutoring</span>
@@ -68,13 +68,14 @@
 				</div>
 			</div> -->
 			<div class="mdl-layout-spacer"></div>
-			<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect">
+			<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect" routerLink="/whiteboard/new">
 				<i class="material-icons">create</i>
 				Create a Whiteboard
 			</button>
 		</div>
 	</header>
-	<div class="drawer mdl-layout__drawer mdl-color--blue-grey-900 mdl-color-text--blue-grey-50">
+	<div *ngIf="allowSidebar()" class="drawer mdl-layout__drawer mdl-color--blue-grey-900 mdl-color-text--blue-grey-50">
+
 		<header class="drawer-header">
 
 			<ng-container *ngIf="authInfo">
@@ -89,35 +90,29 @@
 
 			<ng-container *ngIf="!authInfo">
 				<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect"
-					routerLink="login">
+					routerLink="/login">
 					Login
 				</button>
 				<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--primary mdl-js-ripple-effect"
-					routerLink="register">
+					routerLink="/register">
 					Register
 				</button>
 			</ng-container>
 		</header>
 		<nav class="navigation mdl-navigation mdl-color--blue-grey-800">
-			<a class="mdl-navigation__link" routerLink="home" routerLinkActive="active">
+			<a class="mdl-navigation__link" routerLink="/home" routerLinkActive="active">
 				<i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">home</i>
 				Home
 			</a>
-			<a class="mdl-navigation__link" routerLink="whiteboard" routerLinkActive="active">
-				<i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">folder_open</i>
-				Whiteboard
-				<br>
-				<small>(Debug Only)</small>
-			</a>
-			<a class="mdl-navigation__link" routerLink="dashboard" routerLinkActive="active">
+			<a class="mdl-navigation__link" routerLink="/dashboard" routerLinkActive="active">
 				<i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">dashboard</i>
 				Dashboard
 			</a>
-			<a class="mdl-navigation__link" routerLink="search" routerLinkActive="active">
+			<a class="mdl-navigation__link" routerLink="/search" routerLinkActive="active">
 				<i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">search</i>
 				Find a Session
 			</a>
-			<a class="mdl-navigation__link" routerLink="settings" routerLinkActive="active">
+			<a class="mdl-navigation__link" routerLink="/settings" routerLinkActive="active">
 				<i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">settings</i>
 				Settings
 			</a>
