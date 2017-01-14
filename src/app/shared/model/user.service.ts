@@ -20,13 +20,23 @@ export class UserService {
 	uid: string;
 	status: number;
 
-	constructor(@Inject(FirebaseRef) fb, private db: AngularFireDatabase, private auth: AuthService) {
+	user$: Observable<User>;
+
+	constructor(@Inject(FirebaseRef) fb, private db: AngularFireDatabase, private authService: AuthService) {
 		this.sdkDb = fb.database().ref();
 		this.sdkStorage = fb.storage().ref();
+
+		this.user$ = this.authService.auth$
+			.switchMap(authInfo => {
+				if (authInfo) {
+					return this.findUser(authInfo.auth.uid);
+				}
+				return Observable.of(<undefined|null>authInfo);
+			});
 	}
 
 	register(regOpt: RegisterOptions): Observable<any> {
-		return this.auth.register(regOpt.email, regOpt.password)
+		return this.authService.register(regOpt.email, regOpt.password)
 			.flatMap(val => {
 				const newUid = val.uid;
 				let userToSave = Object.assign({}, regOpt);
@@ -90,7 +100,7 @@ export class UserService {
 	}
 
 	getFreeTimes(): Observable<FreeTimes> {
-		return this.auth.auth$.flatMap(state => {
+		return this.authService.auth$.flatMap(state => {
 			if (state) {
 				return this.db.object(`freeTimesByUsers/${this.uid}/`)
 					.map(freeTimes => {
