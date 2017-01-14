@@ -73,7 +73,7 @@ export class UserAutoCompleteComponent implements OnInit, ControlValueAccessor, 
 		}
 	}
 
-	addUser(e: MouseEvent, i: number) {
+	addUser(e: Event, i: number) {
 		e.stopPropagation();
 		this.onAddUser.emit(this.userResults[i]);
 		this.userValue = this.userValue.concat([this.userResults[i]]);
@@ -98,4 +98,7 @@ export class UserAutoCompleteComponent implements OnInit, ControlValueAccessor, 
 
 	registerOnTouched() {}
 
+	hitBackspace() {
+		this.searchStr = this.searchStr.substr(0, this.searchStr.length - 1);
+	}
 }

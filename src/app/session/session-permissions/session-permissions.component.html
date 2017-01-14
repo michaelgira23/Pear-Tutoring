@@ -2,7 +2,7 @@
 
   <div class="app-modal-header">
     <h2>Permissions for Session: {{ sessionInfo?.title }}</h2>
-    <button class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect" (click)="closeModal()">
+    <button class="close-button mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect" (click)="closeModal()">
       <i class="material-icons">close</i>
     </button>
   </div>
@@ -39,22 +39,20 @@
               </span>
             </li>
             <!--If the permission object is iterable-->
-            <ul class="mdl-list" *ngIf="perms.originalObj[permType].length">
-              <div class="list-item-container" *ngFor="let item of perms.originalObj[permType], let i = index">
-                <li class="mdl-list__item">
-                  <span class="mdl-list__item-primary-content">{{ sessionInfo.whiteboards[i].name }}</span>
-                  <span class="mdl-list__item-secondary-action permission-checkboxes">
-                    <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" [attr.for]="permType + '-read-' + user.$key + i" [class.is-checked]="item.user[user.$key].read">
-                      <input type="checkbox" [id]="permType + '-read-' + user.$key + i" [checked]="item.user[user.$key].read" class="mdl-checkbox__input" [(ngModel)]="perms.originalObj[permType][i].user[user.$key].read" />
-                      <span class="mdl-checkbox__label">Read</span>
-                    </label>
-                    <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" [attr.for]="permType + '-write-' + user.$key + i" [class.is-checked]="item.user[user.$key].write">
-                      <input type="checkbox" [id]="permType + '-write-' + user.$key + i" [checked]="item.user[user.$key].write" class="mdl-checkbox__input" [(ngModel)]="perms.originalObj[permType][i].user[user.$key].write" />
-                      <span class="mdl-checkbox__label">Write</span>
-                    </label>
-                  </span>
-                </li>
-              </div>
+            <ul class="mdl-list iterable-perm" *ngIf="perms.originalObj[permType].length">
+              <li class="mdl-list__item" *ngFor="let item of perms.originalObj[permType], let i = index">
+                <span class="mdl-list__item-primary-content">{{ sessionInfo.whiteboards[i].name }}</span>
+                <span class="mdl-list__item-secondary-action permission-checkboxes">
+                  <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" [attr.for]="permType + '-read-' + user.$key + i" [class.is-checked]="item.user[user.$key].read">
+                    <input type="checkbox" [id]="permType + '-read-' + user.$key + i" [checked]="item.user[user.$key].read" class="mdl-checkbox__input" [(ngModel)]="perms.originalObj[permType][i].user[user.$key].read" />
+                    <span class="mdl-checkbox__label">Read</span>
+                  </label>
+                  <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" [attr.for]="permType + '-write-' + user.$key + i" [class.is-checked]="item.user[user.$key].write">
+                    <input type="checkbox" [id]="permType + '-write-' + user.$key + i" [checked]="item.user[user.$key].write" class="mdl-checkbox__input" [(ngModel)]="perms.originalObj[permType][i].user[user.$key].write" />
+                    <span class="mdl-checkbox__label">Write</span>
+                  </label>
+                </span>
+              </li>
             </ul>
           </div>
         </ul>

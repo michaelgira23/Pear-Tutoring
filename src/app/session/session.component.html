@@ -19,7 +19,7 @@
         </div>
         <h3>Tutees</h3>
         <div class="tutees-display">
-          <app-user-auto-complete [ngModel]="sessionInfo?.tutees" (onAddUser)="addTutee($event)" (onRemoveUser)="removeTutee($event)"></app-user-auto-complete>
+          <app-user-auto-complete *ngIf="perm?.write" [ngModel]="sessionInfo?.tutees" (onAddUser)="addTutee($event)" (onRemoveUser)="removeTutee($event)"></app-user-auto-complete>
         </div>
       </div>
       <div *ngIf="!sessionExist">
@@ -31,7 +31,8 @@
       <div class="online-users-display">
         <app-display-user *ngFor="let user of onlineUsers" [user]="user"></app-display-user>
       </div>
-      <div class="session-actions">
+      <div class="session-actions" *ngIf="perm?.moderator">
+        <h3>Admin Actions</h3>
         <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" [routerLink]="[{ outlets: { 'permissions-popup': ['permissions'], 'requests-popup': null } }]">Permissions</button>
         <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" [routerLink]="[{ outlets: { 'requests-popup': ['requests'], 'permissions-popup': null } }]">Pending join requests</button>
       </div>

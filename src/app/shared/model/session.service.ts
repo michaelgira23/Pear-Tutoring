@@ -59,14 +59,19 @@ export class SessionService {
 		return Observable.of([]);
 	}
 
-	permForUsers(users: string[]): Permission {
+	permForUsers(tutees: string[], tutor: string): Permission {
 		let usersPerm = {};
-		users.forEach(val => {
+		tutees.forEach(val => {
 			usersPerm[val] = {
 				read: true,
 				write: true
 			};
 		});
+		usersPerm[tutor] = {
+			read: true,
+			write: true,
+			moderator: true
+		};
 		return {
 			anonymous: {
 				scopes: {
@@ -365,7 +370,7 @@ export class SessionService {
 
 		return this.firebaseUpdate(dataToSave)
 			.flatMap(val => {
-				return this.permissionsService.createPermission(sessionId, 'session', this.permForUsers(session.tutees.concat([session.tutor])));
+				return this.permissionsService.createPermission(sessionId, 'session', this.permForUsers(session.tutees, session.tutor));
 			});
 	}
 
@@ -388,8 +393,9 @@ export class SessionService {
 		})
 		.flatMap(val => {
 			return Observable.forkJoin(
-				this.permissionsService.createPermission(wbId, 'whiteboard', this.permForUsers(session.tutees.concat([session.tutor]))),
-				this.permissionsService.createPermission(chatId, 'chat', this.permForUsers(session.tutees.concat([session.tutor]))));
+				this.permissionsService.createPermission(wbId, 'whiteboard', this.permForUsers(session.tutees, session.tutor)),
+				this.permissionsService.createPermission(chatId, 'chat', this.permForUsers(session.tutees, session.tutor))
+			);
 		});
 	}
 
@@ -477,7 +483,7 @@ export class SessionService {
 							return this.permissionsService.createPermission(
 								wb.key,
 								'whiteboard',
-								this.permForUsers(session.tutees.concat([session.tutor]).map(user => user.$key))
+								this.permForUsers(session.tutees.map(user => user.$key), session.tutor.$key)
 							);
 						});
 				});
@@ -498,19 +504,32 @@ export class SessionService {
 		return this.findSession(sessionId).take(1)
 			.flatMap((session: Session) => {
 				let dataToSave = {};
-				// if (session.tutor.$key !== this.uid) {
+				// stop the tutor from adding himself
+				if (session.tutor.$key !== tuteeId) {
 					if (session.tutees.length <= session.max) {
-						if (session.pending.some(user => this.uid === tuteeId)) {
+						if (session.pending.some(user => user === tuteeId)) {
 							dataToSave[`sessions/${sessionId}/pending/${tuteeId}`] = null;
 							dataToSave[`sessions/${sessionId}/tutees/${tuteeId}`] = true;
 							dataToSave[`users/${tuteeId}/tuteeSessions/${sessionId}`] = true;
 							dataToSave[`usersInSession/${sessionId}/${tuteeId}`] = false;
-						} else {
-							dataToSave[`sessions/${sessionId}/pending/${tuteeId}`] = true;
+							return this.firebaseUpdate(dataToSave)
+							// give permission to all components for the user
+							.switchMap(val => {
+								return Observable.combineLatest([
+									this.permissionsService.addScope(sessionId, 'session', { read: true, write: true }, 'user', tuteeId),
+									this.permissionsService.addScope(session.chat, 'chat', { read: true, write: true }, 'user', tuteeId),
+									Observable.combineLatest(session.whiteboards.map(wb => {
+										return this.permissionsService.addScope(wb.$key, 'whiteboard', { read: true, write: true }, 'user', tuteeId);
+									}))
+								]);
+							});
 						}
+						dataToSave[`sessions/${sessionId}/pending/${tuteeId}`] = true;
+						return this.firebaseUpdate(dataToSave);
 					}
-				// }
-				return this.firebaseUpdate(dataToSave);
+					return Observable.throw('session is already full');
+				}
+				return Observable.throw('you are the tutor');
 			});
 	}
 

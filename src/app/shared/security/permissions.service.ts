@@ -107,16 +107,10 @@ export class PermissionsService {
 		const _scopeObj: PermissionsScopes = new (this.typeToClass[type])(_scopes);
 		const scopes = _scopeObj.scopes;
 
-		let permissions = this.af.database.object(`${type}Permissions/${$key}`);
+		let permissions = !$uid ? this.af.database.object(`${type}Permissions/${$key}/${group}`)
+								: this.af.database.object(`${type}Permissions/${$key}/${group}/${$uid}`);
 
-		if (group === 'user') {
-			permissions = this.af.database.object(`${type}Permissions/${$key}/user`);
-		}
-
-		const scopeObj = {};
-		scopeObj[group] = scopes;
-
-		return this.promiseToObservable(permissions.update(scopeObj));
+		return this.promiseToObservable(permissions.set(scopes));
 	}
 
 	// See line 29

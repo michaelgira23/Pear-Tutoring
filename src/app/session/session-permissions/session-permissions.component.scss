@@ -1,7 +1,7 @@
 @import '../../shared/styles/_colors';
 
 .list-item-container {
-    margin: 0 4em;
+    margin: 0 1.5em;
     .permission-checkboxes {
         display: flex;
         flex-direction: row;
@@ -21,7 +21,16 @@
     overflow: hidden;
     transition: height 250ms cubic-bezier(0.165, 0.84, 0.44, 1);
     &.open {
-        height: 300px;
+        height: 250px;
         padding: 0.5em 0;
     }
+    .iterable-perm {
+        overflow-y: scroll;
+    }
+}
+
+.close-button {
+	position: absolute;
+	top: 0.5em;
+	right: 0.5em;
 }

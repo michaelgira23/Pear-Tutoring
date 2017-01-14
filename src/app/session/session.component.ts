@@ -1,9 +1,10 @@
 import { Component, OnInit, OnDestroy, ViewChildren, QueryList } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { SessionService } from '../shared/model/session.service';
 import { Session } from '../shared/model/session';
 import { User } from '../shared/model/user';
 import { UserService } from '../shared/model/user.service';
+import { PermissionsService, Permission } from '../shared/security/permissions.service';
 import { Whiteboard } from '../shared/model/whiteboard';
 import { SidebarComponent } from '../shared/common/sidebar/sidebar.component';
 
@@ -19,6 +20,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 	sessionInfo: Session;
 	onlineUsers: User[] = [];
 	findSession$;
+	perm: Permission;
 
 	selectedWbIndex: number = 0;
 	get selectedWb(): Whiteboard {
@@ -27,7 +29,13 @@ export class SessionComponent implements OnInit, OnDestroy {
 
 	@ViewChildren(SidebarComponent) sidebars: QueryList<SidebarComponent>;
 
-	constructor(private route:  ActivatedRoute, private sessionService: SessionService, private userService: UserService) { }
+	constructor(
+		private route: ActivatedRoute,
+		private sessionService: SessionService,
+		private userService: UserService,
+		private permissionsService: PermissionsService,
+		private router: Router
+	) { }
 
 	ngOnInit() {
 		this.route.params.subscribe(params => {
@@ -35,6 +43,13 @@ export class SessionComponent implements OnInit, OnDestroy {
 			this.findSession$ = this.sessionService.findSession(this.sessionId).subscribe(session => {
 				this.sessionExist = true;
 				this.sessionInfo = session;
+				this.permissionsService.getUserPermission(this.sessionId, 'session').subscribe(perm => {
+					this.perm = perm;
+					if (!perm.read) {
+						console.log('You have been banned from the session');
+						this.router.navigate(['scheduling']);
+					}
+				}, console.log);
 				this.sessionService.joinSession(this.sessionId).subscribe(data => {}, console.error,
 				() => {
 					this.sessionService.getOnlineUsers(this.sessionId).subscribe(userIds => {
@@ -86,7 +101,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 	addTutee(user: User) {
 		if (user.$key !== this.sessionInfo.tutor.$key) {
 			this.sessionService.addTutees(this.sessionId, user.$key).subscribe(val => {
-				console.log('added tutees');
+				console.log('request pending');
 			}, console.log);
 		} else {
 			let tutees = JSON.stringify(this.sessionInfo.tutees); this.sessionInfo.tutees = JSON.parse(tutees);

@@ -554,6 +554,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 				this.permissionsSubscription = this.permissionsService.getUserPermission(this.key, 'whiteboard')
 					.subscribe(
 						permissions => {
+							console.log(this.key);
 							// Save old permissions first
 							const oldPermissions = {
 								read: this.shouldRead,

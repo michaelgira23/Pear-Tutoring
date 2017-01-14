@@ -20,9 +20,9 @@ export class SessionRequestComponent implements OnInit {
 
 	ngOnInit() {
 		this.modal.show();
-		let sessionId = this.route.parent.snapshot.params['id'];
-		if (sessionId) {
-			this.sessions.getPendingTutees(sessionId)
+		this.sessionId = this.route.parent.snapshot.params['id'];
+		if (this.sessionId) {
+			this.sessions.getPendingTutees(this.sessionId)
 			.subscribe(tutees => {
 				this.pendingUsers = tutees;
 			}, console.log);

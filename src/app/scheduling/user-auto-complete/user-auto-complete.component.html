@@ -5,7 +5,7 @@
 
   <div class="search-input">
     <div class="mdl-textfield mdl-js-textfield">
-      <input id="user-search" class="mdl-textfield__input" type="text" [ngModel]="searchStr" (ngModelChange)="onSearchKeyup($event)" (keyup.Enter)="addUser(0)">
+      <input id="user-search" class="mdl-textfield__input" type="text" [ngModel]="searchStr" (ngModelChange)="onSearchKeyup($event)" (keyup.backspace)="hitBackspace()">
       <label class="mdl-textfield__label" for="user-search">Type Username</label>
     </div>
 
