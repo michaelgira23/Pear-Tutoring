@@ -2,127 +2,138 @@
 <canvas #whiteboard resize
 	(mousedown)="onMouseDown($event)"
 	(mousemove)="onMouseMove($event)"
-	(mouseup)="onMouseUp($event)"
+	(mouseup)  ="onMouseUp($event)"
+	(dragover) ="onDrag($event); onDragOn($event)"
+	(dragleave)="onDrag($event); onDragOff($event)"
+	(drop)     ="onDrag($event); onDragOff($event); onDrop($event)"
+	[style.cursor]="!toolCursor[tool] ? 'inherit' : 'url(' + toolCursor[tool].url + ') ' + toolCursor[tool].offset.x + ' ' + toolCursor[tool].offset.y + ', auto' | safeStyle"
 	[style.height]="takingSnapshot ? snapshotDimensions.height + 'px' : 'inherit'"
-	[style.width]="takingSnapshot ?  snapshotDimensions.width + 'px' : 'inherit'"></canvas>
+	[style.width] ="takingSnapshot ?  snapshotDimensions.width + 'px' : 'inherit'"></canvas>
 
 <!--Whiteboard Name-->
-<form class="whiteboard-name" (submit)="changeWbName(wbNameInput.value)">
+<form class="whiteboard-name" (submit)="changeWhiteboardName(whiteboardName)">
 	<div class="mdl-textfield mdl-js-textfield">
-		<input #wbNameInput id="whiteboard-name" class="mdl-textfield__input" (blur)=changeWbName(wbNameInput.value) [value]="wbName">
+		<input
+			class="mdl-textfield__input"
+			name="whiteboard-name"
+			[(ngModel)]="whiteboardName"
+			(blur)="changeWhiteboardName(whiteboardName)"
+			[disabled]="!shouldWrite">
 		<!-- <label class="mdl-textfield__label" for="whiteboard-name">Whiteboard Name</label> -->
 	</div>
 </form>
 
-<!-- Tool selection -->
-<div *ngIf="showToolbar" class="toolbar">
-	<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect"
-		[disabled]="tool === 'cursor'" (click)="tool = 'cursor'">
-		<span class="fa fa-mouse-pointer"></span>
-	</button>
-	<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect"
-		[disabled]="tool === 'pen'" (click)="tool = 'pen'">
-		<span class="fa fa-pencil"></span>
-	</button>
-	<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect"
-		[disabled]="tool === 'eraser'" (click)="tool = 'eraser'">
-		<span class="fa fa-eraser"></span>
-	</button>
-	<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect"
-		[disabled]="tool === 'text'" (click)="tool = 'text'">
-		<span class="fa fa-i-cursor"></span>
-	</button>
-	<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect"
-		[disabled]="tool === 'shape'" (click)="tool = 'shape'">
-		<span class="fa fa-square"></span>
-	</button>
-</div>
+<ng-container *ngIf="shouldWrite">
+	<!-- Tool selection -->
+	<div class="tool-selection">
+		<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect"
+			[disabled]="tool === 'cursor'" (click)="changeTool('cursor')">
+			<span class="fa fa-mouse-pointer"></span>
+		</button>
+		<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect"
+			[disabled]="tool === 'pen'" (click)="changeTool('pen')">
+			<span class="fa fa-pencil"></span>
+		</button>
+		<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect"
+			[disabled]="tool === 'eraser'" (click)="changeTool('eraser')">
+			<span class="fa fa-eraser"></span>
+		</button>
+		<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect"
+			[disabled]="tool === 'text'" (click)="changeTool('text')">
+			<span class="fa fa-i-cursor"></span>
+		</button>
+		<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect"
+			[disabled]="tool === 'shape'" (click)="changeTool('shape')">
+			<span class="fa fa-square"></span>
+		</button>
+	</div>
 
-<!-- Tool-Specific Toolbars -->
+	<!-- Toolbar -->
+	<div *ngIf="tools[tool].toolbarShowStyles || isMarkingSelected() || isTextSelected()" class="toolbar" (mouseup)="onToolbarOptionsChange()">
+		<!-- Styles Toolbar -->
+		<ng-container *ngIf="tools[tool].toolbarShowStyles || isMarkingSelected() || isTextSelected()">
+			<div class="toolbar-option">
+				<label>Fill Color</label>
+				<button class="color"
+					[(colorPicker)]="styleOptions.fill.color"
+					[cpFallbackColor]="styleOptions.fill.color"
+					[style.background]="styleOptions.fill.color"></button>
+			</div>
+			<div class="toolbar-option">
+				<label>Stroke Color</label>
+				<button class="color"
+					[(colorPicker)]="styleOptions.stroke.color"
+					[cpFallbackColor]="styleOptions.stroke.color"
+					[style.background]="styleOptions.stroke.color"></button>
+			</div>
+			<div class="toolbar-option">
+				<label>Stroke Size</label>
+				<input type="range" min="1" max="100" [(ngModel)]="styleOptions.stroke.width">
+			</div>
+		</ng-container>
+		<!-- Font Toolbar -->
+		<ng-container *ngIf="tools[tool].toolbarShowText || isTextSelected()">
+			<div class="toolbar-option">
+				<label>Font Family</label>
+				<select [(ngModel)]="fontOptions.family">
+					<option value="sans-serif">sans-serif</option>
+					<option value="Comic Sans MS">Comic Sans MS</option>
+				</select>
+			</div>
+			<div class="toolbar-option">
+				<label>Font Size</label>
+				<input type="range" min="1" max="100" [(ngModel)]="fontOptions.size">
+			</div>
+		</ng-container>
+		<!-- Shapes Toolbar -->
+		<ng-container *ngIf="tools[tool].toolbarShowShapes">
+			<div class="toolbar-option">
+				<label>Shape</label>
+				<div class="shapes">
+					<label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="shape-line">
+						<input type="radio" id="shape-line" class="mdl-radio__button" name="shape" value="line" [(ngModel)]="shapeType">
+						<span class="mdl-radio__label">Line</span>
+					</label>
+					<label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="shape-arc">
+						<input type="radio" id="shape-arc" class="mdl-radio__button" name="shape" value="arc" [(ngModel)]="shapeType">
+						<span class="mdl-radio__label">Arc</span>
+					</label>
+					<label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="shape-ellipse">
+						<input type="radio" id="shape-ellipse" class="mdl-radio__button" name="shape" value="ellipse" [(ngModel)]="shapeType">
+						<span class="mdl-radio__label">Ellipse</span>
+					</label>
+					<label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="shape-polygon">
+						<input type="radio" id="shape-polygon" class="mdl-radio__button" name="shape" value="polygon" [(ngModel)]="shapeType">
+						<span class="mdl-radio__label">Polygon</span>
+						<input class="number" type="number" [(ngModel)]="polygonSides">
+					</label>
+					<label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="shape-star">
+						<input type="radio" id="shape-star" class="mdl-radio__button" name="shape" value="star" [(ngModel)]="shapeType">
+						<span class="mdl-radio__label">Star</span>
+						<input class="number" type="number" [(ngModel)]="starPoints">
+						<input class="number" type="number" min="1" max="99" [(ngModel)]="starRadiusPercentage">
+					</label>
+					<label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="shape-custom">
+						<input type="radio" id="shape-custom" class="mdl-radio__button" name="shape" value="custom" [(ngModel)]="shapeType">
+						<span class="mdl-radio__label">Custom</span>
+					</label>
+				</div>
+			</div>
+		</ng-container>
+	</div>
+</ng-container>
 
-<!-- Draw Toolbar -->
-<div *ngIf="showToolbar && tool === 'pen'" class="tool-toolbar">
-	<div class="option">
-		<label>Color</label>
-		<button class="color"
-			[(colorPicker)]="styleOptions.stroke.color"
-			[cpFallbackColor]="styleOptions.stroke.color"
-			[style.background]="styleOptions.stroke.color"></button>
-	</div>
-	<div class="option">
-		<label>Width</label>
-		<input type="range" min="1" max="100" [(ngModel)]="styleOptions.stroke.width">
-	</div>
-</div>
+<div
+	class="upload-file"
+	[class.show]="draggingFile"
+	(dragover) ="onDrag($event); onDragOn($event)"
+	(dragleave)="onDrag($event); onDragOff($event)"
+	(drop)     ="onDrag($event); onDragOff($event); onDrop($event)">
 
-<!-- Text Toolbar -->
-<div *ngIf="showToolbar && tool === 'text'" class="tool-toolbar">
-	<div class="option">
-		<label>Color</label>
-		<button class="color"
-			[(colorPicker)]="styleOptions.fill.color"
-			[cpFallbackColor]="styleOptions.fill.color"
-			[style.background]="styleOptions.fill.color"></button>
+	<div class="upload-file-square">
+		<h1>Upload Image</h1>
 	</div>
-	<div class="option">
-		<label>Size</label>
-		<input type="range" min="1" max="100" [(ngModel)]="fontOptions.size">
-	</div>
-</div>
-
-<!-- Shape Toolbar -->
-<div *ngIf="showToolbar && tool === 'shape'" class="tool-toolbar">
-	<div class="option">
-		<label>Fill Color</label>
-		<button class="color"
-			[(colorPicker)]="styleOptions.fill.color"
-			[cpFallbackColor]="styleOptions.fill.color"
-			[style.background]="styleOptions.fill.color"></button>
-	</div>
-	<div class="option">
-		<label>Stroke Color</label>
-		<button class="color"
-			[(colorPicker)]="styleOptions.stroke.color"
-			[cpFallbackColor]="styleOptions.stroke.color"
-			[style.background]="styleOptions.stroke.color"></button>
-	</div>
-	<div class="option">
-		<label>Stroke Size</label>
-		<input type="range" min="1" max="100" [(ngModel)]="styleOptions.stroke.width">
-	</div>
-	<div class="option">
-		<label>Shape {{ shapeType }}</label>
-		<div class="shapes">
-			<label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="shape-line">
-				<input type="radio" id="shape-line" class="mdl-radio__button" name="shape" value="line" [(ngModel)]="shapeType">
-				<span class="mdl-radio__label">Line</span>
-			</label>
-			<label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="shape-arc">
-				<input type="radio" id="shape-arc" class="mdl-radio__button" name="shape" value="arc" [(ngModel)]="shapeType">
-				<span class="mdl-radio__label">Arc</span>
-			</label>
-			<label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="shape-ellipse">
-				<input type="radio" id="shape-ellipse" class="mdl-radio__button" name="shape" value="ellipse" [(ngModel)]="shapeType">
-				<span class="mdl-radio__label">Ellipse</span>
-			</label>
-			<label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="shape-polygon">
-				<input type="radio" id="shape-polygon" class="mdl-radio__button" name="shape" value="polygon" [(ngModel)]="shapeType">
-				<span class="mdl-radio__label">Polygon</span>
-				<input class="number" type="number" [(ngModel)]="polygonSides">
-			</label>
-			<label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="shape-star">
-				<input type="radio" id="shape-star" class="mdl-radio__button" name="shape" value="star" [(ngModel)]="shapeType">
-				<span class="mdl-radio__label">Star</span>
-				<input class="number" type="number" [(ngModel)]="starPoints">
-				<input class="number" type="number" min="1" max="99" [(ngModel)]="starRadiusPercentage">
-			</label>
-			<label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="shape-custom">
-				<input type="radio" id="shape-custom" class="mdl-radio__button" name="shape" value="custom" [(ngModel)]="shapeType">
-				<span class="mdl-radio__label">Custom</span>
-			</label>
-		</div>
-
-	</div>
+	<input type="file" name="file-upload">
 </div>
 
 <div class="taking-snapshot" [class.show]="takingSnapshot">

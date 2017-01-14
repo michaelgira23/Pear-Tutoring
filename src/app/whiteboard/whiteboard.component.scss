@@ -12,7 +12,7 @@ $sophisticated-white: #eee;
 	font-size: 2em;
 }
 
-.toolbar {
+.tool-selection {
 	position: absolute;;
 	top: 2.5rem;
 	left: 2.5rem;
@@ -33,7 +33,7 @@ $sophisticated-white: #eee;
 	}
 }
 
-.tool-toolbar {
+.toolbar {
 	position: absolute;
 	top: 2.5rem;
 	left: 2.5rem + 5rem + 2.5rem;
@@ -45,7 +45,11 @@ $sophisticated-white: #eee;
 	background-color: rgba(0, 0, 0, 0.8);
 	border-radius: 0.25rem;
 
-	.option {
+	&:empty {
+		display: none;
+	}
+
+	.toolbar-option {
 		display: flex;
 		flex-direction: column;
 		justify-content: space-between;;
@@ -91,7 +95,8 @@ canvas {
 }
 
 .invalid-key,
-.taking-snapshot {
+.taking-snapshot,
+.upload-file {
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -120,5 +125,20 @@ canvas {
 
 	h1 {
 		color: $sophisticated-white;
+	}
+}
+
+.upload-file {
+	.upload-file-square {
+		padding: 2.5rem;
+		border: 2px $sophisticated-white dashed;
+	}
+
+	input {
+		position: absolute;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
 	}
 }

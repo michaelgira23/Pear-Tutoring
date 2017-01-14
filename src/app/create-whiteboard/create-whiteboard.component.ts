@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 
+import { PermissionsService, Permission } from '../shared/security/permissions.service';
 import { WhiteboardService, defaultWhiteboardOptions } from '../shared/model/whiteboard.service';
 
 @Component({
@@ -11,19 +12,42 @@ import { WhiteboardService, defaultWhiteboardOptions } from '../shared/model/whi
 export class CreateWhiteboardComponent implements OnInit {
 
 	options = defaultWhiteboardOptions;
+	permissions: Permission = {
+		anonymous: {
+			read: true,
+			write: true
+		},
+		loggedIn: {
+			read: true,
+			write: true
+		}
+	};
 
-	constructor(private router: Router, private whiteboardService: WhiteboardService) { }
+	constructor(private router: Router, private permissionService: PermissionsService, private whiteboardService: WhiteboardService) { }
 
 	ngOnInit() {
 	}
 
 	create() {
+		// Create whiteboard
 		this.whiteboardService.createWhiteboard(this.options)
 			.subscribe(
-				data => {
-					console.log('create whiteboard successful', data);
-					console.log('new whiteboard key', data.getKey());
-					this.router.navigate(['whiteboard', data.getKey()]);
+				whiteboard => {
+					console.log('create whiteboard successful', whiteboard);
+					console.log('new whiteboard key', whiteboard.getKey());
+
+					// Set whiteboard permissions
+					this.permissionService.createPermission(whiteboard.getKey(), 'whiteboard', this.permissions)
+						.subscribe(
+							data => {
+								console.log('created permissions', data);
+								this.router.navigate(['whiteboard', whiteboard.getKey()]);
+							},
+							err => {
+								console.log('there was an error creating permissions for the whiteboard!');
+							}
+						);
+
 				},
 				err => {
 					console.log('there was an error creating the whiteboard!');
