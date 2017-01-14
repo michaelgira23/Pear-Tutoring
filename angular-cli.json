@@ -18,7 +18,7 @@
 			"prefix": "app",
 			"mobile": false,
 			"styles": [
-				"../node_modules/material-design-lite/dist/material.blue-orange.min.css",
+				"../node_modules/material-design-lite/dist/material.cyan-light_blue.min.css",
 				"assets/font-awesome-4.7.0/scss/font-awesome.scss",
 				"../node_modules/angular-calendar/scss/angular-calendar.scss",
 				"styles.scss"

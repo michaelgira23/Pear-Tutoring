@@ -96,5 +96,10 @@ export const routerConfig: Route[] = [
 	{
 		path: 'settings',
 		component: SettingsComponent
+	},
+	// 404 Page
+	{
+		path: '**',
+		redirectTo: 'home'
 	}
 ];

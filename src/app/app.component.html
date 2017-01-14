@@ -1,10 +1,10 @@
-<!-- Always shows a header, even in smaller screens. -->
+<!-- Always shows a header, even in smaller screens. --
 <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
 	<header class="mdl-layout__header">
 		<div class="mdl-layout__header-row">
-			<!-- Title -->
+			<!-- Title --
 			<span class="mdl-layout-title">Pear Tutoring</span>
-			<!-- Navigation. We hide it in small screens. -->
+			<!-- Navigation. We hide it in small screens. --
 			<nav class="mdl-navigation mdl-layout--large-screen-only">
 				<a class="mdl-navigation__link" routerLink="home">Home</a>
 				<a class="mdl-navigation__link" routerLink="whiteboard">Whiteboard</a>
@@ -13,7 +13,7 @@
 				<a class="mdl-navigation__link" routerLink="settings">Settings</a>
 			</nav>
 
-			<!-- Add spacer, to align navigation to the right -->
+			<!-- Add spacer, to align navigation to the right --
 			<div class="mdl-layout-spacer"></div>
 
 			<nav class="mdl-navigation">
@@ -49,6 +49,81 @@
 		</nav>
 	</div>
 	<main class="mdl-layout__content">
+		<div class="page-content">
+			<router-outlet></router-outlet>
+		</div>
+	</main>
+</div>-->
+<div class="layout mdl-layout mdl-js-layout mdl-layout--fixed-drawer mdl-layout--fixed-header">
+	<header class="layout-header mdl-layout__header mdl-color--grey-100 mdl-color-text--grey-600">
+		<div class="header-row mdl-layout__header-row">
+			<span class="mdl-layout-title">Pear Tutoring</span>
+			<!-- <div class="header-search mdl-textfield mdl-js-textfield mdl-textfield--expandable">
+				<label class="mdl-button mdl-js-button mdl-button--icon" for="search">
+					<i class="material-icons">search</i>
+				</label>
+				<div class="mdl-textfield__expandable-holder">
+					<input class="mdl-textfield__input" type="text" id="search">
+					<label class="mdl-textfield__label" for="search">Find a Tutoring Session...</label>
+				</div>
+			</div> -->
+			<div class="mdl-layout-spacer"></div>
+			<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect">
+				<i class="material-icons">create</i>
+				Create a Whiteboard
+			</button>
+		</div>
+	</header>
+	<div class="drawer mdl-layout__drawer mdl-color--blue-grey-900 mdl-color-text--blue-grey-50">
+		<header class="drawer-header">
+
+			<ng-container *ngIf="authInfo">
+				<img *ngIf="user?.pfp" [src]="user.pfp" class="profile-pic">
+				<span>{{ authInfo.auth.email }}</span>
+				<div class="mdl-layout-spacer"></div>
+				<button class="logout mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect"
+					(click)="logout()">
+					Logout
+				</button>
+			</ng-container>
+
+			<ng-container *ngIf="!authInfo">
+				<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect"
+					routerLink="login">
+					Login
+				</button>
+				<button class="mdl-button mdl-js-button mdl-button--raised mdl-button--primary mdl-js-ripple-effect"
+					routerLink="register">
+					Register
+				</button>
+			</ng-container>
+		</header>
+		<nav class="navigation mdl-navigation mdl-color--blue-grey-800">
+			<a class="mdl-navigation__link" routerLink="home" routerLinkActive="active">
+				<i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">home</i>
+				Home
+			</a>
+			<a class="mdl-navigation__link" routerLink="whiteboard" routerLinkActive="active">
+				<i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">folder_open</i>
+				Whiteboard
+				<br>
+				<small>(Debug Only)</small>
+			</a>
+			<a class="mdl-navigation__link" routerLink="dashboard" routerLinkActive="active">
+				<i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">dashboard</i>
+				Dashboard
+			</a>
+			<a class="mdl-navigation__link" routerLink="search" routerLinkActive="active">
+				<i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">search</i>
+				Find a Session
+			</a>
+			<a class="mdl-navigation__link" routerLink="settings" routerLinkActive="active">
+				<i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">settings</i>
+				Settings
+			</a>
+		</nav>
+	</div>
+	<main class="mdl-layout__content mdl-color--grey-100">
 		<div class="page-content">
 			<router-outlet></router-outlet>
 		</div>
