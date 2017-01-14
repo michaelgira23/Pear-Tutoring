@@ -2,6 +2,7 @@ import { Injectable, Inject } from '@angular/core';
 import { Observable, Subject } from 'rxjs/Rx';
 import { AngularFireDatabase, FirebaseRef } from 'angularfire2';
 import { Session } from './session';
+import { User } from './user';
 import { UserService, UserStatus, FreeTimes } from './user.service';
 import { ChatService } from './chat.service';
 import { AuthService } from '../security/auth.service';
@@ -18,17 +19,19 @@ export const PAGE_SIZE = 10;
 export class SessionService {
 	sdkDb: any;
 	uid: string;
+	currentUser: User;
 
 	constructor(private db: AngularFireDatabase, @Inject(FirebaseRef) fb,
-				private userService: UserService,
-				private whiteboardService: WhiteboardService,
-				private auth: AuthService,
+				private authService: AuthService,
 				private chatService: ChatService,
-				private permissionsService: PermissionsService) {
+				private permissionsService: PermissionsService,
+				private userService: UserService,
+				private whiteboardService: WhiteboardService) {
 		this.sdkDb = fb.database().ref();
-		auth.auth$.subscribe(val => {
+		this.authService.auth$.subscribe(val => {
 			this.uid = val ? val.uid : null;
 		});
+		this.userService.user$.subscribe(user => this.currentUser = user);
 	}
 
 	private promiseToObservable(promise): Observable<any> {
@@ -295,7 +298,7 @@ export class SessionService {
 		).map(Session.fromJsonArray);
 	}
 
-	// Find sessions that fits the free times of the user. 
+	// Find sessions that fits the free times of the user.
 	findSessionsByFreeTime(timesInDay: FreeTimes, lastKey?: string | Subject<string>): Observable<Session[][]> {
 		let queryList: Observable<any>[] = [];
 		let secFromMdn = function(m: moment.Moment): number {
@@ -308,7 +311,7 @@ export class SessionService {
 				queryList.push(this.findSessionsByProperty('ywd', dayInNextWeek.format('YYYY-WW-E'), lastKey).map(sessions => {
 					let sessionsList: Session[] = [];
 					sessions.forEach(session => {
-						if (session.grade === this.userService.currentUser.grade) {
+						if (session.grade === this.currentUser.grade) {
 							timesInDay[day].forEach(time => {
 								if (secFromMdn(moment(session.start, 'X')) <= secFromMdn(time.from)
 									&& secFromMdn(moment(session.end, 'X')) >= secFromMdn(time.to)) {
