@@ -1,8 +1,9 @@
 <h1>My Schedule</h1>
 <div class="mdl-tabs mdl-js-tabs mdl-js-ripple-effect">
 	<div class="mdl-tabs__tab-bar">
-		<a class="mdl-tabs__tab is-active" href="#my-sessions" (click)="null">My Sessions</a>
-		<a class="mdl-tabs__tab" href="#my-calendar" (click)="null">Calendar View</a>
+		<a class="mdl-tabs__tab is-active" href="#my-sessions" (click)="onClickTab()">My Sessions</a>
+		<a class="mdl-tabs__tab" href="#my-calendar" (click)="onClickTab()">Calendar View</a>
+		<a class="mdl-tabs__tab" href="#free-time" (click)="onClickTab()">Suggestions</a>
 	</div>
 	<div class="mdl-tabs__panel is-active" id="my-sessions">
 		<h2> Sessions I'm tutoring </h2>
@@ -14,13 +15,16 @@
 
 		<h2> Sessions I'm in </h2>
 		<div class="session-display">
-			<div class="session-display">
-				<app-display-session *ngFor="let session of tuteeSessions" [session]="session"></app-display-session>
+			<div class="session-display-item" *ngFor="let session of tuteeSessions">
+				<app-display-session [session]="session"></app-display-session>
 			</div>
 		</div>
 	</div>
 	<div class="mdl-tabs__panel" id="my-calendar">
 		<app-session-calendar [sessions]="mySessions"></app-session-calendar>
 	</div>
-	<div class="mdl"
+	<div class="mdl-tabs__panel" id="free-time">
+		<h4>Your suggestions for next week based on your free time</h4>
+		<app-sessions-with-filter [sessions]="suggestions" *ngIf="suggestions"></app-sessions-with-filter>
+	</div>
 </div>

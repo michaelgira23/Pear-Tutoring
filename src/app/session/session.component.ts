@@ -1,9 +1,10 @@
 import { Component, OnInit, OnDestroy, ViewChildren, QueryList } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { SessionService } from '../shared/model/session.service';
 import { Session } from '../shared/model/session';
 import { User } from '../shared/model/user';
 import { UserService } from '../shared/model/user.service';
+import { PermissionsService, Permission } from '../shared/security/permissions.service';
 import { Whiteboard } from '../shared/model/whiteboard';
 import { SidebarComponent } from '../shared/common/sidebar/sidebar.component';
 
@@ -19,6 +20,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 	sessionInfo: Session;
 	onlineUsers: User[] = [];
 	findSession$;
+	perm: Permission;
 
 	selectedWbIndex: number = 0;
 	get selectedWb(): Whiteboard {
@@ -27,7 +29,13 @@ export class SessionComponent implements OnInit, OnDestroy {
 
 	@ViewChildren(SidebarComponent) sidebars: QueryList<SidebarComponent>;
 
-	constructor(private route:  ActivatedRoute, private sessionService: SessionService, private userService: UserService) { }
+	constructor(
+		private route: ActivatedRoute,
+		private sessionService: SessionService,
+		private userService: UserService,
+		private permissionsService: PermissionsService,
+		private router: Router
+	) { }
 
 	ngOnInit() {
 		this.route.params.subscribe(params => {
@@ -35,6 +43,13 @@ export class SessionComponent implements OnInit, OnDestroy {
 			this.findSession$ = this.sessionService.findSession(this.sessionId).subscribe(session => {
 				this.sessionExist = true;
 				this.sessionInfo = session;
+				this.permissionsService.getUserPermission(this.sessionId, 'session').subscribe(perm => {
+					this.perm = perm;
+					if (!perm.read) {
+						console.log('You have been banned from the session');
+						this.router.navigate(['scheduling']);
+					}
+				}, console.log);
 				this.sessionService.joinSession(this.sessionId).subscribe(data => {}, console.error,
 				() => {
 					this.sessionService.getOnlineUsers(this.sessionId).subscribe(userIds => {
@@ -65,28 +80,37 @@ export class SessionComponent implements OnInit, OnDestroy {
 
 	addWb() {
 		this.sessionService.addWb(this.sessionId).subscribe(val => {
-			this.selectedWbIndex = this.sessionInfo.whiteboards.length - 1;
+			if (this.selectedWbIndex > 0) {
+				this.selectedWbIndex = this.sessionInfo.whiteboards.length - 1;
+			}
 			console.log('added Whiteboard');
 		}, console.log);
 	}
 
 	deleteWb() {
-		if (this.selectedWb || this.sessionInfo.whiteboards.length > 0) {
+		if (this.selectedWb || this.sessionInfo.whiteboards.length > 1) {
 			this.sessionService.deleteWb(this.sessionId, this.selectedWb.$key).subscribe(val => {
-				this.selectedWbIndex -= 1;
+				if (this.selectedWbIndex > 0) {
+					this.selectedWbIndex -= 1;
+				}
 				console.log('deleted whiteboard');
 			}, console.log);
 		}
 	}
 
 	addTutee(user: User) {
-		this.sessionService.addTutees(this.sessionId, [user.$key]).subscribe(val => {
-			console.log('added tutees');
-		}, console.log);
+		if (user.$key !== this.sessionInfo.tutor.$key) {
+			this.sessionService.addTutees(this.sessionId, user.$key).subscribe(val => {
+				console.log('request pending');
+			}, err => {
+				console.log(err);
+				let tutees = Object.assign([], this.sessionInfo.tutees); this.sessionInfo.tutees = tutees;
+			});
+		}
 	}
 
 	removeTutee(user: User) {
-		this.sessionService.removeTutees(this.sessionId, [user.$key]).subscribe(val => {
+		this.sessionService.removeTutees(this.sessionId, user.$key).subscribe(val => {
 			console.log('removed tutee');
 		}, console.log);
 	}

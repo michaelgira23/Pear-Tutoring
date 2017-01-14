@@ -3,7 +3,7 @@ import { AngularFireDatabase, FirebaseRef } from 'angularfire2';
 import { AuthService } from '../security/auth.service';
 import { Observable, Subject } from 'rxjs/Rx';
 import { User } from './user';
-import { objToArr } from '../common/utils';
+import { objToArr, getEditDistance } from '../common/utils';
 import * as moment from 'moment';
 
 export const UserStatus = {
@@ -49,14 +49,6 @@ export class UserService {
 		let userToSave = Object.assign({}, user);
 		let dataToSave = {};
 		dataToSave[`users/${uid}`] = userToSave;
-		let name = user.firstName + ' ' + user.lastName;
-		for (let i = 0; i < name.length; i++) {
-			for (let j = i + 1; j < name.length + 1; j++) {
-				if (name.substring(i, j) !== ' ') {
-					dataToSave[`userNameIndex/${name.substring(i, j)}/${uid}`] = true;
-				}
-			}
-		}
 		return this.firebaseUpdate(dataToSave);
 	}
 
@@ -71,9 +63,13 @@ export class UserService {
 	}
 
 	searchUsersByName(str: string): Observable<User[]> {
-		return this.db.list(`userNameIndex/${str}`)
-		.flatMap(uids => {
-			return Observable.combineLatest(uids.map(uid => this.findUser(uid.$key)));
+		return this.db.list(`users`)
+		.map(User.fromJsonList)
+		.map(users => {
+			return users.filter(user => {
+				// getEditDistance(user.firstName, str) < str.length / 2 || getEditDistance(user.lastName, str) < str.length / 2
+				return getEditDistance(user.name, str) < str.length / 2;
+			});
 		});
 	}
 
