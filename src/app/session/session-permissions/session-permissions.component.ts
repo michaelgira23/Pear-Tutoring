@@ -4,7 +4,7 @@ import { SessionService } from '../../shared/model/session.service';
 import { Session } from '../../shared/model/session';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs/Rx';
-import { combineLatestObj, objToArr } from '../../shared/common/utils';
+import { combineLatestObj } from '../../shared/common/utils';
 import { ModalComponent } from '../../shared/common/modal/modal.component';
 
 @Component({
@@ -25,7 +25,7 @@ export class SessionPermissionsComponent implements OnInit {
 	} = {};
 
 	temp: any;
-	permsTypes: Array<string> = ['session', 'chat', 'whiteboard']
+	permsTypes: Array<string> = ['session', 'chat', 'whiteboard'];
 	sessionInfo: Session;
 
 	dropdownList: Object = {};
@@ -64,7 +64,7 @@ export class SessionPermissionsComponent implements OnInit {
 				});
 			}, console.log);
 		} else {
-			console.log('cannot find session id in the route')
+			console.log('cannot find session id in the route');
 		}
 	}
 

@@ -31,7 +31,7 @@ export class UserService {
 					this.currentUser = user;
 				});
 			}
-		})
+		});
 	}
 
 	register(regOpt: RegisterOptions): Observable<any> {

@@ -6,23 +6,23 @@ import { DebugElement } from '@angular/core';
 import { SessionRequestComponent } from './session-request.component';
 
 describe('SessionRequestComponent', () => {
-  let component: SessionRequestComponent;
-  let fixture: ComponentFixture<SessionRequestComponent>;
+	let component: SessionRequestComponent;
+	let fixture: ComponentFixture<SessionRequestComponent>;
 
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      declarations: [ SessionRequestComponent ]
-    })
-    .compileComponents();
-  }));
+	beforeEach(async(() => {
+		TestBed.configureTestingModule({
+			declarations: [ SessionRequestComponent ]
+		})
+		.compileComponents();
+	}));
 
-  beforeEach(() => {
-    fixture = TestBed.createComponent(SessionRequestComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+	beforeEach(() => {
+		fixture = TestBed.createComponent(SessionRequestComponent);
+		component = fixture.componentInstance;
+		fixture.detectChanges();
+	});
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+	it('should create', () => {
+		expect(component).toBeTruthy();
+	});
 });

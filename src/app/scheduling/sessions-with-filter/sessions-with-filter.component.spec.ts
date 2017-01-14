@@ -6,23 +6,23 @@ import { DebugElement } from '@angular/core';
 import { SessionsWithFilterComponent } from './sessions-with-filter.component';
 
 describe('SessionsWithFilterComponent', () => {
-  let component: SessionsWithFilterComponent;
-  let fixture: ComponentFixture<SessionsWithFilterComponent>;
+	let component: SessionsWithFilterComponent;
+	let fixture: ComponentFixture<SessionsWithFilterComponent>;
 
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      declarations: [ SessionsWithFilterComponent ]
-    })
-    .compileComponents();
-  }));
+	beforeEach(async(() => {
+		TestBed.configureTestingModule({
+			declarations: [ SessionsWithFilterComponent ]
+		})
+		.compileComponents();
+	}));
 
-  beforeEach(() => {
-    fixture = TestBed.createComponent(SessionsWithFilterComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+	beforeEach(() => {
+		fixture = TestBed.createComponent(SessionsWithFilterComponent);
+		component = fixture.componentInstance;
+		fixture.detectChanges();
+	});
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+	it('should create', () => {
+		expect(component).toBeTruthy();
+	});
 });

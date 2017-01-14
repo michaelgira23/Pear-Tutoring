@@ -429,7 +429,7 @@ export class SessionService {
 
 			// dataToSave['sessions/' + sessionId] = null;
 
-			return this.firebaseUpdate(dataToSave)
+			return this.firebaseUpdate(dataToSave);
 				// .switchMap(val => {
 				// 	return Observable.combineLatest([
 				// 		this.permissionsService.deletePermission(sessionId, 'session'),

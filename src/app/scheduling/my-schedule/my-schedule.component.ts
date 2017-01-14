@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { UserService, FreeTimes } from '../../shared/model/user.service';
+import { UserService } from '../../shared/model/user.service';
 import { User } from '../../shared/model/user';
 import { SessionService } from '../../shared/model/session.service';
 import { Session } from '../../shared/model/session';
