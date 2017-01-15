@@ -31,6 +31,10 @@ export const routerConfig: Route[] = [
 	},
 	{
 		path: 'dashboard',
+		component: DashboardComponent
+	},
+	{
+		path: 'my-schedule',
 		component: MyScheduleComponent
 	},
 	{
@@ -91,10 +95,6 @@ export const routerConfig: Route[] = [
 			{
 				path: 'update/:id',
 				component: UpdateSessionComponent
-			},
-			{
-				path: 'my-schedule',
-				component: MyScheduleComponent
 			}
 		]
 	},
