@@ -1,10 +1,59 @@
-.page-content {
-	height: 100%;
+$profile-pic-dimensions: 4rem;
 
-	// Fix for Chrome so the page content fills up whole rest of page
-	position: absolute;
-	top: 0;
-	right: 0;
-	bottom: 0;
-	left: 0;
+$nav-hover-background: #00BCD4;
+$nav-hover-color: #37474F;
+
+.layout {
+
+	.layout-header {
+		.header-row {
+			.header-search {
+				margin-top: 0.75rem;
+				margin-left: 1rem;
+			}
+		}
+	}
+
+	.drawer {
+
+		.drawer-header {
+			padding: 0.5rem;
+
+			.profile-pic {
+				width: $profile-pic-dimensions;
+				height: $profile-pic-dimensions;
+				border-radius: #{$profile-pic-dimensions / 2};
+			}
+
+			.logout {
+				display: block;
+				margin: 0.5rem 0;
+			}
+		}
+
+		.navigation {
+			.mdl-navigation__link {
+				&:hover {
+					background-color: $nav-hover-background;
+					color: $nav-hover-color;
+				}
+
+				&.active {
+					background-color: darken($nav-hover-background, 10%);
+					color: darken($nav-hover-color, 10%);
+				}
+			}
+		}
+	}
+
+	.page-content {
+		height: 100%;
+
+		// Fix for Chrome so the page content fills up whole rest of page
+		position: absolute;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
+	}
 }
