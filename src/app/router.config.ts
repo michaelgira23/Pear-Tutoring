@@ -11,9 +11,10 @@ import { SchedulingComponent } from './scheduling/scheduling.component';
 import { CreateSessionComponent } from './scheduling/create-session/create-session.component';
 import { RegisterComponent } from './register/register.component';
 import { SessionComponent } from './session/session.component';
+import { SessionDetailsComponent } from './session-details/session-details.component';
 import { SettingsComponent } from './settings/settings.component';
 import { UpdateSessionComponent } from './scheduling/update-session/update-session.component';
-import { MyScheduleComponent } from './scheduling/my-schedule/my-schedule.component';
+import { MySessionsComponent } from './my-sessions/my-sessions.component';
 import { SessionPermissionsComponent } from './session/session-permissions/session-permissions.component';
 import { SessionRequestComponent } from './session/session-request/session-request.component';
 
@@ -34,12 +35,24 @@ export const routerConfig: Route[] = [
 		component: DashboardComponent
 	},
 	{
-		path: 'my-schedule',
-		component: MyScheduleComponent
+		path: 'my-sessions',
+		component: MySessionsComponent
 	},
 	{
 		path: 'search',
 		component: SchedulingComponent
+	},
+	{
+		path: 'settings',
+		component: SettingsComponent
+	},
+	{
+		path: 'login',
+		component: LoginComponent
+	},
+	{
+		path: 'register',
+		component: RegisterComponent
 	},
 	{
 		path: 'whiteboard',
@@ -78,38 +91,28 @@ export const routerConfig: Route[] = [
 		]
 	},
 	{
-		path: 'login',
-		component: LoginComponent
-	},
-	{
-		path: 'scheduling',
+		path: 'session',
+		canActivateChild: [SessionGuardService],
 		children: [
-			{
-				path: '',
-				component: SchedulingComponent
-			},
 			{
 				path: 'create',
 				component: CreateSessionComponent
 			},
 			{
-				path: 'update/:id',
-				component: UpdateSessionComponent
-			}
-		]
-	},
-	{
-		path: 'register',
-		component: RegisterComponent
-	},
-	{
-		path: 'session',
-		canActivateChild: [SessionGuardService],
-		children: [
-			{
 				path: ':id',
-				component: SessionComponent,
 				children: [
+					{
+						path: '',
+						component: SessionComponent
+					},
+					{
+						path: 'details',
+						component: SessionDetailsComponent
+					},
+					{
+						path: 'update',
+						component: UpdateSessionComponent
+					},
 					{
 						path: 'permissions',
 						component: SessionPermissionsComponent,
@@ -123,10 +126,6 @@ export const routerConfig: Route[] = [
 				]
 			}
 		],
-	},
-	{
-		path: 'settings',
-		component: SettingsComponent
 	},
 	// 404 Page
 	{

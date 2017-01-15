@@ -1,11 +1,17 @@
 .mdl-grid {
 	.mdl-cell {
+
+		h1 {
+			display: flex;
+			justify-content: space-between;
+		}
+
 		.session-card {
 			width: 100%;
 			margin-bottom: 2rem;
 
 			.mdl-card__title h4 {
-			  margin-top: 0;
+				margin-top: 0;
 			}
 
 			.mdl-card__actions {
@@ -22,7 +28,7 @@
 }
 
 @media (min-width: 480px) {
-	.mdl-grid .mdl-cell .session-card {
-		max-width: calc(100% - 4.5rem);
+	.mdl-grid .mdl-cell {
+		padding-right: 4.5rem;
 	}
 }

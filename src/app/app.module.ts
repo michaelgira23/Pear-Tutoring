@@ -17,6 +17,7 @@ import { RegisterComponent } from './register/register.component';
 import { HomeComponent } from './home/home.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { SettingsComponent } from './settings/settings.component';
+import { PfpUploadComponent } from './settings/pfp-upload/pfp-upload.component';
 
 import { AuthService } from './shared/security/auth.service';
 import { NotificationsService } from './shared/model/notifications.service';
@@ -44,26 +45,29 @@ import { ChatService } from './shared/model/chat.service';
 // Scheduling/session components and services
 import { SchedulingComponent } from './scheduling/scheduling.component';
 import { SessionComponent } from './session/session.component';
+import { SessionDetailsComponent } from './session-details/session-details.component';
 import { CreateSessionComponent } from './scheduling/create-session/create-session.component';
 import { DisplaySessionComponent } from './scheduling/display-session/display-session.component';
 import { SessionCalendarComponent } from './scheduling/session-calendar/session-calendar.component';
 import { DisplayUserComponent } from './scheduling/display-user/display-user.component';
-import { SessionService } from './shared/model/session.service';
 import { UpdateSessionComponent } from './scheduling/update-session/update-session.component';
 import { TimePickerComponent } from './settings/time-picker/time-picker.component';
-import { MyScheduleComponent } from './scheduling/my-schedule/my-schedule.component';
-import { PfpUploadComponent } from './settings/pfp-upload/pfp-upload.component';
+import { MySessionsComponent } from './my-sessions/my-sessions.component';
 import { UserAutoCompleteComponent } from './scheduling/user-auto-complete/user-auto-complete.component';
-import { NamePipe } from './shared/model/name.pipe';
 import { SidebarComponent } from './shared/common/sidebar/sidebar.component';
-import { SidebarControlDirective } from './shared/common/sidebar/sidebar-control.directive';
-import { SidebarContentDirective } from './shared/common/sidebar/sidebar-content.directive';
 import { WhiteboardSelectComponent } from './session/whiteboard-select/whiteboard-select.component';
 import { SessionsWithFilterComponent } from './scheduling/sessions-with-filter/sessions-with-filter.component';
 import { SessionPermissionsComponent } from './session/session-permissions/session-permissions.component';
 import { SessionRequestComponent } from './session/session-request/session-request.component';
-import { SessionGuardService } from './shared/model/session-guard.service';
 import { ModalComponent } from './shared/common/modal/modal.component';
+
+import { SidebarControlDirective } from './shared/common/sidebar/sidebar-control.directive';
+import { SidebarContentDirective } from './shared/common/sidebar/sidebar-content.directive';
+
+import { SessionService } from './shared/model/session.service';
+import { SessionGuardService } from './shared/model/session-guard.service';
+
+import { NamePipe } from './shared/model/name.pipe';
 
 @NgModule({
 	declarations: [
@@ -79,6 +83,7 @@ import { ModalComponent } from './shared/common/modal/modal.component';
 		RegisterComponent,
 		CreateSessionComponent,
 		SessionComponent,
+		SessionDetailsComponent,
 		DisplaySessionComponent,
 		RegisterComponent,
 		SettingsComponent,
@@ -88,7 +93,7 @@ import { ModalComponent } from './shared/common/modal/modal.component';
 		ViewChatComponent,
 		UpdateSessionComponent,
 		TimePickerComponent,
-		MyScheduleComponent,
+		MySessionsComponent,
 		PfpUploadComponent,
 		UserAutoCompleteComponent,
 		MDLUpgradeElementDirective,

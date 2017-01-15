@@ -1,15 +1,15 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { UserService } from '../../shared/model/user.service';
-import { User } from '../../shared/model/user';
-import { SessionService } from '../../shared/model/session.service';
-import { Session } from '../../shared/model/session';
+import { UserService } from '../shared/model/user.service';
+import { User } from '../shared/model/user';
+import { SessionService } from '../shared/model/session.service';
+import { Session } from '../shared/model/session';
 
 @Component({
-	selector: 'app-my-schedule',
-	templateUrl: './my-schedule.component.html',
-	styleUrls: ['./my-schedule.component.scss']
+	selector: 'app-my-sessions',
+	templateUrl: './my-sessions.component.html',
+	styleUrls: ['./my-sessions.component.scss']
 })
-export class MyScheduleComponent implements OnInit, OnDestroy {
+export class MySessionsComponent implements OnInit, OnDestroy {
 
 	user: User;
 
