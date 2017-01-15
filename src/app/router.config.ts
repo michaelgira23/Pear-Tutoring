@@ -105,12 +105,8 @@ export const routerConfig: Route[] = [
 			},
 			{
 				path: ':id',
+				component: SessionComponent,
 				children: [
-					{
-						path: '',
-						component: SessionComponent,
-						pathMatch: 'full'
-					},
 					{
 						path: 'details',
 						component: SessionDetailsComponent
