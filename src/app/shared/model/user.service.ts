@@ -88,7 +88,6 @@ export class UserService {
 		if (this.status !== status) {
 			if (status === UserStatus.ONLINE || status === UserStatus.OFFLINE || status === UserStatus.IN_SESSION) {
 				status = this.uid ? status : UserStatus.OFFLINE;
-				console.log(status);
 				this.sdkDb.child(`users/${this.uid}/status`).onDisconnect().set(UserStatus.OFFLINE);
 				this.db.object(`users/${this.uid}`).update({status}).then(val => this.status = status);
 			}
