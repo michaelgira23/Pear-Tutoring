@@ -59,7 +59,7 @@ export const routerConfig: Route[] = [
 		children: [
 			{
 				path: '',
-				redirectTo: 'new',
+				redirectTo: 'create',
 				pathMatch: 'full'
 			},
 			{
@@ -77,11 +77,11 @@ export const routerConfig: Route[] = [
 		children: [
 			{
 				path: '',
-				redirectTo: 'new',
+				redirectTo: 'create',
 				pathMatch: 'full'
 			},
 			{
-				path: 'new',
+				path: 'create',
 				component: CreateChatComponent
 			},
 			{
@@ -95,6 +95,11 @@ export const routerConfig: Route[] = [
 		canActivateChild: [SessionGuardService],
 		children: [
 			{
+				path: '',
+				redirectTo: 'create',
+				pathMatch: 'full'
+			},
+			{
 				path: 'create',
 				component: CreateSessionComponent
 			},
@@ -103,7 +108,8 @@ export const routerConfig: Route[] = [
 				children: [
 					{
 						path: '',
-						component: SessionComponent
+						component: SessionComponent,
+						pathMatch: 'full'
 					},
 					{
 						path: 'details',
