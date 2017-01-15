@@ -26,12 +26,17 @@
 		}
 
 		.mdl-card__title {
+			display: flex;
+			flex-direction: column;
 			&.session-title {
 				margin-top: -2.5em;
 				z-index: 199;
 			}
+			.mdl-card__title-text {
+				align-self: flex-start;
+			}
 			.mdl-card__subtitle-text {
-				text-align: right;
+				align-self: flex-end;
 			}
 		}
 
@@ -66,6 +71,11 @@
 			text-align: center;
 			.join-session {
 				background: $subject-color;
+				float: left;
+			}
+
+			.side-toggle {
+				float: right;
 			}
 		}
 
@@ -75,14 +85,16 @@
 			}
 		}
 
-		.side-toggle {
-			text-align: center;
-		}
-
 		.mdl-card__supporting-text {
 			.chip-container {
 				display: inline;
 				margin-right: 0.5em;
+			}
+		}
+
+		.class-info {
+			.class-string {
+				font-style: italic;
 			}
 		}
 	}
