@@ -1,8 +1,9 @@
 <div class="session-container" [ngClass]="subject">
   <div class="mdl-card mdl-shadow--8dp">
     <div class="mdl-card_media">
-      <div class="session-thumbnails">
+      <div class="session-thumbnails" *ngIf="session.whiteboards">
         <div class="row">
+          <div class="img-placeholder" *ngIf="!(session.whiteboards[0].snapshot || session.whiteboards[1] || session.whiteboards[2] || session.whiteboards[3])"></div>
           <img *ngIf="session.whiteboards[0] && session.whiteboards[0].snapshot" [src]="session.whiteboards[0].snapshot" [style.width]="session.whiteboards[1] && session.whiteboards[1].snapshot ? '50%' : '100%'">
           <img *ngIf="session.whiteboards[1] && session.whiteboards[1].snapshot" [src]="session.whiteboards[1].snapshot">
         </div>
@@ -17,6 +18,11 @@
       <h2 class="mdl-card__title-text">{{ session.title }}</h2>
     </div>
 
+  <div class="mdl-card__supporting-text">
+    Grade {{ session.grade }} {{ session.subject }}
+    {{ session.classStr }}
+  </div>
+
     <div class="mdl-card__title">
       <div class="mdl-card__subtitle-text">
         {{ startTime }} ~ {{ endTime }}
@@ -30,7 +36,9 @@
     </div>
 
     <div class="mdl-card__actions mdl-card--border">
-      <button (click)="joinSession()" class="join-session mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">Join Session</button>
+      <button *ngIf="joinable" (click)="joinSession()" class="join-session mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">Join Session</button>
+      <button *ngIf="!joinable && !pending" (click)="enrollSession()" class="join-session mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">Enroll</button>
+      <button *ngIf="!joinable && pending" class="join-session mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" disabled>Pending</button>
     </div>
 
     <div class="mdl-card__menu" *ngIf="session.tutor.$key === sessionService.uid">
@@ -40,6 +48,7 @@
       <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" [attr.for]="menuId">
         <li class="mdl-menu__item update-session" (click)="updateSession()">Update</li>
         <li class="mdl-menu__item delete-session" (click)="deleteSession()">Delete</li>
+        <li class="mdl-menu__item" (click)="checkPending()">Pending Tutees</li>
       </ul>
     </div>
 
@@ -58,6 +67,11 @@
       <div class="mdl-card__supporting-text">
         Tutor: 
         <app-display-user [user]="session.tutor"></app-display-user>
+      </div>
+
+      <div class="mdl-card__supporting-text">
+        Tutees: 
+        <app-display-user *ngFor="let tutee of session.tutees" [user]="tutee"></app-display-user>
       </div>
 
       <div class="mdl-card__menu">

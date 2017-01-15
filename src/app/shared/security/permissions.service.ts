@@ -33,7 +33,11 @@ export class PermissionsService {
 	}
 
 	createPermission($key: string, type: PermissionsType, permission: Permission): Observable<any> {
-		let correctedPerm: Permission = {};
+		let correctedPerm: Permission = {
+			anonymous: {},
+			loggedIn: {},
+			user: {}
+		};
 
 		for (let group of Object.keys(permission)) {
 			if (group === 'user') {
@@ -54,6 +58,17 @@ export class PermissionsService {
 
 	getPermission($key: string, type: PermissionsType): FirebaseObjectObservable<any> {
 		return this.af.database.object(`${type}Permissions/${$key}`);
+	}
+
+	deletePermission($key: string, type: PermissionsType): Observable<any> {
+		return this.promiseToObservable(this.getPermission($key, type).remove());
+	}
+
+	updatePermission($key: string, type: PermissionsType, perm: any) {
+		let permToSave: any = Object.assign({}, perm);
+		delete permToSave.$exists;
+		delete permToSave.$key;
+		return this.promiseToObservable(this.af.database.object(`${type}Permissions/${$key}`).set(permToSave));
 	}
 
 	getUserPermission($key: string, type: PermissionsType): Observable<any> {
@@ -92,16 +107,10 @@ export class PermissionsService {
 		const _scopeObj: PermissionsScopes = new (this.typeToClass[type])(_scopes);
 		const scopes = _scopeObj.scopes;
 
-		let permissions = this.af.database.object(`${type}Permissions/${$key}`);
+		let permissions = !$uid ? this.af.database.object(`${type}Permissions/${$key}/${group}`)
+								: this.af.database.object(`${type}Permissions/${$key}/${group}/${$uid}`);
 
-		if (group === 'user') {
-			permissions = this.af.database.object(`${type}Permissions/${$key}/user`);
-		}
-
-		const scopeObj = {};
-		scopeObj[group] = scopes;
-
-		return this.promiseToObservable(permissions.update(scopeObj));
+		return this.promiseToObservable(permissions.set(scopes));
 	}
 
 	// See line 29
@@ -184,7 +193,7 @@ class PermissionsSessionScopes extends PermissionsScopes {
 }
 
 class PermissionsWhiteboardScopes extends PermissionsScopes {
-	static componentScopes = ['read', 'write', 'moderator'];
+	static componentScopes = ['read', 'write'];
 
 	constructor(newScopes: Object) { super(newScopes); }
 }

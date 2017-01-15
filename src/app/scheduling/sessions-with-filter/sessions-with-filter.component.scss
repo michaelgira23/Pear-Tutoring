@@ -1,0 +1,14 @@
+.weekday-select {
+    display: flex;
+    padding: 1.5em;
+}
+
+.session-display {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 1em;
+    overflow: hidden;
+    .session-display-item {
+        margin: 1em;
+    }
+}

@@ -19,6 +19,8 @@ export class CreateSessionComponent implements OnInit, OnChanges {
 				date: ['', Validators.required],
 				startTime: ['', Validators.required],
 				endTime: ['', Validators.required],
+				grade: ['', Validators.required],
+				classStr: ['', Validators.required],
 				subject: ['', Validators.required],
 				max: ['', Validators.required],
 				listed: [false, Validators.required],
@@ -78,6 +80,8 @@ export class CreateSessionComponent implements OnInit, OnChanges {
 				date: [this.sessionInfo.start.format('YYYY-MM-DD'), Validators.required],
 				startTime: [this.sessionInfo.start.format('HH:mm'), Validators.required],
 				endTime: [this.sessionInfo.end.format('HH:mm'), Validators.required],
+				grade: [this.sessionInfo.grade, Validators.required],
+				classStr: [this.sessionInfo.classStr, Validators.required],
 				subject: [this.sessionInfo.subject, Validators.required],
 				max: [this.sessionInfo.max, [Validators.required]],
 				listed: [this.sessionInfo.listed, Validators.required],
@@ -91,7 +95,6 @@ export class CreateSessionComponent implements OnInit, OnChanges {
 
 	createSession() {
 		let sessionToCreate = Object.assign({}, this.createSessionForm.value);
-		console.log(sessionToCreate.tutees.map(val => val.$key));
 		sessionToCreate.start = moment(sessionToCreate.date, 'YYYY-MM-DD')
 								.add(moment(sessionToCreate.startTime, 'HH:mm').hours(), 'hours')
 								.add(moment(sessionToCreate.startTime, 'HH:mm').minutes(), 'minutes');

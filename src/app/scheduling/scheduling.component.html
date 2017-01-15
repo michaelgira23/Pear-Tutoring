@@ -1,40 +1,37 @@
-<h2> Public Sessions </h2>
-<div class="session-display">
-	<div *ngFor="let session of publicSessions">
-		<app-display-session [session]="session"></app-display-session>
+<button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored" routerLink="create">Create a Session</button>
+<button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" routerLink="my-schedule">Go to my scheudle</button>
+
+<div class="search-bar">
+	<h2> Search </h2>
+	<div class="search-input">
+		<form (submit)="findSessionsByProperty(searchOpt)">
+			<fieldset>
+				<input name="searchStr" [(ngModel)]="searchStr">
+				<button type="submit">Find</button>
+			</fieldset>
+		</form>
 	</div>
+
+	<label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="search-all" (click)="searchOpt = 'all'">
+		<input type="radio" id="search-all" class="mdl-radio__button" name="options" value="1" checked>
+		<span class="mdl-radio__label">All</span>
+	</label>
+	<label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="search-tags" (click)="searchOpt = 'tags'">
+		<input type="radio" id="search-tags" class="mdl-radio__button" name="options" value="1">
+		<span class="mdl-radio__label">Tag</span>
+	</label>
+	<label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="search-subject" (click)="searchOpt = 'subject'">
+		<input type="radio" id="search-subject" class="mdl-radio__button" name="options" value="1">
+		<span class="mdl-radio__label">Subject</span>
+	</label>
+	<label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="search-classStr" (click)="searchOpt = 'classStr'">
+		<input type="radio" id="search-classStr" class="mdl-radio__button" name="options" value="1">
+		<span class="mdl-radio__label">Class Name</span>
+	</label>
+	<label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="search-grade" (click)="searchOpt = 'grade'">
+		<input type="radio" id="search-grade" class="mdl-radio__button" name="options" value="1">
+		<span class="mdl-radio__label">Grade</span>
+	</label>
 </div>
 
-<h2> Session By tag </h2>
-<div>
-	<form [formGroup]="searchByTagForm">
-		<fieldset>
-			<input formControlName="tags">
-			<button (click)="findSessionsByTags()">Find</button>
-		</fieldset>
-	</form>
-	<div class="session-display">
-		<div *ngFor="let session of sessionsByTags">
-			<app-display-session [session]="session"></app-display-session>
-		</div>
-	</div>
-</div>
-
-<h2> Session By Subject </h2>
-<div>
-	<form [formGroup]="searchBySubjectForm">
-		<fieldset>
-			<input formControlName="subject">
-			<button (click)="findSessionsBySubject()">Find</button>
-		</fieldset>
-	</form>
-	<div class="session-display">
-		<div *ngFor="let session of sessionsBySubject">
-			<app-display-session [session]="session"></app-display-session>
-		</div>
-	</div>
-</div>
-<br>
-
-<a routerLink="create">Create a Session</a>
-<a routerLink="my-schedule">Go to my scheudle</a>
+<app-sessions-with-filter [sessions]="searchResults"></app-sessions-with-filter>

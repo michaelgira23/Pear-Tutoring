@@ -8,5 +8,27 @@
 			[cpFallbackColor]="options.background"
 			[style.background]="options.background"></button>
 	</label>
+	<fieldset>
+		<legend>Logged in Permissions</legend>
+		<label>
+			<input type="checkbox" name="loggedIn-read" [(ngModel)]="permissions.loggedIn.read">
+			Read
+		</label>
+		<label>
+			<input type="checkbox" name="loggedIn-write" [(ngModel)]="permissions.loggedIn.write">
+			Write
+		</label>
+	</fieldset>
+	<fieldset>
+		<legend>Anonymous Permissions (Logged out)</legend>
+		<label>
+			<input type="checkbox" name="anonymous-read" [(ngModel)]="permissions.anonymous.read">
+			Read
+		</label>
+		<label>
+			<input type="checkbox" name="anonymous-write" [(ngModel)]="permissions.anonymous.write">
+			Write
+		</label>
+	</fieldset>
 	<button>Create</button>
 </form>

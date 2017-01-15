@@ -4,8 +4,6 @@ import { Session } from '../../shared/model/session';
 import { SessionService } from '../../shared/model/session.service';
 import { UUID } from 'angular2-uuid';
 
-declare const componentHandler;
-
 @Component({
 	selector: 'app-display-session',
 	templateUrl: './display-session.component.html',
@@ -18,16 +16,24 @@ export class DisplaySessionComponent implements OnInit {
 	@Input()
 	session: Session;
 	get startTime(): string {
-		return this.session.start.format('M/D/Y');
+		return this.session.start.format('ddd, M/D/Y h:mm:ss');
 	};
 	get endTime(): string {
-		return this.session.end.format('M/D/Y');
+		return this.session.end.format('h:mm:ss');
 	}
 	get subject(): string {
 		return this.session.subject.toLowerCase();
 	}
 
 	sideOpen: boolean;
+
+	get joinable() {
+		return this.session.tutees.some(user => this.sessionService.uid === user.$key) || this.session.tutor.$key === this.sessionService.uid;
+	}
+
+	get pending() {
+		return this.session.pending.some(uid => this.sessionService.uid === uid);
+	}
 
 	constructor(private router: Router, private sessionService: SessionService) {
 	}
@@ -48,5 +54,16 @@ export class DisplaySessionComponent implements OnInit {
 			val => console.log('deleted'),
 			err => console.log(err)
 		);
+	}
+
+	enrollSession() {
+		this.sessionService.addTutees(this.session.$key, this.sessionService.uid).subscribe(val => {
+			console.log('added Tutees');
+		}, console.log);
+	}
+
+	checkPending() {
+		this.router.navigate(['session', this.session.$key, {outlets: {'permissions-popup': null}}]);
+		this.router.navigate(['session', this.session.$key, {outlets: {'requests-popup': ['requests']}}]);
 	}
 }

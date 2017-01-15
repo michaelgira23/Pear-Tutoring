@@ -13,6 +13,12 @@ export class Eraser {
 	 */
 
 	mousedown(event) {
+		// If no permissions, delete eraser line
+		if (!this.whiteboard.shouldWrite) {
+			this.clearEraserPath();
+			return;
+		}
+
 		if (this.eraserPathFinished) {
 			// Create a new path
 			this.eraserPath = new paper.Path({
@@ -26,6 +32,12 @@ export class Eraser {
 	}
 
 	mousemove(event) {
+		// If no permissions, delete eraser line
+		if (!this.whiteboard.shouldWrite) {
+			this.clearEraserPath();
+			return;
+		}
+
 		// Only care if mouse is being dragged
 		if (this.whiteboard.mouseDown && this.eraserPath && !this.eraserPathFinished) {
 			// Add point to the current line
@@ -35,10 +47,15 @@ export class Eraser {
 	}
 
 	mouseup(event) {
+		// If no permissions, delete eraser line
+		if (!this.whiteboard.shouldWrite) {
+			this.clearEraserPath();
+			return;
+		}
+
 		if (this.eraserPath && !this.eraserPathFinished) {
-			this.eraserPathFinished = true;
 			this.eraseMarkingsOnLine(this.eraserPath);
-			this.eraserPath.remove();
+			this.clearEraserPath();
 		}
 	}
 
@@ -80,5 +97,13 @@ export class Eraser {
 					);
 			}
 		});
+	}
+
+	clearEraserPath() {
+		this.eraserPathFinished = true;
+		if (this.eraserPath) {
+			this.eraserPath.remove();
+		}
+		this.eraserPath = null;
 	}
 }

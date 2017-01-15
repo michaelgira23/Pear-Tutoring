@@ -58,6 +58,11 @@ import { SidebarComponent } from './shared/common/sidebar/sidebar.component';
 import { SidebarControlDirective } from './shared/common/sidebar/sidebar-control.directive';
 import { SidebarContentDirective } from './shared/common/sidebar/sidebar-content.directive';
 import { WhiteboardSelectComponent } from './session/whiteboard-select/whiteboard-select.component';
+import { SessionsWithFilterComponent } from './scheduling/sessions-with-filter/sessions-with-filter.component';
+import { SessionPermissionsComponent } from './session/session-permissions/session-permissions.component';
+import { SessionRequestComponent } from './session/session-request/session-request.component';
+import { SessionGuardService } from './shared/model/session-guard.service';
+import { ModalComponent } from './shared/common/modal/modal.component';
 
 @NgModule({
 	declarations: [
@@ -94,7 +99,11 @@ import { WhiteboardSelectComponent } from './session/whiteboard-select/whiteboar
 		SidebarComponent,
 		SidebarControlDirective,
 		SidebarContentDirective,
-		WhiteboardSelectComponent
+		WhiteboardSelectComponent,
+		SessionsWithFilterComponent,
+		SessionPermissionsComponent,
+		SessionRequestComponent,
+		ModalComponent
 	],
 	imports: [
 		BrowserModule,
@@ -106,7 +115,15 @@ import { WhiteboardSelectComponent } from './session/whiteboard-select/whiteboar
 		ColorPickerModule,
 		CalendarModule.forRoot()
 	],
-	providers: [AuthService, ChatService, SessionService, NotificationsService, PermissionsService, UserService, WhiteboardService],
+	providers: [
+		AuthService,
+		ChatService,
+		SessionService,
+		NotificationsService,
+		PermissionsService,
+		UserService,
+		WhiteboardService,
+		SessionGuardService],
 	bootstrap: [AppComponent]
 })
 export class AppModule { }

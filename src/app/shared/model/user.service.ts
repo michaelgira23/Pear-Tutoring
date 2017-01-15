@@ -3,7 +3,7 @@ import { AngularFireDatabase, FirebaseRef } from 'angularfire2';
 import { AuthService } from '../security/auth.service';
 import { Observable, Subject } from 'rxjs/Rx';
 import { User } from './user';
-import { objToArr } from '../common/utils';
+import { objToArr, getEditDistance } from '../common/utils';
 import * as moment from 'moment';
 
 export const UserStatus = {
@@ -20,13 +20,23 @@ export class UserService {
 	uid: string;
 	status: number;
 
-	constructor(@Inject(FirebaseRef) fb, private db: AngularFireDatabase, private auth: AuthService) {
+	user$: Observable<User>;
+
+	constructor(@Inject(FirebaseRef) fb, private db: AngularFireDatabase, private authService: AuthService) {
 		this.sdkDb = fb.database().ref();
 		this.sdkStorage = fb.storage().ref();
+
+		this.user$ = this.authService.auth$
+			.switchMap(authInfo => {
+				if (authInfo) {
+					return this.findUser(authInfo.auth.uid);
+				}
+				return Observable.of(<undefined|null>authInfo);
+			});
 	}
 
 	register(regOpt: RegisterOptions): Observable<any> {
-		return this.auth.register(regOpt.email, regOpt.password)
+		return this.authService.register(regOpt.email, regOpt.password)
 			.flatMap(val => {
 				const newUid = val.uid;
 				let userToSave = Object.assign({}, regOpt);
@@ -39,14 +49,6 @@ export class UserService {
 		let userToSave = Object.assign({}, user);
 		let dataToSave = {};
 		dataToSave[`users/${uid}`] = userToSave;
-		let name = user.firstName + ' ' + user.lastName;
-		for (let i = 0; i < name.length; i++) {
-			for (let j = i + 1; j < name.length + 1; j++) {
-				if (name.substring(i, j) !== ' ') {
-					dataToSave[`userNameIndex/${name.substring(i, j)}/${uid}`] = true;
-				}
-			}
-		}
 		return this.firebaseUpdate(dataToSave);
 	}
 
@@ -61,9 +63,13 @@ export class UserService {
 	}
 
 	searchUsersByName(str: string): Observable<User[]> {
-		return this.db.list(`userNameIndex/${str}`)
-		.flatMap(uids => {
-			return Observable.combineLatest(uids.map(uid => this.findUser(uid.$key)));
+		return this.db.list(`users`)
+		.map(User.fromJsonList)
+		.map(users => {
+			return users.filter(user => {
+				// getEditDistance(user.firstName, str) < str.length / 2 || getEditDistance(user.lastName, str) < str.length / 2
+				return getEditDistance(user.name, str) < str.length / 2;
+			});
 		});
 	}
 
@@ -90,7 +96,7 @@ export class UserService {
 	}
 
 	getFreeTimes(): Observable<FreeTimes> {
-		return this.auth.auth$.flatMap(state => {
+		return this.authService.auth$.flatMap(state => {
 			if (state) {
 				return this.db.object(`freeTimesByUsers/${this.uid}/`)
 					.map(freeTimes => {
