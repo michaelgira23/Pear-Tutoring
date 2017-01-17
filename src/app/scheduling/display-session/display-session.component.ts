@@ -57,7 +57,7 @@ export class DisplaySessionComponent implements OnInit {
 	}
 
 	updateSession() {
-		this.router.navigate(['scheduling', 'update', this.session.$key]);
+		this.router.navigate(['session', this.session.$key, 'update' ]);
 	}
 
 	deleteSession() {
@@ -74,6 +74,6 @@ export class DisplaySessionComponent implements OnInit {
 	}
 
 	checkPending() {
-		this.router.navigate(['session', this.session.$key, {outlets: {'requests-popup': ['requests'], 'permissions-popup': null}}]);
+		this.router.navigate(['session', this.session.$key, {outlets: {'popup': ['requests']}}]);
 	}
 }

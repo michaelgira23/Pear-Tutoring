@@ -27,6 +27,11 @@ export class SessionComponent implements OnInit, OnDestroy {
 		return this.sessionInfo.whiteboards[this.selectedWbIndex];
 	};
 
+	// indicator for if the user has rated the session
+	get rated(): boolean {
+		return this.sessionInfo.rating ? !!this.sessionInfo.rating[this.sessionService.uid] : false;
+	};
+
 	@ViewChildren(SidebarComponent) sidebars: QueryList<SidebarComponent>;
 
 	constructor(

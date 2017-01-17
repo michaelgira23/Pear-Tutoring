@@ -1,7 +1,6 @@
 <div class="container-fluid">
 
-  <router-outlet name="permissions-popup"></router-outlet>
-  <router-outlet name="requests-popup"></router-outlet>
+  <router-outlet name="popup"></router-outlet>
 
   <app-sidebar orientation="left">
     <button appSidebarControl class="toggle-button mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored">
@@ -31,8 +30,8 @@
       </div>
       <h3>Admin Actions</h3>
       <div class="session-actions" *ngIf="perm?.moderator">
-        <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" [routerLink]="[{ outlets: { 'permissions-popup': ['permissions'], 'requests-popup': null } }]">Permissions</button>
-        <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" [routerLink]="[{ outlets: { 'requests-popup': ['requests'], 'permissions-popup': null } }]">Pending join requests</button>
+        <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" [routerLink]="[{ outlets: { 'popup': ['permissions'] } }]">Permissions</button>
+        <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" [routerLink]="[{ outlets: { 'popup': ['requests'] } }]">Pending join requests</button>
       </div>
     </div>
   </app-sidebar>

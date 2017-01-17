@@ -1,4 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRouteSnapshot } from '@angular/router';
+import { SessionService } from '../shared/model/session.service';
+import { Session } from '../shared/model/session';
 
 @Component({
 	selector: 'app-session-details',
@@ -7,9 +10,14 @@ import { Component, OnInit } from '@angular/core';
 })
 export class SessionDetailsComponent implements OnInit {
 
-	constructor() { }
+	sessionId: string;
+	sessionInfo: Session;
+
+	constructor(private route: ActivatedRouteSnapshot, private sessionService: SessionService) { }
 
 	ngOnInit() {
+		this.sessionId = this.route.params['id'];
+		this.sessionService.findSession(this.sessionId).subscribe();
 	}
 
 }
