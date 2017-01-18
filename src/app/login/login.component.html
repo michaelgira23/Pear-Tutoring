@@ -1,5 +1,12 @@
 <form [formGroup]="form" (submit)="login()" autocomplete="off" novalidate>
-	<input name="email" formControlName="email" placeholder="Email">
-	<input type="password" name="password" formControlName="password" placeholder="Password">
-	<button [disabled]="!form.valid">Login</button>
+	<div class="mdl-textfield mdl-js-textfield">
+		<input class="mdl-textfield__input" type="text" id="email" name="email" formControlName="email">
+		<label class="mdl-textfield__label" for="email">Email</label>
+	</div>
+	<div class="mdl-textfield mdl-js-textfield">
+		<input class="mdl-textfield__input" type="password" id="password" name="password" formControlName="password">
+		<label class="mdl-textfield__label" for="password">Password</label>
+	</div>
+	<button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised mdl-button--colored" [disabled]="!form.valid">Login</button>
 </form>
+<!-- TODO: maybe convert this into a modal with `.mdl-dialog` or something? -->
