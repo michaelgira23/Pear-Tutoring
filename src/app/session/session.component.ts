@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy, ViewChildren, ViewChild, QueryList } from '@angular/core';
+import { Subject, Observable } from 'rxjs/rx';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SessionService } from '../shared/model/session.service';
 import { Session } from '../shared/model/session';
@@ -131,9 +132,11 @@ export class SessionComponent implements OnInit, OnDestroy {
 		this.sidebars.toArray()[2].close();
 	}
 
-	openPopup(type: string, callback?: (ref: SessionPopup) => void) {
+	openPopup(type: string): Observable<SessionPopup> {
 		this.popup = type;
-		setTimeout(() => {callback(this[type + 'Popup']); }, 0);
+		let popupRef$ = new Subject<SessionPopup>();
+		setTimeout(() => {popupRef$.next(this[type + 'Popup']); }, 0);
+		return popupRef$.asObservable();
 	}
 
 	closePopup(): void {

@@ -14,11 +14,8 @@ export class SessionDeactivateGuardService implements CanDeactivate<SessionCompo
 
 	canDeactivate(component: SessionComponent, route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | Observable<boolean> {
 		if (!component.rated) {
-			let popupRef$ = new Subject<SessionPopup>();
-			component.openPopup('rating', (popup) => {
-				popupRef$.next(popup);
-			});
-			return popupRef$.flatMap(popup => {
+			return component.openPopup('rating')
+			.flatMap(popup => {
 				return popup.submitted$.map(submitted => {
 					component.closePopup();
 					return submitted;
