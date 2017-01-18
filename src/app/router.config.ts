@@ -63,7 +63,7 @@ export const routerConfig: Route[] = [
 				pathMatch: 'full'
 			},
 			{
-				path: 'new',
+				path: 'create',
 				component: CreateWhiteboardComponent
 			},
 			{
