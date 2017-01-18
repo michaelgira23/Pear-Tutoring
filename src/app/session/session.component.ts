@@ -1,4 +1,5 @@
-import { Component, OnInit, OnDestroy, ViewChildren, QueryList } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChildren, ViewChild, QueryList } from '@angular/core';
+import { Observable } from 'rxjs/Rx';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SessionService } from '../shared/model/session.service';
 import { Session } from '../shared/model/session';
@@ -7,6 +8,7 @@ import { UserService } from '../shared/model/user.service';
 import { PermissionsService, Permission } from '../shared/security/permissions.service';
 import { Whiteboard } from '../shared/model/whiteboard';
 import { SidebarComponent } from '../shared/common/sidebar/sidebar.component';
+import { SessionRatingComponent } from './session-rating/session-rating.component';
 
 @Component({
 	selector: 'app-session',
@@ -34,6 +36,10 @@ export class SessionComponent implements OnInit, OnDestroy {
 
 	@ViewChildren(SidebarComponent) sidebars: QueryList<SidebarComponent>;
 
+	@ViewChild(SessionRatingComponent) ratingPopup: SessionRatingComponent;
+
+	popup: string;
+
 	constructor(
 		private route: ActivatedRoute,
 		private sessionService: SessionService,
@@ -52,7 +58,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 					this.perm = perm;
 					if (!perm.read) {
 						console.log('You have been banned from the session');
-						this.router.navigate(['scheduling']);
+						this.router.navigate(['my-sessions']);
 					}
 				}, console.log);
 				this.sessionService.joinSession(this.sessionId).subscribe(data => {}, console.error,
@@ -123,5 +129,16 @@ export class SessionComponent implements OnInit, OnDestroy {
 	onSelectWb(index: number) {
 		this.selectedWbIndex = index;
 		this.sidebars.toArray()[2].close();
+	}
+
+	openPopup(type: string): Observable<boolean> {
+		this.popup = type;
+		return this[type + 'Popup'].submitted$.asObservable().map(val => {
+			this.closePopup();
+		});
+	}
+
+	closePopup(): void {
+		this.popup = '';
 	}
 }

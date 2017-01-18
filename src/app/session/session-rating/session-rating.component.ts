@@ -1,4 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
+import { Subject } from 'rxjs/Rx';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SessionService } from '../../shared/model/session.service';
 import { Session, SessionRating } from '../../shared/model/session';
@@ -20,11 +21,13 @@ export class SessionRatingComponent implements OnInit {
 
 	@ViewChild(ModalComponent) modal: ModalComponent;
 
+	submitted$ = new Subject<boolean>();
+
 	constructor(private route: ActivatedRoute, private sessionService: SessionService, private router: Router) { }
 
 	ngOnInit() {
 		this.modal.show();
-		this.sessionId = this.route.snapshot.parent.params['id'];
+		this.sessionId = this.route.snapshot.params['id'];
 		this.sessionService.findSession(this.sessionId).subscribe((session: Session) => {
 			this.sessionInfo = session;
 			if (session.rating) {
@@ -33,15 +36,17 @@ export class SessionRatingComponent implements OnInit {
 		});
 	}
 
-	closeModal(e?: Event) {
+	closeModal(submitted: boolean, e?: Event) {
 		if (e) {e.stopPropagation(); };
 		this.modal.hide();
-		this.router.navigate(['../'], {relativeTo: this.route});
+		this.submitted$.next(submitted);
 	}
 
 	submitRating() {
 		this.sessionService.changeRating(this.sessionId, this.sessionService.uid, this.ratingModel).subscribe(
-			val => {this.closeModal(); },
+			val => {
+				this.closeModal(true);
+			},
 			err => {console.log(err); }
 		);
 	}

@@ -106,33 +106,18 @@ export const routerConfig: Route[] = [
 				component: CreateSessionComponent
 			},
 			{
-				path: ':id/details',
-				component: SessionDetailsComponent
-			},
-			{
-				path: ':id/update',
-				component: UpdateSessionComponent
-			},
-			{
 				path: ':id',
 				component: SessionComponent,
 				canDeactivate: [SessionDeactivateGuardService],
 				children: [
 					{
-						path: 'permissions',
-						component: SessionPermissionsComponent,
-						outlet: 'popup'
+						path: 'details',
+						component: SessionDetailsComponent
 					},
 					{
-						path: 'requests',
-						component: SessionRequestComponent,
-						outlet: 'popup'
+						path: 'update',
+						component: UpdateSessionComponent
 					},
-					{
-						path: 'rating',
-						component: SessionRatingComponent,
-						outlet: 'popup'
-					}
 				]
 			}
 		],

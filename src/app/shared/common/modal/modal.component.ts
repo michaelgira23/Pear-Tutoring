@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Subject } from 'rxjs/Rx';
 
 @Component({
 	selector: 'app-modal',
@@ -7,7 +8,7 @@ import { Component } from '@angular/core';
 })
 export class ModalComponent {
 
-	public visible = false;
+	public visible: boolean;
 
 	public show(): void {
 		this.visible = true;

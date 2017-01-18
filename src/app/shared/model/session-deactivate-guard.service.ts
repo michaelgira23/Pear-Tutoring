@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { CanDeactivate,
 		ActivatedRouteSnapshot, Router,
 		RouterStateSnapshot }  from '@angular/router';
+import { Observable } from 'rxjs/Rx';
 
 import { SessionComponent } from '../../session/session.component';
 
@@ -10,12 +11,11 @@ export class SessionDeactivateGuardService implements CanDeactivate<SessionCompo
 
 	constructor(private router: Router) {}
 
-	canDeactivate(component: SessionComponent, route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
-		if (component.rated) {
-			return true;
+	canDeactivate(component: SessionComponent, route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | Observable<boolean> {
+		if (!component.rated) {
+			return component.openPopup('rating');
 		}
-		this.router.navigate(['session', component.sessionId, { outlets: { 'popup': ['rating'] } }]);
-		return false;
+		return true;
 	}
 
 }
