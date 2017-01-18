@@ -1,6 +1,9 @@
 <h1>Create a Whiteboard</h1>
 <form (submit)="create()" autocomplete="off" novalidate>
-	<input [(ngModel)]="options.name" name="name" placeholder="Whiteboard Name">
+	<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+		<input class="mdl-textfield__input" [(ngModel)]="options.name" type="text" name="name" id="name">
+		<label class="mdl-textfield__label" for="name">Whiteboard Name</label>
+	</div>
 	<label>
 		Background Color
 		<button type="button" class="color"
@@ -30,5 +33,5 @@
 			<span class="mdl-checkbox__label">Write</span>
 		</label>
 	</fieldset>
-	<button>Create</button>
+	<button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised mdl-button--colored">Create</button>
 </form>
