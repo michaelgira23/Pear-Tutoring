@@ -4,13 +4,14 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { SessionService } from '../../shared/model/session.service';
 import { Session, SessionRating } from '../../shared/model/session';
 import { ModalComponent } from '../../shared/common/modal/modal.component';
+import { SessionPopup } from '../session-popup';
 
 @Component({
 	selector: 'app-session-rating',
 	templateUrl: './session-rating.component.html',
 	styleUrls: ['./session-rating.component.scss']
 })
-export class SessionRatingComponent implements OnInit {
+export class SessionRatingComponent extends SessionPopup implements OnInit {
 
 	sessionId: string;
 	sessionInfo: Session;
@@ -23,7 +24,9 @@ export class SessionRatingComponent implements OnInit {
 
 	submitted$ = new Subject<boolean>();
 
-	constructor(private route: ActivatedRoute, private sessionService: SessionService, private router: Router) { }
+	constructor(private route: ActivatedRoute, private sessionService: SessionService, private router: Router) {
+		super();
+	}
 
 	ngOnInit() {
 		this.modal.show();

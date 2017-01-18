@@ -1,5 +1,4 @@
 import { Component, OnInit, OnDestroy, ViewChildren, ViewChild, QueryList } from '@angular/core';
-import { Observable } from 'rxjs/Rx';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SessionService } from '../shared/model/session.service';
 import { Session } from '../shared/model/session';
@@ -9,6 +8,7 @@ import { PermissionsService, Permission } from '../shared/security/permissions.s
 import { Whiteboard } from '../shared/model/whiteboard';
 import { SidebarComponent } from '../shared/common/sidebar/sidebar.component';
 import { SessionRatingComponent } from './session-rating/session-rating.component';
+import { SessionPopup } from './session-popup';
 
 @Component({
 	selector: 'app-session',
@@ -131,11 +131,9 @@ export class SessionComponent implements OnInit, OnDestroy {
 		this.sidebars.toArray()[2].close();
 	}
 
-	openPopup(type: string): Observable<boolean> {
+	openPopup(type: string, callback?: (ref: SessionPopup) => void) {
 		this.popup = type;
-		return this[type + 'Popup'].submitted$.asObservable().map(val => {
-			this.closePopup();
-		});
+		setTimeout(() => {callback(this[type + 'Popup']); }, 0);
 	}
 
 	closePopup(): void {
