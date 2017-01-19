@@ -1,114 +1,71 @@
-@import '../shared/styles/colors';
+$sophisticated-white: #eee;
 
-@mixin color-theme($subject-color) {
-	position: relative;
-	.mdl-card {
-		border: 5px solid $subject-color;
-		width: 300px;
-		height: 400px;
-		z-index: 100;
+.session-card,
+.pending-card {
+	width: 100%;
+	margin-bottom: 2rem;
 
-		&.side {
-			position: absolute;
-			transition: top 400ms cubic-bezier(0.215, 0.61, 0.355, 1), opacity 400ms cubic-bezier(0.215, 0.61, 0.355, 1), z-index 400ms cubic-bezier(0.215, 0.61, 0.355, 1);
-			width: 300px;
-			top: 400px;
-			opacity: 0;
-			z-index: -1;
-			&.open {
-				opacity: 1;
-				top: 0px;
-				z-index: 200;
-			}
-			.mdl-card__supporting-text:nth-child(1) {
-				margin-top: 2em;
-			}
+	.mdl-card__title {
+		h4 {
+			margin-top: 0;
 		}
+	}
 
-		.mdl-card__title {
-			display: flex;
-			flex-direction: column;
-			&.session-title {
-				margin-top: -2.5em;
-				z-index: 199;
-			}
-			.mdl-card__title-text {
-				align-self: flex-start;
-			}
-			.mdl-card__subtitle-text {
-				align-self: flex-end;
-			}
+	.mdl-card__supporting-text {
+		width: 100%;
+	}
+
+	.mdl-card__actions {
+		display: flex;
+		align-items: center;
+
+		* {
+			margin-right: 1rem;
 		}
+	}
 
-		.session-thumbnails {
-			display: flex;
-			max-height: 150px;
-			width: 100%;
-			flex-direction: column;
-			flex-wrap: nowrap;
-			.row {
-				display: flex;
-				flex-wrap: nowrap;
-				img {
-					width: 50%;
-					height: 150px;
-				}
-				.img-placeholder {
-					height: 150px;
-				}
-			}
-			&::after {
-				content: '';
-				position: absolute;
-				top: 0;
-				height: 150px;
-				width: 300px;
-				background-image: linear-gradient( 180deg, rgba(0,0,0,0) 60%, white )
-			}
-		}
+	&.session-card--english > *:not(.mdl-card__actions) {
+		background: #3f51b5;
+		color: $sophisticated-white;
+	}
 
-		.mdl-card__actions {
-			text-align: center;
-			.join-session {
-				background: $subject-color;
-				float: left;
-			}
+	&.session-card--history > *:not(.mdl-card__actions) {
+		background: #2196f3;
+	}
 
-			.side-toggle {
-				float: right;
-			}
-		}
+	&.session-card--math > *:not(.mdl-card__actions) {
+		background: #4caf50;
+	}
 
-		.mdl-menu {
-			.delete-session:hover {
-				background-color: $fruity-rose;
-			}
-		}
+	&.session-card--science > *:not(.mdl-card__actions) {
+		background: #ffc107;
+	}
 
-		.mdl-card__supporting-text {
-			.chip-container {
-				display: inline;
-				margin-right: 0.5em;
-			}
-		}
+	&.session-card--world-language > *:not(.mdl-card__actions) {
+		background: #f44336;
+	}
 
-		.class-info {
-			.class-string {
-				font-style: italic;
-			}
-		}
+	&.session-card--other > *:not(.mdl-card__actions) {
+		background: #607d8b;
 	}
 }
 
-.session-container {
-	@include color-theme(black);
-	&.math {
-		@include color-theme($fruity-grape);
+.pending-card .mdl-card__title {
+	h4 {
+		color: $sophisticated-white;
 	}
-	&.english {
-		@include color-theme($fruity-blue);
+
+	a {
+		color: mix(#000, rgb(68,138,255));
 	}
-	&.art {
-		@include color-theme($fruity-kiwi);
+
+	&.pending-user-image {
+		background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(https://firebasestorage.googleapis.com/v0/b/wwt-hackathon-2016.appspot.com/o/userPfps%2Fr3QeEe1HigWPKjJlv7WfwgMbBE03?alt=media&token=11f5d2f8-3951-4714-9bed-37c8c5606f8e);
+		background-size: cover;
+		background-position: center;
+
+		a {
+			color: mix($sophisticated-white, rgb(68,138,255));
+		}
 	}
 }

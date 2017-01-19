@@ -1,55 +1,152 @@
-import { Component, OnInit, Input} from '@angular/core';
+import { Component, OnInit, OnDestroy, Input} from '@angular/core';
 import { Router } from '@angular/router';
+import { FirebaseAuthState } from 'angularfire2';
+
+import { AuthService } from '../shared/security/auth.service';
 import { Session } from '../shared/model/session';
 import { SessionService } from '../shared/model/session.service';
-import { UUID } from 'angular2-uuid';
-import { Observable } from 'rxjs/Rx';
-import * as moment from 'moment';
+import { User } from '../shared/model/user';
+
+type CardType = 'display' | 'pending';
 
 @Component({
 	selector: 'app-session-card',
 	templateUrl: './session-card.component.html',
 	styleUrls: ['./session-card.component.scss']
 })
-export class SessionCardComponent implements OnInit {
+export class SessionCardComponent implements OnInit, OnDestroy {
 
-	menuId: string = UUID.UUID();
+	typeToButtonLabels = {
+		display: {
+			notInSession: {
+				primary: 'Enroll',
+				secondary: 'Details'
+			},
+			inSession: {
+				primary: 'Join Session',
+				secondary: 'Details'
+			},
+			pending: {
+				disabled: 'Enrollment is pending...'
+			}
+		},
+		pending: {
+			inSession: {
+				tutor: {
+					primary: 'Accept',
+					secondary: 'Deny'
+				},
+				tutee: {
+					disabled: 'Enrollment accepted!'
+				}
+			},
+			pending: {
+				disabled: 'Enrollment is pending...'
+			}
+		}
+	};
+
+	subjectToLabel = {
+		english: 'file-text2',
+		history: 'history',
+		math: 'calculator',
+		science: 'lab',
+		'world-language': '',
+		default: 'rocket'
+	};
+
+	@Input()
+	type: CardType;
 
 	@Input()
 	session: Session;
-	get startTime(): string {
-		return this.session.start.format('ddd, M/D/Y h:mm:ss');
-	};
-	get endTime(): string {
-		return this.session.end.format('h:mm:ss');
+
+	// User input only used for `pending` type
+	@Input()
+	user: User;
+
+	authSubscription: any;
+	authInfo: FirebaseAuthState;
+
+	get sessionDate(): string {
+		return this.session.start.format('M/D/Y');
 	}
+	get startTime(): string {
+		return this.session.start.format('h:mm');
+	}
+	get endTime(): string {
+		return this.session.end.format('h:mm');
+	}
+
 	get subject(): string {
 		return this.session.subject.toLowerCase();
 	}
 
-	sideOpen: boolean;
-
-	get joinable() {
-		return this.session.tutees.some(user => this.sessionService.uid === user.$key) || this.session.tutor.$key === this.sessionService.uid;
+	get role() {
+		if (this.isTutor) {
+			return 'tutor';
+		} else if (this.isTutee) {
+			return 'tutee';
+		}
+		return null;
 	}
 
-	get pending() {
-		return this.session.pending.some(uid => this.sessionService.uid === uid);
+	get isTutor() {
+		return this.session.tutor.$key === this.authInfo.uid;
 	}
 
-	startingIn: Observable<string>;
-
-	get past(): boolean {
-		return moment().isSameOrAfter(this.session.end);
+	get isTutee() {
+		return this.session.tutees.some(user => user.$key === this.authInfo.uid);
 	}
 
-	constructor(private router: Router, private sessionService: SessionService) {
+	get isPending() {
+		return this.session.pending.includes(this.authInfo.uid);
+	}
+
+	get sessionStatus() {
+		if (this.isPending) {
+			return 'pending';
+		} else if (this.inSession) {
+			return 'inSession';
+		}
+		return 'notInSession';
+	}
+
+	get inSession() {
+		return this.isTutor || this.isTutee;
+	}
+
+	constructor(private router: Router, private authService: AuthService, private sessionService: SessionService) {
 	}
 
 	ngOnInit() {
-		this.startingIn = Observable.interval(5000).map(val => {
-			return this.session.start.fromNow();
-		});
+		this.authSubscription = this.authService.auth$.subscribe(authInfo => this.authInfo = authInfo);
+	}
+
+	ngOnDestroy() {
+		this.authSubscription.unsubscribe();
+	}
+
+	getButtonText(button: string) {
+		if (this.typeToButtonLabels[this.type]
+			&& this.typeToButtonLabels[this.type][this.sessionStatus]) {
+
+			// Check if there's button text for the session status
+			if (this.typeToButtonLabels[this.type][this.sessionStatus][this.role]
+				&& this.typeToButtonLabels[this.type][this.sessionStatus][this.role][button]) {
+
+				return this.typeToButtonLabels[this.type][this.sessionStatus][this.role][button];
+			}
+
+			// Fallback and see if there's any regular button text without specific roles
+			if (this.typeToButtonLabels[this.type][this.sessionStatus]
+				&& this.typeToButtonLabels[this.type][this.sessionStatus][button]) {
+
+				return this.typeToButtonLabels[this.type][this.sessionStatus][button];
+			}
+		}
+
+		return null;
 	}
 
 	joinSession() {
@@ -57,7 +154,7 @@ export class SessionCardComponent implements OnInit {
 	}
 
 	updateSession() {
-		this.router.navigate(['session', this.session.$key, 'update' ]);
+		this.router.navigate(['scheduling', 'update', this.session.$key]);
 	}
 
 	deleteSession() {
@@ -74,6 +171,7 @@ export class SessionCardComponent implements OnInit {
 	}
 
 	checkPending() {
-		this.router.navigate(['session', this.session.$key, {outlets: {'popup': ['requests']}}]);
+		this.router.navigate(['session', this.session.$key, {outlets: {'permissions-popup': null}}]);
+		this.router.navigate(['session', this.session.$key, {outlets: {'requests-popup': ['requests']}}]);
 	}
 }

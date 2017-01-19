@@ -1,4 +1,33 @@
-<div class="session-container" [ngClass]="subject">
+<div class="session-card session-card--science mdl-card mdl-shadow--2dp" [ngClass]="'session-card--' + subject">
+	<div class="mdl-card__title mdl-card--expand">
+		<h4>
+			{{ session.title }}
+			<br>
+			<small>{{ sessionDate }} ({{ startTime }} - {{ endTime }})</small>
+			<br>
+			<small>{{ session.subject }}</small>
+		</h4>
+	</div>
+	<div class="mdl-card__supporting-text">
+		Session Description Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+		Mauris sagittis pellentesque lacus eleifend lacinia...
+	</div>
+	<div class="mdl-card__actions mdl-card--border">
+		<a *ngIf="getButtonText('primary')" class="mdl-button mdl-button--raised mdl-button--primary mdl-js-button mdl-js-ripple-effect">
+			{{ getButtonText('primary') }}
+		</a>
+		<a *ngIf="getButtonText('secondary')" class="mdl-button mdl-js-button mdl-js-ripple-effect">
+			{{ getButtonText('secondary') }}
+		</a>
+		<button *ngIf="getButtonText('disabled')" class="mdl-button mdl-js-button" disabled>
+			{{ getButtonText('disabled') }}
+		</button>
+		<div class="mdl-layout-spacer"></div>
+		<span class="subject-icon icomoon" [ngClass]="'icomoon-' + (subjectToLabel[subject] ? subjectToLabel[subject] : subjectToLabel.default)"></span>
+	</div>
+</div>
+
+<!-- <div class="session-container" [ngClass]="subject">
 	<div class="mdl-card mdl-shadow--8dp">
 		<div class="mdl-card_media">
 			<div class="session-thumbnails" *ngIf="session.whiteboards">
@@ -80,4 +109,4 @@
 				</button>
 			</div>
 	</div>
-</div>
+</div> -->
