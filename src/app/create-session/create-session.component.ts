@@ -1,11 +1,11 @@
 import { Component, OnInit, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { Validators, FormGroup, FormBuilder } from '@angular/forms';
 import { Router } from '@angular/router';
-import { SessionService, AllowedSubjects } from '../../shared/model/session.service';
-import { Session } from '../../shared/model/session';
+import { SessionService, AllowedSubjects } from '../shared/model/session.service';
+import { Session } from '../shared/model/session';
 import * as moment from 'moment';
-import { UserService } from '../../shared/model/user.service';
-import { User } from '../../shared/model/user';
+import { UserService } from '../shared/model/user.service';
+import { User } from '../shared/model/user';
 import { Subscription } from 'rxjs/Rx';
 
 @Component({
@@ -16,19 +16,19 @@ import { Subscription } from 'rxjs/Rx';
 export class CreateSessionComponent implements OnInit, OnChanges {
 
 	createSessionForm: FormGroup = this.fb.group({
-				date: ['', Validators.required],
-				startTime: ['', Validators.required],
-				endTime: ['', Validators.required],
-				grade: ['', Validators.required],
-				classStr: ['', Validators.required],
-				subject: ['', Validators.required],
-				max: ['', Validators.required],
-				listed: [false, Validators.required],
-				title: ['', [Validators.required]],
-				desc: ['', Validators.required],
-				tutees: [[], Validators.required],
-				tags: ['']
-			});
+		date: ['', Validators.required],
+		startTime: ['', Validators.required],
+		endTime: ['', Validators.required],
+		grade: ['', Validators.required],
+		classStr: ['', Validators.required],
+		subject: ['', Validators.required],
+		max: ['', Validators.required],
+		listed: [false, Validators.required],
+		title: ['', [Validators.required]],
+		desc: ['', Validators.required],
+		tutees: [[], Validators.required],
+		tags: ['']
+	});
 	allUsers: User[];
 	allowedSubjects: string[] = AllowedSubjects;
 

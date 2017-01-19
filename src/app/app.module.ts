@@ -46,7 +46,7 @@ import { ChatService } from './shared/model/chat.service';
 import { SchedulingComponent } from './scheduling/scheduling.component';
 import { SessionComponent } from './session/session.component';
 import { SessionDetailsComponent } from './session-details/session-details.component';
-import { CreateSessionComponent } from './scheduling/create-session/create-session.component';
+import { CreateSessionComponent } from './create-session/create-session.component';
 import { DisplaySessionComponent } from './scheduling/display-session/display-session.component';
 import { SessionCalendarComponent } from './scheduling/session-calendar/session-calendar.component';
 import { UserChipComponent } from './scheduling/user-chip/user-chip.component';

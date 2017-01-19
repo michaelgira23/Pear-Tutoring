@@ -8,7 +8,7 @@ import { CreateWhiteboardComponent } from './create-whiteboard/create-whiteboard
 import { ViewWhiteboardComponent } from './view-whiteboard/view-whiteboard.component';
 import { LoginComponent } from './login/login.component';
 import { SchedulingComponent } from './scheduling/scheduling.component';
-import { CreateSessionComponent } from './scheduling/create-session/create-session.component';
+import { CreateSessionComponent } from './create-session/create-session.component';
 import { RegisterComponent } from './register/register.component';
 import { SessionComponent } from './session/session.component';
 import { SessionDetailsComponent } from './session-details/session-details.component';
