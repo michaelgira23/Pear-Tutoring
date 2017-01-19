@@ -66,12 +66,12 @@
 
       <div class="mdl-card__supporting-text">
         Tutor: 
-        <app-display-user [user]="session.tutor"></app-display-user>
+        <app-user-chip [user]="session.tutor"></app-user-chip>
       </div>
 
       <div class="mdl-card__supporting-text">
         Tutees: 
-        <app-display-user *ngFor="let tutee of session.tutees" [user]="tutee"></app-display-user>
+        <app-user-chip *ngFor="let tutee of session.tutees" [user]="tutee"></app-user-chip>
       </div>
 
       <div class="mdl-card__menu">

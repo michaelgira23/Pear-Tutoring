@@ -1,6 +1,6 @@
 <div class="user-select-container">
   <div class="selected-users" *ngIf="selectedUsers">
-    <app-display-user *ngFor="let user of selectedUsers; let i = index" [user]="user" [removable]="true" (onRemove)="removeUser(i)"></app-display-user>
+    <app-user-chip *ngFor="let user of selectedUsers; let i = index" [user]="user" [removable]="true" (onRemove)="removeUser(i)"></app-user-chip>
   </div>
 
   <div class="search-input">
@@ -11,7 +11,7 @@
 
     <ul class="drop-down mdl-shadow--4dp">
       <li class="drop-down-items" *ngFor="let user of userResults; let i = index" (click)="addUser($event, i)" [hidden]="containsUser(user, selectedUsers)">
-        <app-display-user [user]="user"></app-display-user>
+        <app-user-chip [user]="user"></app-user-chip>
       </li>
     </ul>
   </div>

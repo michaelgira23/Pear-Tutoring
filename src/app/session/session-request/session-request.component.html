@@ -10,7 +10,7 @@
       <h2 *ngIf="pendingUsers.length === 0">There is no requests.</h2>
       <li class="mdl-list__item" *ngFor="let user of pendingUsers">
         <span class="mdl-list__item-primary-content">
-          <app-display-user [user]="user"></app-display-user>
+          <app-user-chip [user]="user"></app-user-chip>
         </span>
         <span class="mdl-list__item-secondary-action">
           <button class="mdl-button mdl-js-button mdl-button--accent" (click)="addTutee(user.$key)">

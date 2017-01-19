@@ -49,7 +49,7 @@ import { SessionDetailsComponent } from './session-details/session-details.compo
 import { CreateSessionComponent } from './scheduling/create-session/create-session.component';
 import { DisplaySessionComponent } from './scheduling/display-session/display-session.component';
 import { SessionCalendarComponent } from './scheduling/session-calendar/session-calendar.component';
-import { DisplayUserComponent } from './scheduling/display-user/display-user.component';
+import { UserChipComponent } from './scheduling/user-chip/user-chip.component';
 import { UpdateSessionComponent } from './scheduling/update-session/update-session.component';
 import { TimePickerComponent } from './settings/time-picker/time-picker.component';
 import { MySessionsComponent } from './my-sessions/my-sessions.component';
@@ -88,7 +88,7 @@ import { NamePipe } from './shared/model/name.pipe';
 		RegisterComponent,
 		SettingsComponent,
 		SessionCalendarComponent,
-		DisplayUserComponent,
+		UserChipComponent,
 		CreateChatComponent,
 		ViewChatComponent,
 		UpdateSessionComponent,
