@@ -1,0 +1,20 @@
+.app-modal-body {
+	display: flex;
+	.rating-buttons {
+		align-self: flex-end;
+		display: flex;
+		justify-content: space-around;
+		flex-direction: column;
+		.selected {
+			color: rgb(255,152,0);
+		}
+	}
+	.comment-box {
+		display: flex;
+		flex-direction: column;
+		align-self: flex-end;
+	}
+	.submit-rating {
+		align-self: flex-end
+	}
+}

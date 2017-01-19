@@ -66,8 +66,10 @@ import { SidebarContentDirective } from './shared/common/sidebar/sidebar-content
 
 import { SessionService } from './shared/model/session.service';
 import { SessionGuardService } from './shared/model/session-guard.service';
+import { SessionDeactivateGuardService } from './shared/model/session-deactivate-guard.service';
 
 import { NamePipe } from './shared/model/name.pipe';
+import { SessionRatingComponent, SessionRatingModalComponent } from './session/session-rating/session-rating.component';
 
 @NgModule({
 	declarations: [
@@ -110,7 +112,9 @@ import { NamePipe } from './shared/model/name.pipe';
 		SessionsWithFilterComponent,
 		SessionPermissionsComponent,
 		SessionRequestComponent,
-		ModalComponent
+		ModalComponent,
+		SessionRatingComponent,
+		SessionRatingModalComponent
 	],
 	imports: [
 		BrowserModule,
@@ -130,7 +134,8 @@ import { NamePipe } from './shared/model/name.pipe';
 		PermissionsService,
 		UserService,
 		WhiteboardService,
-		SessionGuardService],
+		SessionGuardService,
+		SessionDeactivateGuardService],
 	bootstrap: [AppComponent]
 })
 export class AppModule { }

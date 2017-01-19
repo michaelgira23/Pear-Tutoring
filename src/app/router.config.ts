@@ -17,8 +17,10 @@ import { UpdateSessionComponent } from './scheduling/update-session/update-sessi
 import { MySessionsComponent } from './my-sessions/my-sessions.component';
 import { SessionPermissionsComponent } from './session/session-permissions/session-permissions.component';
 import { SessionRequestComponent } from './session/session-request/session-request.component';
+import { SessionRatingComponent } from './session/session-rating/session-rating.component';
 
 import { SessionGuardService } from './shared/model/session-guard.service';
+import { SessionDeactivateGuardService } from './shared/model/session-deactivate-guard.service';
 
 export const routerConfig: Route[] = [
 	{
@@ -108,8 +110,8 @@ export const routerConfig: Route[] = [
 				children: [
 					{
 						path: '',
-						component: SessionComponent,
-						pathMatch: 'full'
+						canDeactivate: [SessionDeactivateGuardService],
+						component: SessionComponent
 					},
 					{
 						path: 'details',
@@ -119,16 +121,6 @@ export const routerConfig: Route[] = [
 						path: 'update',
 						component: UpdateSessionComponent
 					},
-					{
-						path: 'permissions',
-						component: SessionPermissionsComponent,
-						outlet: 'permissions-popup'
-					},
-					{
-						path: 'requests',
-						component: SessionRequestComponent,
-						outlet: 'requests-popup'
-					}
 				]
 			}
 		],

@@ -1,4 +1,5 @@
-import { Component, OnInit, OnDestroy, ViewChildren, QueryList } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChildren, ViewChild, QueryList } from '@angular/core';
+import { Subject, Observable } from 'rxjs/Rx';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SessionService } from '../shared/model/session.service';
 import { Session } from '../shared/model/session';
@@ -7,6 +8,8 @@ import { UserService } from '../shared/model/user.service';
 import { PermissionsService, Permission } from '../shared/security/permissions.service';
 import { Whiteboard } from '../shared/model/whiteboard';
 import { SidebarComponent } from '../shared/common/sidebar/sidebar.component';
+import { SessionRatingModalComponent } from './session-rating/session-rating.component';
+import { SessionPopup } from './session-popup';
 
 @Component({
 	selector: 'app-session',
@@ -27,7 +30,16 @@ export class SessionComponent implements OnInit, OnDestroy {
 		return this.sessionInfo.whiteboards[this.selectedWbIndex];
 	};
 
+	// indicator for if the user has rated the session
+	get rated(): boolean {
+		return this.sessionInfo.rating ? !!this.sessionInfo.rating[this.sessionService.uid] : false;
+	};
+
 	@ViewChildren(SidebarComponent) sidebars: QueryList<SidebarComponent>;
+
+	@ViewChild(SessionRatingModalComponent) ratingPopup: SessionRatingModalComponent;
+
+	popup: string;
 
 	constructor(
 		private route: ActivatedRoute,
@@ -47,7 +59,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 					this.perm = perm;
 					if (!perm.read) {
 						console.log('You have been banned from the session');
-						this.router.navigate(['scheduling']);
+						this.router.navigate(['my-sessions']);
 					}
 				}, console.log);
 				this.sessionService.joinSession(this.sessionId).subscribe(data => {}, console.error,
@@ -118,5 +130,16 @@ export class SessionComponent implements OnInit, OnDestroy {
 	onSelectWb(index: number) {
 		this.selectedWbIndex = index;
 		this.sidebars.toArray()[2].close();
+	}
+
+	openPopup(type: string): Observable<SessionPopup> {
+		this.popup = type;
+		let popupRef$ = new Subject<SessionPopup>();
+		setTimeout(() => {popupRef$.next(this[type + 'Popup']); }, 0);
+		return popupRef$.asObservable();
+	}
+
+	closePopup(): void {
+		this.popup = '';
 	}
 }

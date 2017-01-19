@@ -3,6 +3,8 @@ import { Router } from '@angular/router';
 import { Session } from '../shared/model/session';
 import { SessionService } from '../shared/model/session.service';
 import { UUID } from 'angular2-uuid';
+import { Observable } from 'rxjs/Rx';
+import * as moment from 'moment';
 
 @Component({
 	selector: 'app-session-card',
@@ -35,10 +37,19 @@ export class SessionCardComponent implements OnInit {
 		return this.session.pending.some(uid => this.sessionService.uid === uid);
 	}
 
+	startingIn: Observable<string>;
+
+	get past(): boolean {
+		return moment().isSameOrAfter(this.session.end);
+	}
+
 	constructor(private router: Router, private sessionService: SessionService) {
 	}
 
 	ngOnInit() {
+		this.startingIn = Observable.interval(5000).map(val => {
+			return this.session.start.fromNow();
+		});
 	}
 
 	joinSession() {
@@ -46,7 +57,7 @@ export class SessionCardComponent implements OnInit {
 	}
 
 	updateSession() {
-		this.router.navigate(['scheduling', 'update', this.session.$key]);
+		this.router.navigate(['session', this.session.$key, 'update' ]);
 	}
 
 	deleteSession() {
@@ -63,7 +74,6 @@ export class SessionCardComponent implements OnInit {
 	}
 
 	checkPending() {
-		this.router.navigate(['session', this.session.$key, {outlets: {'permissions-popup': null}}]);
-		this.router.navigate(['session', this.session.$key, {outlets: {'requests-popup': ['requests']}}]);
+		this.router.navigate(['session', this.session.$key, {outlets: {'popup': ['requests']}}]);
 	}
 }
