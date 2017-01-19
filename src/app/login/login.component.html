@@ -1,12 +1,12 @@
 <div class="mdl-grid">
 	<div class="mdl-card mdl-cell mdl-shadow--2dp">
 		<div class="mdl-card__title">
-			<h3 class="mdl-card__title-text">Login</h3>
+			<h2 class="mdl-card__title-text">Login</h2>
 		</div>
 		<div class="mdl-card__supporting-text">
 			<form [formGroup]="form" (submit)="login()" autocomplete="off" novalidate>
 				<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-					<input class="mdl-textfield__input" type="text" id="email" name="email" formControlName="email">
+					<input class="mdl-textfield__input" type="email" id="email" name="email" formControlName="email">
 					<label class="mdl-textfield__label" for="email">Email</label>
 				</div>
 				<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
@@ -14,7 +14,8 @@
 					<label class="mdl-textfield__label" for="password">Password</label>
 				</div>
 				<div class="mdl-card__actions">
-					<button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--colored" [disabled]="!form.valid">Login</button>
+					<button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--colored" id="login" [disabled]="!form.valid">Login</button>
+					<button class="mdl-button mdl-js-button mdl-js-ripple-effect" type="button" id="cancel" routerLink="/home">Cancel</button>
 				</div>
 			</form>
 		</div>

@@ -1,7 +1,7 @@
 <div class="mdl-grid">
 	<div class="mdl-card mdl-cell mdl-shadow--2dp">
 		<div class="mdl-card__title">
-			<h3 class="mdl-card__title-text">Register</h3>
+			<h2 class="mdl-card__title-text">Register</h2>
 		</div>
 		<div class="mdl-card__supporting-text">
 			<form [formGroup]="form" (submit)="register()" autocomplete="off" novalidate>
@@ -28,7 +28,8 @@
 					<span class="mdl-textfield__error">Input is not a valid grade!</span>
 				</div>
 				<div class="mdl-card__actions">
-					<button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--colored" [disabled]="!form.valid">Register</button>
+					<button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--colored" id="register" [disabled]="!form.valid">Register</button>
+					<button class="mdl-button mdl-js-button mdl-js-ripple-effect" type="button" id="cancel" routerLink="/home">Cancel</button>
 				</div>
 			</form>
 		</div>
