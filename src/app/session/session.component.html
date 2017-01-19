@@ -1,6 +1,6 @@
 <div class="container-fluid" [ngSwitch]="popup">
 
-  <app-session-rating *ngSwitchCase="'rating'"></app-session-rating>
+  <app-session-rating--modal *ngSwitchCase="'rating'"></app-session-rating--modal>
   <app-session-permissions *ngSwitchCase="'permissions'"></app-session-permissions>
   <app-session-request *ngSwitchCase="'requests'"></app-session-request>
 

@@ -11,7 +11,7 @@ import { SessionPopup } from '../session-popup';
 	templateUrl: './session-rating.component.html',
 	styleUrls: ['./session-rating.component.scss']
 })
-export class SessionRatingComponent extends SessionPopup implements OnInit {
+export class SessionRatingComponent {
 
 	sessionId: string;
 	sessionInfo: Session;
@@ -20,23 +20,31 @@ export class SessionRatingComponent extends SessionPopup implements OnInit {
 		comment: ''
 	};
 
+	constructor(private route: ActivatedRoute, protected sessionService: SessionService, private router: Router) {
+	}
+
+	submitRating() {
+		this.sessionId = this.route.snapshot.parent.params['id'];
+		this.sessionService.changeRating(this.sessionId, this.sessionService.uid, this.ratingModel).subscribe(
+			val => {console.log('rating submitted')},
+			err => {console.log(err); }
+		);
+	}
+
+}
+
+@Component({
+	selector: 'app-session-rating--modal',
+	templateUrl: './session-rating--modal.component.html',
+	styleUrls: ['./session-rating--modal.component.scss']
+})
+export class SessionRatingModalComponent extends SessionRatingComponent implements OnInit, SessionPopup {
 	@ViewChild(ModalComponent) modal: ModalComponent;
 
 	submitted$ = new Subject<boolean>();
 
-	constructor(private route: ActivatedRoute, private sessionService: SessionService, private router: Router) {
-		super();
-	}
-
 	ngOnInit() {
 		this.modal.show();
-		this.sessionId = this.route.snapshot.params['id'];
-		this.sessionService.findSession(this.sessionId).subscribe((session: Session) => {
-			this.sessionInfo = session;
-			if (session.rating) {
-				this.ratingModel = session.rating[this.sessionService.uid];
-			}
-		});
 	}
 
 	closeModal(submitted: boolean, e?: Event) {
@@ -53,5 +61,4 @@ export class SessionRatingComponent extends SessionPopup implements OnInit {
 			err => {console.log(err); }
 		);
 	}
-
 }

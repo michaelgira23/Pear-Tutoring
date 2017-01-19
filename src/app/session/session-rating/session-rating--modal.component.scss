@@ -1,18 +1,28 @@
+.close-button {
+	position: absolute;
+	top: 0.5em;
+	right: 0.5em;
+}
+
 .app-modal-body {
+	padding: 1em;
 	display: flex;
+	flex-direction: column;
 	.rating-buttons {
-		align-self: flex-end;
+		width: 100%;
+		align-self: center;
 		display: flex;
 		justify-content: space-around;
-		flex-direction: column;
+		margin: 1rem;
 		.selected {
 			color: rgb(255,152,0);
 		}
 	}
 	.comment-box {
+		margin: 1em;
 		display: flex;
 		flex-direction: column;
-		align-self: flex-end;
+		align-self: center;
 	}
 	.submit-rating {
 		align-self: flex-end

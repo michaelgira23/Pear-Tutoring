@@ -2,8 +2,7 @@ import { Injectable } from '@angular/core';
 import { CanDeactivate,
 		ActivatedRouteSnapshot, Router,
 		RouterStateSnapshot }  from '@angular/router';
-import { Observable, Subject } from 'rxjs/Rx';
-import { SessionPopup } from '../../session/session-popup';
+import { Observable } from 'rxjs/Rx';
 
 import { SessionComponent } from '../../session/session.component';
 

@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, ViewChildren, ViewChild, QueryList } from '@angular/core';
-import { Subject, Observable } from 'rxjs/rx';
+import { Subject, Observable } from 'rxjs/Rx';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SessionService } from '../shared/model/session.service';
 import { Session } from '../shared/model/session';
@@ -8,7 +8,7 @@ import { UserService } from '../shared/model/user.service';
 import { PermissionsService, Permission } from '../shared/security/permissions.service';
 import { Whiteboard } from '../shared/model/whiteboard';
 import { SidebarComponent } from '../shared/common/sidebar/sidebar.component';
-import { SessionRatingComponent } from './session-rating/session-rating.component';
+import { SessionRatingModalComponent } from './session-rating/session-rating.component';
 import { SessionPopup } from './session-popup';
 
 @Component({
@@ -37,7 +37,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 
 	@ViewChildren(SidebarComponent) sidebars: QueryList<SidebarComponent>;
 
-	@ViewChild(SessionRatingComponent) ratingPopup: SessionRatingComponent;
+	@ViewChild(SessionRatingModalComponent) ratingPopup: SessionRatingModalComponent;
 
 	popup: string;
 

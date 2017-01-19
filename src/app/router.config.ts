@@ -107,9 +107,12 @@ export const routerConfig: Route[] = [
 			},
 			{
 				path: ':id',
-				component: SessionComponent,
-				canDeactivate: [SessionDeactivateGuardService],
 				children: [
+					{
+						path: '',
+						canDeactivate: [SessionDeactivateGuardService],
+						component: SessionComponent
+					},
 					{
 						path: 'details',
 						component: SessionDetailsComponent

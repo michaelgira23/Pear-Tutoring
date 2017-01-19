@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRouteSnapshot } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { SessionService } from '../shared/model/session.service';
-import { Session } from '../shared/model/session';
 
 @Component({
 	selector: 'app-session-details',
@@ -11,13 +10,24 @@ import { Session } from '../shared/model/session';
 export class SessionDetailsComponent implements OnInit {
 
 	sessionId: string;
-	sessionInfo: Session;
+	sessionInfo: any;
 
-	constructor(private route: ActivatedRouteSnapshot, private sessionService: SessionService) { }
+	get canRate(): boolean {
+		return this.sessionInfo.tutees.find(tutee => {
+			return tutee.$key === this.sessionService.uid;
+		}) || true;
+	}
+
+	constructor(private route: ActivatedRoute, private sessionService: SessionService) { }
 
 	ngOnInit() {
-		this.sessionId = this.route.params['id'];
-		this.sessionService.findSession(this.sessionId).subscribe();
+		this.sessionId = this.route.snapshot.params['id'];
+		this.sessionService.combineWithRatings(this.sessionService.findSession(this.sessionId)).subscribe(
+			session => {
+				this.sessionInfo = session;
+				console.log(session);
+			}
+		);
 	}
 
 }

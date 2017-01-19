@@ -22,7 +22,7 @@ export class SessionService {
 	currentUser: User;
 	connectedRef: any;
 
-	constructor(private db: AngularFireDatabase, @Inject(FirebaseRef) fb,
+	constructor(private db: AngularFireDatabase, @Inject(FirebaseRef) private fb,
 				private authService: AuthService,
 				private chatService: ChatService,
 				private permissionsService: PermissionsService,
@@ -207,6 +207,33 @@ export class SessionService {
 				sessionsWithWb[sessionIndex].whiteboards = val[sessionIndex];
 			});
 			return sessionsWithWb;
+		});
+	}
+
+	combineWithRatings(sessionQuery: Observable<any>): Observable<any> {
+		let sessionsWithRatings = {};
+		let tempRatings = [];
+		return sessionQuery.flatMap(session => {
+			sessionsWithRatings = session;
+			return this.db.list(`ratingsBySessions/${session.$key}`, {
+				query: {
+					orderByChild: 'time'
+				}
+			})
+		})
+		.flatMap(ratings => {
+			tempRatings = ratings;
+			return this.checkAndCombine(ratings.map(rating => this.userService.findUser(rating.$key)));
+		})
+		.map(users => {
+			let finalRatings = []
+			users.forEach(user => {
+				let tempRating = tempRatings.find(rating => rating.$key === user.$key);
+				delete tempRating.exists;
+				finalRatings.push(Object.assign({ user }, tempRating));
+			});
+			sessionsWithRatings['rating'] = finalRatings;
+			return sessionsWithRatings;
 		});
 	}
 
@@ -580,7 +607,8 @@ export class SessionService {
 	}
 
 	changeRating(sessionId: string, uid: string, rating: SessionRating): Observable<any> {
-		return this.promiseToObservable(this.db.object(`sessions/${sessionId}/rating/${uid}`).set(rating));
+		return this.promiseToObservable(this.db.object(`ratingsBySessions/${sessionId}/${uid}`)
+			.set(Object.assign(rating, {time: this.fb.H.database.ServerValue.TIMESTAMP})));
 	}
 }
 

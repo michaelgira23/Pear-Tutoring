@@ -69,7 +69,7 @@ import { SessionGuardService } from './shared/model/session-guard.service';
 import { SessionDeactivateGuardService } from './shared/model/session-deactivate-guard.service';
 
 import { NamePipe } from './shared/model/name.pipe';
-import { SessionRatingComponent } from './session/session-rating/session-rating.component';
+import { SessionRatingComponent, SessionRatingModalComponent } from './session/session-rating/session-rating.component';
 
 @NgModule({
 	declarations: [
@@ -113,7 +113,8 @@ import { SessionRatingComponent } from './session/session-rating/session-rating.
 		SessionPermissionsComponent,
 		SessionRequestComponent,
 		ModalComponent,
-		SessionRatingComponent
+		SessionRatingComponent,
+		SessionRatingModalComponent
 	],
 	imports: [
 		BrowserModule,
