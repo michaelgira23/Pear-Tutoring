@@ -1,26 +1,36 @@
-<form [formGroup]="form" (submit)="register()" autocomplete="off" novalidate>
-	<h3>Register</h3>
-	<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-		<input class="mdl-textfield__input" type="text" name="first-name" id="first-name" formControlName="firstName">
-		<label class="mdl-textfield__label" for="first-name">First Name</label>
+<div class="mdl-grid">
+	<div class="mdl-card mdl-cell mdl-shadow--2dp">
+		<div class="mdl-card__title">
+			<h3 class="mdl-card__title-text">Register</h3>
+		</div>
+		<div class="mdl-card__supporting-text">
+			<form [formGroup]="form" (submit)="register()" autocomplete="off" novalidate>
+				<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+					<input class="mdl-textfield__input" type="text" name="first-name" id="first-name" formControlName="firstName">
+					<label class="mdl-textfield__label" for="first-name">First Name</label>
+				</div>
+				<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+					<input class="mdl-textfield__input" type="text" name="last-name" id="last-name" formControlName="lastName">
+					<label class="mdl-textfield__label" for="last-name">Last Name</label>
+				</div>
+				<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+					<input class="mdl-textfield__input" type="email" name="email" id="email" formControlName="email">
+					<label class="mdl-textfield__label" for="email">Email</label>
+				</div>
+				<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+					<input class="mdl-textfield__input" type="text" type="password" name="password" id="password" formControlName="password">
+					<label class="mdl-textfield__label" for="password">Password</label>
+				</div>
+				<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+					<!-- This regex matches 'JK', 'SK', and numbers 1-12. -->
+					<input class="mdl-textfield__input" type="text" name="grade" id="grade" pattern="([JS]K|[1-9]|1[0-2])" formControlName="grade">
+					<label class="mdl-textfield__label" for="grade">Grade</label>
+					<span class="mdl-textfield__error">Input is not a valid grade!</span>
+				</div>
+				<div class="mdl-card__actions">
+					<button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--colored" [disabled]="!form.valid">Register</button>
+				</div>
+			</form>
+		</div>
 	</div>
-	<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-		<input class="mdl-textfield__input" type="text" name="last-name" id="last-name" formControlName="lastName">
-		<label class="mdl-textfield__label" for="last-name">Last Name</label>
-	</div>
-	<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-		<input class="mdl-textfield__input" type="email" name="email" id="email" formControlName="email">
-		<label class="mdl-textfield__label" for="email">Email</label>
-	</div>
-	<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-		<input class="mdl-textfield__input" type="text" type="password" name="password" id="password" formControlName="password">
-		<label class="mdl-textfield__label" for="password">Password</label>
-	</div>
-	<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-		<!-- This regex matches 'JK', 'SK', and numbers 1-12. -->
-		<input class="mdl-textfield__input" type="text" name="grade" id="grade" pattern="([JS]K|[1-9]|1[0-2])" formControlName="grade">
-		<label class="mdl-textfield__label" for="grade">Grade</label>
-		<span class="mdl-textfield__error">Input is not a valid grade!</span>
-	</div>
-	<button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised mdl-button--colored" [disabled]="!form.valid">Register</button>
-</form>
+</div>
