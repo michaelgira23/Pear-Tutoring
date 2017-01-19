@@ -1,15 +1,15 @@
 import { Component, OnInit, Input} from '@angular/core';
 import { Router } from '@angular/router';
-import { Session } from '../../shared/model/session';
-import { SessionService } from '../../shared/model/session.service';
+import { Session } from '../shared/model/session';
+import { SessionService } from '../shared/model/session.service';
 import { UUID } from 'angular2-uuid';
 
 @Component({
-	selector: 'app-display-session',
-	templateUrl: './display-session.component.html',
-	styleUrls: ['./display-session.component.scss']
+	selector: 'app-session-card',
+	templateUrl: './session-card.component.html',
+	styleUrls: ['./session-card.component.scss']
 })
-export class DisplaySessionComponent implements OnInit {
+export class SessionCardComponent implements OnInit {
 
 	menuId: string = UUID.UUID();
 

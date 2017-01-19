@@ -9,14 +9,14 @@
 		<h2> Sessions I'm tutoring </h2>
 		<div class="session-display">
 			<div class="session-display-item" *ngFor="let session of tutorSessions"> 
-				<app-display-session [session]="session"></app-display-session>
+				<app-session-card [session]="session"></app-session-card>
 			</div>
 		</div>
 
 		<h2> Sessions I'm in </h2>
 		<div class="session-display">
 			<div class="session-display-item" *ngFor="let session of tuteeSessions">
-				<app-display-session [session]="session"></app-display-session>
+				<app-session-card [session]="session"></app-session-card>
 			</div>
 		</div>
 	</div>

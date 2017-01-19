@@ -47,7 +47,7 @@ import { SchedulingComponent } from './scheduling/scheduling.component';
 import { SessionComponent } from './session/session.component';
 import { SessionDetailsComponent } from './session-details/session-details.component';
 import { CreateSessionComponent } from './create-session/create-session.component';
-import { DisplaySessionComponent } from './scheduling/display-session/display-session.component';
+import { SessionCardComponent } from './session-card/session-card.component';
 import { SessionCalendarComponent } from './scheduling/session-calendar/session-calendar.component';
 import { UserChipComponent } from './scheduling/user-chip/user-chip.component';
 import { UpdateSessionComponent } from './scheduling/update-session/update-session.component';
@@ -84,7 +84,7 @@ import { NamePipe } from './shared/model/name.pipe';
 		CreateSessionComponent,
 		SessionComponent,
 		SessionDetailsComponent,
-		DisplaySessionComponent,
+		SessionCardComponent,
 		RegisterComponent,
 		SettingsComponent,
 		SessionCalendarComponent,
