@@ -1,5 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { Subject } from 'rxjs/Rx';
+
+declare const dialogPolyfill: any;
 
 @Component({
 	selector: 'app-modal',
@@ -8,17 +10,20 @@ import { Subject } from 'rxjs/Rx';
 })
 export class ModalComponent {
 
-	public visible: boolean;
+	@ViewChild('modal') modal;
 
-	public show(): void {
-		this.visible = true;
+	constructor() {
+		if (!this.modal.showModal) {
+			dialogPolyfill.registerDialog(this.modal);
+		}
 	}
 
-	public hide(): void {
-		this.visible = false;
+	show() {
+		this.modal.showModal();
 	}
 
-	public onClick(e: Event): void {
-		e.stopPropagation();
+	hide() {
+		this.modal.close();
 	}
+
 }

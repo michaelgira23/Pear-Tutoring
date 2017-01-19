@@ -1,16 +1,11 @@
-<div class="modal fade" tabindex="-1" [ngClass]="{'in': visibleAnimate}"
-      [ngStyle]="{'display': visible ? 'block' : 'none'}" (click)="onClick($event)">
-  <div class="modal-dialog mdl-shadow--2dp">
-    <div class="modal-content">
-      <div class="modal-header">
-        <ng-content select=".app-modal-header"></ng-content>
-      </div>
-      <div class="modal-body">
-        <ng-content select=".app-modal-body"></ng-content>
-      </div>
-      <div class="modal-footer">
-        <ng-content select=".app-modal-footer"></ng-content>
-      </div>
-    </div>
-  </div>
-</div>
+<dialog #modal class="mdl-dialog">
+	<div class="mdl-dialog__title">
+		<ng-content select=".app-modal__header"></ng-content>
+	</div>
+	<div class="mdl-dialog__content">
+		<ng-content select=".app-modal__body"></ng-content>
+	</div>
+	<div class="mdl-dialog__actions">
+		<ng-content select=".app-modal__footer"></ng-content>
+	</div>
+</dialog>
