@@ -1,11 +1,21 @@
 $sophisticated-white: #eee;
 
-.session-card {
+.session-card,
+.pending-card {
 	width: 100%;
 	margin-bottom: 2rem;
 
-	&.current-session {
-		margin: 1rem;
+	.mdl-card__actions {
+		display: flex;
+		align-items: center;
+
+		* {
+			margin-right: 1rem;
+		}
+	}
+
+	.mdl-card__supporting-text {
+		width: 100%;
 	}
 
 	&.session-card--english > *:not(.mdl-card__actions) {
@@ -32,32 +42,44 @@ $sophisticated-white: #eee;
 	&.session-card--other > *:not(.mdl-card__actions) {
 		background: #607d8b;
 	}
-
-	.mdl-card__actions {
-		display: flex;
-		align-items: center;
-
-		* {
-			margin-right: 1rem;
-		}
-	}
-
-	.mdl-card__supporting-text {
-		width: 100%;
-	}
 }
 
-.mdl-grid {
-	.mdl-cell {
+.session-card.current-session {
+	margin: 1rem;
+}
 
-		h1 {
-			display: flex;
-			justify-content: space-between;
+.mdl-grid .mdl-cell {
+
+	h1 {
+		display: flex;
+		justify-content: space-between;
+	}
+
+	.session-card,
+	.pending-card {
+		.mdl-card__title {
+			h4 {
+				margin-top: 0;
+			}
+		}
+	}
+
+	.pending-card .mdl-card__title {
+		h4 {
+			color: $sophisticated-white;
 		}
 
-		.session-card .mdl-card__title {
-			h1, h4 {
-				margin-top: 0;
+		a {
+			color: mix(#000, rgb(68,138,255));
+		}
+
+		&.pending-user-image {
+			background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(https://firebasestorage.googleapis.com/v0/b/wwt-hackathon-2016.appspot.com/o/userPfps%2Fr3QeEe1HigWPKjJlv7WfwgMbBE03?alt=media&token=11f5d2f8-3951-4714-9bed-37c8c5606f8e);
+			background-size: cover;
+			background-position: center;
+
+			a {
+				color: mix($sophisticated-white, rgb(68,138,255));
 			}
 		}
 	}
