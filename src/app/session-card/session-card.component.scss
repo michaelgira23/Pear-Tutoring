@@ -24,6 +24,11 @@ $sophisticated-white: #eee;
 		}
 	}
 
+	// Default to miscellaneous color
+	>*:not(.mdl-card__actions) {
+		background: #607d8b;
+	}
+
 	&.session-card--english > *:not(.mdl-card__actions) {
 		background: #3f51b5;
 		color: $sophisticated-white;
@@ -43,10 +48,6 @@ $sophisticated-white: #eee;
 
 	&.session-card--world-language > *:not(.mdl-card__actions) {
 		background: #f44336;
-	}
-
-	&.session-card--other > *:not(.mdl-card__actions) {
-		background: #607d8b;
 	}
 }
 

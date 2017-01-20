@@ -6,19 +6,20 @@
 		<a class="mdl-tabs__tab" href="#free-time" (click)="onClickTab()">Suggestions</a>
 	</div>
 	<div class="mdl-tabs__panel is-active" id="my-sessions">
-		<h2> Sessions I'm tutoring </h2>
-		<div class="session-display">
-			<div class="session-display-item" *ngFor="let session of tutorSessions"> 
-				<app-session-card [session]="session"></app-session-card>
-			</div>
-		</div>
 
-		<h2> Sessions I'm in </h2>
-		<div class="session-display">
-			<div class="session-display-item" *ngFor="let session of tuteeSessions">
-				<app-session-card [session]="session"></app-session-card>
+		<ng-container *ngIf="tutorSessions.length > 0">
+			<h2>Sessions I'm tutoring </h2>
+			<div class="mdl-grid">
+				<app-session-card class="mdl-cell mdl-cell--4-col" *ngFor="let session of tutorSessions" [session]="session" type="display"></app-session-card>
 			</div>
-		</div>
+		</ng-container>
+
+		<ng-container *ngIf="tuteeSessions.length > 0">
+			<h2>Sessions I'm in </h2>
+			<div class="mdl-grid">
+				<app-session-card class="mdl-cell mdl-cell--4-col" *ngFor="let session of tuteeSessions" [session]="session" type="display"></app-session-card>
+			</div>
+		</ng-container>
 	</div>
 	<div class="mdl-tabs__panel" id="my-calendar">
 		<app-session-calendar [sessions]="mySessions"></app-session-calendar>

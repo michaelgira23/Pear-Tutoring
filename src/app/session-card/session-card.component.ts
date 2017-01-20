@@ -78,10 +78,6 @@ export class SessionCardComponent implements OnInit, OnDestroy {
 		return this.session.end.format('h:mm');
 	}
 
-	get subject(): string {
-		return this.session.subject.toLowerCase();
-	}
-
 	get role() {
 		if (this.isTutor) {
 			return 'tutor';
