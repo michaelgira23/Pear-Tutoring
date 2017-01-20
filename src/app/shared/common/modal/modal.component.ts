@@ -17,14 +17,11 @@ export class ModalComponent implements OnInit {
 		// this.modalEl = this.modal.nativeElement;
 		this.initializeModal();
 		console.log('modal element', this.modalEl);
-
-		if (!this.modalEl.showModal) {
-			dialogPolyfill.registerDialog(this.modalEl);
-		}
 	}
 
 	initializeModal() {
 		this.modalEl = this.modal.nativeElement;
+		dialogPolyfill.registerDialog(this.modalEl);
 	}
 
 	show() {
