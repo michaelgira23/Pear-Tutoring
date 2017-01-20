@@ -26,7 +26,7 @@ export class SessionRatingComponent {
 	submitRating() {
 		this.sessionId = this.route.snapshot.parent.params['id'];
 		this.sessionService.changeRating(this.sessionId, this.sessionService.uid, this.ratingModel).subscribe(
-			val => {console.log('rating submitted')},
+			val => {console.log('rating submitted'); },
 			err => {console.log(err); }
 		);
 	}

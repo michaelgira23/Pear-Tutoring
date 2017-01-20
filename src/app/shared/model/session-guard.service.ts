@@ -6,8 +6,8 @@ import {
 } from '@angular/router';
 import { Observable } from 'rxjs/Rx';
 import { SessionService } from './session.service';
-import { Session } from './session';
-import * as moment from 'moment';
+// import { Session } from './session';
+// import * as moment from 'moment';
 
 @Injectable()
 export class SessionGuardService implements CanActivateChild {

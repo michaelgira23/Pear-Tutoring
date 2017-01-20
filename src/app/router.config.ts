@@ -14,9 +14,6 @@ import { SessionComponent } from './session/session.component';
 import { SessionDetailsComponent } from './session-details/session-details.component';
 import { SettingsComponent } from './settings/settings.component';
 import { MySessionsComponent } from './my-sessions/my-sessions.component';
-import { SessionPermissionsComponent } from './session/session-permissions/session-permissions.component';
-import { SessionRequestComponent } from './session/session-request/session-request.component';
-import { SessionRatingComponent } from './session/session-rating/session-rating.component';
 
 import { SessionGuardService } from './shared/model/session-guard.service';
 import { SessionDeactivateGuardService } from './shared/model/session-deactivate-guard.service';
