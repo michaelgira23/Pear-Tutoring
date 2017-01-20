@@ -19,29 +19,50 @@ export class SessionCardComponent implements OnInit, OnDestroy {
 	typeToButtonLabels = {
 		display: {
 			notInSession: {
-				primary: 'Enroll',
-				secondary: 'Details'
+				primary: {
+					content: 'Enroll',
+					function: this.enrollSession
+				},
+				secondary: {
+					content: 'Details',
+					function: this.sessionDetails
+				}
 			},
 			inSession: {
-				primary: 'Join Session',
-				secondary: 'Details'
+				primary: {
+					content: 'Join Session'
+				},
+				secondary: {
+					content: 'Details',
+					function: this.sessionDetails
+				}
 			},
 			pending: {
-				disabled: 'Enrollment is pending...'
+				disabled: {
+					content: 'Enrollment is pending...'
+				}
 			}
 		},
 		pending: {
 			inSession: {
 				tutor: {
-					primary: 'Accept',
-					secondary: 'Deny'
+					primary: {
+						content: 'Accept'
+					},
+					secondary: {
+						content: 'Deny'
+					}
 				},
 				tutee: {
-					disabled: 'Enrollment accepted!'
+					disabled: {
+						content: 'Enrollment accepted!'
+					}
 				}
 			},
 			pending: {
-				disabled: 'Enrollment is pending...'
+				disabled: {
+					content: 'Enrollment is pending...'
+				}
 			}
 		}
 	};
@@ -51,7 +72,7 @@ export class SessionCardComponent implements OnInit, OnDestroy {
 		history: 'history',
 		math: 'calculator',
 		science: 'lab',
-		'world-language': '',
+		'world-language': 'earth',
 		default: 'rocket'
 	};
 
@@ -123,7 +144,7 @@ export class SessionCardComponent implements OnInit, OnDestroy {
 		this.authSubscription.unsubscribe();
 	}
 
-	getButtonText(button: string) {
+	getButtonObject(button: string) {
 		if (this.typeToButtonLabels[this.type]
 			&& this.typeToButtonLabels[this.type][this.sessionStatus]) {
 
@@ -145,6 +166,34 @@ export class SessionCardComponent implements OnInit, OnDestroy {
 		return null;
 	}
 
+	activateBottonFunction(button: string) {
+		const buttonObject = this.getButtonObject(button);
+		if (!buttonObject || !buttonObject.function) {
+			return;
+		}
+		return buttonObject.function.bind(this);
+	}
+
+	/**
+	 * Click handlers for buttons
+	 */
+
+	sessionDetails() {
+		this.router.navigate(['session', this.session.$key, 'details']);
+	}
+
+	enrollSession() {
+		this.sessionService.addTutees(this.session.$key, this.authInfo.uid)
+			.subscribe(
+				val => {
+					console.log('successfully enrolled in session', val);
+				},
+				err => {
+					console.log('enroll error', err);
+				}
+			);
+	}
+
 	joinSession() {
 		this.router.navigate(['session', this.session.$key]);
 	}
@@ -158,12 +207,6 @@ export class SessionCardComponent implements OnInit, OnDestroy {
 			val => console.log('deleted'),
 			err => console.log(err)
 		);
-	}
-
-	enrollSession() {
-		this.sessionService.addTutees(this.session.$key, this.sessionService.uid).subscribe(val => {
-			console.log('added Tutees');
-		}, console.log);
 	}
 
 	checkPending() {

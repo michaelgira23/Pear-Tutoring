@@ -9,18 +9,17 @@
 		</h4>
 	</div>
 	<div class="mdl-card__supporting-text">
-		Session Description Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-		Mauris sagittis pellentesque lacus eleifend lacinia...
+		{{ session.desc }}
 	</div>
 	<div class="mdl-card__actions mdl-card--border">
-		<a *ngIf="getButtonText('primary')" class="mdl-button mdl-button--raised mdl-button--primary mdl-js-button mdl-js-ripple-effect">
-			{{ getButtonText('primary') }}
+		<a *ngIf="getButtonObject('primary')" class="mdl-button mdl-button--raised mdl-button--primary mdl-js-button mdl-js-ripple-effect" (click)="activateBottonFunction('primary')()">
+			{{ getButtonObject('primary')?.content || ' ' }}
 		</a>
-		<a *ngIf="getButtonText('secondary')" class="mdl-button mdl-js-button mdl-js-ripple-effect">
-			{{ getButtonText('secondary') }}
+		<a *ngIf="getButtonObject('secondary')" class="mdl-button mdl-js-button mdl-js-ripple-effect" (click)="activateBottonFunction('secondary')()">
+			{{ getButtonObject('secondary')?.content || ' ' }}
 		</a>
-		<button *ngIf="getButtonText('disabled')" class="mdl-button mdl-js-button" disabled>
-			{{ getButtonText('disabled') }}
+		<button *ngIf="getButtonObject('disabled')" class="mdl-button mdl-js-button" (click)="activateBottonFunction('disabled')()" disabled>
+			{{ getButtonObject('disabled')?.content || ' ' }}
 		</button>
 		<div class="mdl-layout-spacer"></div>
 		<span class="subject-icon icomoon" [ngClass]="'icomoon-' + (subjectToLabel[subject] ? subjectToLabel[subject] : subjectToLabel.default)"></span>
