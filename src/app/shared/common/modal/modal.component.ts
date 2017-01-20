@@ -1,5 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
-import { Subject } from 'rxjs/Rx';
+import { Component, AfterViewChecked, ViewChild } from '@angular/core';
 
 declare const dialogPolyfill: any;
 
@@ -8,22 +7,28 @@ declare const dialogPolyfill: any;
 	templateUrl: './modal.component.html',
 	styleUrls: ['./modal.component.scss']
 })
-export class ModalComponent {
+export class ModalComponent implements AfterViewChecked {
 
 	@ViewChild('modal') modal;
+	modalEl: any;
 
-	constructor() {
-		if (!this.modal.showModal) {
-			dialogPolyfill.registerDialog(this.modal);
+	// FIXME: this lifecycle hook doesn't fire late enough. it doesn't end up detect the modal element
+	ngAfterViewChecked() {
+		this.modalEl = this.modal.nativeElement;
+
+		if (!this.modalEl.showModal) {
+			dialogPolyfill.registerDialog(this.modalEl);
 		}
 	}
 
 	show() {
-		this.modal.showModal();
+		console.log(this.modalEl);
+		this.modalEl.showModal();
 	}
 
 	hide() {
-		this.modal.close();
+		console.log(this.modalEl);
+		this.modalEl.close();
 	}
 
 }
