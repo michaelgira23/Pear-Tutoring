@@ -52,7 +52,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 	ngOnInit() {
 		this.route.params.subscribe(params => {
 			this.sessionId = params['id'];
-			this.findSession$ = this.sessionService.findSession(this.sessionId).subscribe(session => {
+			this.findSession$ = this.sessionService.combineWithRatings(this.sessionService.findSession(this.sessionId)).subscribe(session => {
 				this.sessionExist = true;
 				this.sessionInfo = session;
 				this.permissionsService.getUserPermission(this.sessionId, 'session').subscribe(perm => {
