@@ -50,7 +50,6 @@ import { CreateSessionComponent } from './create-session/create-session.componen
 import { SessionCardComponent } from './session-card/session-card.component';
 import { SessionCalendarComponent } from './scheduling/session-calendar/session-calendar.component';
 import { UserChipComponent } from './scheduling/user-chip/user-chip.component';
-import { UpdateSessionComponent } from './scheduling/update-session/update-session.component';
 import { TimePickerComponent } from './settings/time-picker/time-picker.component';
 import { MySessionsComponent } from './my-sessions/my-sessions.component';
 import { UserAutoCompleteComponent } from './scheduling/user-auto-complete/user-auto-complete.component';
@@ -93,7 +92,6 @@ import { SessionRatingComponent, SessionRatingModalComponent } from './session/s
 		UserChipComponent,
 		CreateChatComponent,
 		ViewChatComponent,
-		UpdateSessionComponent,
 		TimePickerComponent,
 		MySessionsComponent,
 		PfpUploadComponent,

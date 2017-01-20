@@ -13,7 +13,6 @@ import { RegisterComponent } from './register/register.component';
 import { SessionComponent } from './session/session.component';
 import { SessionDetailsComponent } from './session-details/session-details.component';
 import { SettingsComponent } from './settings/settings.component';
-import { UpdateSessionComponent } from './scheduling/update-session/update-session.component';
 import { MySessionsComponent } from './my-sessions/my-sessions.component';
 import { SessionPermissionsComponent } from './session/session-permissions/session-permissions.component';
 import { SessionRequestComponent } from './session/session-request/session-request.component';
@@ -119,7 +118,7 @@ export const routerConfig: Route[] = [
 					},
 					{
 						path: 'update',
-						component: UpdateSessionComponent
+						component: CreateSessionComponent
 					},
 				]
 			}

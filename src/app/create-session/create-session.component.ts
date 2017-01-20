@@ -1,6 +1,6 @@
-import { Component, OnInit, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Validators, FormGroup, FormBuilder } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { SessionService, AllowedSubjects } from '../shared/model/session.service';
 import { Session } from '../shared/model/session';
 import * as moment from 'moment';
@@ -13,7 +13,7 @@ import { Subscription } from 'rxjs/Rx';
 	templateUrl: './create-session.component.html',
 	styleUrls: ['./create-session.component.scss']
 })
-export class CreateSessionComponent implements OnInit, OnChanges {
+export class CreateSessionComponent implements OnInit {
 
 	createSessionForm: FormGroup = this.fb.group({
 		date: ['', Validators.required],
@@ -36,28 +36,33 @@ export class CreateSessionComponent implements OnInit, OnChanges {
 
 	// The component detects if there's a session id provided, and prefill the form with values from the session information
 	sessionInfo: Session;
-	@Input()
 	sessionId: string;
 
 	findSession$: Subscription;
 
-	constructor(private fb: FormBuilder,
-				private sessionService: SessionService,
-				private userService: UserService,
-				private router: Router) { }
+	constructor(
+		private fb: FormBuilder,
+		private router: Router,
+		private route: ActivatedRoute,
+		private sessionService: SessionService,
+		private userService: UserService
+	) { }
 
 	ngOnInit() {
+
+		this.route.params.subscribe(params => {
+			if (params['id']) {
+				this.sessionId = params['id'];
+			}
+			this.refreshSessionInfo();
+		});
+
 		this.userService.findAllUsers().subscribe(
 			val => this.allUsers = val,
 			err => console.log('Getting users error', err)
 		);
 
 		this.refreshSessionInfo();
-	}
-
-	ngOnChanges(changes: SimpleChanges) {
-			if (changes['sessionId']) { this.sessionId = changes['sessionId'].currentValue; }
-			this.refreshSessionInfo();
 	}
 
 	refreshSessionInfo() {
