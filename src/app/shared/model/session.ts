@@ -59,6 +59,12 @@ export class Session {
 }
 
 export interface SessionRating {
+	user: string;
 	rating: 0 | 1 | -1;
 	comment: string;
+	time: number;
+}
+
+export interface SessionWithRatings extends Session {
+	rating: SessionRating[];
 }

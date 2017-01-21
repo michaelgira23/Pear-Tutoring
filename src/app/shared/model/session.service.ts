@@ -1,6 +1,7 @@
 import { Injectable, Inject } from '@angular/core';
 import { Observable, Subject } from 'rxjs/Rx';
 import { AngularFireDatabase, FirebaseRef } from 'angularfire2';
+import * as firebase from 'firebase';
 import { Session, SessionRating } from './session';
 import { User } from './user';
 import { UserService, UserStatus, FreeTimes } from './user.service';
@@ -579,7 +580,7 @@ export class SessionService {
 								]);
 							});
 						}
-						dataToSave[`sessions/${sessionId}/pending/${tuteeId}`] = this.fb.H.database.ServerValue.TIMESTAMP;
+						dataToSave[`sessions/${sessionId}/pending/${tuteeId}`] = firebase.database.ServerValue.TIMESTAMP;
 						return this.firebaseUpdate(dataToSave);
 					}
 					return Observable.throw('session is already full');
@@ -606,9 +607,9 @@ export class SessionService {
 			});
 	}
 
-	changeRating(sessionId: string, uid: string, rating: SessionRating): Observable<any> {
+	changeRating(sessionId: string, uid: string, rating: any): Observable<any> {
 		return this.promiseToObservable(this.db.object(`ratingsBySessions/${sessionId}/${uid}`)
-			.set(Object.assign(rating, {time: this.fb.H.database.ServerValue.TIMESTAMP})));
+			.set(Object.assign(rating, {time: firebase.database.ServerValue.TIMESTAMP})));
 	}
 }
 

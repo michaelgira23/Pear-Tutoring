@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { SessionService } from '../../shared/model/session.service';
-import { Session, SessionRating } from '../../shared/model/session';
+import { Session } from '../../shared/model/session';
 import { SessionPopup } from '../session-popup';
 
 @Component({
@@ -12,16 +13,17 @@ export class SessionRatingComponent extends SessionPopup implements OnInit {
 
 	sessionId: string;
 	sessionInfo: Session;
-	ratingModel: SessionRating = {
+	ratingModel: any = {
 		rating: undefined,
 		comment: ''
 	};
 
-	constructor(protected sessionService: SessionService) {
+	constructor(protected sessionService: SessionService, private route: ActivatedRoute) {
 		super();
 	}
 
 	ngOnInit() {
+		this.sessionId = this.route.snapshot.params['id'];
 	}
 
 	submitRating() {
