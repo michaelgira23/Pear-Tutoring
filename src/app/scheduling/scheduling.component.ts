@@ -44,7 +44,7 @@ export class SchedulingComponent implements OnInit, OnDestroy {
 		if (this.searchStr.length !== 0) {
 			if (!this.tagsSessions$.closed) { this.tagsSessions$.unsubscribe(); }
 			if (!this.propertySessions$.closed) { this.propertySessions$.unsubscribe(); }
-			if (!this.publicSessions$.closed) {this.publicSessions$.unsubscribe()}
+			if (!this.publicSessions$.closed) {this.publicSessions$.unsubscribe(); }
 			if (prop === 'tags') {
 				let tags = this.searchStr.split(',').map(tag => tag.trim());
 				this.tagsSessions$ = this.sessionService.findSessionsByTags(tags, this.page).subscribe(val => {

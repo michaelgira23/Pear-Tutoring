@@ -10,8 +10,40 @@
 		<link rel="icon" type="image/x-icon" href="favicon.ico">
 		<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:300,400,500,700">
 		<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
+		<!-- Loading page styles -->
+		<style>
+			.loading {
+				position: fixed;
+				top: 0;
+				right: 0;
+				bottom: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				align-items: center;
+
+				padding: 0 1rem;
+			}
+
+			.loading h1 {
+				font-size: 600%;
+			}
+
+			.loading p {
+				text-align: center;
+			}
+		</style>
 	</head>
 	<body>
-		<app-root>Loading...</app-root>
+		<app-root></app-root>
+		<div class="loading mdl-color--blue-grey-900 mdl-color-text--blue-grey-50">
+			<h1 class="mdl-typography--display-4">Tutoring our tutors...</h1>
+			<p class="mdl-typography--display-1">This will only take a moment <!-- unlike you haha otherwise there would be no point for a tutoring platform --></p>
+		</div>
 	</body>
 </html>

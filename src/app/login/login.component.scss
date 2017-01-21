@@ -1,0 +1,32 @@
+.mdl-card {
+	align-items: center;
+	justify-content: center;
+	display: flex;
+
+	.mdl-card__title {
+		.mdl-card__title-text {
+			font-size: 2.5em;
+		}
+	}
+
+	.mdl-card__supporting-text {
+		.mdl-textfield {
+			width: 150%;
+		}
+
+		.mdl-card__actions {
+			#login {
+				float: left;
+			}
+
+			#cancel {
+				float: right;
+			}
+		}
+	}
+}
+
+.mdl-grid {
+	@extend .mdl-card;
+	height: 100%;
+}

@@ -39,7 +39,7 @@ export class SessionPermissionsComponent implements OnInit {
 
 	ngOnInit() {
 		this.modal.show();
-		let sessionId = this.route.parent.snapshot.params['id'];
+		let sessionId = this.route.snapshot.params['id'];
 		if (sessionId) {
 			this.sessions.findSession(sessionId)
 			.flatMap((session: Session) => {

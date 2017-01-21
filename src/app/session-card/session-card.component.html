@@ -1,0 +1,111 @@
+<div class="session-card mdl-card mdl-shadow--2dp" [ngClass]="'session-card--' + session.subject.toLowerCase()">
+	<div class="mdl-card__title mdl-card--expand">
+		<h4>
+			{{ session.title }}
+			<br>
+			<small>{{ sessionDate }} ({{ startTime }} - {{ endTime }})</small>
+			<br>
+			<small>{{ session.subject }}</small>
+		</h4>
+	</div>
+	<div class="mdl-card__supporting-text">
+		{{ session.desc }}
+	</div>
+	<div class="mdl-card__actions mdl-card--border">
+		<a *ngIf="getButtonObject('primary')" class="mdl-button mdl-button--raised mdl-button--primary mdl-js-button mdl-js-ripple-effect" (click)="activateBottonFunction('primary')()">
+			{{ getButtonObject('primary')?.content || ' ' }}
+		</a>
+		<a *ngIf="getButtonObject('secondary')" class="mdl-button mdl-js-button mdl-js-ripple-effect" (click)="activateBottonFunction('secondary')()">
+			{{ getButtonObject('secondary')?.content || ' ' }}
+		</a>
+		<button *ngIf="getButtonObject('disabled')" class="mdl-button mdl-js-button" (click)="activateBottonFunction('disabled')()" disabled>
+			{{ getButtonObject('disabled')?.content || ' ' }}
+		</button>
+		<div class="mdl-layout-spacer"></div>
+		<span class="subject-icon icomoon" [ngClass]="'icomoon-' + (subjectToLabel[subject] ? subjectToLabel[subject] : subjectToLabel.default)"></span>
+	</div>
+</div>
+
+<!-- <div class="session-container" [ngClass]="subject">
+	<div class="mdl-card mdl-shadow--8dp">
+		<div class="mdl-card_media">
+			<div class="session-thumbnails" *ngIf="session.whiteboards">
+				<div class="row">
+					<div class="img-placeholder" *ngIf="!(session.whiteboards[0].snapshot || session.whiteboards[1] || session.whiteboards[2] || session.whiteboards[3])"></div>
+					<img *ngIf="session.whiteboards[0] && session.whiteboards[0].snapshot" [src]="session.whiteboards[0].snapshot" [style.width]="session.whiteboards[1] && session.whiteboards[1].snapshot ? '50%' : '100%'">
+					<img *ngIf="session.whiteboards[1] && session.whiteboards[1].snapshot" [src]="session.whiteboards[1].snapshot">
+				</div>
+				<div class="row">
+					<img *ngIf="session.whiteboards[2] && session.whiteboards[2].snapshot" [src]="session.whiteboards[2].snapshot">
+					<img *ngIf="session.whiteboards[3] && session.whiteboards[3].snapshot" [src]="session.whiteboards[3].snapshot">
+				</div>
+			</div>
+		</div>
+
+		<div class="mdl-card__title session-title">
+			<h2 class="mdl-card__title-text">{{ session.title }}</h2>
+		</div>
+
+	<div class="mdl-card__supporting-text">
+		Grade {{ session.grade }} {{ session.subject }}
+		{{ session.classStr }}
+	</div>
+
+		<div class="mdl-card__title">
+			<div class="mdl-card__subtitle-text">
+				{{ startTime }} ~ {{ endTime }}
+			</div>
+		</div>
+
+		<div class="mdl-card__supporting-text">
+			<div *ngFor="let tag of session.tags" class="chip-container">
+				<div class="mdl-chip"><span class="mdl-chip__text">{{ tag }}</span></div>
+			</div>
+		</div>
+
+		<div class="mdl-card__actions mdl-card--border">
+			<button *ngIf="joinable" (click)="joinSession()" class="join-session mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">Join Session</button>
+			<button *ngIf="!joinable && !pending" (click)="enrollSession()" class="join-session mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">Enroll</button>
+			<button *ngIf="!joinable && pending" class="join-session mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" disabled>Pending</button>
+		</div>
+
+		<div class="mdl-card__menu" *ngIf="session.tutor.$key === sessionService.uid">
+			<button [id]="menuId" class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab session-admin">
+				<i class="material-icons">more_vert</i>
+			</button>
+			<ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" [attr.for]="menuId">
+				<li class="mdl-menu__item update-session" (click)="updateSession()">Update</li>
+				<li class="mdl-menu__item delete-session" (click)="deleteSession()">Delete</li>
+				<li class="mdl-menu__item" (click)="checkPending()">Pending Tutees</li>
+			</ul>
+		</div>
+
+		<div class="side-toggle" (click)="sideOpen = true">
+			<button class="mdl-button mdl-js-button mdl-button--icon session-admin">
+				<i class="material-icons">expand_less</i>
+			</button>
+		</div>
+	</div>
+
+	<div class="mdl-card mdl-shadow--5dp side" [class.open]="sideOpen">
+			<div class="mdl-card__supporting-text">
+				{{ session.desc }}
+			</div>
+
+			<div class="mdl-card__supporting-text">
+				Tutor:
+				<app-user-chip [user]="session.tutor"></app-user-chip>
+			</div>
+
+			<div class="mdl-card__supporting-text">
+				Tutees:
+				<app-user-chip *ngFor="let tutee of session.tutees" [user]="tutee"></app-user-chip>
+			</div>
+
+			<div class="mdl-card__menu">
+				<button class="mdl-button mdl-js-button mdl-button--icon session-admin" (click)="sideOpen = false">
+					<i class="material-icons">close</i>
+				</button>
+			</div>
+	</div>
+</div> -->
