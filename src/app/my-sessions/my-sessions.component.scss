@@ -1,18 +1,8 @@
-@import '../shared/styles/_colors.scss';
-
 h1 {
-    text-align: center;
+	text-align: center;
 }
 
-.mdl-tabs {
-    .mdl-tabs__panel {
-        .session-display {
-            display: flex;
-            flex-wrap: wrap;
-            padding: 1em;
-            .session-display-item {
-                margin: 1em;
-            }
-        }
-    }
+.create-session {
+	display: block;
+	margin: 0 auto 2rem;
 }

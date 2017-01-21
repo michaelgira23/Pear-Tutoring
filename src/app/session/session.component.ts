@@ -1,12 +1,16 @@
-import { Component, OnInit, OnDestroy, ViewChildren, QueryList } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChildren, ViewChild, QueryList } from '@angular/core';
+import { Subject, Observable } from 'rxjs/Rx';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SessionService } from '../shared/model/session.service';
-import { Session } from '../shared/model/session';
 import { User } from '../shared/model/user';
 import { UserService } from '../shared/model/user.service';
 import { PermissionsService, Permission } from '../shared/security/permissions.service';
 import { Whiteboard } from '../shared/model/whiteboard';
 import { SidebarComponent } from '../shared/common/sidebar/sidebar.component';
+import { SessionRatingComponent } from './session-rating/session-rating.component';
+import { SessionPermissionsComponent } from './session-permissions/session-permissions.component';
+import { SessionRequestComponent } from './session-request/session-request.component';
+import { SessionPopup } from './session-popup';
 
 @Component({
 	selector: 'app-session',
@@ -17,7 +21,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 
 	sessionId: string;
 	sessionExist: boolean;
-	sessionInfo: Session;
+	sessionInfo: any; // Session type plus rating
 	onlineUsers: User[] = [];
 	findSession$;
 	perm: Permission;
@@ -27,7 +31,18 @@ export class SessionComponent implements OnInit, OnDestroy {
 		return this.sessionInfo.whiteboards[this.selectedWbIndex];
 	};
 
+	// indicator for if the user has rated the session
+	get rated(): boolean {
+		return this.sessionInfo.rating ? !!this.sessionInfo.rating.find(rating => {
+			return rating.user.$key === this.sessionService.uid;
+		}) : false;
+	};
+
 	@ViewChildren(SidebarComponent) sidebars: QueryList<SidebarComponent>;
+
+	@ViewChild(SessionRatingComponent) ratingPopup: SessionRatingComponent;
+	@ViewChild(SessionRequestComponent) requestsPopup: SessionRatingComponent;
+	@ViewChild(SessionPermissionsComponent) permissionsPopup: SessionRatingComponent;
 
 	constructor(
 		private route: ActivatedRoute,
@@ -40,21 +55,21 @@ export class SessionComponent implements OnInit, OnDestroy {
 	ngOnInit() {
 		this.route.params.subscribe(params => {
 			this.sessionId = params['id'];
-			this.findSession$ = this.sessionService.findSession(this.sessionId).subscribe(session => {
+			this.findSession$ = this.sessionService.combineWithRatings(this.sessionService.findSession(this.sessionId)).subscribe(session => {
 				this.sessionExist = true;
 				this.sessionInfo = session;
 				this.permissionsService.getUserPermission(this.sessionId, 'session').subscribe(perm => {
 					this.perm = perm;
 					if (!perm.read) {
 						console.log('You have been banned from the session');
-						this.router.navigate(['scheduling']);
+						this.router.navigate(['my-sessions']);
 					}
 				}, console.log);
 				this.sessionService.joinSession(this.sessionId).subscribe(data => {}, console.error,
 				() => {
 					this.sessionService.getOnlineUsers(this.sessionId).subscribe(userIds => {
 						let allUsers = this.sessionInfo.tutees.concat(this.sessionInfo.tutor);
-						// The online state is [uid]:boolean. i wanted to preserve the boolean that 
+						// The online state is [uid]:boolean. i wanted to preserve the boolean that
 						// represented the online state so i didn't convert the uid into a user object
 						let onlineUsers = [];
 						userIds.forEach(userOnlineState => {
@@ -118,5 +133,17 @@ export class SessionComponent implements OnInit, OnDestroy {
 	onSelectWb(index: number) {
 		this.selectedWbIndex = index;
 		this.sidebars.toArray()[2].close();
+	}
+
+	openPopup(type: string): Observable<SessionPopup> {
+		this[type + 'Popup'].modal.show();
+		let popupRef$ = new Subject<SessionPopup>();
+		setTimeout(() => {popupRef$.next(this[type + 'Popup']); }, 0);
+		return popupRef$.asObservable();
+	}
+
+	closePopup(type: string): void {
+		let popup = <SessionPopup> this[type + 'Popup'];
+		popup.closeModal(false);
 	}
 }

@@ -1,0 +1,27 @@
+.close-button {
+	position: absolute;
+	top: 0.5em;
+	right: 0.5em;
+}
+
+.app-modal__body {
+	display: flex;
+	flex-direction: column;
+	.rating-buttons {
+		width: 100%;
+		display: flex;
+		justify-content: space-around;
+		.selected {
+			color: rgb(255,152,0);
+		}
+	}
+	.comment-box {
+		width: 100%;
+		display: flex;
+		flex-direction: column;
+		align-self: center;
+	}
+	.submit-rating {
+		align-self: flex-end
+	}
+}
