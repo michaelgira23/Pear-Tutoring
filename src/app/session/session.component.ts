@@ -2,7 +2,6 @@ import { Component, OnInit, OnDestroy, ViewChildren, ViewChild, QueryList } from
 import { Subject, Observable } from 'rxjs/Rx';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SessionService } from '../shared/model/session.service';
-import { Session } from '../shared/model/session';
 import { User } from '../shared/model/user';
 import { UserService } from '../shared/model/user.service';
 import { PermissionsService, Permission } from '../shared/security/permissions.service';
@@ -22,7 +21,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 
 	sessionId: string;
 	sessionExist: boolean;
-	sessionInfo: Session;
+	sessionInfo: any; // Session type plus rating
 	onlineUsers: User[] = [];
 	findSession$;
 	perm: Permission;
@@ -70,7 +69,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 				() => {
 					this.sessionService.getOnlineUsers(this.sessionId).subscribe(userIds => {
 						let allUsers = this.sessionInfo.tutees.concat(this.sessionInfo.tutor);
-						// The online state is [uid]:boolean. i wanted to preserve the boolean that 
+						// The online state is [uid]:boolean. i wanted to preserve the boolean that
 						// represented the online state so i didn't convert the uid into a user object
 						let onlineUsers = [];
 						userIds.forEach(userOnlineState => {

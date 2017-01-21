@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { PermissionsService, Permission, PermissionsType } from '../../shared/security/permissions.service';
 import { SessionService } from '../../shared/model/session.service';
 import { Session } from '../../shared/model/session';
