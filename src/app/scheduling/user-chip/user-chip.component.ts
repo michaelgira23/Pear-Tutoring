@@ -3,11 +3,11 @@ import { User } from '../../shared/model/user';
 import { UserStatus } from '../../shared/model/user.service';
 
 @Component({
-	selector: 'app-display-user',
-	templateUrl: './display-user.component.html',
-	styleUrls: ['./display-user.component.scss']
+	selector: 'app-user-chip',
+	templateUrl: './user-chip.component.html',
+	styleUrls: ['./user-chip.component.scss']
 })
-export class DisplayUserComponent implements OnInit, OnChanges {
+export class UserChipComponent implements OnInit, OnChanges {
 
 	@Input()
 	user: User;

@@ -1,13 +1,13 @@
 <app-modal>
 
-  <div class="app-modal-header">
+  <div class="app-modal__header">
     <h4>Permissions for Session: {{ sessionInfo?.title }}</h4>
-    <button class="close-button mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect" (click)="closeModal($event)">
+    <button class="close-button mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect" (click)="closeModal(false, $event)">
       <i class="material-icons">close</i>
     </button>
   </div>
 
-  <div class="app-modal-body">
+  <div class="app-modal__body">
     <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" (click)="savePerms()">Save Changes</button>
     <ul class="mdl-list">
       <div class="list-item-container" *ngFor="let user of sessionInfo?.tutees; let index = i">
@@ -58,6 +58,12 @@
         </ul>
       </div>
     </ul>
+  </div>
+
+  <div class=".app-modal__footer">
+  	<button class="close-button mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect" (click)="closeModal($event)">
+      <i class="material-icons">close</i>
+    </button>
   </div>
 
 </app-modal>

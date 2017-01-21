@@ -4,13 +4,13 @@ import { TestBed, async, inject } from '@angular/core/testing';
 import { SessionDeactivateGuardService } from './session-deactivate-guard.service';
 
 describe('SessionDeactivateGuardService', () => {
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-      providers: [SessionDeactivateGuardService]
-    });
-  });
+	beforeEach(() => {
+		TestBed.configureTestingModule({
+			providers: [SessionDeactivateGuardService]
+		});
+	});
 
-  it('should ...', inject([SessionDeactivateGuardService], (service: SessionDeactivateGuardService) => {
-    expect(service).toBeTruthy();
-  }));
+	it('should ...', inject([SessionDeactivateGuardService], (service: SessionDeactivateGuardService) => {
+		expect(service).toBeTruthy();
+	}));
 });

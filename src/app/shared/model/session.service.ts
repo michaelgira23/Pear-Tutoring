@@ -219,14 +219,14 @@ export class SessionService {
 				query: {
 					orderByChild: 'time'
 				}
-			})
+			});
 		})
 		.flatMap(ratings => {
 			tempRatings = ratings;
 			return this.checkAndCombine(ratings.map(rating => this.userService.findUser(rating.$key)));
 		})
 		.map(users => {
-			let finalRatings = []
+			let finalRatings = [];
 			users.forEach(user => {
 				let tempRating = tempRatings.find(rating => rating.$key === user.$key);
 				delete tempRating.exists;

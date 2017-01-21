@@ -46,11 +46,10 @@ import { ChatService } from './shared/model/chat.service';
 import { SchedulingComponent } from './scheduling/scheduling.component';
 import { SessionComponent } from './session/session.component';
 import { SessionDetailsComponent } from './session-details/session-details.component';
-import { CreateSessionComponent } from './scheduling/create-session/create-session.component';
-import { DisplaySessionComponent } from './scheduling/display-session/display-session.component';
+import { CreateSessionComponent } from './create-session/create-session.component';
+import { SessionCardComponent } from './session-card/session-card.component';
 import { SessionCalendarComponent } from './scheduling/session-calendar/session-calendar.component';
-import { DisplayUserComponent } from './scheduling/display-user/display-user.component';
-import { UpdateSessionComponent } from './scheduling/update-session/update-session.component';
+import { UserChipComponent } from './scheduling/user-chip/user-chip.component';
 import { TimePickerComponent } from './settings/time-picker/time-picker.component';
 import { MySessionsComponent } from './my-sessions/my-sessions.component';
 import { UserAutoCompleteComponent } from './scheduling/user-auto-complete/user-auto-complete.component';
@@ -86,14 +85,13 @@ import { SessionRatingComponent } from './session/session-rating/session-rating.
 		CreateSessionComponent,
 		SessionComponent,
 		SessionDetailsComponent,
-		DisplaySessionComponent,
+		SessionCardComponent,
 		RegisterComponent,
 		SettingsComponent,
 		SessionCalendarComponent,
-		DisplayUserComponent,
+		UserChipComponent,
 		CreateChatComponent,
 		ViewChatComponent,
-		UpdateSessionComponent,
 		TimePickerComponent,
 		MySessionsComponent,
 		PfpUploadComponent,

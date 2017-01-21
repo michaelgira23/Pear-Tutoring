@@ -1,9 +1,6 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { Subject } from 'rxjs/Rx';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
 import { SessionService } from '../../shared/model/session.service';
 import { Session, SessionRating } from '../../shared/model/session';
-import { ModalComponent } from '../../shared/common/modal/modal.component';
 import { SessionPopup } from '../session-popup';
 
 @Component({
@@ -20,7 +17,7 @@ export class SessionRatingComponent extends SessionPopup implements OnInit {
 		comment: ''
 	};
 
-	constructor(private route: ActivatedRoute, protected sessionService: SessionService, private router: Router) {
+	constructor(protected sessionService: SessionService) {
 		super();
 	}
 

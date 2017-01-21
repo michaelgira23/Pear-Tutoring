@@ -1,24 +1,24 @@
 .user-select-container {
-    .selected-users {
-        display: flex;
-        flex-wrap: wrap;
-    }
-    .search-input {
-        position: relative;
-        .drop-down {
-            display: flex;
-            flex-direction: column;
-            position: absolute;
-            margin-top: -0.5em;
-            list-style: none;
-            background-color: white;
-            margin: 0.25em;
-            padding: 0;
-            .drop-down-items {
-                cursor: pointer;
-                border-bottom: 1px solid grey;
-                padding: 0.25em;
-            }
-        }
-    }
+	.selected-users {
+		display: flex;
+		flex-wrap: wrap;
+	}
+	.search-input {
+		position: relative;
+		.drop-down {
+			display: flex;
+			flex-direction: column;
+			position: absolute;
+			margin-top: -0.5em;
+			list-style: none;
+			background-color: white;
+			margin: 0.25em;
+			padding: 0;
+			.drop-down-items {
+				cursor: pointer;
+				border-bottom: 1px solid grey;
+				padding: 0.25em;
+			}
+		}
+	}
 }

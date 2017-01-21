@@ -1,0 +1,7 @@
+<span *ngIf="user" class="mdl-chip mdl-chip--contact mdl-chip--deletable">
+	<img *ngIf="user.pfp" class="mdl-chip__contact" [src]="user.pfp">
+	<span *ngIf="!user.pfp" class="mdl-chip__contact mdl-color--teal mdl-color-text--white">{{ user.name[0] }}</span>
+	<span class="mdl-chip__text username">{{ user.name }}</span>
+	<a class="mdl-chip__action" [style.color]="statusColor"><i class="material-icons">radio_button_unchecked</i></a>
+	<a class="mdl-chip__action" [style.color]="statusColor" *ngIf="removable" (click)="emitRemove($event)"><i class="material-icons">cancel</i></a>
+</span>

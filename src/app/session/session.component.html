@@ -16,7 +16,7 @@
       <div class="session-info">
         <h3>Tutor</h3>
         <div>
-          <app-display-user [user]="sessionInfo?.tutor"></app-display-user>
+          <app-user-chip [user]="sessionInfo?.tutor"></app-user-chip>
         </div>
         <h3>Tutees (max: {{ sessionInfo?.max }})</h3>
         <div class="tutees-display">
@@ -28,7 +28,7 @@
       </div>
       <h3>Users in Session</h3>
       <div class="online-users-display">
-        <app-display-user *ngFor="let user of onlineUsers" [user]="user"></app-display-user>
+        <app-user-chip *ngFor="let user of onlineUsers" [user]="user"></app-user-chip>
       </div>
       <h3>Admin Actions</h3>
       <div class="session-actions" *ngIf="perm?.moderator">

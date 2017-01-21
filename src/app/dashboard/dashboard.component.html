@@ -25,11 +25,11 @@
 
 <div class="mdl-grid">
 	<div class="mdl-cell mdl-cell--4-col">
-		<h1>Upcoming Sessions <button routerLink="/my-sessions" class="mdl-button mdl-js-button mdl-js-ripple-effect">My Sessions</button></h1>
+		<h1>Upcoming<button routerLink="/my-sessions" class="mdl-button mdl-js-button mdl-js-ripple-effect">My Sessions</button></h1>
 		<div class="session-card session-card--science mdl-card mdl-shadow--2dp">
 			<div class="mdl-card__title mdl-card--expand">
 				<h4>
-					Session Date
+					Session Title
 					<br>
 					<small>Session Time</small>
 				</h4>
@@ -49,13 +49,36 @@
 				<span class="subject-icon icomoon icomoon-lab"></span>
 			</div>
 		</div>
+		<div class="session-card session-card--math mdl-card mdl-shadow--2dp">
+			<div class="mdl-card__title mdl-card--expand">
+				<h4>
+					Session Title
+					<br>
+					<small>Session Time</small>
+				</h4>
+			</div>
+			<div class="mdl-card__supporting-text">
+				Session Description Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+				Mauris sagittis pellentesque lacus eleifend lacinia...
+			</div>
+			<div class="mdl-card__actions mdl-card--border">
+				<a class="mdl-button mdl-button--raised mdl-button--primary mdl-js-button mdl-js-ripple-effect">
+					Join Session
+				</a>
+				<a class="mdl-button mdl-button--primary mdl-js-button mdl-js-ripple-effect">
+					Details
+				</a>
+				<div class="mdl-layout-spacer"></div>
+				<span class="subject-icon icomoon icomoon-calculator"></span>
+			</div>
+		</div>
 	</div>
 	<div class="mdl-cell mdl-cell--4-col">
-		<h1>Available Sessions <button routerLink="/search" class="mdl-button mdl-js-button mdl-js-ripple-effect">View More</button></h1>
+		<h1>Available Sessions<button routerLink="/search" class="mdl-button mdl-js-button mdl-js-ripple-effect">View More</button></h1>
 		<div class="session-card session-card--english mdl-card mdl-shadow--2dp">
 			<div class="mdl-card__title mdl-card--expand">
 				<h4>
-					Session Date
+					Session Title
 					<br>
 					<small>Session Time</small>
 				</h4>
@@ -78,7 +101,7 @@
 		<div class="session-card session-card--world-language mdl-card mdl-shadow--2dp">
 			<div class="mdl-card__title mdl-card--expand">
 				<h4>
-					Session Date
+					Session Title
 					<br>
 					<small>Session Time</small>
 				</h4>
@@ -101,17 +124,32 @@
 	</div>
 	<div class="mdl-cell mdl-cell--4-col">
 		<h1>Pending Enrollments</h1>
-		<div class="session-card session-card--math mdl-card mdl-shadow--2dp">
+		<div class="pending-card session-card--math mdl-card mdl-shadow--2dp">
 			<div class="mdl-card__title mdl-card--expand">
 				<h4>
-					Session Date
+					<a routerLink="/user/michaelgira">Michael Gira</a> requests to join
 					<br>
-					<small>Session Time</small>
+					<small><a routerLink="/session/123/details">Session Title</a></small>
 				</h4>
 			</div>
-			<div class="mdl-card__supporting-text">
-				Session Description Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-				Mauris sagittis pellentesque lacus eleifend lacinia...
+			<div class="mdl-card__actions mdl-card--border">
+				<button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--primary">
+					Accept
+				</button>
+				<button class="mdl-button mdl-button--secondary mdl-js-button mdl-js-ripple-effect">
+					Deny
+				</button>
+				<div class="mdl-layout-spacer"></div>
+				<span class="subject-icon icomoon icomoon-calculator"></span>
+			</div>
+		</div>
+		<div class="pending-card session-card--math mdl-card mdl-shadow--2dp">
+			<div class="pending-user-image mdl-card__title mdl-card--expand">
+				<h4>
+					<a routerLink="/user/michaelgira">Michael Gira</a> requests to join
+					<br>
+					<small><a routerLink="/session/123/details">Session Title</a></small>
+				</h4>
 			</div>
 			<div class="mdl-card__actions mdl-card--border">
 				<button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--primary">
@@ -127,7 +165,7 @@
 		<div class="session-card session-card--history mdl-card mdl-shadow--2dp">
 			<div class="mdl-card__title mdl-card--expand">
 				<h4>
-					Session Date
+					Session Title
 					<br>
 					<small>Session Time</small>
 				</h4>

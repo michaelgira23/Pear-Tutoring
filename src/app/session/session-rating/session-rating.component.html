@@ -1,12 +1,12 @@
 <app-modal>
 
-	<div class="app-modal-header">
+	<div class="app-modal__header">
 		<h4>Rate This Session</h4>
-		<button class="close-button mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect" (click)="closeModal($event)">
+		<button class="close-button mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect" (click)="closeModal(false, $event)">
 			<i class="material-icons">close</i>
 		</button>
 	</div>
-	<div class="app-modal-body">
+	<div class="app-modal__body">
 		<div class="rating-buttons">
 			<button class="mdl-button mdl-js-button mdl-button--fab" [class.selected]="ratingModel.rating === -1" (click)="ratingModel.rating = -1">
 				<i class="material-icons">mood_bad</i>
