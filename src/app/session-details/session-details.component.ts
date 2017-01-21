@@ -25,9 +25,7 @@ export class SessionDetailsComponent implements OnInit {
 		this.sessionService.combineWithRatings(this.sessionService.findSession(this.sessionId)).subscribe(
 			session => {
 				this.sessionInfo = session;
-				console.log(session);
 			}
 		);
 	}
-
 }

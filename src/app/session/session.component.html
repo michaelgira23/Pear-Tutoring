@@ -1,8 +1,8 @@
-<div class="container-fluid" [ngSwitch]="popup">
+<div class="container-fluid">
 
-  <app-session-rating--modal *ngSwitchCase="'rating'"></app-session-rating--modal>
-  <app-session-permissions *ngSwitchCase="'permissions'"></app-session-permissions>
-  <app-session-request *ngSwitchCase="'requests'"></app-session-request>
+  <app-session-rating></app-session-rating>
+  <app-session-permissions></app-session-permissions>
+  <app-session-request></app-session-request>
 
   <app-sidebar orientation="left">
     <button appSidebarControl class="toggle-button mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored">

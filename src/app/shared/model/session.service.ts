@@ -579,7 +579,7 @@ export class SessionService {
 								]);
 							});
 						}
-						dataToSave[`sessions/${sessionId}/pending/${tuteeId}`] = true;
+						dataToSave[`sessions/${sessionId}/pending/${tuteeId}`] = this.fb.H.database.ServerValue.TIMESTAMP;
 						return this.firebaseUpdate(dataToSave);
 					}
 					return Observable.throw('session is already full');
