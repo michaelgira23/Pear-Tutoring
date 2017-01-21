@@ -5,16 +5,14 @@ import { Session } from '../../shared/model/session';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs/Rx';
 import { combineLatestObj } from '../../shared/common/utils';
-import { ModalComponent } from '../../shared/common/modal/modal.component';
+import { SessionPopup } from '../session-popup';
 
 @Component({
 	selector: 'app-session-permissions',
 	templateUrl: './session-permissions.component.html',
 	styleUrls: ['./session-permissions.component.scss']
 })
-export class SessionPermissionsComponent implements OnInit {
-
-	@ViewChild(ModalComponent) modal: ModalComponent;
+export class SessionPermissionsComponent extends SessionPopup implements OnInit {
 
 	perms: {
 		// a reference to the original self when used in a proxy
@@ -35,10 +33,11 @@ export class SessionPermissionsComponent implements OnInit {
 		private route: ActivatedRoute,
 		private sessions: SessionService,
 		private router: Router
-	) { }
+	) {
+		super();
+	}
 
 	ngOnInit() {
-		this.modal.show();
 		let sessionId = this.route.snapshot.params['id'];
 		if (sessionId) {
 			this.sessions.findSession(sessionId)
@@ -97,12 +96,6 @@ export class SessionPermissionsComponent implements OnInit {
 		Observable.combineLatest(queryList).subscribe(val => {
 			console.log('permission updated');
 		}, console.log);
-	}
-
-	closeModal(e: Event) {
-		e.stopPropagation();
-		this.modal.hide();
-		this.router.navigate(['../'], {relativeTo: this.route});
 	}
 
 }

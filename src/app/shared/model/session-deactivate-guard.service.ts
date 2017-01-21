@@ -16,7 +16,6 @@ export class SessionDeactivateGuardService implements CanDeactivate<SessionCompo
 			return component.openPopup('rating')
 			.flatMap(popup => {
 				return popup.submitted$.map(submitted => {
-					component.closePopup();
 					return submitted;
 				});
 			});

@@ -1,0 +1,20 @@
+.session-title-container {
+    border-bottom: solid 1px grey;
+}
+.session-snapshots {
+    display: flex;
+    padding: 0.5em;
+    img {
+        border: 5px solid rgb(255,152,0);
+    }
+}
+.session-comments {
+    .mdl-list__item-secondary-content {
+        margin: auto
+    }
+    .session-comments-item {
+        margin: 0.5em;
+        border-left: 0.5em solid rgb(255,152,0);
+        border-radius: 5px;
+    }
+}

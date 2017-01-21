@@ -8,7 +8,9 @@ import { UserService } from '../shared/model/user.service';
 import { PermissionsService, Permission } from '../shared/security/permissions.service';
 import { Whiteboard } from '../shared/model/whiteboard';
 import { SidebarComponent } from '../shared/common/sidebar/sidebar.component';
-import { SessionRatingModalComponent } from './session-rating/session-rating.component';
+import { SessionRatingComponent } from './session-rating/session-rating.component';
+import { SessionPermissionsComponent } from './session-permissions/session-permissions.component';
+import { SessionRequestComponent } from './session-request/session-request.component';
 import { SessionPopup } from './session-popup';
 
 @Component({
@@ -32,14 +34,16 @@ export class SessionComponent implements OnInit, OnDestroy {
 
 	// indicator for if the user has rated the session
 	get rated(): boolean {
-		return this.sessionInfo.rating ? !!this.sessionInfo.rating[this.sessionService.uid] : false;
+		return this.sessionInfo.rating ? !!this.sessionInfo.rating.find(rating => {
+			return rating.user.$key === this.sessionService.uid;
+		}) : false;
 	};
 
 	@ViewChildren(SidebarComponent) sidebars: QueryList<SidebarComponent>;
 
-	@ViewChild(SessionRatingModalComponent) ratingPopup: SessionRatingModalComponent;
-
-	popup: string;
+	@ViewChild(SessionRatingComponent) ratingPopup: SessionRatingComponent;
+	@ViewChild(SessionRequestComponent) requestsPopup: SessionRatingComponent;
+	@ViewChild(SessionPermissionsComponent) permissionsPopup: SessionRatingComponent;
 
 	constructor(
 		private route: ActivatedRoute,
@@ -52,7 +56,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 	ngOnInit() {
 		this.route.params.subscribe(params => {
 			this.sessionId = params['id'];
-			this.findSession$ = this.sessionService.findSession(this.sessionId).subscribe(session => {
+			this.findSession$ = this.sessionService.combineWithRatings(this.sessionService.findSession(this.sessionId)).subscribe(session => {
 				this.sessionExist = true;
 				this.sessionInfo = session;
 				this.permissionsService.getUserPermission(this.sessionId, 'session').subscribe(perm => {
@@ -133,13 +137,14 @@ export class SessionComponent implements OnInit, OnDestroy {
 	}
 
 	openPopup(type: string): Observable<SessionPopup> {
-		this.popup = type;
+		this[type + 'Popup'].modal.show();
 		let popupRef$ = new Subject<SessionPopup>();
 		setTimeout(() => {popupRef$.next(this[type + 'Popup']); }, 0);
 		return popupRef$.asObservable();
 	}
 
-	closePopup(): void {
-		this.popup = '';
+	closePopup(type: string): void {
+		let popup = <SessionPopup> this[type + 'Popup'];
+		popup.closeModal(false);
 	}
 }
