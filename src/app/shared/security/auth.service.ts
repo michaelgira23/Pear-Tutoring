@@ -1,15 +1,15 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, Subject, BehaviorSubject } from 'rxjs/Rx';
-import { FirebaseAuth, FirebaseAuthState } from 'angularfire2';
+import { AngularFire, FirebaseAuthState } from 'angularfire2';
 
 @Injectable()
 export class AuthService {
 
 	auth$: BehaviorSubject<FirebaseAuthState> = new BehaviorSubject(undefined);
 
-	constructor (private auth: FirebaseAuth, private router: Router) {
-		this.auth.subscribe(
+	constructor (private af: AngularFire, private router: Router) {
+		this.af.auth.subscribe(
 			data => {
 				this.auth$.next(data);
 			},
@@ -20,11 +20,11 @@ export class AuthService {
 	}
 
 	login(email: string, password: string): Observable<FirebaseAuthState> {
-		return this.fromFirebaseAuthPromise(this.auth.login({ email, password }));
+		return this.fromFirebaseAuthPromise(this.af.auth.login({ email, password }));
 	}
 
 	register(email: string, password: string): Observable<FirebaseAuthState> {
-		return this.fromFirebaseAuthPromise(this.auth.createUser({ email, password }));
+		return this.fromFirebaseAuthPromise(this.af.auth.createUser({ email, password }));
 	}
 
 	fromFirebaseAuthPromise(promise): Observable<any> {
@@ -45,7 +45,7 @@ export class AuthService {
 	}
 
 	logout() {
-		this.auth.logout();
+		this.af.auth.logout();
 		this.router.navigate(['/home']);
 	}
 
