@@ -30,7 +30,8 @@ export class SessionCardComponent implements OnInit, OnDestroy {
 			},
 			inSession: {
 				primary: {
-					content: 'Join Session'
+					content: 'Join Session',
+					function: this.joinSession
 				},
 				secondary: {
 					content: 'Details',
@@ -47,10 +48,12 @@ export class SessionCardComponent implements OnInit, OnDestroy {
 			inSession: {
 				tutor: {
 					primary: {
-						content: 'Accept'
+						content: 'Accept',
+						function: this.acceptPending
 					},
 					secondary: {
-						content: 'Deny'
+						content: 'Deny',
+						function: this.denyPending
 					}
 				},
 				tutee: {
@@ -169,7 +172,7 @@ export class SessionCardComponent implements OnInit, OnDestroy {
 	activateBottonFunction(button: string) {
 		const buttonObject = this.getButtonObject(button);
 		if (!buttonObject || !buttonObject.function) {
-			return;
+			return function() {};
 		}
 		return buttonObject.function.bind(this);
 	}
@@ -196,6 +199,30 @@ export class SessionCardComponent implements OnInit, OnDestroy {
 
 	joinSession() {
 		this.router.navigate(['session', this.session.$key]);
+	}
+
+	acceptPending() {
+		this.sessionService.addTutees(this.session.$key, this.user.$key)
+			.subscribe(
+				val => {
+					console.log('successfully accepted user into session', val);
+				},
+				err => {
+					console.log('accepting user error', err);
+				}
+			);
+	}
+
+	denyPending() {
+		this.sessionService.denyPending(this.session.$key, this.user.$key)
+			.subscribe(
+				val => {
+					console.log('successfully denied user from session', val);
+				},
+				err => {
+					console.log('denying user error', err);
+				}
+			);
 	}
 
 	updateSession() {

@@ -1,6 +1,7 @@
 <form [formGroup]="createSessionForm" (ngSubmit)="createSession()">
 	<fieldset>
-		date: <input formControlName="date" required type="date">
+		<!-- date: <input formControlName="date" required type="date"> -->
+		date: <ng2-datepicker formControlName="date" required></ng2-datepicker>
 		start: <input formControlName="startTime" required type="time">
 		end: <input formControlName="endTime" required type="time"> <br/>
 		Grade Level: <input formControlName="grade" required type="number"><br/>

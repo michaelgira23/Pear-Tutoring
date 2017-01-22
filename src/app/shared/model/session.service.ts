@@ -2,7 +2,7 @@ import { Injectable, Inject } from '@angular/core';
 import { Observable, Subject } from 'rxjs/Rx';
 import { AngularFireDatabase, FirebaseRef } from 'angularfire2';
 import * as firebase from 'firebase';
-import { Session, SessionRating } from './session';
+import { Session } from './session';
 import { User } from './user';
 import { UserService, UserStatus, FreeTimes } from './user.service';
 import { ChatService } from './chat.service';
@@ -586,6 +586,18 @@ export class SessionService {
 					return Observable.throw('session is already full');
 				}
 				return Observable.throw('you cannot add the tutor as a tutee');
+			});
+	}
+
+	denyPending(sessionId: string, pendingId: string) {
+		return this.findSession(sessionId)
+			.take(1)
+			.flatMap((session: Session) => {
+				// If current user is not tutor, we do not have permission
+				if (session.tutor.$key !== this.currentUser.$key) {
+					return Observable.throw('You are the tutor of this session and cannot deny this user\'s enrollment!');
+				}
+				return this.promiseToObservable(this.db.object(`sessions/${sessionId}/pending/${pendingId}`).remove());
 			});
 	}
 

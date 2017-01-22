@@ -100,10 +100,10 @@ export class CreateSessionComponent implements OnInit {
 
 	createSession() {
 		let sessionToCreate = Object.assign({}, this.createSessionForm.value);
-		sessionToCreate.start = moment(sessionToCreate.date, 'YYYY-MM-DD')
+		sessionToCreate.start = sessionToCreate.date.momentObj.clone()
 								.add(moment(sessionToCreate.startTime, 'HH:mm').hours(), 'hours')
 								.add(moment(sessionToCreate.startTime, 'HH:mm').minutes(), 'minutes');
-		sessionToCreate.end = moment(sessionToCreate.date, 'YYYY-MM-DD')
+		sessionToCreate.end = sessionToCreate.date.momentObj.clone()
 								.add(moment(sessionToCreate.endTime, 'HH:mm').hours(), 'hours')
 								.add(moment(sessionToCreate.endTime, 'HH:mm').minutes(), 'minutes');
 		sessionToCreate.tags = sessionToCreate.tags.split(',').map(val => val.trim());
