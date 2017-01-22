@@ -1,11 +1,11 @@
-import { Component, OnInit, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Validators, FormGroup, FormBuilder } from '@angular/forms';
-import { Router } from '@angular/router';
-import { SessionService, AllowedSubjects } from '../../shared/model/session.service';
-import { Session } from '../../shared/model/session';
+import { Router, ActivatedRoute } from '@angular/router';
+import { SessionService, AllowedSubjects } from '../shared/model/session.service';
+import { Session } from '../shared/model/session';
 import * as moment from 'moment';
-import { UserService } from '../../shared/model/user.service';
-import { User } from '../../shared/model/user';
+import { UserService } from '../shared/model/user.service';
+import { User } from '../shared/model/user';
 import { Subscription } from 'rxjs/Rx';
 
 @Component({
@@ -13,22 +13,22 @@ import { Subscription } from 'rxjs/Rx';
 	templateUrl: './create-session.component.html',
 	styleUrls: ['./create-session.component.scss']
 })
-export class CreateSessionComponent implements OnInit, OnChanges {
+export class CreateSessionComponent implements OnInit {
 
 	createSessionForm: FormGroup = this.fb.group({
-				date: ['', Validators.required],
-				startTime: ['', Validators.required],
-				endTime: ['', Validators.required],
-				grade: ['', Validators.required],
-				classStr: ['', Validators.required],
-				subject: ['', Validators.required],
-				max: ['', Validators.required],
-				listed: [false, Validators.required],
-				title: ['', [Validators.required]],
-				desc: ['', Validators.required],
-				tutees: [[], Validators.required],
-				tags: ['']
-			});
+		date: ['', Validators.required],
+		startTime: ['', Validators.required],
+		endTime: ['', Validators.required],
+		grade: ['', Validators.required],
+		classStr: ['', Validators.required],
+		subject: ['', Validators.required],
+		max: ['', Validators.required],
+		listed: [false, Validators.required],
+		title: ['', [Validators.required]],
+		desc: ['', Validators.required],
+		tutees: [[], Validators.required],
+		tags: ['']
+	});
 	allUsers: User[];
 	allowedSubjects: string[] = AllowedSubjects;
 
@@ -36,28 +36,33 @@ export class CreateSessionComponent implements OnInit, OnChanges {
 
 	// The component detects if there's a session id provided, and prefill the form with values from the session information
 	sessionInfo: Session;
-	@Input()
 	sessionId: string;
 
 	findSession$: Subscription;
 
-	constructor(private fb: FormBuilder,
-				private sessionService: SessionService,
-				private userService: UserService,
-				private router: Router) { }
+	constructor(
+		private fb: FormBuilder,
+		private router: Router,
+		private route: ActivatedRoute,
+		private sessionService: SessionService,
+		private userService: UserService
+	) { }
 
 	ngOnInit() {
+
+		this.route.params.subscribe(params => {
+			if (params['id']) {
+				this.sessionId = params['id'];
+			}
+			this.refreshSessionInfo();
+		});
+
 		this.userService.findAllUsers().subscribe(
 			val => this.allUsers = val,
 			err => console.log('Getting users error', err)
 		);
 
 		this.refreshSessionInfo();
-	}
-
-	ngOnChanges(changes: SimpleChanges) {
-			if (changes['sessionId']) { this.sessionId = changes['sessionId'].currentValue; }
-			this.refreshSessionInfo();
 	}
 
 	refreshSessionInfo() {
@@ -95,10 +100,10 @@ export class CreateSessionComponent implements OnInit, OnChanges {
 
 	createSession() {
 		let sessionToCreate = Object.assign({}, this.createSessionForm.value);
-		sessionToCreate.start = moment(sessionToCreate.date, 'YYYY-MM-DD')
+		sessionToCreate.start = sessionToCreate.date.momentObj.clone()
 								.add(moment(sessionToCreate.startTime, 'HH:mm').hours(), 'hours')
 								.add(moment(sessionToCreate.startTime, 'HH:mm').minutes(), 'minutes');
-		sessionToCreate.end = moment(sessionToCreate.date, 'YYYY-MM-DD')
+		sessionToCreate.end = sessionToCreate.date.momentObj.clone()
 								.add(moment(sessionToCreate.endTime, 'HH:mm').hours(), 'hours')
 								.add(moment(sessionToCreate.endTime, 'HH:mm').minutes(), 'minutes');
 		sessionToCreate.tags = sessionToCreate.tags.split(',').map(val => val.trim());

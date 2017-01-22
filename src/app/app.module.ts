@@ -6,6 +6,7 @@ import { HttpModule } from '@angular/http';
 import { AngularFireModule } from 'angularfire2';
 import { ColorPickerModule } from 'angular2-color-picker';
 import { CalendarModule } from 'angular-calendar';
+import { DatePickerModule } from 'ng2-datepicker';
 
 import { routerConfig } from './router.config';
 import { firebaseConfig, authConfig } from '../environments/environment';
@@ -46,11 +47,10 @@ import { ChatService } from './shared/model/chat.service';
 import { SchedulingComponent } from './scheduling/scheduling.component';
 import { SessionComponent } from './session/session.component';
 import { SessionDetailsComponent } from './session-details/session-details.component';
-import { CreateSessionComponent } from './scheduling/create-session/create-session.component';
-import { DisplaySessionComponent } from './scheduling/display-session/display-session.component';
+import { CreateSessionComponent } from './create-session/create-session.component';
+import { SessionCardComponent } from './session-card/session-card.component';
 import { SessionCalendarComponent } from './scheduling/session-calendar/session-calendar.component';
-import { DisplayUserComponent } from './scheduling/display-user/display-user.component';
-import { UpdateSessionComponent } from './scheduling/update-session/update-session.component';
+import { UserChipComponent } from './scheduling/user-chip/user-chip.component';
 import { TimePickerComponent } from './settings/time-picker/time-picker.component';
 import { MySessionsComponent } from './my-sessions/my-sessions.component';
 import { UserAutoCompleteComponent } from './scheduling/user-auto-complete/user-auto-complete.component';
@@ -66,8 +66,10 @@ import { SidebarContentDirective } from './shared/common/sidebar/sidebar-content
 
 import { SessionService } from './shared/model/session.service';
 import { SessionGuardService } from './shared/model/session-guard.service';
+import { SessionDeactivateGuardService } from './shared/model/session-deactivate-guard.service';
 
 import { NamePipe } from './shared/model/name.pipe';
+import { SessionRatingComponent } from './session/session-rating/session-rating.component';
 
 @NgModule({
 	declarations: [
@@ -84,14 +86,13 @@ import { NamePipe } from './shared/model/name.pipe';
 		CreateSessionComponent,
 		SessionComponent,
 		SessionDetailsComponent,
-		DisplaySessionComponent,
+		SessionCardComponent,
 		RegisterComponent,
 		SettingsComponent,
 		SessionCalendarComponent,
-		DisplayUserComponent,
+		UserChipComponent,
 		CreateChatComponent,
 		ViewChatComponent,
-		UpdateSessionComponent,
 		TimePickerComponent,
 		MySessionsComponent,
 		PfpUploadComponent,
@@ -110,7 +111,8 @@ import { NamePipe } from './shared/model/name.pipe';
 		SessionsWithFilterComponent,
 		SessionPermissionsComponent,
 		SessionRequestComponent,
-		ModalComponent
+		ModalComponent,
+		SessionRatingComponent
 	],
 	imports: [
 		BrowserModule,
@@ -120,7 +122,8 @@ import { NamePipe } from './shared/model/name.pipe';
 		RouterModule.forRoot(routerConfig),
 		AngularFireModule.initializeApp(firebaseConfig, authConfig),
 		ColorPickerModule,
-		CalendarModule.forRoot()
+		CalendarModule.forRoot(),
+		DatePickerModule
 	],
 	providers: [
 		AuthService,
@@ -130,7 +133,8 @@ import { NamePipe } from './shared/model/name.pipe';
 		PermissionsService,
 		UserService,
 		WhiteboardService,
-		SessionGuardService],
+		SessionGuardService,
+		SessionDeactivateGuardService],
 	bootstrap: [AppComponent]
 })
 export class AppModule { }

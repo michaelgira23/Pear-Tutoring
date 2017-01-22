@@ -1,3 +1,50 @@
-<p>
-	session-detail works!
-</p>
+<div class="mdl-grid" *ngIf="sessionInfo">
+	<div class="session-title-container mdl-cell--12-col">
+		<h2 class="session-title">{{ sessionInfo.title }}
+			<div class="session-tags mdl-chip" *ngFor="let tag of sessionInfo.tags">
+				<span class="mdl-chip__text">{{ tag }}</span>
+			</div>
+		</h2>
+		<h4 class="session-subtitle">{{ sessionInfo.description }}</h4>
+	</div>
+</div>
+<div class="mdl-grid" *ngIf="sessionInfo">
+	<div class="mdl-cell mdl-cell--8-col">
+		<div class="session-snapshots">
+			<img *ngFor="let wb of sessionInfo.whiteboards" [src]="wb.snapshot">
+		</div>
+		<h2>Admin Actions</h2>
+		<div class="session-actions" *ngIf="perm?.moderator">
+			<button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" (click)="openPopup('permissions')">Permissions</button>
+			<button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" (click)="openPopup('requests')">Pending join requests</button>
+		</div>
+	</div>
+	<div class="session-comments-container mdl-cell mdl-cell--4-col">
+		<div class="session-comments" *ngIf="sessionInfo">
+			<ul class="demo-list-three mdl-list">
+				<h4>Session Comments</h4>
+				<button class="mdl-button mdl-js-button mdl-js-ripple-effect" (click)="openPopup('rating')">Rate</button>
+				<li class="session-comments-item mdl-list__item mdl-list__item--three-line" *ngFor="let rating of sessionInfo.rating">
+					<span class="mdl-list__item-primary-content">
+						<i class="material-icons mdl-list__item-avatar" *ngIf="!rating.user.pfp">person</i>
+						<img class="mdl-list__item-avatar" [src]="rating.user.pfp" *ngIf="rating.user.pfp">
+						<span>{{ rating.user.name }}</span>
+						<span class="mdl-list__item-text-body">
+						{{ rating.comment }}
+						</span>
+					</span>
+					<span class="mdl-list__item-secondary-content">
+						<span class="mdl-list__item-secondary-action" *ngIf="rating.rating === 1"><i class="material-icons">thumb_up</i></span>
+						<span class="mdl-list__item-secondary-action" *ngIf="rating.rating === 0">~</span>
+						<span class="mdl-list__item-secondary-action" *ngIf="rating.rating === -1"><i class="material-icons">thumb_down</i></span>
+					</span>
+				</li>
+			</ul>
+		</div>
+	</div>
+</div>
+
+<app-session-rating></app-session-rating>
+<app-session-permissions></app-session-permissions>
+<app-session-request></app-session-request>
+

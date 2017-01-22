@@ -27,9 +27,8 @@ export class Session {
 		}
 		start = moment(start, 'X');
 		end = moment(end, 'X');
-		let past = moment().isSameOrAfter(end);
 		return new Session($key, start, end, subject, color, tutor, tutees, max, listed,
-							whiteboards, chat, title, desc, canceled, tags, ywd, grade, classStr, past, pending);
+							whiteboards, chat, title, desc, canceled, tags, ywd, grade, classStr, pending);
 	}
 
 	static fromJsonArray(json: any[]): Session[] {
@@ -55,7 +54,17 @@ export class Session {
 		public ywd: string,
 		public grade: number,
 		public classStr: string,
-		public past: boolean,
-		public pending: string[]
+		public pending: string[],
 	) { }
+}
+
+export interface SessionRating {
+	user: string;
+	rating: 0 | 1 | -1;
+	comment: string;
+	time: number;
+}
+
+export interface SessionWithRatings extends Session {
+	rating: SessionRating[];
 }

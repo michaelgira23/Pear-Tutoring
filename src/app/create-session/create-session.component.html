@@ -1,0 +1,30 @@
+<form [formGroup]="createSessionForm" (ngSubmit)="createSession()">
+	<fieldset>
+		<!-- date: <input formControlName="date" required type="date"> -->
+		date: <ng2-datepicker formControlName="date" required></ng2-datepicker>
+		start: <input formControlName="startTime" required type="time">
+		end: <input formControlName="endTime" required type="time"> <br/>
+		Grade Level: <input formControlName="grade" required type="number"><br/>
+		Subject:
+		<select formControlName="subject">
+			<option *ngFor="let option of allowedSubjects" [value]="option">{{ option }}</option>
+		</select><br/>
+		Class: <input formControlName="classStr" required type="text"><br/>
+		max: <input formControlName="max" required type="number"><br/>
+		listed: <input type="checkbox" formControlName="listed" required><br/>
+		title: <input formControlName="title" required><br/>
+		description: <textarea formControlName="desc" required></textarea>
+		tags: <textarea formControlName="tags" required row=1></textarea>
+	</fieldset>
+	<fieldset>
+		add tutees: <br/>
+		<app-user-auto-complete *ngIf="customCtrlReady" formControlName="tutees"></app-user-auto-complete>
+	</fieldset>
+	<button *ngIf="!sessionId && !sessionInfo" class="btn btn-primary">Create</button>
+	<button *ngIf="sessionId || sessionInfo" class="btn btn-primary" type="button" (click)="createSession()">Update</button>
+</form>
+
+<h2> All Users </h2>
+<div *ngFor="let user of allUsers">
+	<app-user-chip [user]="user"></app-user-chip>
+</div>

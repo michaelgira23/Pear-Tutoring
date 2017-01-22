@@ -1,33 +1,100 @@
-.mdl-grid {
-	.mdl-cell {
+$sophisticated-white: #eee;
 
-		h1 {
-			display: flex;
-			justify-content: space-between;
+.session-card,
+.pending-card {
+	width: 100%;
+	margin-bottom: 2rem;
+
+	.mdl-card__actions {
+		display: flex;
+		align-items: center;
+
+		* {
+			margin-right: 1rem;
 		}
+	}
 
-		.session-card {
-			width: 100%;
-			margin-bottom: 2rem;
+	.mdl-card__supporting-text {
+		width: 100%;
+	}
 
-			.mdl-card__title h4 {
+	&.session-card--english > *:not(.mdl-card__actions) {
+		background: #3f51b5;
+		color: $sophisticated-white;
+	}
+
+	&.session-card--history > *:not(.mdl-card__actions) {
+		background: #2196f3;
+	}
+
+	&.session-card--math > *:not(.mdl-card__actions) {
+		background: #4caf50;
+	}
+
+	&.session-card--science > *:not(.mdl-card__actions) {
+		background: #ffc107;
+	}
+
+	&.session-card--world-language > *:not(.mdl-card__actions) {
+		background: #f44336;
+	}
+
+	&.session-card--other > *:not(.mdl-card__actions) {
+		background: #607d8b;
+	}
+}
+
+.session-card.current-session {
+	margin: 1rem;
+}
+
+.mdl-grid .mdl-cell {
+
+	h1 {
+		display: flex;
+		justify-content: space-between;
+	}
+
+	.empty-column {
+		text-align: center;
+	}
+
+	.session-card,
+	.pending-card {
+		.mdl-card__title {
+			h4 {
 				margin-top: 0;
 			}
+		}
+	}
 
-			.mdl-card__actions {
-				box-sizing: border-box;
-				display: flex;
-				align-items: center;
+	.pending-card .mdl-card__title {
+		h4 {
+			color: $sophisticated-white;
+		}
 
-				* {
-					margin-right: 1rem;
-				}
+		a {
+			color: mix(#000, rgb(68,138,255));
+		}
+
+		&.pending-user-image {
+			background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(https://firebasestorage.googleapis.com/v0/b/wwt-hackathon-2016.appspot.com/o/userPfps%2Fr3QeEe1HigWPKjJlv7WfwgMbBE03?alt=media&token=11f5d2f8-3951-4714-9bed-37c8c5606f8e);
+			background-size: cover;
+			background-position: center;
+
+			a {
+				color: mix($sophisticated-white, rgb(68,138,255));
 			}
 		}
 	}
 }
 
 @media (min-width: 480px) {
+
+	.current-session {
+		width: calc(100% - 6.5rem);
+	}
+
 	.mdl-grid .mdl-cell {
 		padding-right: 4.5rem;
 	}

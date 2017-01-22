@@ -1,4 +1,5 @@
 <h1>My Schedule</h1>
+<button class="create-session mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored" routerLink="/session/create">Create a Session</button>
 <div class="mdl-tabs mdl-js-tabs mdl-js-ripple-effect">
 	<div class="mdl-tabs__tab-bar">
 		<a class="mdl-tabs__tab is-active" href="#my-sessions" (click)="onClickTab()">My Sessions</a>
@@ -6,19 +7,20 @@
 		<a class="mdl-tabs__tab" href="#free-time" (click)="onClickTab()">Suggestions</a>
 	</div>
 	<div class="mdl-tabs__panel is-active" id="my-sessions">
-		<h2> Sessions I'm tutoring </h2>
-		<div class="session-display">
-			<div class="session-display-item" *ngFor="let session of tutorSessions"> 
-				<app-display-session [session]="session"></app-display-session>
-			</div>
-		</div>
 
-		<h2> Sessions I'm in </h2>
-		<div class="session-display">
-			<div class="session-display-item" *ngFor="let session of tuteeSessions">
-				<app-display-session [session]="session"></app-display-session>
+		<ng-container *ngIf="tutorSessions.length > 0">
+			<h2>Sessions I'm tutoring </h2>
+			<div class="mdl-grid">
+				<app-session-card class="mdl-cell mdl-cell--4-col" *ngFor="let session of tutorSessions" [session]="session" type="display"></app-session-card>
 			</div>
-		</div>
+		</ng-container>
+
+		<ng-container *ngIf="tuteeSessions.length > 0">
+			<h2>Sessions I'm in </h2>
+			<div class="mdl-grid">
+				<app-session-card class="mdl-cell mdl-cell--4-col" *ngFor="let session of tuteeSessions" [session]="session" type="display"></app-session-card>
+			</div>
+		</ng-container>
 	</div>
 	<div class="mdl-tabs__panel" id="my-calendar">
 		<app-session-calendar [sessions]="mySessions"></app-session-calendar>

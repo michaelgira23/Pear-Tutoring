@@ -1,6 +1,7 @@
 import { Injectable, Inject } from '@angular/core';
 import { Observable, Subject } from 'rxjs/Rx';
 import { AngularFireDatabase, FirebaseRef } from 'angularfire2';
+import * as firebase from 'firebase';
 import { Session } from './session';
 import { User } from './user';
 import { UserService, UserStatus, FreeTimes } from './user.service';
@@ -20,14 +21,16 @@ export class SessionService {
 	sdkDb: any;
 	uid: string;
 	currentUser: User;
+	connectedRef: any;
 
-	constructor(private db: AngularFireDatabase, @Inject(FirebaseRef) fb,
+	constructor(private db: AngularFireDatabase, @Inject(FirebaseRef) private fb,
 				private authService: AuthService,
 				private chatService: ChatService,
 				private permissionsService: PermissionsService,
 				private userService: UserService,
 				private whiteboardService: WhiteboardService) {
 		this.sdkDb = fb.database().ref();
+		this.connectedRef = fb.database().ref('.info/connected');
 		this.authService.auth$.subscribe(val => {
 			this.uid = val ? val.uid : null;
 		});
@@ -205,6 +208,33 @@ export class SessionService {
 				sessionsWithWb[sessionIndex].whiteboards = val[sessionIndex];
 			});
 			return sessionsWithWb;
+		});
+	}
+
+	combineWithRatings(sessionQuery: Observable<any>): Observable<any> {
+		let sessionsWithRatings = {};
+		let tempRatings = [];
+		return sessionQuery.flatMap(session => {
+			sessionsWithRatings = session;
+			return this.db.list(`ratingsBySessions/${session.$key}`, {
+				query: {
+					orderByChild: 'time'
+				}
+			});
+		})
+		.flatMap(ratings => {
+			tempRatings = ratings;
+			return this.checkAndCombine(ratings.map(rating => this.userService.findUser(rating.$key)));
+		})
+		.map(users => {
+			let finalRatings = [];
+			users.forEach(user => {
+				let tempRating = tempRatings.find(rating => rating.$key === user.$key);
+				delete tempRating.exists;
+				finalRatings.push(Object.assign({ user }, tempRating));
+			});
+			sessionsWithRatings['rating'] = finalRatings;
+			return sessionsWithRatings;
 		});
 	}
 
@@ -458,16 +488,31 @@ export class SessionService {
 	}
 
 	// Adds the user to the pool of online users in a session, and change the user's status to "inSession"
-	joinSession(sessionId: String): Observable<any> {
+	joinSession(sessionId: string): Observable<any> {
 		if (!this.uid) { return Observable.throw('Rip no login info'); }
 
-		// in case the user closes the tab
-		this.sdkDb.child(`/usersInSession/${sessionId}/${this.uid}`).onDisconnect().set(false);
+		return this.findSession(sessionId).take(1)
+		.flatMap((session: Session) => {
+			// in case the user closes the tab
+			this.sdkDb.child(`/usersInSession/${sessionId}/${this.uid}`).onDisconnect().set(false);
+			this.connectedRef.on('value', (snap) => {
+				if (snap.val() === false) {
+					// if its passed session's ending time, take away the write permissions
+					if (session.end.isSameOrBefore(moment())) {
+						this.db.object(`chatPermission/${session.chat}/user/${this.uid}`).set({read: true, write: false});
+						this.db.object(`sessionPermission/${sessionId}/user/${this.uid}`).set({read: true, write: false});
+						session.whiteboards.forEach(wb => {
+							this.db.object(`whiteboardPermission/${wb.$key}/user/${this.uid}`).set({read: true, write: false});
+						});
+					}
+				}
+			});
 
-		let dataToSave = {};
-		dataToSave[`/usersInSession/${sessionId}/${this.uid}`] = true;
-		this.userService.changeStatus(UserStatus.IN_SESSION);
-		return this.firebaseUpdate(dataToSave);
+			let dataToSave = {};
+			dataToSave[`/usersInSession/${sessionId}/${this.uid}`] = true;
+			this.userService.changeStatus(UserStatus.IN_SESSION);
+			return this.firebaseUpdate(dataToSave);
+		});
 	}
 
 	// remove the user from the pool of online users for the session, and change his status to "online"
@@ -535,12 +580,24 @@ export class SessionService {
 								]);
 							});
 						}
-						dataToSave[`sessions/${sessionId}/pending/${tuteeId}`] = true;
+						dataToSave[`sessions/${sessionId}/pending/${tuteeId}`] = firebase.database.ServerValue.TIMESTAMP;
 						return this.firebaseUpdate(dataToSave);
 					}
 					return Observable.throw('session is already full');
 				}
 				return Observable.throw('you cannot add the tutor as a tutee');
+			});
+	}
+
+	denyPending(sessionId: string, pendingId: string) {
+		return this.findSession(sessionId)
+			.take(1)
+			.flatMap((session: Session) => {
+				// If current user is not tutor, we do not have permission
+				if (session.tutor.$key !== this.currentUser.$key) {
+					return Observable.throw('You are the tutor of this session and cannot deny this user\'s enrollment!');
+				}
+				return this.promiseToObservable(this.db.object(`sessions/${sessionId}/pending/${pendingId}`).remove());
 			});
 	}
 
@@ -560,6 +617,11 @@ export class SessionService {
 					return this.userService.findUser(uid);
 				}));
 			});
+	}
+
+	changeRating(sessionId: string, uid: string, rating: any): Observable<any> {
+		return this.promiseToObservable(this.db.object(`ratingsBySessions/${sessionId}/${uid}`)
+			.set(Object.assign(rating, {time: firebase.database.ServerValue.TIMESTAMP})));
 	}
 }
 
