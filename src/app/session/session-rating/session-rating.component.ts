@@ -14,7 +14,7 @@ export class SessionRatingComponent extends SessionPopup implements OnInit {
 	sessionId: string;
 	sessionInfo: Session;
 	ratingModel: any = {
-		rating: undefined,
+		rating: 0,
 		comment: ''
 	};
 

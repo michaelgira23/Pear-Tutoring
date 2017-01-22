@@ -7,12 +7,18 @@
 .app-modal__body {
 	display: flex;
 	flex-direction: column;
-	.rating-buttons {
+	.rating {
 		width: 100%;
 		display: flex;
-		justify-content: space-around;
-		.selected {
-			color: rgb(255,152,0);
+		justify-content: center;
+		.rating-star {
+			cursor: pointer;
+			color: rgb(255,235,59);
+			width: 24px;
+			height: 40px;
+			i {
+				position: absolute;
+			}
 		}
 	}
 	.comment-box {

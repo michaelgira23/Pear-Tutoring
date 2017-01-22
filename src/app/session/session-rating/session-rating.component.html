@@ -7,16 +7,11 @@
 		</button>
 	</div>
 	<div class="app-modal__body">
-		<div class="rating-buttons">
-			<button class="mdl-button mdl-js-button mdl-button--fab" [class.selected]="ratingModel.rating === -1" (click)="ratingModel.rating = -1">
-				<i class="material-icons">mood_bad</i>
-			</button>
-			<button class="mdl-button mdl-js-button mdl-button--fab" [class.selected]="ratingModel.rating === 0" (click)="ratingModel.rating = 0">
-				<i class="material-icons">face</i>
-			</button>
-			<button class="mdl-button mdl-js-button mdl-button--fab" [class.selected]="ratingModel.rating === 1" (click)="ratingModel.rating = 1">
-				<i class="material-icons">mood</i>
-			</button>
+		<div class="rating">
+			<div class="rating-star" *ngFor="let count of [1, 2, 3, 4, 5]" (click)="ratingModel.rating = count">
+				<i class="material-icons">star_border</i>
+				<i *ngIf="ratingModel.rating >= count" class="material-icons">star</i>
+			</div>
 		</div>
 		<div class="comment-box">
 			<div>Additional Comment:</div>

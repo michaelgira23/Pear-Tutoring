@@ -28,7 +28,20 @@
     border-left: 1px solid grey;
     .session-comments {
         .mdl-list__item-secondary-content {
-            margin: auto
+            margin: auto;
+            .rating {
+                width: 100%;
+                display: flex;
+                justify-content: center;
+                .rating-star {
+                    color: rgb(255,235,59);
+                    width: 24px;
+                    height: 40px;
+                    i {
+                        position: absolute;
+                    }
+                }
+            }
         }
         .session-comments-item {
             margin: 0.5em;
