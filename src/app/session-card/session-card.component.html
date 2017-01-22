@@ -22,7 +22,7 @@
 			{{ getButtonObject('disabled')?.content || ' ' }}
 		</button>
 		<div class="mdl-layout-spacer"></div>
-		<span class="subject-icon icomoon" [ngClass]="'icomoon-' + (subjectToLabel[subject] ? subjectToLabel[subject] : subjectToLabel.default)"></span>
+		<span class="subject-icon icomoon" [ngClass]="'icomoon-' + (subjectToLabel[session.subject.toLowerCase()] ? subjectToLabel[session.subject.toLowerCase()] : subjectToLabel.default)"></span>
 	</div>
 </div>
 

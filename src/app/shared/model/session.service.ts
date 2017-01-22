@@ -276,6 +276,14 @@ export class SessionService {
 		]);
 	};
 
+	// Returns all sessions. Sorry Jack.
+	findAllSessions(): Observable<Session[]> {
+		return this.combineArrWithUser(
+			this.combineArrWithWb(
+				this.db.list('sessions')
+			)
+		).map(Session.fromJsonArray);
+	}
 
 	// Find all of the sessions where the listed field is true.
 	findPublicSessions(lastKey?: string | Subject<string>): Observable<Session[]> {

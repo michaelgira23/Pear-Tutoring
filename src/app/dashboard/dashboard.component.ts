@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Observable } from 'rxjs';
 import * as moment from 'moment';
 
 import { Session } from '../shared/model/session';
@@ -11,10 +12,15 @@ import { UserService } from '../shared/model/user.service';
 	templateUrl: './dashboard.component.html',
 	styleUrls: ['./dashboard.component.scss']
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
 
 	currentUser: User;
 
+	upcomingSubscription: any;
+	availableSubscription: any;
+	pendingSubscription: any;
+
+	allMySessions: Session[];
 	upcomingSessions: Session[];
 	availableSessions: Session[];
 	pendingEnrollments: {
@@ -29,17 +35,23 @@ export class DashboardComponent implements OnInit {
 		this.userService.user$.subscribe(user => this.currentUser = user);
 
 		// Get upcoming sessions the user is in
-		this.sessionService.findMySessions()
-			// Also fire observable when user changes
-			.withLatestFrom(this.userService.user$, (session, user) => session)
+		this.upcomingSubscription = Observable
+			.combineLatest(
+				this.sessionService.findMySessions(),
+				this.userService.user$,
+				(sessions, user) => sessions
+			)
+			.map(sessions => {
+				// Get upcoming sessions by combining tutor and tutee sessions
+				return sessions[0].concat(sessions[1])
+					// Filter out any sessions that have aleady happened
+					.filter(session => moment().unix() < session.end.unix())
+					// Sort by starting timestamp
+					.sort((a, b) => b.start.unix() - a.start.unix());
+			})
 			.subscribe(
-				userSessions => {
-					// Combine tutor and tutee sessions
-					this.upcomingSessions = userSessions[0].concat(userSessions[1])
-						// Filter out any sessions that have aleady happened
-						.filter(session => moment().unix() < session.end.unix())
-						// Sort by starting timestamp
-						.sort((a, b) => a.start.unix() - b.start.unix());
+				sessions => {
+					this.upcomingSessions = sessions;
 				},
 				err => {
 					console.log('get my sessions error', err);
@@ -47,15 +59,18 @@ export class DashboardComponent implements OnInit {
 			);
 
 		// Get all sessions. Order by start date and only take the first 5
-		this.sessionService.findPublicSessions()
-			// Also fire observable when user changes
-			.withLatestFrom(this.userService.user$, (session, user) => session)
-			.subscribe(
-				sessions => {
-					console.log('avaailbe sessions', sessions.length);
-
+		this.availableSubscription = Observable
+			.combineLatest(
+				this.sessionService.findPublicSessions(),
+				this.userService.user$,
+				(sessions, user) => sessions
+			)
+			.map(sessions => {
+				return sessions
+					// Filter out any sessions that have aleady happened
+					.filter(session => moment().unix() < session.end.unix())
 					// Filter out sessions that the user is already in
-					sessions = sessions.filter(session => {
+					.filter(session => {
 						// Check if tutor
 						if (session.tutor.$key === this.currentUser.$key) {
 							return false;
@@ -72,17 +87,79 @@ export class DashboardComponent implements OnInit {
 						}
 
 						return true;
-					});
-
-					// Order sessions by start date first
-					sessions.sort((a, b) => {
-						return a.start.unix() - b.start.unix();
-					});
-
-					this.availableSessions = sessions.slice(0, 6);
+					})
+					// Sort by starting timestamp
+					.sort((a, b) => b.start.unix() - a.start.unix())
+					// Only get the first 5 sessions
+					.slice(0, 6);
+			})
+			.subscribe(
+				sessions => {
+					this.availableSessions = sessions;
+				},
+				err => {
+					console.log('get available sessions error', err);
 				}
 			);
 
+		// Get pending user sessions
+		this.pendingSubscription = Observable
+			.combineLatest(
+				this.sessionService.findAllSessions(),
+				this.userService.findAllUsers(),
+				(sessions, users) => { return { sessions, users }; }
+			)
+			.map(data => {
+				// Map users to uid
+				let users = {};
+				data.users.forEach(user => {
+					users[user.$key] = user;
+				});
+
+				let pending = [];
+				data.sessions
+					// Filter out any sessions that have aleady happened
+					.filter(session => moment().unix() < session.end.unix())
+					// Sort by starting timestamp
+					.sort((a, b) => b.start.unix() - a.start.unix())
+					// Only keep sessions that should be in pending column
+					.forEach(session => {
+						console.log('session', session);
+						// If tutor and there's pending, add all users in pending
+						if (session.tutor.$key === this.currentUser.$key) {
+							console.log('current user is session tutor', session);
+							session.pending.forEach(uid => {
+								pending.push({
+									session,
+									user: users[uid]
+								});
+							});
+
+						// Also if user is in pending list, we should also add
+						} else if (session.pending.includes(this.currentUser.$key)) {
+							pending.push({
+								session,
+								user: users[this.currentUser.$key]
+							});
+						}
+					});
+				return pending;
+			})
+			.subscribe(
+				pending => {
+					this.pendingEnrollments = pending;
+				},
+				err => {
+					console.log('get pending sessions error', err);
+				}
+			);
+
+	}
+
+	ngOnDestroy() {
+		this.upcomingSubscription.unsubscribe();
+		this.availableSubscription.unsubscribe();
+		this.pendingSubscription.unsubscribe();
 	}
 
 }
