@@ -1,4 +1,5 @@
 import { Component, HostListener, OnInit, OnChanges, OnDestroy, SimpleChanges, Input } from '@angular/core';
+import { DomSanitizer } from '@angular/platform-browser';
 
 import { ChatService, Message, Status } from '../shared/model/chat.service';
 import { NamePipe } from '../shared/model/name.pipe';
@@ -10,6 +11,8 @@ declare global {
 	interface Array<T> {
 		includes(searchElement: T): boolean;
 	}
+
+	const MathJax: any;
 }
 
 @Component({
@@ -19,7 +22,8 @@ declare global {
 })
 export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 
-	@Input() key: string = 'anonymous';
+	@Input()
+	key: string = 'anonymous';
 	keyChanged: boolean;
 
 	messageSubscription: any;
@@ -35,13 +39,10 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 	currentPerms: Object = {
 		read: true
 	};
-	readable: boolean = 'read' in this.currentPerms;
-	writable: boolean = 'write' in this.currentPerms;
-	// TODO: functionality for moderators
-	moderator: boolean = 'moderator' in this.currentPerms;
 
 	constructor(
 		private chatService: ChatService,
+		private sanitizer: DomSanitizer,
 		private notificationsService: NotificationsService,
 		private permissionsService: PermissionsService,
 		private userService: UserService
@@ -54,6 +55,7 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 				console.log(`Sending 'join' status error: ${err}`);
 			}
 		);
+		this.reTypeset();
 	}
 
 	ngOnChanges(changes: SimpleChanges) {
@@ -91,12 +93,12 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 					}
 
 					for (let msg of data) {
-						// See line 61.
 						this.messageKeys.push((<any>msg).$key);
 					}
 
 					this.allMessages = data;
 					this.mergeEntries();
+					this.reTypeset();
 				},
 				err => {
 					console.log(`Getting chat messages error: ${err}`);
@@ -116,9 +118,6 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 			this.permissionsSubscription = this.permissionsService.getUserPermission(this.key, 'chat').subscribe(
 				data => {
 					this.currentPerms = data;
-					this.readable = 'read' in this.currentPerms;
-					this.writable = 'write' in this.currentPerms;
-					this.moderator = 'moderator' in this.currentPerms;
 				},
 				err => {
 					console.log(`Error getting current permission state: ${err}`);
@@ -127,7 +126,8 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 		}
 	}
 
-	@HostListener('window:unload') ngOnDestroy() {
+	@HostListener('window:unload')
+	ngOnDestroy() {
 		this.chatService.sendStatus('leave', this.key).subscribe(
 			data => {},
 			err => {
@@ -168,6 +168,12 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 		}
 	}
 
+	reTypeset() {
+		// README: i honestly do not care enough to have this refresh each individual item.
+		// it's a demo. not worth the effort at the moment
+		MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
+	}
+
 	notificationFormat(msg: Message) {
 		const truncateLength = 100;
 
@@ -182,4 +188,8 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 		}
 		return result;
 	}
+}
+
+export interface EquationMap {
+	[msgKey: string]: string;
 }

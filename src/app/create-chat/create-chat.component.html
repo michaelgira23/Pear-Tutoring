@@ -1,2 +1,26 @@
 <h1>Create a Chat Room</h1>
-<button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised mdl-button--colored" (click)="create()">Create</button>
+<form (submit)="create()" autocomplete="off" novalidate>
+	<fieldset>
+		<legend>Logged in Permissions</legend>
+		<label class="mdl-checkbox mdl-js-checkbox" for="loggedIn-read" [class.is-checked]="permissions.loggedIn.read">
+			<input type="checkbox" class="mdl-checkbox__input" id="loggedIn-read" name="loggedIn-read" [(ngModel)]="permissions.loggedIn.read">
+			<span class="mdl-checkbox__label">Read</span>
+		</label>
+		<label class="mdl-checkbox mdl-js-checkbox" for="loggedIn-write" [class.is-checked]="permissions.loggedIn.write">
+			<input type="checkbox" class="mdl-checkbox__input" id="loggedIn-write" name="loggedIn-write" [(ngModel)]="permissions.loggedIn.write">
+			<span class="mdl-checkbox__label">Write</span>
+		</label>
+	</fieldset>
+	<fieldset>
+		<legend>Anonymous Permissions (Logged out)</legend>
+		<label class="mdl-checkbox mdl-js-checkbox" for="anonymous-read" [class.is-checked]="permissions.anonymous.read">
+			<input type="checkbox" class="mdl-checkbox__input" id="anonymous-read" name="anonymous-read" [(ngModel)]="permissions.anonymous.read">
+			<span class="mdl-checkbox__label">Read</span>
+		</label>
+		<label class="mdl-checkbox mdl-js-checkbox" for="anonymous-write" [class.is-checked]="permissions.anonymous.write">
+			<input type="checkbox" class="mdl-checkbox__input" id="anonymous-write" name="anonymous-write" [(ngModel)]="permissions.anonymous.write">
+			<span class="mdl-checkbox__label">Write</span>
+		</label>
+	</fieldset>
+	<button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised mdl-button--colored">Create</button>
+</form>
