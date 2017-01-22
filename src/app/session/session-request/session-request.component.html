@@ -1,7 +1,7 @@
 <app-modal>
   <div class="app-modal__header">
     <h4>Pending Users</h4>
-    <button class="close-button mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect" (click)="closeModal(false, $event)">
+    <button class="close-button mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect" *ngIf="isModal" (click)="closeModal(false, $event)">
       <i class="material-icons">close</i>
     </button>
   </div>
@@ -15,6 +15,9 @@
         <span class="mdl-list__item-secondary-action">
           <button class="mdl-button mdl-js-button mdl-button--accent" (click)="addTutee(user.$key)">
             <i class="material-icons">done</i>
+          </button>
+          <button class="mdl-button mdl-js-button mdl-button--accent" (click)="denyTutee(user.$key)">
+            <i class="material-icons">close</i>
           </button>
         </span>
       </li>

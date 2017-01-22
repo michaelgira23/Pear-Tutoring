@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 
 declare const dialogPolyfill: any;
 
@@ -9,8 +9,11 @@ declare const dialogPolyfill: any;
 })
 export class ModalComponent implements OnInit {
 
-	@ViewChild('modal') modal;
+	@ViewChild('modal') modal: ElementRef;
 	modalEl: any;
+
+	@ViewChild('modalContent') content: ElementRef;
+	@ViewChild('modalHeader') header: ElementRef;
 
 	// FIXME: this lifecycle hook doesn't fire late enough. it doesn't end up detect the modal element
 	ngOnInit() {

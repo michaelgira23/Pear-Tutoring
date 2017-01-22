@@ -1,7 +1,18 @@
 .session-title-container {
-    border-bottom: solid 1px grey;
+    padding: 1.5em 0.75em;
+    display: flex;
+    justify-content: space-between;
     .session-tags {
-        margin-right: 0.5em;
+        align-self: flex-end;
+        flex-grow: 1;
+        .mdl-chip {
+            display: inline-block;
+            margin-left: 10px;
+        }
+    }
+    .session-subtitle {
+        align-self: flex-end;
+        max-width: 400px;
     }
 }
 .session-snapshots {
@@ -25,4 +36,8 @@
             border-radius: 5px;
         }
     }
+}
+
+.session-actions {
+    display: flex;
 }

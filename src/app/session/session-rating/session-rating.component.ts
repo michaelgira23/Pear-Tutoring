@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Renderer } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { SessionService } from '../../shared/model/session.service';
 import { Session } from '../../shared/model/session';
@@ -18,8 +18,8 @@ export class SessionRatingComponent extends SessionPopup implements OnInit {
 		comment: ''
 	};
 
-	constructor(protected sessionService: SessionService, private route: ActivatedRoute) {
-		super();
+	constructor(protected sessionService: SessionService, private route: ActivatedRoute, protected renderer: Renderer) {
+		super(renderer);
 	}
 
 	ngOnInit() {

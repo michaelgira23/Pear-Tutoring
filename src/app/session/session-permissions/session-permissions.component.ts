@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Renderer } from '@angular/core';
 import { PermissionsService, Permission, PermissionsType } from '../../shared/security/permissions.service';
 import { SessionService } from '../../shared/model/session.service';
 import { Session } from '../../shared/model/session';
@@ -32,9 +32,10 @@ export class SessionPermissionsComponent extends SessionPopup implements OnInit 
 		private permissionsService: PermissionsService,
 		private route: ActivatedRoute,
 		private sessions: SessionService,
-		private router: Router
+		private router: Router,
+		protected renderer: Renderer
 	) {
-		super();
+		super(renderer);
 	}
 
 	ngOnInit() {

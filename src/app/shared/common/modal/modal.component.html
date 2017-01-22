@@ -1,8 +1,8 @@
-<dialog #modal class="mdl-dialog">
-	<div class="mdl-dialog__title">
+<dialog #modal class="mdl-dialog" (click)="$event.stopPropagation()">
+	<div #modalHeader class="mdl-dialog__title">
 		<ng-content select=".app-modal__header"></ng-content>
 	</div>
-	<div class="mdl-dialog__content">
+	<div #modalContent class="mdl-dialog__content">
 		<ng-content select=".app-modal__body"></ng-content>
 	</div>
 	<div class="mdl-dialog__actions">
