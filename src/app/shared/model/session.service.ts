@@ -12,7 +12,14 @@ import { PermissionsService, Permission } from '../security/permissions.service'
 import * as moment from 'moment';
 import { objToArr, arrToObj, arraysEqual } from '../common/utils';
 
-export const AllowedSubjects = ['Math', 'English', 'Art'];
+export const AllowedSubjects = [
+	'English',
+	'History',
+	'Math',
+	'Science',
+	'World-Language',
+	'other'
+];
 
 export const PAGE_SIZE = 10;
 

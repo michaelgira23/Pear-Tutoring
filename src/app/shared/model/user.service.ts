@@ -77,10 +77,9 @@ export class UserService {
 		if (!this.uid) {return Observable.throw('rip no login info'); }
 		return this.promiseToObservable(this.sdkStorage.child(`userPfps/${this.uid}/`).put(pfp))
 			.flatMap((snap: any) => {
-				let userToSave = Object.assign({}, {pfp: snap.metadata.downloadURLs[0]});
-				let dataToSave = {};
-				dataToSave[`users/${this.uid}`] = userToSave;
-				return this.firebaseUpdate(dataToSave);
+				return this.promiseToObservable(
+					this.db.object(`users/${this.uid}`).update({ pfp: snap.metadata.downloadURLs[0] })
+				);
 			});
 	}
 

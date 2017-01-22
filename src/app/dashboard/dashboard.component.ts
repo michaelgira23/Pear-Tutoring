@@ -124,10 +124,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
 					.sort((a, b) => b.start.unix() - a.start.unix())
 					// Only keep sessions that should be in pending column
 					.forEach(session => {
-						console.log('session', session);
 						// If tutor and there's pending, add all users in pending
 						if (session.tutor.$key === this.currentUser.$key) {
-							console.log('current user is session tutor', session);
 							session.pending.forEach(uid => {
 								pending.push({
 									session,

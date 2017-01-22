@@ -123,6 +123,10 @@ export class SessionCardComponent implements OnInit, OnDestroy {
 		return this.session.pending.includes(this.authInfo.uid);
 	}
 
+	get displayPendingUserPic() {
+		return this.type === 'pending' && this.user && this.user.$key !== this.authInfo.uid;
+	}
+
 	get sessionStatus() {
 		if (this.isPending) {
 			return 'pending';
@@ -183,6 +187,10 @@ export class SessionCardComponent implements OnInit, OnDestroy {
 
 	sessionDetails() {
 		this.router.navigate(['session', this.session.$key, 'details']);
+	}
+
+	userDetails() {
+		this.router.navigate(['user', this.user.$key, 'details']);
 	}
 
 	enrollSession() {
