@@ -57,7 +57,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 			// Interval each marking path should be drawn in at (in ms)
 			const interval = 100;
 			// Delay to show SVG after it has been drawn (in ms)
-			const delay = 1000;
+			const delay = 2000;
 
 			// If number, get class name from animations array
 			if (typeof className === 'number') {
