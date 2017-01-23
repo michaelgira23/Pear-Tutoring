@@ -1,0 +1,9 @@
+<div class="text-list">
+  <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label" *ngFor="let text of actuallTextList; let i = index">
+    <input class="mdl-textfield__input" type="text" name="tex-input" [id]="'text-input-' + i" [(ngModel)]="textList[i]">
+    <label class="mdl-textfield__label" [attr.for]="'text-input-' + i">{{ label }}</label>
+  </div>
+  <button class="add-button mdl-button mdl-js-button mdl-js-ripple-effect" (click)="textList.push()">
+    Another One
+  </button>
+</div>

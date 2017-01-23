@@ -22,11 +22,11 @@ export class UserDetailsComponent implements OnInit {
 		let allRatings: SessionRating[] = this.tutorSessions.map(session => {
 			return session.rating.map(rating => {
 				return Object.assign(rating, {session});
-			})
+			});
 		})
 		.reduce((a, b) => {
 			return a.concat(b);
-		});
+		}, []);
 		return allRatings.sort((a, b) => {
 			return a.time.unix() - b.time.unix();
 		});
@@ -39,7 +39,7 @@ export class UserDetailsComponent implements OnInit {
 			})
 			.reduce((a, b) => {
 				return a + b;
-			}) / this.userRatings.length;
+			}, 0) / this.userRatings.length;
 	}
 
 	constructor(private sessionService: SessionService, private userService: UserService, private route: ActivatedRoute) { }

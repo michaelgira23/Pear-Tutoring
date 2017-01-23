@@ -72,6 +72,7 @@ import { NamePipe } from './shared/model/name.pipe';
 import { SessionRatingComponent } from './session/session-rating/session-rating.component';
 import { UserDetailsComponent } from './user-details/user-details.component';
 import { RatingDisplayComponent } from './rating-display/rating-display.component';
+import { TextListControlComponent } from './register/text-list-control/text-list-control.component';
 
 @NgModule({
 	declarations: [
@@ -116,7 +117,8 @@ import { RatingDisplayComponent } from './rating-display/rating-display.componen
 		ModalComponent,
 		SessionRatingComponent,
 		UserDetailsComponent,
-		RatingDisplayComponent
+		RatingDisplayComponent,
+		TextListControlComponent
 	],
 	imports: [
 		BrowserModule,

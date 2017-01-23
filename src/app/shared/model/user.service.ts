@@ -161,6 +161,8 @@ export interface RegisterOptions {
 	lastName: string;
 	email: string;
 	password: string;
+	goodAt: string[];
+	needsHelp: string[];
 }
 
 export interface FreeTimes {
