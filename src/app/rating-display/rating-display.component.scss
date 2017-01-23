@@ -1,0 +1,12 @@
+.rating {
+	width: 100%;
+	display: flex;
+	.rating-star {
+		color: rgb(255,235,59);
+		width: 24px;
+		height: 40px;
+		i {
+			position: absolute;
+		}
+	}
+}

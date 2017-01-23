@@ -5,6 +5,7 @@ import { Observable, Subject } from 'rxjs/Rx';
 import { User } from './user';
 import { objToArr, getEditDistance } from '../common/utils';
 import * as moment from 'moment';
+import * as firebase from 'firebase';
 
 export const UserStatus = {
 	IN_SESSION: 2,
@@ -39,7 +40,7 @@ export class UserService {
 		return this.authService.register(regOpt.email, regOpt.password)
 			.flatMap(val => {
 				const newUid = val.uid;
-				let userToSave = Object.assign({}, regOpt);
+				let userToSave = Object.assign({}, regOpt, {registerTime: firebase.database.ServerValue.TIMESTAMP});
 				delete userToSave.password;
 				return this.saveUser(userToSave, newUid);
 			});

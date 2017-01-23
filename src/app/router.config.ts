@@ -16,6 +16,7 @@ import { SettingsComponent } from './settings/settings.component';
 import { MySessionsComponent } from './my-sessions/my-sessions.component';
 import { SessionPermissionsComponent } from './session/session-permissions/session-permissions.component';
 import { SessionRequestComponent } from './session/session-request/session-request.component';
+import { UserDetailsComponent } from './user-details/user-details.component';
 
 import { SessionGuardService } from './shared/model/session-guard.service';
 import { SessionDeactivateGuardService } from './shared/model/session-deactivate-guard.service';
@@ -130,6 +131,10 @@ export const routerConfig: Route[] = [
 				]
 			}
 		],
+	},
+	{
+		path: 'user/:uid',
+		component: UserDetailsComponent
 	},
 	// 404 Page
 	{

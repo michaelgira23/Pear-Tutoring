@@ -1,0 +1,6 @@
+<div class="rating">
+  <div class="rating-star" *ngFor="let count of [1, 2, 3, 4, 5]">
+    <i class="material-icons">star_border</i>
+    <i *ngIf="rating >= count" class="material-icons">star</i>
+  </div>
+</div>

@@ -1,7 +1,12 @@
+import * as moment from 'moment';
+
 export class User {
-	static fromJson({$key, firstName, lastName, grade, email, tutorSessions, tuteeSessions, status, pfp}): User {
+	static fromJson({$key, firstName, lastName, grade, email, tutorSessions, tuteeSessions, status, pfp, registerTime}): User {
 		let name = firstName + ' ' + lastName;
-		return new User($key, firstName, lastName, name, grade, email, tutorSessions, tuteeSessions, status, pfp);
+		if (tutorSessions) {tutorSessions = Object.keys(tutorSessions); }
+		if (tuteeSessions) {tuteeSessions = Object.keys(tuteeSessions); }
+		if (registerTime) {registerTime = moment(registerTime, 'x'); } else {registerTime = moment(); }
+		return new User($key, firstName, lastName, name, grade, email, tutorSessions, tuteeSessions, status, pfp, registerTime);
 	}
 
 	static fromJsonList(list: any[]): User[] {
@@ -14,10 +19,11 @@ export class User {
 		public name: string,
 		public grade: number,
 		public email: string,
-		public tutorSessions: {[uid: string]: boolean},
-		public tuteeSessions: {[uid: string]: boolean},
+		public tutorSessions: string[],
+		public tuteeSessions: string[],
 		public status: number,
 		public pfp: string,
+		public registerTime: moment.Moment
 		// public publicSessions: string[],
 	) {}
 }

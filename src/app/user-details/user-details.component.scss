@@ -1,0 +1,29 @@
+.user-pfp {
+	width: 100%;
+	.mdl-card__title {
+		height: 20em;
+	}
+}
+
+.user-info-container {
+	.user-info {
+		width: 100%;
+		margin-bottom: 1em;
+		.big-number {
+			font-size: 2.5em;
+			color: rgb(255,152,0);
+		}
+		.user-rating {
+			display: block;
+			margin: 0 auto;
+			padding-bottom: 0;
+		}
+		.username {
+			display: block;
+			margin: 0 auto;
+			padding-bottom: 0;
+		}
+	}
+}
+
+

@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { SessionService } from '../shared/model/session.service';
 import { PermissionsService, Permission } from '../shared/security/permissions.service';
-import { SessionWithRatings } from '../shared/model/session';
+import { Session } from '../shared/model/session';
 import { Subject, Observable } from 'rxjs/Rx';
 import { SessionPopup } from '../session/session-popup';
 import { SessionRatingComponent } from '../session/session-rating/session-rating.component';
@@ -17,7 +17,7 @@ import { SessionRequestComponent } from '../session/session-request/session-requ
 export class SessionDetailsComponent implements OnInit {
 
 	sessionId: string;
-	sessionInfo: SessionWithRatings;
+	sessionInfo: Session;
 	perm: Permission;
 
 	get canRate(): boolean {
@@ -40,8 +40,9 @@ export class SessionDetailsComponent implements OnInit {
 
 	ngOnInit() {
 		this.sessionId = this.route.snapshot.params['id'];
-		this.sessionService.combineWithRatings(this.sessionService.findSession(this.sessionId)).subscribe(
-			session => {
+		this.sessionService.findSession(this.sessionId)
+		.subscribe(
+			(session: Session) => {
 				this.sessionInfo = session;
 				console.log(session);
 				this.permissionsService.getUserPermission(this.sessionId, 'session').subscribe(perm => {

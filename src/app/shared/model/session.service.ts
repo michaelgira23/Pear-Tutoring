@@ -247,17 +247,19 @@ export class SessionService {
 
 	// find a single session and combine it with user data
 	findSession(id: string): Observable<any> {
-		return this.combineWithUser(
-			this.combineWithWb(
-				this.db.object('sessions/' + id)
-				.flatMap(val => val.$exists() ? Observable.of(val) : Observable.throw(`Session ${val.$key} does not exist`))
+		return this.combineWithRatings(
+			this.combineWithUser(
+				this.combineWithWb(
+					this.db.object('sessions/' + id)
+					.flatMap(val => val.$exists() ? Observable.of(val) : Observable.throw(`Session ${val.$key} does not exist`))
+				)
 			)
 		).map(Session.fromJson);
 	}
 
 	// Find the session ids where the user is a tutor or a tutee. Note the info in stored in the user object.
 	findMySessions(lastKey?: string | Subject<string>): Observable<Session[][]> {
-		return this.checkAndCombine([
+		return Observable.combineLatest(
 			this.authService.auth$.flatMap(state => {
 				if (!state) {
 					return [];
@@ -280,8 +282,29 @@ export class SessionService {
 				}})
 				.flatMap(ids => this.checkAndCombine(ids.map(id => this.db.object('sessions/' + id.$key))))));
 			}).map(Session.fromJsonArray)
-		]);
+		);
 	};
+
+	findUserSessions(uid: string): Observable<Session[][]> {
+		return Observable.combineLatest(
+			this.combineArrWithUser(this.combineArrWithWb(this.db.list(`/users/${uid}/tutorSessions`)
+			.flatMap(ids => this.checkAndCombine(ids.map(id => this.db.object('sessions/' + id.$key))))))
+			.flatMap(sessions => {
+				return this.checkAndCombine(sessions.map(session => {
+					return this.combineWithRatings(Observable.of(session));
+				}));
+			})
+			.map(Session.fromJsonArray),
+			this.combineArrWithUser(this.combineArrWithWb(this.db.list(`/users/${uid}/tuteeSessions`)
+			.flatMap(ids => this.checkAndCombine(ids.map(id => this.db.object('sessions/' + id.$key))))))
+			.flatMap(sessions => {
+				return this.checkAndCombine(sessions.map(session => {
+					return this.combineWithRatings(Observable.of(session));
+				}));
+			})
+			.map(Session.fromJsonArray)
+		);
+	}
 
 	// Returns all sessions. Sorry Jack.
 	findAllSessions(): Observable<Session[]> {

@@ -11,10 +11,10 @@
 </div>
 <div class="mdl-grid" *ngIf="sessionInfo">
 	<div class="mdl-cell mdl-cell--8-col">
-		<h5>Created By: <app-user-chip [user]="sessionInfo.tutor"></app-user-chip></h5>
 		<div class="session-snapshots">
 			<img *ngFor="let wb of sessionInfo.whiteboards" [src]="wb.snapshot">
 		</div>
+		<h5>Created By: <app-user-chip [user]="sessionInfo.tutor"></app-user-chip></h5>
 		<h5>Tutees: <app-user-chip *ngFor="let tutee of sessionInfo.tutees" [user]="tutee"></app-user-chip></h5>
 	</div>
 	<div class="session-comments-container mdl-cell mdl-cell--4-col">
@@ -27,18 +27,13 @@
 					<span class="mdl-list__item-primary-content">
 						<i class="material-icons mdl-list__item-avatar" *ngIf="!rating.user.pfp">person</i>
 						<img class="mdl-list__item-avatar" [src]="rating.user.pfp" *ngIf="rating.user.pfp">
-						<span>{{ rating.user.name }}</span>
+						<span>{{ rating.user.name }} ({{ rating.time.format('l') }})</span>
 						<span class="mdl-list__item-text-body">
 						{{ rating.comment }}
 						</span>
 					</span>
 					<span class="mdl-list__item-secondary-content">
-						<div class="rating">
-							<div class="rating-star" *ngFor="let count of [1, 2, 3, 4, 5]">
-								<i class="material-icons">star_border</i>
-								<i *ngIf="rating.rating >= count" class="material-icons">star</i>
-							</div>
-						</div>
+						<app-rating-display [rating]="rating.rating"></app-rating-display>
 					</span>
 				</li>
 			</ul>

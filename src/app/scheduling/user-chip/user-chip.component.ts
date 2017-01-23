@@ -1,4 +1,5 @@
 import { Component, OnInit, Input, OnChanges, SimpleChange, Output, EventEmitter } from '@angular/core';
+import { Router } from '@angular/router';
 import { User } from '../../shared/model/user';
 import { UserStatus } from '../../shared/model/user.service';
 
@@ -27,7 +28,7 @@ export class UserChipComponent implements OnInit, OnChanges {
 		return '#4B515D';
 	};
 
-	constructor() { }
+	constructor(private router: Router) { }
 
 	ngOnInit() {
 	}
@@ -39,5 +40,9 @@ export class UserChipComponent implements OnInit, OnChanges {
 	emitRemove(e: MouseEvent) {
 		e.stopPropagation();
 		this.onRemove.emit();
+	}
+
+	viewUser() {
+		this.router.navigate(['user', this.user.$key]);
 	}
 }
