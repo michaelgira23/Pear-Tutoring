@@ -27,10 +27,12 @@ export class Session {
 		}
 		start = moment(start, 'X');
 		end = moment(end, 'X');
-		rating.map(r => {
-			r.time = moment(r.time, 'x');
-			return r;
-		});
+		if (rating) {
+			rating.map(r => {
+				r.time = moment(r.time, 'x');
+				return r;
+			});
+		}
 		return new Session($key, start, end, subject, color, tutor, tutees, max, listed,
 							whiteboards, chat, title, desc, canceled, tags, ywd, grade, classStr, pending, rating);
 	}
