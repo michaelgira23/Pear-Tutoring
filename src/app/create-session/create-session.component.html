@@ -1,21 +1,45 @@
-<form [formGroup]="createSessionForm" (ngSubmit)="createSession()">
-	<fieldset>
-		<!-- TODO: MDL-ify the label for this -->
-		date: <ng2-datepicker formControlName="date" id="date"></ng2-datepicker>
-		<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+<h2 class="title">New Session</h2>
+<form [formGroup]="createSessionForm" (ngSubmit)="createSession()" class="mdl-grid">
+	<div class="mdl-cell mdl-cell--8-col mdl-card mdl-shadow--4dp mdl-grid">
+		
+		<label class="mdl-cell mdl-cell--12-col mdl-switch mdl-js-switch mdl-js-ripple-effect" for="listed">
+			<input class="mdl-switch__input" type="checkbox" formControlName="listed" id="listed">
+			<span class="mdl-switch__label">Public</span>
+		</label>
+
+		<div class="title-input mdl-cell mdl-cell--10-col mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+			<input class="mdl-textfield__input" formControlName="title" id="title" type="text">
+			<label class="mdl-textfield__label" for="title">Title</label>
+		</div>
+
+		<div class="desc-input mdl-cell mdl-cell--10-col mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+			<textarea class="mdl-textfield__input" formControlName="desc" id="desc"></textarea>
+			<label class="mdl-textfield__label" for="desc">Description</label>
+		</div>
+
+		<!-- TODO: MDL-ify the input for this -->
+		<div class="mdl-cell mdl-cell--4-col mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+			<ng2-datepicker formControlName="date" id="StartDay"></ng2-datepicker>
+			<label class="mdl-textfield__label" for="startDay">Date</label>
+		</div>
+
+		<div class="mdl-cell mdl-cell--4-col mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
 			<input class="mdl-textfield__input" formControlName="startTime" id="startTime" type="time">
 			<label class="mdl-textfield__label" for="startTime">Start</label>
 		</div>
-		<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+
+		<div class="mdl-cell mdl-cell--4-col mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
 			<input class="mdl-textfield__input" formControlName="endTime" id="endTime" type="time">
 			<label class="mdl-textfield__label" for="endTime">End</label>
 		</div>
-		<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+
+		<div class="mdl-cell mdl-cell--4-col mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
 		<input class="mdl-textfield__input" formControlName="grade" id="grade" pattern="([JS]K|[1-9]|1[0-2])" type="text">
 			<label class="mdl-textfield__label" for="grade">Grade Level</label>
 			<span class="mdl-textfield__error">Input is not a valid grade!</span>
 		</div>
-		<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label getmdl-select">
+
+		<div class="mdl-cell mdl-cell--4-col mdl-textfield mdl-js-textfield mdl-textfield--floating-label getmdl-select">
 		<input class="mdl-textfield__input" formControlName="subject" id="subject" type="text">
 			<label for="subject">
 				<i class="mdl-icon-toggle__label material-icons">keyboard_arrow_down</i>
@@ -25,42 +49,27 @@
 				<li *ngFor="let option of allowedSubjects">{{ option }}</li>
 			</ul>
 		</div>
-		<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+
+		<div class="mdl-cell mdl-cell--4-col mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
 			<input class="mdl-textfield__input" formControlName="classStr" id="classStr" type="text">
 			<label class="mdl-textfield__label" for="classStr">Class</label>
 		</div>
-		<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+
+		<div class="mdl-cell mdl-cell--4-col mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
 			<input class="mdl-textfield__input" formControlName="max" id="max" pattern="-?[0-9]*(\.[0-9]+)?" type="text">
 			<label class="mdl-textfield__label" for="max">Max</label>
 			<span class="mdl-textfield__error">Input is not a number!</span>
 		</div>
-		<label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="listed">
-			<input class="mdl-checkbox__input" type="checkbox" formControlName="listed" id="listed">
-			<span class="mdl-checkbox__label">Listed</span>
-		</label>
-		<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-			<input class="mdl-textfield__input" formControlName="title" id="title" type="text">
-			<label class="mdl-textfield__label" for="title">Title</label>
-		</div>
-		<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-			<textarea class="mdl-textfield__input" formControlName="desc" id="desc"></textarea>
-			<label class="mdl-textfield__label" for="desc">Description</label>
-		</div>
-		<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-			<textarea class="mdl-textfield__input" formControlName="tags" id="tags" rows="1"></textarea>
+
+		<div class="mdl-cell mdl-cell--4-col mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+			<textarea class="mdl-textfield__input" formControlName="tags" id="tags"></textarea>
 			<label class="mdl-textfield__label" for="tags">Tags</label>
 		</div>
-	</fieldset>
-	<fieldset>
-		<!-- TODO: MDL-ify this -->
-		add tutees:
+	</div>
+	<div class="mdl-cell mdl-cell--4-col mdl-card mdl-shadow--4dp">
+		<h3>add tutees</h3>
 		<app-user-auto-complete *ngIf="customCtrlReady" formControlName="tutees" id="tutees"></app-user-auto-complete>
-	</fieldset>
-	<button *ngIf="!sessionId && !sessionInfo" class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised mdl-button--colored">Create</button>
-	<button *ngIf="sessionId || sessionInfo" class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised mdl-button--colored" type="button" (click)="createSession()">Update</button>
+	</div>
+	<button *ngIf="!sessionId && !sessionInfo" class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised mdl-button--colored" [disabled]="!createSessionForm.valid">Create</button>
+	<button *ngIf="sessionId || sessionInfo" class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised mdl-button--colored" type="button" (click)="createSession()" [disabled]="!createSessionForm.valid">Update</button>
 </form>
-
-<h2> All Users </h2>
-<div *ngFor="let user of allUsers">
-	<app-user-chip [user]="user"></app-user-chip>
-</div>
