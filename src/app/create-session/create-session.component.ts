@@ -26,7 +26,7 @@ export class CreateSessionComponent implements OnInit {
 		listed: [true, Validators.required],
 		title: ['', [Validators.required]],
 		desc: ['', Validators.required],
-		tutees: [[], Validators.required],
+		tutees: [[]],
 		tags: ['']
 	});
 	allUsers: User[];
@@ -92,7 +92,7 @@ export class CreateSessionComponent implements OnInit {
 				listed: [this.sessionInfo.listed, Validators.required],
 				title: [this.sessionInfo.title, [Validators.required]],
 				desc: [this.sessionInfo.desc, Validators.required],
-				tutees: [this.sessionInfo.tutees, Validators.required],
+				tutees: [this.sessionInfo.tutees],
 				tags: [this.sessionInfo.tags ? this.sessionInfo.tags.join(', ') : '']
 			});
 		}
