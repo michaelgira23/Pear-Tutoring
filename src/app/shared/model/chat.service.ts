@@ -78,7 +78,8 @@ export class ChatService {
 			createdBy: this.authInfo ? this.authInfo.uid : null
 		};
 
-		return this.observableToPromise(chats.push(chatObj));
+		return this.observableToPromise(chats.push(chatObj))
+			.map(item => item.key);
 	}
 
 	sendMessage(msgText: string, chatKey: string): Observable<any> {
