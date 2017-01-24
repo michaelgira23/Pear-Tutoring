@@ -1,8 +1,9 @@
 <div class="mdl-grid" *ngIf="userInfo">
 	<div class="user-pfp-container mdl-cell mdl-cell--4-col">
 		<div class="user-pfp mdl-card mdl-shadow--2dp">
-			<div class="mdl-card__title" [style.background-image]="'url(' + userInfo.pfp + ')'">
+			<div class="mdl-card__title" *ngIf="userInfo.pfp" [style.background-image]="'url(' + userInfo.pfp + ')'">
 			</div>
+			<div class="mdl-card__title" *ngIf="!userInfo.pfp" [style.background-image]="'url(../../assets/user_placeholder.svg)'"></div>
 			<div class="mdl-card__actions mdl-card--border">
 				<a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
 				Get Started
@@ -51,6 +52,12 @@
 					</span>
 				</li>
 			</div>
+		</div>
+	</div>
+	<div class="user-sessions-container mdl-cell mdl-cell--12-col mdl-grid" *ngIf="tutorSessions">
+		<h4 class="mdl-cell mdl-cell--12-col">Open Sessions</h4>
+		<div class="user-session mdl-cell mdl-cell--4-col" *ngFor="let session of tutorSessions">
+			<app-session-card [session]="session"></app-session-card>
 		</div>
 	</div>
 </div>

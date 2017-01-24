@@ -21,22 +21,25 @@
     padding: 0.5em;
     .session-snapshots {
         display: flex;
+        overflow-x: scroll;
         img {
-            border: 5px solid rgb(255,152,0);
+            border: 3px solid rgb(255,152,0);
         }
     }
 }
 
 .session-comments-container {
-    padding: 0.5em;
+    .mdl-card__title {
+        padding-bottom: 0;
+        display: flex;
+        justify-content: space-between;
+    }
     .session-comments {
         .mdl-list__item-secondary-content {
             margin: auto;
         }
         .session-comments-item {
             margin: 0.5em;
-            border-left: 0.5em solid rgb(255,152,0);
-            border-radius: 5px;
         }
     }
 }
