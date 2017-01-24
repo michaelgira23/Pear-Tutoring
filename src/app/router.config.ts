@@ -93,7 +93,6 @@ export const routerConfig: Route[] = [
 	},
 	{
 		path: 'session',
-		canActivateChild: [SessionGuardService],
 		children: [
 			{
 				path: '',
@@ -110,23 +109,27 @@ export const routerConfig: Route[] = [
 					{
 						path: '',
 						canDeactivate: [SessionDeactivateGuardService],
-						component: SessionComponent
+						component: SessionComponent,
+						canActivate: [SessionGuardService]
 					},
 					{
 						path: 'details',
-						component: SessionDetailsComponent
+						component: SessionDetailsComponent,
 					},
 					{
 						path: 'update',
-						component: CreateSessionComponent
+						component: CreateSessionComponent,
+						canActivate: [SessionGuardService]
 					},
 					{
 						path: 'permissions',
-						component: SessionPermissionsComponent
+						component: SessionPermissionsComponent,
+						canActivate: [SessionGuardService]
 					},
 					{
 						path: 'requests',
-						component: SessionRequestComponent
+						component: SessionRequestComponent,
+						canActivate: [SessionGuardService]
 					}
 				]
 			}

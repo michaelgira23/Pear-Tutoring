@@ -9,9 +9,9 @@
       <i class="material-icons">info</i>
     </button>
     <div appSidebarContent>
-      <h2>
+      <h3>
         Session Info
-      </h2>
+      </h3>
       <h3> {{ sessionInfo?.title }} </h3>
       <div class="session-info">
         <h3>Tutor</h3>
@@ -26,12 +26,12 @@
       <div *ngIf="!sessionExist">
         Session does not exist
       </div>
-      <h3>Users in Session</h3>
+      <h4>Users in Session</h4>
       <div class="online-users-display">
         <app-user-chip *ngFor="let user of onlineUsers" [user]="user"></app-user-chip>
       </div>
-      <h3>Admin Actions</h3>
       <div class="session-actions" *ngIf="perm?.moderator">
+        <h4>Admin Actions</h4>
         <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" (click)="openPopup('permissions')">Permissions</button>
         <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" (click)="openPopup('requests')">Pending join requests</button>
       </div>

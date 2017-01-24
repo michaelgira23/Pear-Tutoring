@@ -66,7 +66,7 @@ export class Session {
 }
 
 export interface SessionRating {
-	user: string;
+	user: User;
 	rating: number;
 	comment: string;
 	time: moment.Moment;

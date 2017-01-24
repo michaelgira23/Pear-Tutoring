@@ -12,7 +12,7 @@ export class SessionDeactivateGuardService implements CanDeactivate<SessionCompo
 	constructor(private router: Router) {}
 
 	canDeactivate(component: SessionComponent, route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | Observable<boolean> {
-		if (!component.rated) {
+		if (!component.rated && !component.isTutor) {
 			return component.openPopup('rating')
 			.flatMap(popup => {
 				return popup.submitted$.map(submitted => {

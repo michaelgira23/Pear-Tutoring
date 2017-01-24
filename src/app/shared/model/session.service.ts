@@ -463,6 +463,7 @@ export class SessionService {
 			return this.chatService.createChat();
 		})
 		.flatMap(chat => {
+			console.log(chat);
 			chatId = chat.key;
 			const newSessionKey = this.sdkDb.child('sessions').push().key;
 			session.whiteboard = wbId;

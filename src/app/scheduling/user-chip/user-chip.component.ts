@@ -19,6 +19,9 @@ export class UserChipComponent implements OnInit, OnChanges {
 	@Output()
 	onRemove = new EventEmitter<void>();
 
+	@Input()
+	clickable = true;
+
 	get statusColor(): string {
 		switch (this.user.status) {
 			case UserStatus.ONLINE: return '#00C851';
@@ -42,7 +45,10 @@ export class UserChipComponent implements OnInit, OnChanges {
 		this.onRemove.emit();
 	}
 
-	viewUser() {
-		this.router.navigate(['user', this.user.$key]);
+	viewUser(e: Event) {
+		if (this.clickable) {
+			e.stopPropagation();
+			this.router.navigate(['user', this.user.$key]);
+		}
 	}
 }

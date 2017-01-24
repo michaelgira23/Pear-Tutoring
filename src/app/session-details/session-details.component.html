@@ -1,5 +1,5 @@
 <div class="mdl-grid" *ngIf="sessionInfo">
-	<div class="session-title-container mdl-cell--12-col" [style.background-color]="sessionInfo.color">
+	<div class="session-title-container mdl-cell--12-col mdl-shadow--4dp" [style.background-color]="sessionInfo.color">
 		<h2 class="session-title">{{ sessionInfo.title }}</h2>
 		<div class="session-tags">
 			<div class="mdl-chip" *ngFor="let tag of sessionInfo.tags">
@@ -10,14 +10,14 @@
 	</div>
 </div>
 <div class="mdl-grid" *ngIf="sessionInfo">
-	<div class="mdl-cell mdl-cell--8-col">
+	<div class="session-info-container mdl-cell mdl-cell--7-col mdl-card mdl-shadow--4dp">
 		<div class="session-snapshots">
 			<img *ngFor="let wb of sessionInfo.whiteboards" [src]="wb.snapshot">
 		</div>
 		<h5>Created By: <app-user-chip [user]="sessionInfo.tutor"></app-user-chip></h5>
 		<h5>Tutees: <app-user-chip *ngFor="let tutee of sessionInfo.tutees" [user]="tutee"></app-user-chip></h5>
 	</div>
-	<div class="session-comments-container mdl-cell mdl-cell--4-col">
+	<div class="session-comments-container mdl-cell mdl-cell--5-col mdl-card mdl-shadow--4dp">
 		<div class="session-comments" *ngIf="sessionInfo">
 			<ul class="demo-list-three mdl-list">
 				<h4>Session Comments
@@ -37,6 +37,15 @@
 					</span>
 				</li>
 			</ul>
+		</div>
+	</div>
+</div>
+
+<div class="mdl-grid" *ngIf="tutorSessions && tuteeSessions">
+	<div class="mdl-cell mdl-cell--12-col">
+		<h4>Sessions {{ userInfo.firstName }} is tutoring </h4>
+		<div class="mdl-grid">
+			<app-session-card class="mdl-cell mdl-cell--4-col" *ngFor="let session of tutorSessions" [session]="session" type="display"></app-session-card>
 		</div>
 	</div>
 </div>

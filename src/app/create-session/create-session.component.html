@@ -67,8 +67,12 @@
 		</div>
 	</div>
 	<div class="mdl-cell mdl-cell--4-col mdl-card mdl-shadow--4dp">
-		<h3>add tutees</h3>
-		<app-user-auto-complete *ngIf="customCtrlReady" formControlName="tutees" id="tutees"></app-user-auto-complete>
+		<div class="mdl-card__title">
+			<h3 class="mdl-card__title-text">add tutees</h3>
+		</div>
+		<div class="mdl-card__supporting-text">
+			<app-user-auto-complete *ngIf="customCtrlReady" formControlName="tutees" id="tutees"></app-user-auto-complete>
+		</div>
 	</div>
 	<button *ngIf="!sessionId && !sessionInfo" class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised mdl-button--colored" [disabled]="!createSessionForm.valid">Create</button>
 	<button *ngIf="sessionId || sessionInfo" class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised mdl-button--colored" type="button" (click)="createSession()" [disabled]="!createSessionForm.valid">Update</button>

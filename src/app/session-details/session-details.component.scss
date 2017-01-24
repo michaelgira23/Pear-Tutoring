@@ -2,6 +2,7 @@
     padding: 1.5em 0.75em;
     display: flex;
     justify-content: space-between;
+    width: 100%;
     .session-tags {
         align-self: flex-end;
         flex-grow: 1;
@@ -15,17 +16,19 @@
         max-width: 400px;
     }
 }
-.session-snapshots {
-    display: flex;
+
+.session-info-container {
     padding: 0.5em;
-    img {
-        border: 5px solid rgb(255,152,0);
+    .session-snapshots {
+        display: flex;
+        img {
+            border: 5px solid rgb(255,152,0);
+        }
     }
 }
 
 .session-comments-container {
-    padding: 1em;
-    border-left: 1px solid grey;
+    padding: 0.5em;
     .session-comments {
         .mdl-list__item-secondary-content {
             margin: auto;

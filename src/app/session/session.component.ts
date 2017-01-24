@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { SessionService } from '../shared/model/session.service';
 import { User } from '../shared/model/user';
 import { UserService } from '../shared/model/user.service';
+import { Session } from '../shared/model/session';
 import { PermissionsService, Permission } from '../shared/security/permissions.service';
 import { Whiteboard } from '../shared/model/whiteboard';
 import { SidebarComponent } from '../shared/common/sidebar/sidebar.component';
@@ -21,7 +22,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 
 	sessionId: string;
 	sessionExist: boolean;
-	sessionInfo: any; // Session type plus rating
+	sessionInfo: Session; // Session type plus rating
 	onlineUsers: User[] = [];
 	findSession$;
 	perm: Permission;
@@ -37,6 +38,10 @@ export class SessionComponent implements OnInit, OnDestroy {
 			return rating.user.$key === this.sessionService.uid;
 		}) : false;
 	};
+
+	get isTutor(): boolean {
+		return this.sessionService.uid === this.sessionInfo.tutor.$key;
+	}
 
 	@ViewChildren(SidebarComponent) sidebars: QueryList<SidebarComponent>;
 
@@ -58,6 +63,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 			this.findSession$ = this.sessionService.combineWithRatings(this.sessionService.findSession(this.sessionId)).subscribe(session => {
 				this.sessionExist = true;
 				this.sessionInfo = session;
+				console.log(session);
 				this.permissionsService.getUserPermission(this.sessionId, 'session').subscribe(perm => {
 					this.perm = perm;
 					if (!perm.read) {
