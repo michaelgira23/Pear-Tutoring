@@ -55,7 +55,7 @@ export class CreateSessionComponent implements OnInit {
 
 	ngOnInit() {
 
-		this.createSessionForm.controls['endTime'].setValidators(validateIsAfter(moment(this.createSessionForm.value.startTime, 'HH:mm')));
+		// this.createSessionForm.controls['endTime'].setValidators(validateIsAfter(moment(this.createSessionForm.value.startTime, 'HH:mm')));
 
 		this.route.params.subscribe(params => {
 			if (params['id']) {
@@ -98,7 +98,7 @@ export class CreateSessionComponent implements OnInit {
 			this.createSessionForm = this.fb.group({
 				date: [dateModel, Validators.required],
 				startTime: [this.sessionInfo.start.format('HH:mm'), Validators.required],
-				endTime: [this.sessionInfo.end.format('HH:mm'), [Validators.required, validateIsAfter(this.sessionInfo.start)]],
+				endTime: [this.sessionInfo.end.format('HH:mm'), [Validators.required]],
 				grade: [this.sessionInfo.grade, Validators.required],
 				classStr: [this.sessionInfo.classStr, Validators.required],
 				subject: [this.sessionInfo.subject, Validators.required],
@@ -143,12 +143,13 @@ export class CreateSessionComponent implements OnInit {
 
 }
 
-function validateIsAfter(startTime: moment.Moment): ValidatorFn {
-	return function (c: FormControl) {
-		let endTime = moment(c.value, 'HH:mm').seconds(0);
-		startTime = moment().hours(startTime.hours()).minutes(startTime.minutes()).seconds(0);
-		return startTime.isBefore(endTime) ? null : {
-			error: 'Session must be shorter than 5 hours!'
-		};
-	};
-}
+// function validateIsAfter(startTime: moment.Moment): ValidatorFn {
+// 	return function (c: FormControl) {
+// 		let endTime = moment(c.value, 'HH:mm').seconds(0);
+// 		startTime = moment().hours(startTime.hours()).minutes(startTime.minutes()).seconds(0);
+// 		console.log(endTime.isAfter(startTime), endTime.format('l'), startTime.format('l'));
+// 		return endTime.isAfter(startTime) ? null : {
+// 			error: 'Session must be shorter than 5 hours!'
+// 		};
+// 	};
+// }
