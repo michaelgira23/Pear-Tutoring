@@ -24,12 +24,26 @@ export class AppComponent implements OnInit {
 		'/register'
 	];
 
+	// Perspective label that will show in the corner if string is not empty
+	label: string = '';
+
 	constructor (
 		private router: Router,
 		private authService: AuthService,
 		private notificationsService: NotificationsService,
 		private userService: UserService
-	) { }
+	) {
+		// Add setter in global window to set perspective
+		Object.defineProperty(window, 'label', {
+			set: value => {
+				if (!value) {
+					this.label = '';
+				} else {
+					this.label = `${value}'s Perspective`;
+				}
+			}
+		});
+	}
 
 	ngOnInit() {
 		this.notificationsService.init();

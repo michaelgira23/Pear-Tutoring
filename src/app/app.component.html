@@ -1,3 +1,8 @@
+<!-- Perspective Label -->
+<div class="perspective-label" *ngIf="label && label.length > 0">
+	<h3>{{ label }}</h3>
+</div>
+
 <div appMdl class="layout mdl-layout mdl-js-layout mdl-layout--fixed-header" [class.mdl-layout--fixed-drawer]="allowSidebar()">
 	<header class="layout-header mdl-layout__header mdl-color--grey-100 mdl-color-text--grey-600">
 		<div class="header-row mdl-layout__header-row">
