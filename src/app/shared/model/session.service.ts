@@ -443,7 +443,7 @@ export class SessionService {
 		// below are only for the public sessions, because we want the private sessions to be unsearchable in the catalogs
 		if (session.listed) {
 			dataToSave[`listedSessions/${sessionId}`] = true;
-			if (session.tags) {
+			if (session.tags.length > 0) {
 				session.tags.forEach(tag => dataToSave[`sessionsByTags/${tag}/${sessionId}`] = true);
 			}
 			if (AllowedSubjects.find((val) => session.subject === val)) {

@@ -2,7 +2,7 @@ import { Observable } from 'rxjs/Rx';
 
 // Helper function to transform array to object with properties as array's values and values as true
 export function arrToObj(arr: string[]): {[key: string]: true} {
-	let objTmp = null;
+	let objTmp = {};
 	arr.forEach(val => {
 		objTmp[val] = true;
 	});
