@@ -30,7 +30,7 @@ export class RegisterComponent implements OnInit {
 	register() {
 		let formValue: RegisterOptions = Object.assign({}, this.form.value);
 		for (let prop in formValue) {
-			if (formValue[prop]) {
+			if (formValue[prop] && typeof formValue[prop] === 'string') {
 				formValue[prop] = formValue[prop].trim();
 			}
 		}
