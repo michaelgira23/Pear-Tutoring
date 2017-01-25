@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Validators, FormGroup, FormBuilder } from '@angular/forms';
+import { Validators, FormGroup, FormBuilder, FormControl, ValidatorFn } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { SessionService, AllowedSubjects } from '../shared/model/session.service';
 import { Session } from '../shared/model/session';
@@ -82,9 +82,9 @@ export class CreateSessionComponent implements OnInit {
 	formInit() {
 		if (this.sessionInfo) {
 			this.createSessionForm = this.fb.group({
-				date: [this.sessionInfo.start.format('YYYY-MM-DD'), Validators.required],
+				date: [this.sessionInfo.start, Validators.required],
 				startTime: [this.sessionInfo.start.format('HH:mm'), Validators.required],
-				endTime: [this.sessionInfo.end.format('HH:mm'), Validators.required],
+				endTime: [this.sessionInfo.end.format('HH:mm'), [Validators.required, validateIsAfter(this.sessionInfo.start)]],
 				grade: [this.sessionInfo.grade, Validators.required],
 				classStr: [this.sessionInfo.classStr, Validators.required],
 				subject: [this.sessionInfo.subject, Validators.required],
@@ -127,4 +127,14 @@ export class CreateSessionComponent implements OnInit {
 		}
 	}
 
+}
+
+function validateIsAfter(startTime: moment.Moment): ValidatorFn {
+	return function (c: FormControl) {
+		let endTime = moment(c.value, 'HH:mm').seconds(0);
+		startTime = moment().hours(startTime.hours()).minutes(startTime.minutes()).seconds(0);
+		return startTime.isBefore(endTime) ? null : {
+			error: 'Session must be shorter than 5 hours!'
+		};
+	};
 }
