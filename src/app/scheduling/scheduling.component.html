@@ -2,36 +2,20 @@
 <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" routerLink="/my-sessions">Go to my scheudle</button>
 
 <div class="search-bar">
-	<h2> Search </h2>
-	<div class="search-input">
-		<form (submit)="findSessionsByProperty(searchOpt)">
-			<fieldset>
-				<input name="searchStr" [(ngModel)]="searchStr">
-				<button type="submit">Find</button>
-			</fieldset>
+	<div class="mdl-grid mdl-shadow--4dp">
+		<div class="mdl-cell mdl-cell--4-col">
+			<h2>Search</h2>
+		</div>
+		
+		<form class="mdl-cell mdl-cell--8-col" (submit)="findSessions()">
+			<div class="mdl-textfield mdl-js-textfield ">
+				<input class="mdl-textfield__input" id="search-input" name="searchStr" [(ngModel)]="searchStr">
+			</div>
+			<button class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab">
+				<i class="material-icons">search</i>
+			</button>
 		</form>
 	</div>
-
-	<label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="search-all" (click)="searchOpt = 'all'">
-		<input type="radio" id="search-all" class="mdl-radio__button" name="options" value="1" checked>
-		<span class="mdl-radio__label">All</span>
-	</label>
-	<label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="search-tags" (click)="searchOpt = 'tags'">
-		<input type="radio" id="search-tags" class="mdl-radio__button" name="options" value="1">
-		<span class="mdl-radio__label">Tag</span>
-	</label>
-	<label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="search-subject" (click)="searchOpt = 'subject'">
-		<input type="radio" id="search-subject" class="mdl-radio__button" name="options" value="1">
-		<span class="mdl-radio__label">Subject</span>
-	</label>
-	<label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="search-classStr" (click)="searchOpt = 'classStr'">
-		<input type="radio" id="search-classStr" class="mdl-radio__button" name="options" value="1">
-		<span class="mdl-radio__label">Class Name</span>
-	</label>
-	<label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="search-grade" (click)="searchOpt = 'grade'">
-		<input type="radio" id="search-grade" class="mdl-radio__button" name="options" value="1">
-		<span class="mdl-radio__label">Grade</span>
-	</label>
 </div>
 
 <app-sessions-with-filter [sessions]="searchResults"></app-sessions-with-filter>

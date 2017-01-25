@@ -10,7 +10,7 @@ import { AuthService } from '../security/auth.service';
 import { WhiteboardService, defaultWhiteboardOptions } from './whiteboard.service';
 import { PermissionsService, Permission } from '../security/permissions.service';
 import * as moment from 'moment';
-import { objToArr, arrToObj, arraysEqual } from '../common/utils';
+import { objToArr, arrToObj, arraysEqual, getEditDistance } from '../common/utils';
 
 export const AllowedSubjects = [
 	'English',
@@ -354,24 +354,39 @@ export class SessionService {
 	}
 
 	// Supported proprties are tags, class, subject, grade
-	findSessionsByProperty(prop: string, searchStr: string, lastKey?: string | Subject<string>): Observable<Session[]> {
+	findSessionsByProperty(prop: string, searchStr: string, lastKey?: string | Subject<string>): Observable<Session[]> | any {
 		// if (Session.prototype[prop] === undefined) {
 		// 	return Observable.throw('property is not defined in session');
 		// }
-		let fbNode = 'sessionsBy' + prop[0].toUpperCase() + prop.slice(1, prop.length) + '/';
-		return this.combineArrWithUser(
-			this.combineArrWithWb(
-				this.db.list(fbNode + searchStr, {query: {
-					orderByKey: true,
-					startAt: lastKey,
-					limitToFirst: PAGE_SIZE
-				}})
-				// List of session ids --> list of session objects without user inserted
-				.flatMap(ids => this.checkAndCombine(ids.map(id => {
-					return this.db.object('sessions/' + id.$key);
-				})))
-			)
-		).map(Session.fromJsonArray);
+		// let fbNode = 'sessionsBy' + prop[0].toUpperCase() + prop.slice(1, prop.length) + '/';
+		// return this.combineArrWithUser(
+		// 	this.combineArrWithWb(
+		// 		this.db.list(fbNode + searchStr, {query: {
+		// 			orderByKey: true,
+		// 			startAt: lastKey,
+		// 			limitToFirst: PAGE_SIZE
+		// 		}})
+		// 		// List of session ids --> list of session objects without user inserted
+		// 		.flatMap(ids => this.checkAndCombine(ids.map(id => {
+		// 			return this.db.object('sessions/' + id.$key);
+		// 		})))
+		// 	)
+		// ).map(Session.fromJsonArray);
+	}
+
+	findSessionsByString(str: string): Observable<Session[]> {
+		let scopes = ['classStr', 'title', 'subject'];
+		return this.findAllSessions().map(sessions => {
+			return sessions.filter(session => {
+				return scopes.some(scope => {
+					if (session[scope]) {
+						return getEditDistance(session[scope], str) < 2;
+					}
+					return false;
+				});
+			});
+		});
+
 	}
 
 	// Find sessions that fits the free times of the user.

@@ -12,12 +12,10 @@ import { Subscription } from 'rxjs/Rx';
 export class SchedulingComponent implements OnInit, OnDestroy {
 
 	searchStr: string = '';
-	searchOpt: string = 'all';
 	searchResults: Session[] = [];
 
 	publicSessions$: Subscription = new Subscription();
-	tagsSessions$: Subscription = new Subscription();
-	propertySessions$: Subscription = new Subscription();
+	resultSessions$: Subscription = new Subscription();
 
 	page: number = 0;
 
@@ -40,22 +38,14 @@ export class SchedulingComponent implements OnInit, OnDestroy {
 		this.publicSessions$.unsubscribe();
 	}
 
-	findSessionsByProperty(prop: string) {
+	findSessions() {
 		if (this.searchStr.length !== 0) {
-			if (!this.tagsSessions$.closed) { this.tagsSessions$.unsubscribe(); }
-			if (!this.propertySessions$.closed) { this.propertySessions$.unsubscribe(); }
 			if (!this.publicSessions$.closed) {this.publicSessions$.unsubscribe(); }
-			if (prop === 'tags') {
-				let tags = this.searchStr.split(',').map(tag => tag.trim());
-				this.tagsSessions$ = this.sessionService.findSessionsByTags(tags, this.page).subscribe(val => {
-					this.searchResults = val;
-				}, console.log);
-			} else {
-				this.propertySessions$ = this.sessionService.findSessionsByProperty(prop, this.searchStr).subscribe(val => {
-					this.searchResults = val;
-				}, console.log);
-			}
+			this.resultSessions$ = this.sessionService.findSessionsByString(this.searchStr).subscribe(sessions => {
+				this.searchResults = sessions;
+			});
 		} else {
+			if (!this.resultSessions$) {this.resultSessions$.unsubscribe()}
 			this.publicSessions$ = this.sessionService.findPublicSessions()
 			.subscribe(
 				val3 => {
