@@ -35,7 +35,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 	// indicator for if the user has rated the session
 	get rated(): boolean {
 		return this.sessionInfo.rating ? !!this.sessionInfo.rating.find(rating => {
-			return rating.user.$key === this.sessionService.uid;
+			return rating.user === this.sessionService.uid;
 		}) : false;
 	};
 

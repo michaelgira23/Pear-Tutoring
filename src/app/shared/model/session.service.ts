@@ -429,7 +429,7 @@ export class SessionService {
 		if (session.listed) {
 			dataToSave[`listedSessions/${sessionId}`] = true;
 			if (session.tags) {
-				session.tags.forEach(tag => dataToSave[`sessionsByTags/${tag}/${sessionId}`] = true);s
+				session.tags.forEach(tag => dataToSave[`sessionsByTags/${tag}/${sessionId}`] = true);
 			}
 			if (AllowedSubjects.find((val) => session.subject === val)) {
 				dataToSave[`sessionsBySubject/${session.subject}/${sessionId}`] = true;
@@ -465,7 +465,7 @@ export class SessionService {
 			return this.chatService.createChat();
 		})
 		.flatMap(chat => {
-			chatId = chat;
+			chatId = chat.getKey();
 			const newSessionKey = this.sdkDb.child('sessions').push().key;
 			session.whiteboard = wbId;
 			session.chat = chatId;

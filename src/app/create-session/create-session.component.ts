@@ -7,6 +7,7 @@ import * as moment from 'moment';
 import { UserService } from '../shared/model/user.service';
 import { User } from '../shared/model/user';
 import { Subscription } from 'rxjs/Rx';
+import { DateModel } from 'ng2-datepicker';
 
 @Component({
 	selector: 'app-create-session',
@@ -40,6 +41,10 @@ export class CreateSessionComponent implements OnInit {
 
 	findSession$: Subscription;
 
+	get formPristine(): boolean {
+		return this.createSessionForm.pristine;
+	}
+
 	constructor(
 		private fb: FormBuilder,
 		private router: Router,
@@ -49,6 +54,8 @@ export class CreateSessionComponent implements OnInit {
 	) { }
 
 	ngOnInit() {
+
+		this.createSessionForm.controls['endTime'].setValidators(validateIsAfter(moment(this.createSessionForm.value.startTime, 'HH:mm')));
 
 		this.route.params.subscribe(params => {
 			if (params['id']) {
@@ -81,8 +88,15 @@ export class CreateSessionComponent implements OnInit {
 
 	formInit() {
 		if (this.sessionInfo) {
+			let dateModel = new DateModel({
+				day: this.sessionInfo.start.day().toString(),
+				month: this.sessionInfo.start.month().toString(),
+				year: this.sessionInfo.start.year().toString(),
+				formatted: this.sessionInfo.start.format('YYYY-MM-DD'),
+				momentObj: this.sessionInfo.start.clone()
+			});
 			this.createSessionForm = this.fb.group({
-				date: [this.sessionInfo.start, Validators.required],
+				date: [dateModel, Validators.required],
 				startTime: [this.sessionInfo.start.format('HH:mm'), Validators.required],
 				endTime: [this.sessionInfo.end.format('HH:mm'), [Validators.required, validateIsAfter(this.sessionInfo.start)]],
 				grade: [this.sessionInfo.grade, Validators.required],
