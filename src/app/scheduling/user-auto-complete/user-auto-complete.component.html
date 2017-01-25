@@ -11,7 +11,7 @@
 
 		<ul class="drop-down mdl-shadow--4dp">
 			<li class="drop-down-items" *ngFor="let user of userResults; let i = index" (click)="addUser($event, i)" [hidden]="containsUser(user, selectedUsers)">
-				<app-user-chip [user]="user"></app-user-chip>
+				<app-user-chip [user]="user" [clickable]="false"></app-user-chip>
 			</li>
 		</ul>
 	</div>

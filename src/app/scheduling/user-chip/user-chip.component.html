@@ -1,4 +1,4 @@
-<span *ngIf="user" class="mdl-chip mdl-chip--contact mdl-chip--deletable" (click)="viewUser()">
+<span *ngIf="user" class="mdl-chip mdl-chip--contact mdl-chip--deletable" (click)="viewUser($event)" [style.cursor]="clickable ? 'pointer' : 'initial'">
 	<img *ngIf="user.pfp" class="mdl-chip__contact" [src]="user.pfp">
 	<span *ngIf="!user.pfp" class="mdl-chip__contact mdl-color--teal mdl-color-text--white">{{ user.name[0] }}</span>
 	<span class="mdl-chip__text username">{{ user.name }}</span>

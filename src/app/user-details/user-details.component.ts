@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { SessionService } from '../shared/model/session.service';
 import { UserService } from '../shared/model/user.service';
 import { User } from '../shared/model/user';
@@ -42,7 +42,10 @@ export class UserDetailsComponent implements OnInit {
 			}, 0) / this.userRatings.length;
 	}
 
-	constructor(private sessionService: SessionService, private userService: UserService, private route: ActivatedRoute) { }
+	constructor(private sessionService: SessionService,
+				private userService: UserService,
+				private route: ActivatedRoute,
+				private router: Router) { }
 
 	ngOnInit() {
 		this.uid = this.route.snapshot.params['uid'];
@@ -58,6 +61,10 @@ export class UserDetailsComponent implements OnInit {
 				this.userInfo = user;
 			}
 		);
+	}
+
+	gotoSession(id: string) {
+		this.router.navigate(['session', id, 'details']);
 	}
 
 }

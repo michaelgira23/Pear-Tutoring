@@ -246,7 +246,7 @@ export class SessionService {
 	}
 
 	// find a single session and combine it with user data
-	findSession(id: string): Observable<any> {
+	findSession(id: string): Observable<Session> {
 		return this.combineWithRatings(
 			this.combineWithUser(
 				this.combineWithWb(
@@ -428,7 +428,9 @@ export class SessionService {
 		// below are only for the public sessions, because we want the private sessions to be unsearchable in the catalogs
 		if (session.listed) {
 			dataToSave[`listedSessions/${sessionId}`] = true;
-			session.tags.forEach(tag => dataToSave[`sessionsByTags/${tag}/${sessionId}`] = true);
+			if (session.tags) {
+				session.tags.forEach(tag => dataToSave[`sessionsByTags/${tag}/${sessionId}`] = true);s
+			}
 			if (AllowedSubjects.find((val) => session.subject === val)) {
 				dataToSave[`sessionsBySubject/${session.subject}/${sessionId}`] = true;
 			}
@@ -463,7 +465,7 @@ export class SessionService {
 			return this.chatService.createChat();
 		})
 		.flatMap(chat => {
-			chatId = chat.key;
+			chatId = chat;
 			const newSessionKey = this.sdkDb.child('sessions').push().key;
 			session.whiteboard = wbId;
 			session.chat = chatId;
@@ -658,8 +660,11 @@ export class SessionService {
 	}
 
 	changeRating(sessionId: string, uid: string, rating: any): Observable<any> {
-		return this.promiseToObservable(this.db.object(`ratingsBySessions/${sessionId}/${uid}`)
+		return this.findSession(sessionId).take(1).flatMap(session => {
+			if (!session.tutees.find(tutee => tutee.$key === this.uid)) { return Observable.throw('You are not participating in the session!'); }
+			return this.promiseToObservable(this.db.object(`ratingsBySessions/${sessionId}/${uid}`)
 			.set(Object.assign(rating, {time: firebase.database.ServerValue.TIMESTAMP})));
+		});
 	}
 }
 

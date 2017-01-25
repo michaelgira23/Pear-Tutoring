@@ -1,5 +1,5 @@
 <div class="mdl-grid" *ngIf="sessionInfo">
-	<div class="session-title-container mdl-cell--12-col" [style.background-color]="sessionInfo.color">
+	<div class="session-title-container mdl-cell--12-col mdl-shadow--4dp" [style.background-color]="sessionInfo.color">
 		<h2 class="session-title">{{ sessionInfo.title }}</h2>
 		<div class="session-tags">
 			<div class="mdl-chip" *ngFor="let tag of sessionInfo.tags">
@@ -10,24 +10,25 @@
 	</div>
 </div>
 <div class="mdl-grid" *ngIf="sessionInfo">
-	<div class="mdl-cell mdl-cell--8-col">
+	<div class="session-info-container mdl-cell mdl-cell--7-col mdl-card mdl-shadow--4dp">
 		<div class="session-snapshots">
 			<img *ngFor="let wb of sessionInfo.whiteboards" [src]="wb.snapshot">
 		</div>
 		<h5>Created By: <app-user-chip [user]="sessionInfo.tutor"></app-user-chip></h5>
 		<h5>Tutees: <app-user-chip *ngFor="let tutee of sessionInfo.tutees" [user]="tutee"></app-user-chip></h5>
 	</div>
-	<div class="session-comments-container mdl-cell mdl-cell--4-col">
+	<div class="session-comments-container mdl-cell mdl-cell--5-col mdl-card mdl-shadow--4dp">
+		<div class="mdl-card__title">
+			<h4 class="mdl-card__title-text">Session Comments</h4>
+			<button class="mdl-button mdl-js-button mdl-js-ripple-effect" (click)="openPopup('rating')">Rate</button>
+		</div>
 		<div class="session-comments" *ngIf="sessionInfo">
 			<ul class="demo-list-three mdl-list">
-				<h4>Session Comments
-					<button class="mdl-button mdl-js-button mdl-js-ripple-effect" (click)="openPopup('rating')">Rate</button>
-				</h4>
 				<li class="session-comments-item mdl-list__item mdl-list__item--three-line" *ngFor="let rating of sessionInfo.rating">
 					<span class="mdl-list__item-primary-content">
 						<i class="material-icons mdl-list__item-avatar" *ngIf="!rating.user.pfp">person</i>
 						<img class="mdl-list__item-avatar" [src]="rating.user.pfp" *ngIf="rating.user.pfp">
-						<span>{{ rating.user.name }} ({{ rating.time.format('l') }})</span>
+						<span>{{ rating.user.name }} <small>({{ rating.time.format('l') }})</small></span>
 						<span class="mdl-list__item-text-body">
 						{{ rating.comment }}
 						</span>
@@ -37,6 +38,15 @@
 					</span>
 				</li>
 			</ul>
+		</div>
+	</div>
+</div>
+
+<div class="mdl-grid" *ngIf="tutorSessions && tuteeSessions">
+	<div class="mdl-cell mdl-cell--12-col">
+		<h4>Sessions {{ userInfo.firstName }} is tutoring </h4>
+		<div class="mdl-grid">
+			<app-session-card class="mdl-cell mdl-cell--4-col" *ngFor="let session of tutorSessions" [session]="session" type="display"></app-session-card>
 		</div>
 	</div>
 </div>
