@@ -1,42 +1,59 @@
+<main class="mdl-layout__content">
+<div class="mdl-layout__tab-panel is-active">
 <!-- Only show if there is a session currently taking place -->
-<div class="current-session session-card session-card--other mdl-card mdl-shadow--2dp">
-	<div class="mdl-card__title mdl-card--expand">
-		<h1>
-			Current Session
-			<br>
-			<small>Happening now!</small>
-		</h1>
-	</div>
-	<div class="mdl-card__supporting-text">
-		Session Description Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-		Mauris sagittis pellentesque lacus eleifend lacinia...
-	</div>
-	<div class="mdl-card__actions mdl-card--border">
-		<a class="mdl-button mdl-button--raised mdl-button--primary mdl-js-button mdl-js-ripple-effect">
-			Join Session
-		</a>
-		<a class="mdl-button mdl-button--primary mdl-js-button mdl-js-ripple-effect">
-			Details
-		</a>
-		<div class="mdl-layout-spacer"></div>
-		<span class="subject-icon icomoon icomoon-rocket"></span>
+<div class="mdl-grid">
+	<div class="current-session session-card session-card--other mdl-card mdl-shadow--2dp mdl-card--expand">
+		<div class="mdl-card__supporting-text">
+			<h1>Current Session</h1>
+			<h6>Happening Now!</h6>
+		</div>
+		<div class="mdl-card__actions mdl-card--border">
+			<a class="mdl-button mdl-button--raised mdl-button--primary mdl-js-button mdl-js-ripple-effect">
+				Join Session
+			</a>
+			<a class="mdl-button mdl-button--primary mdl-js-button mdl-js-ripple-effect">
+				Details
+			</a>
+			<div class="mdl-layout-spacer"></div>
+			<span class="subject-icon icomoon icomoon-rocket"></span>
+		</div>
 	</div>
 </div>
 
 <div class="mdl-grid">
 	<div class="mdl-cell mdl-cell--4-col">
-		<h1>Upcoming<button routerLink="/my-sessions" class="mdl-button mdl-js-button mdl-js-ripple-effect">My Sessions</button></h1>
-		<app-session-card *ngFor="let session of upcomingSessions" [session]="session" type="display"></app-session-card>
-		<p *ngIf="!upcomingSessions || upcomingSessions.length === 0" class="empty-column mdl-color-text--grey-600">No upcoming sessions!</p>
+		<div class="mdl-card mdl-shadow--2dp">
+			<div class="mdl-card__supporting-text">
+				<h1>Upcoming<button routerLink="/my-sessions" class="mdl-button mdl-js-button mdl-js-ripple-effect">My Sessions</button></h1>
+				<p *ngIf="!upcomingSessions || upcomingSessions.length === 0" class="empty-column mdl-color-text--grey-600">No upcoming sessions!</p>
+			</div>
+			<div class="mdl-grid" style="width: 100%">
+				<app-session-card *ngFor="let session of upcomingSessions" [session]="session" type="display"></app-session-card>
+			</div>
+		</div>
 	</div>
 	<div class="mdl-cell mdl-cell--4-col">
-		<h1>Available Sessions<button routerLink="/search" class="mdl-button mdl-js-button mdl-js-ripple-effect">View More</button></h1>
-		<app-session-card *ngFor="let session of availableSessions" [session]="session" type="display"></app-session-card>
-		<p *ngIf="!availableSessions || availableSessions.length === 0" class="empty-column mdl-color-text--grey-600">No available sessions at the moment!</p>
+		<div class="mdl-card mdl-shadow--2dp">
+			<div class="mdl-card__supporting-text">
+				<h1>Available Sessions<button routerLink="/search" class="mdl-button mdl-js-button mdl-js-ripple-effect">View More</button></h1>
+				<p *ngIf="!availableSessions || availableSessions.length === 0" class="empty-column mdl-color-text--grey-600">No available sessions at the moment!</p>
+			</div>
+			<div class="mdl-grid" style="width: 100%">
+				<app-session-card *ngFor="let session of availableSessions" [session]="session" type="display"></app-session-card>
+			</div>
+		</div>
 	</div>
 	<div class="mdl-cell mdl-cell--4-col">
-		<h1>Pending Enrollments</h1>
-		<app-session-card *ngFor="let enrollment of pendingEnrollments" [session]="enrollment.session" [user]="enrollment.user" type="pending"></app-session-card>
-		<p *ngIf="!pendingEnrollments || pendingEnrollments.length === 0" class="empty-column mdl-color-text--grey-600">No pending enrollments at the moment!</p>
+		<div class="mdl-card mdl-shadow--2dp">
+			<div class="mdl-card__supporting-text">
+				<h1>Pending Enrollments</h1>
+				<p *ngIf="!pendingEnrollments || pendingEnrollments.length === 0" class="empty-column mdl-color-text--grey-600">No pending enrollments at the moment!</p>
+			</div>
+			<div class="mdl-grid" style="width: 100%">
+				<app-session-card *ngFor="let enrollment of pendingEnrollments" [session]="enrollment.session" [user]="enrollment.user" type="pending"></app-session-card>
+			</div>
+		</div>
 	</div>
 </div>
+</div>
+</main>
