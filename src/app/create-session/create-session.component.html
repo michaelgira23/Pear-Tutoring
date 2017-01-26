@@ -38,15 +38,11 @@
 			<span class="mdl-textfield__error">Input is not a valid grade!</span>
 		</div>
 
-		<div class="mdl-cell mdl-cell--4-col mdl-textfield mdl-js-textfield mdl-textfield--floating-label getmdl-select">
-		<input class="mdl-textfield__input" formControlName="subject" id="subject" type="text">
-			<label for="subject">
-				<i class="mdl-icon-toggle__label material-icons">keyboard_arrow_down</i>
-			</label>
+		<div class="mdl-cell mdl-cell--4-col">
 			<label class="mdl-textfield__label" for="subject">Subject</label>
-			<ul class="mdl-menu mdl-menu--bottom-left mdl-js-menu" for="subject">
-				<li *ngFor="let option of allowedSubjects">{{ option }}</li>
-			</ul>
+			<select formControlName="subject" for="subject">
+				<option *ngFor="let option of allowedSubjects">{{ option }}</option>
+			</select>
 		</div>
 
 		<div class="mdl-cell mdl-cell--4-col mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
