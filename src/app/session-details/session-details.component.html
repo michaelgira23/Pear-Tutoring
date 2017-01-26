@@ -1,21 +1,25 @@
 <div class="mdl-grid" *ngIf="sessionInfo">
 	<div class="session-title-container mdl-cell--12-col mdl-shadow--4dp" [style.background-color]="sessionInfo.color">
-		<h2 class="session-title">{{ sessionInfo.title }}</h2>
-		<div class="session-tags">
-			<div class="mdl-chip" *ngFor="let tag of sessionInfo.tags">
-				<span class="mdl-chip__text">{{ tag }}</span>
+		<div class="mdl-card__supporting-text">
+			<h2 class="session-title">{{ sessionInfo.title }}</h2>
+			<h6 class="session-subtitle">{{ sessionInfo.desc }}</h6>
+			<div class="session-tags">
+				<div class="mdl-chip" *ngFor="let tag of sessionInfo.tags">
+					<span class="mdl-chip__text">{{ tag }}</span>
+				</div>
 			</div>
 		</div>
-		<h6 class="session-subtitle">{{ sessionInfo.desc }}</h6>
 	</div>
 </div>
 <div class="mdl-grid" *ngIf="sessionInfo">
 	<div class="session-info-container mdl-cell mdl-cell--7-col mdl-card mdl-shadow--4dp">
-		<div class="session-snapshots">
-			<img *ngFor="let wb of sessionInfo.whiteboards" [src]="wb.snapshot">
+		<div class="mdl-card__supporting-text">
+			<div class="session-snapshots">
+				<img *ngFor="let wb of sessionInfo.whiteboards" [src]="wb.snapshot">
+			</div>
+			<h5>Created By: <app-user-chip [user]="sessionInfo.tutor"></app-user-chip></h5>
+			<h5>Tutees: <app-user-chip *ngFor="let tutee of sessionInfo.tutees" [user]="tutee"></app-user-chip></h5>
 		</div>
-		<h5>Created By: <app-user-chip [user]="sessionInfo.tutor"></app-user-chip></h5>
-		<h5>Tutees: <app-user-chip *ngFor="let tutee of sessionInfo.tutees" [user]="tutee"></app-user-chip></h5>
 	</div>
 	<div class="session-comments-container mdl-cell mdl-cell--5-col mdl-card mdl-shadow--4dp">
 		<div class="mdl-card__title">

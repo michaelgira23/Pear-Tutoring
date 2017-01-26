@@ -200,11 +200,6 @@ function stringToColorObject(string: string): Color {
 
 // Deserialization of color
 function colorObjectToString(color: Color | string): string {
-
 	// If color is already a string, return
-	if (typeof color !== 'object') {
-		return String(color);
-	}
-
-	return `rgba(${color.red}, ${color.green}, ${color.blue}, ${color.alpha})`;
+	return typeof color !== 'object' ? String(color) : `rgba(${color.red}, ${color.green}, ${color.blue}, ${color.alpha})`;
 }
