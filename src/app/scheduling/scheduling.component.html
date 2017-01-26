@@ -6,8 +6,8 @@
 		<div class="mdl-cell mdl-cell--4-col">
 			<h2>Search</h2>
 		</div>
-		
-		<form class="mdl-cell mdl-cell--8-col" (submit)="findSessions()">
+
+		<form class="mdl-cell mdl-cell--8-col" (keyup)="findSessions()">
 			<div class="mdl-textfield mdl-js-textfield ">
 				<input class="mdl-textfield__input" id="search-input" name="searchStr" [(ngModel)]="searchStr">
 			</div>

@@ -47,7 +47,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 					// Filter out any sessions that have aleady happened
 					.filter(session => moment().unix() < session.end.unix())
 					// Sort by starting timestamp
-					.sort((a, b) => b.start.unix() - a.start.unix());
+					.sort((a, b) => a.start.unix() - b.start.unix());
 			})
 			.subscribe(
 				sessions => {
@@ -89,7 +89,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 						return true;
 					})
 					// Sort by starting timestamp
-					.sort((a, b) => b.start.unix() - a.start.unix())
+					.sort((a, b) => a.start.unix() - b.start.unix())
 					// Only get the first 5 sessions
 					.slice(0, 6);
 			})
@@ -121,7 +121,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 					// Filter out any sessions that have aleady happened
 					.filter(session => moment().unix() < session.end.unix())
 					// Sort by starting timestamp
-					.sort((a, b) => b.start.unix() - a.start.unix())
+					.sort((a, b) => a.start.unix() - b.start.unix())
 					// Only keep sessions that should be in pending column
 					.forEach(session => {
 						// If tutor and there's pending, add all users in pending
