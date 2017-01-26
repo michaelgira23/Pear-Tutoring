@@ -1,4 +1,4 @@
-<div class="session-card mdl-card mdl-shadow--2dp" [ngClass]="'session-card--' + session.subject.toLowerCase()">
+<div class="session-card mdl-card mdl-shadow--2dp" [ngClass]="'session-card--' + session.subject.toLowerCase()" [attr.data-session-id]="session?.$key">
 	<!-- Show for regular class -->
 	<ng-container *ngIf="!displayPendingUserPic">
 		<div class="mdl-card__title mdl-card--expand">
@@ -41,6 +41,18 @@
 		<div class="mdl-layout-spacer"></div>
 		<span class="subject-icon icomoon" [ngClass]="'icomoon-' + (subjectToLabel[session.subject.toLowerCase()] ? subjectToLabel[session.subject.toLowerCase()] : subjectToLabel.default)"></span>
 	</div>
+	<!-- Possible menu if user is tutor -->
+	<div class="mdl-card__menu" *ngIf="isTutor">
+		<button [id]="'menuId'" class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect">
+			<i class="material-icons">more_vert</i>
+		</button>
+	</div>
+	<ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" [attr.for]="'menuId'">
+		<li class="mdl-menu__item">Some Action</li>
+		<li class="mdl-menu__item">Another Action</li>
+		<li disabled class="mdl-menu__item">Disabled Action</li>
+		<li class="mdl-menu__item">Yet Another Action</li>
+	</ul>
 </div>
 
 <!-- <div class="session-container" [ngClass]="subject">

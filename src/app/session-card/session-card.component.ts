@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, Input} from '@angular/core';
 import { Router } from '@angular/router';
 import { FirebaseAuthState } from 'angularfire2';
+import { UUID } from 'angular2-uuid';
 
 import { AuthService } from '../shared/security/auth.service';
 import { Session } from '../shared/model/session';
@@ -80,7 +81,7 @@ export class SessionCardComponent implements OnInit, OnDestroy {
 	};
 
 	@Input()
-	type: CardType;
+	type: CardType = 'display';
 
 	@Input()
 	session: Session;
@@ -91,6 +92,8 @@ export class SessionCardComponent implements OnInit, OnDestroy {
 
 	authSubscription: any;
 	authInfo: FirebaseAuthState;
+
+	menuId = UUID.UUID();
 
 	get sessionDate(): string {
 		return this.session.start.format('M/D/Y');
@@ -140,8 +143,7 @@ export class SessionCardComponent implements OnInit, OnDestroy {
 		return this.isTutor || this.isTutee;
 	}
 
-	constructor(private router: Router, private authService: AuthService, private sessionService: SessionService) {
-	}
+	constructor(private router: Router, private authService: AuthService, private sessionService: SessionService) { }
 
 	ngOnInit() {
 		this.authSubscription = this.authService.auth$.subscribe(authInfo => this.authInfo = authInfo);
