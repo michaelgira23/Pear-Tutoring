@@ -355,9 +355,9 @@ export class SessionService {
 
 	// Supported proprties are tags, class, subject, grade
 	findSessionsByProperty(prop: string, searchStr: string, lastKey?: string | Subject<string>): Observable<Session[]> | any {
-		if (Session.prototype[prop] === undefined) {
-			return Observable.throw('property is not defined in session');
-		}
+		// if (Session.prototype[prop] === undefined) {
+		// 	return Observable.throw('property is not defined in session');
+		// }
 		let fbNode = 'sessionsBy' + prop[0].toUpperCase() + prop.slice(1, prop.length) + '/';
 		return this.combineArrWithUser(
 			this.combineArrWithWb(
