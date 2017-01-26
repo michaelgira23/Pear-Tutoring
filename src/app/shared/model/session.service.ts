@@ -402,14 +402,14 @@ export class SessionService {
 				queryList.push(this.findSessionsByProperty('ywd', dayInNextWeek.format('YYYY-WW-E'), lastKey).map(sessions => {
 					let sessionsList: Session[] = [];
 					sessions.forEach(session => {
-						if (session.grade === this.currentUser.grade) {
+						// if (session.grade === this.currentUser.grade) {
 							timesInDay[day].forEach(time => {
 								if (secFromMdn(moment(session.start, 'X')) <= secFromMdn(time.from)
 									&& secFromMdn(moment(session.end, 'X')) >= secFromMdn(time.to)) {
 									sessionsList.push(session);
 								}
 							});
-						}
+						// }
 					});
 					return sessionsList;
 				}).map(Session.fromJsonArray));
@@ -480,7 +480,7 @@ export class SessionService {
 			return this.chatService.createChat();
 		})
 		.flatMap(chat => {
-			chatId = chat.getKey();
+			chatId = chat.key;
 			const newSessionKey = this.sdkDb.child('sessions').push().key;
 			session.whiteboard = wbId;
 			session.chat = chatId;
