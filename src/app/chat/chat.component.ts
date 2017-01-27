@@ -171,7 +171,9 @@ export class ChatComponent implements OnInit, OnChanges, OnDestroy {
 	reTypeset() {
 		// README: i honestly do not care enough to have this refresh each individual item.
 		// it's a demo. not worth the effort at the moment
-		MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
+		setTimeout(() => {
+			MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
+		}, 0);
 	}
 
 	notificationFormat(msg: Message) {
