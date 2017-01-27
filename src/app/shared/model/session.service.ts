@@ -317,15 +317,9 @@ export class SessionService {
 
 	// Find all of the sessions where the listed field is true.
 	findPublicSessions(lastKey?: string | Subject<string>): Observable<Session[]> {
-		return this.db.list('listedSessions', {
-				query: {
-					orderByKey: true,
-					startAt: lastKey,
-					limitToFirst: PAGE_SIZE
-				}
-			})
+		return this.db.list('listedSessions')
 			.flatMap(ids => {
-			return this.checkAndCombine(ids.map(id => this.findSession(id.$key)));
+				return this.checkAndCombine(ids.map(id => this.findSession(id.$key)));
 			})
 			.map(Session.fromJsonArray);
 	}
