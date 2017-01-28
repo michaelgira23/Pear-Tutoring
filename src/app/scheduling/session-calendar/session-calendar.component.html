@@ -1,13 +1,16 @@
 <div class="container-fluid">
-	<h2>{{ viewDate | date }}</h2>
+	<h3>{{ viewDate | date }}</h3>
 	<div class="btn-group">
-		<button (click)="lastMonth()" class="btn btn-default">Last Month</button>
-		<button (click)="nextMonth()" class="btn btn-default">Next Month</button>
+		<h6>Navigation</h6>
+		<button (click)="lastMonth()" class="btn btn-default mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">Last Month</button>
+		<button (click)="nextMonth()" class="btn btn-default mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">Next Month</button>
 	</div>
 	<div class="btn-group">
-		<div class="btn btn-primary" (click)="view = 'month'" [class.active]="view === 'month'">Month</div>
-		<div class="btn btn-primary" (click)="view = 'week'" [class.active]="view === 'week'">Week</div>
-		<div class="btn btn-primary" (click)="view = 'day'" [class.active]="view === 'day'">Day</div>
+		<h6>Calendar View</h6>
+		<button class="btn btn-primary mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" (click)="view = 'month'" [class.active]="view === 'month'">Month</button>
+		<button class="btn btn-primary mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" (click)="view = 'week'" [class.active]="view === 'week'">Week</button>
+		<button class="btn btn-primary mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" (click)="view = 'day'" [class.active]="view === 'day'">Day</button>
+		<h6></h6>
 	</div>
 
 	<div [ngSwitch]="view">
