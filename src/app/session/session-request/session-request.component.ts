@@ -32,13 +32,13 @@ export class SessionRequestComponent extends SessionPopup implements OnInit, Aft
 
 	addTutee(id: string) {
 		this.sessionService.addTutees(this.sessionId, id).subscribe(val => {
-			console.log('enrolled pending tutee');
+			// console.log('enrolled pending tutee');
 		}, console.log);
 	}
 
 	denyTutee(id: string) {
 		this.sessionService.denyPending(this.sessionId, id).subscribe(val => {
-			console.log('denied pending tutee');
+			// console.log('denied pending tutee');
 		}, console.log);
 	}
 

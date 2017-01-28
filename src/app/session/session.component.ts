@@ -63,7 +63,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 			this.findSession$ = this.sessionService.combineWithRatings(this.sessionService.findSession(this.sessionId)).subscribe(session => {
 				this.sessionExist = true;
 				this.sessionInfo = session;
-				console.log(session);
+				// console.log(session);
 				this.permissionsService.getUserPermission(this.sessionId, 'session').subscribe(perm => {
 					this.perm = perm;
 					if (!perm.read) {
@@ -104,7 +104,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 			if (this.selectedWbIndex > 0) {
 				this.selectedWbIndex = this.sessionInfo.whiteboards.length - 1;
 			}
-			console.log('added Whiteboard');
+			// console.log('added Whiteboard');
 		}, console.log);
 	}
 
@@ -114,7 +114,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 				if (this.selectedWbIndex > 0) {
 					this.selectedWbIndex -= 1;
 				}
-				console.log('deleted whiteboard');
+				// console.log('deleted whiteboard');
 			}, console.log);
 		}
 	}
@@ -122,7 +122,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 	addTutee(user: User) {
 		if (user.$key !== this.sessionInfo.tutor.$key) {
 			this.sessionService.addTutees(this.sessionId, user.$key).subscribe(val => {
-				console.log('request pending');
+				// console.log('request pending');
 			}, err => {
 				console.log(err);
 				let tutees = Object.assign([], this.sessionInfo.tutees); this.sessionInfo.tutees = tutees;
@@ -132,7 +132,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 
 	removeTutee(user: User) {
 		this.sessionService.removeTutees(this.sessionId, user.$key).subscribe(val => {
-			console.log('removed tutee');
+			// console.log('removed tutee');
 		}, console.log);
 	}
 

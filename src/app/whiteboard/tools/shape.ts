@@ -175,7 +175,7 @@ export class Shape {
 			this.whiteboard.whiteboardService.createMarking(this.whiteboard.key, markingOptions)
 				.subscribe(
 					data => {
-						console.log('successfully added shape', data);
+						// console.log('successfully added shape', data);
 					},
 					err => {
 						console.log('add shape error', err);

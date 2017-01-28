@@ -44,7 +44,7 @@ export class SessionDetailsComponent implements OnInit {
 		.subscribe(
 			(session: Session) => {
 				this.sessionInfo = session;
-				console.log(session);
+				// console.log(session);
 				this.permissionsService.getUserPermission(this.sessionId, 'session').subscribe(perm => {
 					this.perm = perm;
 				}, console.log);

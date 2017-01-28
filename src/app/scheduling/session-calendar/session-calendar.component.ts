@@ -34,7 +34,7 @@ export class SessionCalendarComponent implements OnInit, OnChanges {
 	actions: EventAction[] = [{
 		label: '<i class="fa fa-fw fa-pencil"></i>',
 		onClick: ({event}: {event: CalendarEvent}): void => {
-			console.log('Edit event', event);
+			// console.log('Edit event', event);
 		}
 	}, {
 		label: '<i class="fa fa-fw fa-times"></i>',

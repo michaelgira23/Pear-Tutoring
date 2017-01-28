@@ -32,12 +32,12 @@ export class CreateChatComponent implements OnInit {
 			data => {
 				let chatKey = data.getKey();
 
-				console.log('New chat room successfully created!');
-				console.log(`New chat room key: ${chatKey}`);
+				// console.log('New chat room successfully created!');
+				// console.log(`New chat room key: ${chatKey}`);
 
 				this.permissionsService.createPermission(chatKey, 'chat', this.permissions).subscribe(
-					data => {
-						console.log(`Created chat permissions: ${data}`);
+					permData => {
+						// console.log(`Created chat permissions: ${permData}`);
 						this.router.navigate(['chat', chatKey]);
 					},
 					err => {

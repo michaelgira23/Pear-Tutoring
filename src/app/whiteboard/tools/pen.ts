@@ -75,7 +75,7 @@ export class Pen {
 			this.whiteboard.whiteboardService.createMarking(this.whiteboard.key, markingOptions)
 				.subscribe(
 					data => {
-						console.log('successfully added marking', data);
+						// console.log('successfully added marking', data);
 					},
 					err => {
 						console.log('add marking error', err);

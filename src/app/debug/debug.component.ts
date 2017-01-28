@@ -32,7 +32,7 @@ export class DebugComponent implements OnInit {
 		this.sessionService.deleteSession(this.deleteSessionId)
 			.subscribe(
 				data => {
-					console.log(`delete successful! ${data}`);
+					// console.log(`delete successful! ${data}`);
 				},
 				err => {
 					console.log(`error deleting session ${err}`);

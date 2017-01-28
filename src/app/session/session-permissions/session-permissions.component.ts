@@ -95,7 +95,7 @@ export class SessionPermissionsComponent extends SessionPopup implements OnInit 
 		}
 
 		Observable.combineLatest(queryList).subscribe(val => {
-			console.log('permission updated');
+			// console.log('permission updated');
 		}, console.log);
 	}
 

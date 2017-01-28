@@ -33,14 +33,14 @@ export class CreateWhiteboardComponent implements OnInit {
 		this.whiteboardService.createWhiteboard(this.options)
 			.subscribe(
 				whiteboard => {
-					console.log('create whiteboard successful', whiteboard);
-					console.log('new whiteboard key', whiteboard.getKey());
+					// console.log('create whiteboard successful', whiteboard);
+					// console.log('new whiteboard key', whiteboard.getKey());
 
 					// Set whiteboard permissions
 					this.permissionService.createPermission(whiteboard.getKey(), 'whiteboard', this.permissions)
 						.subscribe(
 							data => {
-								console.log('created permissions', data);
+								// console.log('created permissions', data);
 								this.router.navigate(['whiteboard', whiteboard.getKey()]);
 							},
 							err => {

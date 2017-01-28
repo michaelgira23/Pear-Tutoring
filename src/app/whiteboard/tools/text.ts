@@ -117,7 +117,7 @@ export class Text {
 				this.whiteboard.whiteboardService.editText(this.whiteboard.key, textKey, textOptions)
 					.subscribe(
 						data => {
-							console.log('successfully edited text', data);
+							// console.log('successfully edited text', data);
 						},
 						err => {
 							console.log('edit text error', err);
@@ -128,7 +128,7 @@ export class Text {
 				this.whiteboard.whiteboardService.createText(this.whiteboard.key, textOptions)
 					.subscribe(
 						data => {
-							console.log('successfully added text', data);
+							// console.log('successfully added text', data);
 						},
 						err => {
 							console.log('add text error', err);

@@ -24,12 +24,12 @@ export class ChatService {
 
 				// Check if there are any status updates in the queue before authInfo was initialized
 				if (typeof this.authInfo !== 'undefined' && this.queue.length > 0) {
-					console.log('handle queue of length', this.queue.length, this.authInfo);
+					// console.log('handle queue of length', this.queue.length, this.authInfo);
 					this.queue.forEach(value => {
 						this.sendStatus(value.status, value.chatKey, value.statusKey)
 							.subscribe(
 								key => {
-									console.log('set status success', key);
+									// console.log('set status success', key);
 								},
 								err => {
 									console.log('set status error', err);

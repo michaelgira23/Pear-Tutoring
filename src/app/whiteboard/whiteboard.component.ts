@@ -203,7 +203,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 					if (this.styleOptions[styleKey][prop] === value) {
 						return;
 					}
-					console.log('edit style options', styleKey, prop, value);
+					// console.log('edit style options', styleKey, prop, value);
 
 					// Set like normal
 					obj[prop] = value;
@@ -231,7 +231,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 				if (this.fontOptions[prop] === value) {
 					return;
 				}
-				console.log('edit font options', prop, value);
+				// console.log('edit font options', prop, value);
 
 				// Set like normal
 				obj[prop] = value;
@@ -335,7 +335,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		const readChanged = this.shouldRead !== oldPermissions.read;
 		const writeChanged = this.shouldWrite !== oldPermissions.write;
 
-		console.log(`new permissions read: ${this.shouldRead}, write: ${this.shouldWrite}`);
+		// console.log(`new permissions read: ${this.shouldRead}, write: ${this.shouldWrite}`);
 
 		if (readChanged) {
 			if (this.shouldRead) {
@@ -390,11 +390,11 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		const point = this.cursorPoint(event);
 		if (event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]) {
 			const uploadFile = event.dataTransfer.files[0];
-			console.log('file', uploadFile);
+			// console.log('file', uploadFile);
 			this.whiteboardService.uploadImage(this.key, uploadFile, point.x, point.y)
 				.subscribe(
 					data => {
-						console.log('successfully uploaded image', data);
+						// console.log('successfully uploaded image', data);
 					},
 					err => {
 						console.log('error uploading image', err);
@@ -501,7 +501,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 	}
 
 	clearCanvas() {
-		console.log('clera acnaas');
+		// console.log('clera acnaas');
 		this.setBackgroundColor('#fff');
 		this.clearCurrentMarkings();
 		this.clearMarkings();
@@ -518,13 +518,13 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 
 	// Listen whiteboard key in database
 	tuneWhiteboard(key: string) {
-		console.log('tune whiteboard');
+		// console.log('tune whiteboard');
 		// Unsubscribe from current subscriptions just in case
 		this.cleanUp();
 
 		// Check if we have read permissions or if there's even a valid key
 		if (!this.key) {
-			console.log('actually don\'t tune whiteboard');
+			// console.log('actually don\'t tune whiteboard');
 			return;
 		}
 
@@ -554,7 +554,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 				this.permissionsSubscription = this.permissionsService.getUserPermission(this.key, 'whiteboard')
 					.subscribe(
 						permissions => {
-							console.log(this.key);
+							// console.log(this.key);
 							// Save old permissions first
 							const oldPermissions = {
 								read: this.shouldRead,
@@ -633,7 +633,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 			this.whiteboardService.editWhiteboard(this.key, { name })
 				.subscribe(
 					data => {
-						console.log('successfully changed whiteboard name!', data);
+						// console.log('successfully changed whiteboard name!', data);
 					},
 					err => {
 						console.log('error while changing whiteboard name', err);
@@ -831,7 +831,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 
 	clearCurrentText() {
 		// Erase current text too if it isn't in the process of being created
-		console.log('clear current text');
+		// console.log('clear current text');
 		if (this.tools.text.currentText && this.tools.text.currentTextFinished) {
 			// If we are editing current text, that means it's already on whiteboard and already registered in database.
 			// We should not remove then.
@@ -1083,7 +1083,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 			this.whiteboardService.editMarking(this.key, marking.key, marking.options)
 				.subscribe(
 					data => {
-						console.log('successfully edited marking!', data);
+						// console.log('successfully edited marking!', data);
 					},
 					err => {
 						console.log('error while editing marking!', err);
@@ -1095,7 +1095,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 			this.whiteboardService.editText(this.key, text.key, text.options)
 				.subscribe(
 					data => {
-						console.log('successfully edited text!', data);
+						// console.log('successfully edited text!', data);
 					},
 					err => {
 						console.log('error while editing text!', err);
@@ -1107,7 +1107,7 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 			this.whiteboardService.editImage(this.key, image.key, image.options)
 				.subscribe(
 					data => {
-						console.log('successfully edited image!', data);
+						// console.log('successfully edited image!', data);
 					},
 					err => {
 						console.log('error while editing image!', err);
@@ -1142,22 +1142,21 @@ export class WhiteboardComponent implements OnInit, OnChanges, OnDestroy {
 		// Wait for changes to take place
 		setTimeout(() => {
 			// Save canvas as an image
-			this.canvasEl.toBlob((imgBlob: Blob) => {
-				// Revert whiteboard to original size
-				paper.project.view.scale(1 / scaleWidth, 1 / scaleHeight, new paper.Point(0, 0));
-				paper.project.view.viewSize = originalViewSize;
-				this.takingSnapshot = false;
+			let imgBlob = this.canvasEl.toBlob();
+			// Revert whiteboard to original size
+			paper.project.view.scale(1 / scaleWidth, 1 / scaleHeight, new paper.Point(0, 0));
+			paper.project.view.viewSize = originalViewSize;
+			this.takingSnapshot = false;
 
-				// Upload image to Firebase
-				this.whiteboardService.storeSnapshot(key, imgBlob).subscribe(
-					data => {
-						console.log('whiteboard snapshot is saved', data);
-					},
-					err => {
-						console.log('error when saving whiteboard snapshot', err);
-					}
-				);
-			});
+			// Upload image to Firebase
+			this.whiteboardService.storeSnapshot(key, imgBlob).subscribe(
+				data => {
+					// console.log('whiteboard snapshot is saved', data);
+				},
+				err => {
+					console.log('error when saving whiteboard snapshot', err);
+				}
+			);
 		}, 15);
 	}
 

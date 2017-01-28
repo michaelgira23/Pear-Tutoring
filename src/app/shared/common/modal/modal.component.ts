@@ -19,7 +19,7 @@ export class ModalComponent implements OnInit {
 	ngOnInit() {
 		// this.modalEl = this.modal.nativeElement;
 		this.initializeModal();
-		console.log('modal element', this.modalEl);
+		// console.log('modal element', this.modalEl);
 	}
 
 	initializeModal() {
@@ -32,7 +32,7 @@ export class ModalComponent implements OnInit {
 			this.initializeModal();
 		}
 
-		console.log('show modal', this.modalEl);
+		// console.log('show modal', this.modalEl);
 		this.modalEl.showModal();
 	}
 
@@ -41,7 +41,7 @@ export class ModalComponent implements OnInit {
 			this.initializeModal();
 		}
 
-		console.log('hide modal', this.modalEl);
+		// console.log('hide modal', this.modalEl);
 		this.modalEl.close();
 	}
 

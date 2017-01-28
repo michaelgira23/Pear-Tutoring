@@ -72,7 +72,7 @@ export class Eraser {
 				this.whiteboard.whiteboardService.eraseMarking(this.whiteboard.key, markingKey)
 					.subscribe(
 						data => {
-							console.log('Erased marking', data);
+							// console.log('Erased marking', data);
 						},
 						err => {
 							console.log('Erase marking error', err);
@@ -89,7 +89,7 @@ export class Eraser {
 				this.whiteboard.whiteboardService.eraseText(this.whiteboard.key, textKey)
 					.subscribe(
 						data => {
-							console.log('Erased text', data);
+							// console.log('Erased text', data);
 						},
 						err => {
 							console.log('Erase text error', err);

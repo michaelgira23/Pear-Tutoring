@@ -199,7 +199,7 @@ export class SessionCardComponent implements OnInit, OnDestroy {
 		this.sessionService.addTutees(this.session.$key, this.authInfo.uid)
 			.subscribe(
 				val => {
-					console.log('successfully enrolled in session', val);
+					// console.log('successfully enrolled in session', val);
 				},
 				err => {
 					console.log('enroll error', err);
@@ -215,7 +215,7 @@ export class SessionCardComponent implements OnInit, OnDestroy {
 		this.sessionService.addTutees(this.session.$key, this.user.$key)
 			.subscribe(
 				val => {
-					console.log('successfully accepted user into session', val);
+					// console.log('successfully accepted user into session', val);
 				},
 				err => {
 					console.log('accepting user error', err);
@@ -227,7 +227,7 @@ export class SessionCardComponent implements OnInit, OnDestroy {
 		this.sessionService.denyPending(this.session.$key, this.user.$key)
 			.subscribe(
 				val => {
-					console.log('successfully denied user from session', val);
+					// console.log('successfully denied user from session', val);
 				},
 				err => {
 					console.log('denying user error', err);
@@ -241,7 +241,9 @@ export class SessionCardComponent implements OnInit, OnDestroy {
 
 	deleteSession() {
 		this.sessionService.deleteSession(this.session.$key).subscribe(
-			val => console.log('deleted'),
+			val => {
+				// console.log('deleted')
+			},
 			err => console.log(err)
 		);
 	}
