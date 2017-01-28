@@ -38,14 +38,20 @@ export class AppComponent implements OnInit {
 			set: value => {
 				if (!value) {
 					this.label = '';
+					localStorage.removeItem('label');
 				} else {
 					this.label = `${value}'s Perspective`;
+					localStorage.setItem('label', this.label);
 				}
 			}
 		});
 	}
 
 	ngOnInit() {
+
+		// If label from local storage, add that
+		this.label = localStorage.getItem('label') || '';
+
 		this.notificationsService.init();
 		this.authService.auth$.subscribe(
 			val => {
