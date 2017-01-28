@@ -39,7 +39,6 @@
 		</div>
 
 		<div class="mdl-cell mdl-cell--4-col">
-			<label class="mdl-textfield__label" for="subject">Subject</label>
 			<select formControlName="subject" for="subject">
 				<option *ngFor="let option of allowedSubjects">{{ option }}</option>
 			</select>
@@ -63,7 +62,7 @@
 	</div>
 	<div class="mdl-cell mdl-cell--4-col mdl-card mdl-shadow--4dp">
 		<div class="mdl-card__title">
-			<h4 class="mdl-card__title-text">add tutees</h4>
+			<h4 class="mdl-card__title-text">Add Tutees</h4>
 		</div>
 		<div class="mdl-cell mdl-cell--12-col">
 			<app-user-auto-complete *ngIf="customCtrlReady" formControlName="tutees" id="tutees"></app-user-auto-complete>

@@ -1,7 +1,11 @@
 .search-bar {
-	width: 100%;;
+	padding: 0 1rem;
 
-	.search-input {
-		font-size: 2em;
+	form {
+		margin: 0 auto;
+
+		.mdl-textfield {
+			vertical-align: middle;
+		}
 	}
 }

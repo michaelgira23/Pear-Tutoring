@@ -1,19 +1,18 @@
-<button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored" routerLink="/session/create">Create a Session</button>
 <div class="search-bar">
-	<div class="mdl-grid mdl-shadow--4dp">
-		<div class="mdl-cell mdl-cell--4-col">
-			<h2>Search</h2>
+	<h2 class="mdl-typography--display-3">Search</h2>
+	<button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored" routerLink="/session/create">
+		<i class="material-icons">add</i>
+		Create a Session
+	</button>
+	<form (keyup)="findSessions()" (submit)="findSessions()">
+		<div class="mdl-textfield mdl-js-textfield">
+			<input id="search-input" class="search-input mdl-textfield__input" name="searchStr" [(ngModel)]="searchStr">
+			<label class="mdl-textfield__label" for="search-input">Search for a Session...</label>
 		</div>
-
-		<form class="mdl-cell mdl-cell--8-col" (keyup)="findSessions()">
-			<div class="mdl-textfield mdl-js-textfield ">
-				<input class="search-input mdl-textfield__input" name="searchStr" [(ngModel)]="searchStr">
-			</div>
-			<button class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab">
-				<i class="material-icons">search</i>
-			</button>
-		</form>
-	</div>
+		<button class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-button--accent">
+			<i class="material-icons">search</i>
+		</button>
+	</form>
 </div>
 
 <div class="mdl-grid">
