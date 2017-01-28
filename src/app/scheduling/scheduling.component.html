@@ -1,13 +1,13 @@
 <div class="search-bar">
-	<h2 class="mdl-typography--display-3">Search</h2>
-	<button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored" routerLink="/session/create">
+	<!-- <h2 class="mdl-typography--display-3">Search</h2> -->
+<!-- 	<button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored" routerLink="/session/create">
 		<i class="material-icons">add</i>
 		Create a Session
-	</button>
+	</button> -->
 	<form (keyup)="findSessions()" (submit)="findSessions()">
-		<div class="mdl-textfield mdl-js-textfield">
+		<div id="searchrr" class="mdl-textfield mdl-js-textfield">
 			<input id="search-input" class="search-input mdl-textfield__input" name="searchStr" [(ngModel)]="searchStr">
-			<label class="mdl-textfield__label" for="search-input">Search for a Session...</label>
+			<label id="lbel" class="mdl-textfield__label" for="search-input">Search for a Session...</label>
 		</div>
 		<button class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-button--accent">
 			<i class="material-icons">search</i>
