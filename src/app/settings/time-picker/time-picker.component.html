@@ -1,32 +1,34 @@
 <div class="mdl-grid">
-	<div class="mdl-cell mdl-cell--5-col" *ngFor="let day of freeTimesProps">
-		<div class="mdl-card">
-			<div class="mdl-card__title"><div class="mdl-card__title-text">{{ day }}</div></div>
-			<div class="mdl-card__supporting-text">
-				<ul class="mdl-list">
-					<li class="mdl-list__item" *ngFor="let time of freeTimesModel[day]; let timeIndex = index">
+	<div class="mdl-card mdl-cell mdl-cell--6-col mdl-shadow--4dp" *ngFor="let day of freeTimesProps">
+		<div class="mdl-card__title">
+			<div class="mdl-card__title-text">{{ day }}</div>
+		</div>
+		<div class="mdl-card__supporting-text">
+			<ul class="mdl-list">
+				<li class="mdl-list__item" *ngFor="let time of freeTimesModel[day]; let timeIndex = index">
 						<span class="mdl-list__item-primary-content">
 							{{ time.from.format('HH:mm') }} ~ {{ time.to.format('HH:mm') }}
 						</span>
-						<span class="mdl-list__item-primary-content">
-							<button class="mdl-button mdl-js-button mdl-button--icon" type="button" (click)="removeTime(day, timeIndex)">
+					<span class="mdl-list__item-primary-content">
+							<button class="mdl-button mdl-js-button mdl-button--icon" type="button"
+									(click)="removeTime(day, timeIndex)">
 								<i class="material-icons">close</i>
 							</button>
 						</span>
-					</li>
-				</ul>
+				</li>
+			</ul>
+		</div>
+		<div class="mdl-card__actions">
+			<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+				<input class="mdl-textfield__input" id="free-time-from" type="time" #timeFrom>
+				<label class="mdl-textfield__label" for="free-time-from">From</label>
 			</div>
-			<div class="mdl-card__actions">
-				<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-					<input class="mdl-textfield__input" id="free-time-from" type="time" #timeFrom>
-					<label class="mdl-textfield__label" for="free-time-from">From</label>
-				</div>
-				<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-					<input class="mdl-textfield__input" id="free-time-to" type="time" #timeTo>
-					<label class="mdl-textfield__label" for="free-time-to">To</label>
-				</div>
-				<button type="button" (click)="addTime(day, timeFrom.value, timeTo.value)">Add Time</button>
+			<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+				<input class="mdl-textfield__input" id="free-time-to" type="time" #timeTo>
+				<label class="mdl-textfield__label" for="free-time-to">To</label>
 			</div>
+			<br/>
+			<button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" (click)="addTime(day, timeFrom.value, timeTo.value)">Add Time</button>
 		</div>
 	</div>
 </div>

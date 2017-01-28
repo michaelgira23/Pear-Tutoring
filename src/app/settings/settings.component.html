@@ -1,11 +1,14 @@
-<h1>Settings</h1>
-<div class="mdl-shadow--5dp">
-  <app-pfp-upload></app-pfp-upload>
+<div class="mdl-grid mdl-shadow--4dp">
+	<div class="mdl-cell mdl-cell--12-col">
+		<h1>Settings</h1>
+		<app-pfp-upload></app-pfp-upload>
+	</div>
+</div>
+
+<div>
+	<!--Change User info-->
 </div>
 <div>
-  <!--Change User info-->
+	<app-time-picker></app-time-picker>
 </div>
-<div class="mdl-shadow--5dp">
-  <app-time-picker></app-time-picker>
-</div>
-<h2 *ngIf="finished">changes saved</h2>
+<h2 *ngIf="finished">Changes Saved!</h2>
