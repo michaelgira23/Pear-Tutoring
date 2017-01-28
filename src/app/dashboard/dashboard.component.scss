@@ -47,30 +47,34 @@ $sophisticated-white: #eee;
 	margin: 1rem;
 }
 
-.mdl-grid .mdl-cell .mdl-card {
-	width: 100%;
+.mdl-grid .mdl-cell {
+	padding-right: 1rem;
 
-	> * {
+	.mdl-card {
 		width: 100%;
-	}
 
-	.mdl-card__supporting-text {
-		h1 {
-			display: flex;
-			justify-content: space-between;
+		> * {
+			width: 100%;
 		}
 
-		.empty-column {
-			text-align: center;
+		.mdl-card__supporting-text {
+			h1 {
+				display: flex;
+				justify-content: space-between;
+			}
+
+			.empty-column {
+				text-align: center;
+			}
 		}
-	}
 
-	.mdl-grid app-session-card {
-		width: 100%;
-		margin-bottom: 2rem;
+		.mdl-grid app-session-card {
+			width: 100%;
+			margin-bottom: 2rem;
 
-		&:last-child {
-			margin-bottom: 0;
+			&:last-child {
+				margin-bottom: 0;
+			}
 		}
 	}
 }
