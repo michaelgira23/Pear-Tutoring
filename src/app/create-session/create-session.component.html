@@ -1,10 +1,12 @@
 <form [formGroup]="createSessionForm" (ngSubmit)="createSession()" class="mdl-grid">
 	<div class="mdl-cell mdl-cell--8-col mdl-card mdl-shadow--4dp mdl-grid">
 
-		<label class="mdl-cell mdl-cell--12-col mdl-switch mdl-js-switch mdl-js-ripple-effect" [class.is-checked]="createSessionForm.value.listed" for="listed">
+		<label class="mdl-cell mdl-cell--8-col mdl-switch mdl-js-switch mdl-js-ripple-effect" [class.is-checked]="createSessionForm.value.listed" for="listed">
 			<input class="mdl-switch__input" type="checkbox" formControlName="listed" id="listed">
 			<span class="mdl-switch__label">Public</span>
 		</label>
+
+		<button type="button" class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised mdl-button--colored mdl-cell--4-col" (click)="autoFill()">Pretend we are typing...</button>
 
 		<div class="title-input mdl-cell mdl-cell--10-col mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
 			<input class="mdl-textfield__input" formControlName="title" id="title" type="text">
@@ -68,6 +70,6 @@
 			<app-user-auto-complete *ngIf="customCtrlReady" formControlName="tutees" id="tutees"></app-user-auto-complete>
 		</div>
 	</div>
-	<button *ngIf="!sessionId && !sessionInfo" class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised mdl-button--colored mdl-shadow--4dp" [disabled]="createSessionForm.invalid">Create Session</button>
-	<button *ngIf="sessionId || sessionInfo" class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised mdl-button--colored mdl-shadow--4dp" [disabled]="createSessionForm.invalid && formPristine">Update Session</button>
+	<button *ngIf="!sessionId && !sessionInfo" class="create-session mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised mdl-button--colored mdl-shadow--4dp" [disabled]="createSessionForm.invalid">Create Session</button>
+	<button *ngIf="sessionId || sessionInfo" class="create-session mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised mdl-button--colored mdl-shadow--4dp" [disabled]="createSessionForm.invalid && formPristine">Update Session</button>
 </form>

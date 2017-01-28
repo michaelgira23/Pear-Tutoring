@@ -141,6 +141,31 @@ export class CreateSessionComponent implements OnInit {
 		}
 	}
 
+	autoFill() {
+		let testTime = moment('2017-2-3', 'YYYY-MM-DD');
+		let dateModel = new DateModel({
+			day: testTime.day().toString(),
+			month: testTime.month().toString(),
+			year: testTime.year().toString(),
+			formatted: testTime.format('YYYY-MM-DD'),
+			momentObj: testTime.clone()
+		});
+		this.createSessionForm = this.fb.group({
+			date: [dateModel, Validators.required],
+			startTime: [testTime.format('HH:mm'), Validators.required],
+			endTime: [testTime.add(3, 'hour').format('HH:mm'), [Validators.required]],
+			grade: ['10', Validators.required],
+			classStr: ['Integrated Math I', Validators.required],
+			subject: ['Math', Validators.required],
+			max: ['4', [Validators.required]],
+			listed: [true, Validators.required],
+			title: ['Math Help', [Validators.required]],
+			desc: ['Math help for Nick', Validators.required],
+			tutees: [[]],
+			tags: ['math, help, private', Validators.required]
+		});
+	}
+
 }
 
 // function validateIsAfter(startTime: moment.Moment): ValidatorFn {
