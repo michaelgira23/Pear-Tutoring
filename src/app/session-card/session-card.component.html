@@ -22,9 +22,9 @@
 			[style.background-size]="!user?.pfp ? '' : 'cover'"
 			[style.background-position]="!user?.pfp ? '' : 'center'">
 			<h4>
-				<a (click)="userDetails()">{{ user.firstName }} {{ user.lastName }}</a> requests to join
+				<a (click)="userDetails()">{{ user?.firstName }} {{ user?.lastName }}</a> requests to join
 				<br>
-				<small><a (click)="sessionDetails()">{{ session.title }}</a></small>
+				<small><a (click)="sessionDetails()">{{ session?.title }}</a></small>
 			</h4>
 		</div>
 	</ng-container>

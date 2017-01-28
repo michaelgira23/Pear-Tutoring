@@ -2,6 +2,11 @@
 	<input name="delete-session-id" [(ngModel)]="deleteSessionId">
 	<button>Delete Session</button>
 </form>
-<div class="sessions mdl-grid">
-	<app-session-card class="mdl-cell mdl-cell--12-col" *ngFor="let session of sessions" [session]="session"></app-session-card>
+
+<div>
+	<app-user-chip *ngFor="let user of users" [user]="user"></app-user-chip>
+</div>
+
+<div class="mdl-grid">
+	<app-session-card class="mdl-cell mdl-cell--4-col" *ngFor="let session of sessions" [session]="session"></app-session-card>
 </div>

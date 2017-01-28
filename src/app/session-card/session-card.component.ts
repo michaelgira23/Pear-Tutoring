@@ -115,14 +115,23 @@ export class SessionCardComponent implements OnInit, OnDestroy {
 	}
 
 	get isTutor() {
+		if (!this.authInfo) {
+			return false;
+		}
 		return this.session.tutor.$key === this.authInfo.uid;
 	}
 
 	get isTutee() {
+		if (!this.authInfo) {
+			return false;
+		}
 		return this.session.tutees.some(user => user.$key === this.authInfo.uid);
 	}
 
 	get isPending() {
+		if (!this.authInfo) {
+			return false;
+		}
 		return this.session.pending.includes(this.authInfo.uid);
 	}
 
