@@ -132,13 +132,15 @@ export class CreateSessionComponent implements OnInit {
 		delete sessionToCreate.endTime;
 		if (!this.sessionId && !this.sessionInfo) {
 			this.sessionService.createSession(sessionToCreate).subscribe(
-				val => this.router.navigate(['dashboard']),
+				// val => this.router.navigate(['dashboard']),
+				val => window.location.replace('/dashboard'),
 				err => console.log(err)
 			);
 		}
 		if (this.sessionId || this.sessionInfo) {
 			this.sessionService.updateSession(this.sessionId, sessionToCreate).subscribe(
-				val => this.router.navigate(['dashboard']),
+				// val => this.router.navigate(['dashboard']),
+				val => window.location.replace('/dashboard'),
 				err => console.log(err)
 			);
 		}

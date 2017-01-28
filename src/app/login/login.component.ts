@@ -26,7 +26,8 @@ export class LoginComponent implements OnInit {
 		const formValue = this.form.value;
 		this.authService.login(formValue.email, formValue.password).subscribe(
 			data => {
-				this.router.navigate(['dashboard']);
+				// this.router.navigate(['dashboard']);
+				window.location.replace('/dashboard');
 			},
 			err => {
 				console.log('Login error', err);
