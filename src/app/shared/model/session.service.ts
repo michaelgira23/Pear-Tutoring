@@ -368,21 +368,6 @@ export class SessionService {
 		).map(Session.fromJsonArray);
 	}
 
-	findSessionsByString(str: string): Observable<Session[]> {
-		let scopes = ['classStr', 'title', 'subject'];
-		return this.findAllSessions().map(sessions => {
-			return sessions.filter(session => {
-				return scopes.some(scope => {
-					if (session[scope]) {
-						return getEditDistance(session[scope], str) < 2;
-					}
-					return false;
-				});
-			});
-		});
-
-	}
-
 	// Find sessions that fits the free times of the user.
 	findSessionsByFreeTime(timesInDay: FreeTimes, lastKey?: string | Subject<string>): Observable<Session[][]> {
 		let queryList: Observable<any>[] = [];

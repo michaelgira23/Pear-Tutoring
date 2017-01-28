@@ -1,0 +1,7 @@
+<form (submit)="deleteSession()">
+	<input name="delete-session-id" [(ngModel)]="deleteSessionId">
+	<button>Delete Session</button>
+</form>
+<div class="sessions mdl-grid">
+	<app-session-card class="mdl-cell mdl-cell--12-col" *ngFor="let session of sessions" [session]="session"></app-session-card>
+</div>

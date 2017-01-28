@@ -72,6 +72,7 @@ import { SessionRatingComponent } from './session/session-rating/session-rating.
 import { UserDetailsComponent } from './user-details/user-details.component';
 import { RatingDisplayComponent } from './rating-display/rating-display.component';
 import { TextListControlComponent } from './register/text-list-control/text-list-control.component';
+import { DebugComponent } from './debug/debug.component';
 
 @NgModule({
 	declarations: [
@@ -116,7 +117,8 @@ import { TextListControlComponent } from './register/text-list-control/text-list
 		SessionRatingComponent,
 		UserDetailsComponent,
 		RatingDisplayComponent,
-		TextListControlComponent
+		TextListControlComponent,
+		DebugComponent
 	],
 	imports: [
 		BrowserModule,
