@@ -18,13 +18,7 @@ export class MySessionsComponent implements OnInit, OnDestroy {
 	mySessions = [];
 	sessionsByFreeTime: Session[][];
 	get suggestions(): Session[] {
-		if (this.sessionsByFreeTime) {
-			if (this.sessionsByFreeTime.length > 0) {
-				return this.sessionsByFreeTime.reduce((prev, curr) => prev.concat(curr));
-			}
-			return [];
-		}
-		return [];
+		return [].concat.apply([], this.sessionsByFreeTime);
 	};
 
 	mySessions$: any;

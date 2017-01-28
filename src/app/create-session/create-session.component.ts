@@ -114,12 +114,15 @@ export class CreateSessionComponent implements OnInit {
 
 	createSession() {
 		let sessionToCreate = Object.assign({}, this.createSessionForm.value);
+		console.log('start', sessionToCreate.startTime, sessionToCreate.endTime);
+		console.log(moment(sessionToCreate.startTime, 'HH:mm').hours(), moment(sessionToCreate.endTime, 'HH:mm').hours());
+
 		sessionToCreate.start = sessionToCreate.date.momentObj.clone()
-								.add(moment(sessionToCreate.startTime, 'HH:mm').hours(), 'hours')
-								.add(moment(sessionToCreate.startTime, 'HH:mm').minutes(), 'minutes');
+								.hours(moment(sessionToCreate.startTime, 'HH:mm').hours())
+								.minutes(moment(sessionToCreate.startTime, 'HH:mm').minutes());
 		sessionToCreate.end = sessionToCreate.date.momentObj.clone()
-								.add(moment(sessionToCreate.endTime, 'HH:mm').hours(), 'hours')
-								.add(moment(sessionToCreate.endTime, 'HH:mm').minutes(), 'minutes');
+								.hours(moment(sessionToCreate.endTime, 'HH:mm').hours())
+								.minutes(moment(sessionToCreate.endTime, 'HH:mm').minutes());
 		sessionToCreate.tags = sessionToCreate.tags.split(',').map(val => val.trim());
 		sessionToCreate.tutees = sessionToCreate.tutees.map(val => val.$key);
 		sessionToCreate.tutor = this.userService.uid;
@@ -142,7 +145,14 @@ export class CreateSessionComponent implements OnInit {
 	}
 
 	autoFill() {
-		let testTime = moment('2017-2-3', 'YYYY-MM-DD');
+		// let testTime = moment('2017-1-30 15:30', 'YYYY-MM-DD HH:mm');
+		let testTime = moment({
+			year: 2017,
+			month: 0,
+			day: 30,
+			hour: 15,
+			minute: 30
+		});
 		let dateModel = new DateModel({
 			day: testTime.day().toString(),
 			month: testTime.month().toString(),
@@ -153,16 +163,16 @@ export class CreateSessionComponent implements OnInit {
 		this.createSessionForm = this.fb.group({
 			date: [dateModel, Validators.required],
 			startTime: [testTime.format('HH:mm'), Validators.required],
-			endTime: [testTime.add(3, 'hour').format('HH:mm'), [Validators.required]],
+			endTime: [testTime.clone().add(1, 'hour').format('HH:mm'), [Validators.required]],
 			grade: ['10', Validators.required],
-			classStr: ['Integrated Math I', Validators.required],
+			classStr: ['Math Integrated II Accelerated', Validators.required],
 			subject: ['Math', Validators.required],
-			max: ['4', [Validators.required]],
+			max: ['3', [Validators.required]],
 			listed: [true, Validators.required],
-			title: ['Math Help', [Validators.required]],
-			desc: ['Math help for Nick', Validators.required],
+			title: ['Unit Circle', [Validators.required]],
+			desc: ['We will go over the basics of the Unit Circle and how to use it to evaluate sin and cosine.', Validators.required],
 			tutees: [[]],
-			tags: ['math, help, private', Validators.required]
+			tags: ['math, unit circle', Validators.required]
 		});
 	}
 
