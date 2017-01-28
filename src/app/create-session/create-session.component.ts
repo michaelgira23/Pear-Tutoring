@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Validators, FormGroup, FormBuilder, FormControl, ValidatorFn } from '@angular/forms';
+import { Validators, FormGroup, FormBuilder } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { SessionService, AllowedSubjects } from '../shared/model/session.service';
 import { Session } from '../shared/model/session';
@@ -129,13 +129,13 @@ export class CreateSessionComponent implements OnInit {
 		delete sessionToCreate.endTime;
 		if (!this.sessionId && !this.sessionInfo) {
 			this.sessionService.createSession(sessionToCreate).subscribe(
-				val => this.router.navigate(['scheduling']),
+				val => this.router.navigate(['dashboard']),
 				err => console.log(err)
 			);
 		}
 		if (this.sessionId || this.sessionInfo) {
 			this.sessionService.updateSession(this.sessionId, sessionToCreate).subscribe(
-				val => this.router.navigate(['scheduling']),
+				val => this.router.navigate(['dashboard']),
 				err => console.log(err)
 			);
 		}

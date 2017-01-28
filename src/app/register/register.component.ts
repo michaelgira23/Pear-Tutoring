@@ -36,7 +36,7 @@ export class RegisterComponent implements OnInit {
 		}
 		this.userService.register(formValue).subscribe(
 			data => {
-				this.router.navigate(['/home']);
+				this.router.navigate(['home']);
 			},
 			err => {
 				console.log('Register error', err);
