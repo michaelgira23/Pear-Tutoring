@@ -21,7 +21,8 @@ export class HomeComponent implements OnInit, OnDestroy {
 	animations: string[] = [
 		'share-knowledge',
 		'pass-your-test',
-		'impact-your-community'
+		'impact-your-community',
+		'connect-with-others'
 	];
 	// Whether or not animation timer has already started
 	animationSubscription: any;
