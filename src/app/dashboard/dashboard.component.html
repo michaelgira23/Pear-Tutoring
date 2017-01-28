@@ -1,7 +1,5 @@
-<main class="mdl-layout__content">
-<div class="mdl-layout__tab-panel is-active">
 <!-- Only show if there is a session currently taking place -->
-<div class="mdl-grid">
+<!-- <div class="mdl-grid">
 	<div class="current-session session-card session-card--other mdl-card mdl-shadow--2dp mdl-card--expand">
 		<div class="mdl-card__supporting-text">
 			<h1>Current Session</h1>
@@ -18,7 +16,7 @@
 			<span class="subject-icon icomoon icomoon-rocket"></span>
 		</div>
 	</div>
-</div>
+</div> -->
 
 <div class="mdl-grid">
 	<div class="mdl-cell mdl-cell--4-col">
@@ -39,7 +37,7 @@
 				<p *ngIf="!availableSessions || availableSessions.length === 0" class="empty-column mdl-color-text--grey-600">No available sessions at the moment!</p>
 			</div>
 			<div class="mdl-grid" style="width: 100%">
-				<app-session-card *ngFor="let session of availableSessions" [session]="session" type="display"></app-session-card>
+				<app-session-card *ngFor="let session of availableSessions" [session]="session"></app-session-card>
 			</div>
 		</div>
 	</div>
@@ -55,5 +53,3 @@
 		</div>
 	</div>
 </div>
-</div>
-</main>

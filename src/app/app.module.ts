@@ -56,7 +56,6 @@ import { MySessionsComponent } from './my-sessions/my-sessions.component';
 import { UserAutoCompleteComponent } from './scheduling/user-auto-complete/user-auto-complete.component';
 import { SidebarComponent } from './shared/common/sidebar/sidebar.component';
 import { WhiteboardSelectComponent } from './session/whiteboard-select/whiteboard-select.component';
-import { SessionsWithFilterComponent } from './scheduling/sessions-with-filter/sessions-with-filter.component';
 import { SessionPermissionsComponent } from './session/session-permissions/session-permissions.component';
 import { SessionRequestComponent } from './session/session-request/session-request.component';
 import { ModalComponent } from './shared/common/modal/modal.component';
@@ -111,7 +110,6 @@ import { TextListControlComponent } from './register/text-list-control/text-list
 		SidebarControlDirective,
 		SidebarContentDirective,
 		WhiteboardSelectComponent,
-		SessionsWithFilterComponent,
 		SessionPermissionsComponent,
 		SessionRequestComponent,
 		ModalComponent,

@@ -7,7 +7,7 @@
 
 		<form class="mdl-cell mdl-cell--8-col" (keyup)="findSessions()">
 			<div class="mdl-textfield mdl-js-textfield ">
-				<input class="mdl-textfield__input" id="search-input" name="searchStr" [(ngModel)]="searchStr">
+				<input class="search-input mdl-textfield__input" name="searchStr" [(ngModel)]="searchStr">
 			</div>
 			<button class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab">
 				<i class="material-icons">search</i>
@@ -16,4 +16,6 @@
 	</div>
 </div>
 
-<app-sessions-with-filter [sessions]="searchResults"></app-sessions-with-filter>
+<div class="mdl-grid">
+	<app-session-card class="mdl-cell mdl-cell--4-col" *ngFor="let session of searchResults" [session]="session"></app-session-card>
+</div>

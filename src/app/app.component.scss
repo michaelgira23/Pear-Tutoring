@@ -65,14 +65,14 @@ $nav-hover-color: #37474F;
 
 		.navigation {
 			.mdl-navigation__link {
+				color: $white;
+
 				&:hover {
 					background-color: $nav-hover-background;
-					color: $nav-hover-color;
 				}
 
 				&.active {
 					background-color: darken($nav-hover-background, 10%);
-					color: darken($nav-hover-color, 10%);
 				}
 			}
 		}

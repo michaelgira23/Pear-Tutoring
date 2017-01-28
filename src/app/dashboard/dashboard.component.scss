@@ -3,7 +3,6 @@ $sophisticated-white: #eee;
 .session-card,
 .pending-card {
 	width: 100%;
-	margin-bottom: 2rem;
 
 	.mdl-card__actions {
 		display: flex;
@@ -48,43 +47,30 @@ $sophisticated-white: #eee;
 	margin: 1rem;
 }
 
-.mdl-grid .mdl-cell {
+.mdl-grid .mdl-cell .mdl-card {
+	width: 100%;
 
-	h1 {
-		display: flex;
-		justify-content: space-between;
+	> * {
+		width: 100%;
 	}
 
-	.empty-column {
-		text-align: center;
-	}
+	.mdl-card__supporting-text {
+		h1 {
+			display: flex;
+			justify-content: space-between;
+		}
 
-	.session-card,
-	.pending-card {
-		.mdl-card__title {
-			h4 {
-				margin-top: 0;
-			}
+		.empty-column {
+			text-align: center;
 		}
 	}
 
-	.pending-card .mdl-card__title {
-		h4 {
-			color: $sophisticated-white;
-		}
+	.mdl-grid app-session-card {
+		width: 100%;
+		margin-bottom: 2rem;
 
-		a {
-			color: mix(#000, rgb(68,138,255));
-		}
-
-		&.pending-user-image {
-			background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(https://firebasestorage.googleapis.com/v0/b/wwt-hackathon-2016.appspot.com/o/userPfps%2Fr3QeEe1HigWPKjJlv7WfwgMbBE03?alt=media&token=11f5d2f8-3951-4714-9bed-37c8c5606f8e);
-			background-size: cover;
-			background-position: center;
-
-			a {
-				color: mix($sophisticated-white, rgb(68,138,255));
-			}
+		&:last-child {
+			margin-bottom: 0;
 		}
 	}
 }

@@ -27,6 +27,8 @@
 	</div>
 	<div class="mdl-tabs__panel" id="free-time">
 		<h4>Your suggestions for next week based on your free time</h4>
-		<app-sessions-with-filter [sessions]="suggestions" *ngIf="suggestions"></app-sessions-with-filter>
+		<div class="mdl-grid">
+			<app-session-card class="mdl-cell mdl-cell--4-col" *ngFor="let session of searchResults" [session]="session" type="display"></app-session-card>
+		</div>
 	</div>
 </div>

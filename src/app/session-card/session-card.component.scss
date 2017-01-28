@@ -2,7 +2,6 @@ $sophisticated-white: #eee;
 
 .session-card {
 	width: 100%;
-	margin-bottom: 2rem;
 
 	.mdl-card__title {
 		position: relative;
@@ -55,7 +54,7 @@ $sophisticated-white: #eee;
 	}
 
 	// Default to miscellaneous color
-	>*:not(.mdl-card__actions) {
+	> *:not(.mdl-card__actions) {
 		background: #607d8b;
 	}
 
