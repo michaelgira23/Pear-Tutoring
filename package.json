@@ -1,6 +1,7 @@
 {
-  "name": "wwt-hackathon-2016-frontend",
+  "name": "pear-tutoring",
   "version": "0.0.0",
+  "description": "Sharing the fruits of knowledge",
   "license": "MIT",
   "angular-cli": {},
   "scripts": {
@@ -15,13 +16,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/michaelgira23/WWT-Hackathon-20160-Frontend.git"
+    "url": "git+https://github.com/michaelgira23/Pear-Tutoring.git"
   },
   "private": true,
   "contributors": [
     {
       "name": "Jack Cai",
-      "email": "jackcai1206@gmail.com"
+      "email": "jack@jackcai.me",
+      "url": "https://jackcai.me/"
     },
     {
       "name": "Nick Clifford",
@@ -46,9 +48,9 @@
     }
   ],
   "bugs": {
-    "url": "https://github.com/michaelgira23/WWT-Hackathon-2016-Frontend/issues"
+    "url": "https://github.com/michaelgira23/Pear-Tutoring/issues"
   },
-  "homepage": "https://github.com/michaelgira23/WWT-Hackathon-2016-Frontend#readme",
+  "homepage": "https://github.com/michaelgira23/Pear-Tutoring#readme",
   "dependencies": {
     "@angular/common": "^2.2.3",
     "@angular/compiler": "^2.2.3",
