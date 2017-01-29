@@ -19,3 +19,5 @@ Run `npm run deploy` for Linux / OSX and `npm run deploy:win` for Windows. Befor
 ## Hackathon
 
 The MICDS team won first place winning $10,000 for our school!
+
+![MICDS Team at WWT Hackathon](https://pbs.twimg.com/media/C3SGbedUkAAlBQv.jpg)
