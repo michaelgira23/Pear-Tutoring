@@ -22,7 +22,7 @@
 	<div class="mdl-cell mdl-cell--4-col">
 		<div class="mdl-card mdl-shadow--2dp">
 			<div class="mdl-card__supporting-text">
-				<h1>Upcoming<button routerLink="/my-sessions" class="mdl-button mdl-js-button mdl-js-ripple-effect">My Sessions</button></h1>
+				<h1>Upcoming Sessions</h1>
 				<p *ngIf="!upcomingSessions || upcomingSessions.length === 0" class="empty-column mdl-color-text--grey-600">No upcoming sessions!</p>
 			</div>
 			<div class="mdl-grid" style="width: 100%">
@@ -33,7 +33,7 @@
 	<div class="mdl-cell mdl-cell--4-col">
 		<div class="mdl-card mdl-shadow--2dp">
 			<div class="mdl-card__supporting-text">
-				<h1>Available Sessions<button routerLink="/search" class="mdl-button mdl-js-button mdl-js-ripple-effect">View More</button></h1>
+				<h1>Available Sessions</h1>
 				<p *ngIf="!availableSessions || availableSessions.length === 0" class="empty-column mdl-color-text--grey-600">No available sessions at the moment!</p>
 			</div>
 			<div class="mdl-grid" style="width: 100%">
